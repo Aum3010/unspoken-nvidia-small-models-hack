@@ -1,5 +1,5 @@
 // Webcam gaze from the MediaPipe Face Landmarker we already run (lib/face.ts):
-// iris position inside each eye + head pose, plus the gaze direction MobileGaze reads from the
+// iris position and eyelids inside each eye, plus the gaze direction MobileGaze reads from the
 // face image (lib/appearance.ts) -> screen point, via a ridge regression fitted on the calibration
 // dots. No second face model, no extra camera stream.
 //
@@ -18,7 +18,7 @@ type Listener = (p: GazePoint | null) => void
 
 const listeners = new Set<Listener>()
 const FEAT_FRAMES = 4      // feature averaging window (frames)
-const LAMBDA = 5           // ridge penalty on z-scored features
+const LAMBDA = 3           // ridge penalty on z-scored features (best on held-out dots in recorded sessions)
 const LOST_MS = 600        // emit null after this long without a face
 const BLINK = 0.35         // eyelid closure above which iris landmarks are unreliable
 const KEEP = 0.8           // per calibration dot, keep the 80% of samples closest to its median
@@ -92,7 +92,7 @@ const fx = new OneEuro(), fy = new OneEuro()
 
 // The fitted calibration is kept on this device (a few dozen numbers, no images) so it can be
 // reused after a reload. It is only valid for the same window size and camera position.
-const STORE = 'unspoken.gaze.v5'
+const STORE = 'unspoken.gaze.v6'
 interface Saved { model: RidgeModel; appearance: boolean; accuracyPx: number; w: number; h: number; savedAt: number }
 
 export function saveCalibration() {
@@ -145,14 +145,19 @@ function features(f: FaceFrame): number[] | null {
   // head rotation (forward axis) + translation, taken for either matrix layout (row- or column-major;
   // the unused entries are constant and drop out), plus quadratic eye terms for screen edges
   const pose = [p[2], p[6], p[8], p[9], p[3], p[7], p[11], p[12], p[13], p[14]]
-  const geo = [hR, vR, oR, hL, vL, oL, ...pose, hm * hm, vm * vm, hm * vm]
+  const geo = [hR, vR, oR, hL, vL, oL, ...pose, hm * hm, vm * vm, hm * vm]   // full set, logged for diagnostics
   if (label && performance.now() < label.until) {
     const a = currentAppearance()
     diag.push({ t: Math.round(f.t), phase: label.phase, tx: Math.round(label.x), ty: Math.round(label.y), geo: geo.map((v) => +v.toFixed(6)),
       app: a ? [+a.yaw.toFixed(5), +a.pitch.toFixed(5)] : null, pred: null })
   }
   if (gazeState.appearance && !app) return null
-  return app ? [...geo, app.yaw, app.pitch] : geo
+  // The model leaves out the head-pose terms: on recorded sessions they fit one sitting well (~70 px)
+  // but a calibration reused minutes later, after a small posture change, jumped to 180-220 px.
+  // Eye-in-head features (+ the eye-image angles) stayed at 63-86 px. Head movement is handled by
+  // the head fine-tune instead (position()).
+  const eyes = [hR, vR, oR, hL, vL, oL, hm * hm, vm * vm, hm * vm]
+  return app ? [...eyes, app.yaw, app.pitch] : eyes
 }
 
 // Head direction from 2D landmarks, in image units with known signs (no matrix-layout ambiguity):
