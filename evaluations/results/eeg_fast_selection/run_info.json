@@ -1,0 +1,55 @@
+{
+ "decoders": [
+  "ens_lda_riemann",
+  "shrinkage_lda",
+  "xdawn_riemann_lr"
+ ],
+ "cpu_us_per_flash_update": {
+  "ens_lda_riemann": 7.81553300000155,
+  "shrinkage_lda": 8.207486899999594,
+  "xdawn_riemann_lr": 7.401499050001803
+ },
+ "taus": [
+  0.3,
+  0.4,
+  0.5,
+  0.6,
+  0.7,
+  0.8,
+  0.85,
+  0.9,
+  0.93,
+  0.95,
+  0.97,
+  0.98,
+  0.99,
+  0.995,
+  0.999,
+  0.9995,
+  0.9999
+ ],
+ "deadlines": [
+  1.0,
+  2.0,
+  3.0,
+  4.0,
+  5.0,
+  7.5,
+  10.0,
+  15.0,
+  20.0,
+  25.0,
+  Infinity
+ ],
+ "risks": [
+  0.0,
+  0.02,
+  0.05,
+  0.1
+ ],
+ "n_selections": [
+  120
+ ],
+ "timing": "t_dec = onset_k - onset_1 + 0.7 s (epoch end); t_acq = onset_k - onset_1 + 0.25 s; recorded timestamps",
+ "risk_rule": "calibration incorrect commits <= floor(risk * n_calibration_selections), maximise calibration correct/min"
+}
