@@ -94,6 +94,29 @@ bash asr_eval/scripts/brev/fetch_results.sh marginal-sapphire-whale
 brev delete marginal-sapphire-whale
 ```
 
+### Live test UI: browser on your laptop, models on Brev
+
+`asr_eval/serve.py` serves a push-to-talk page and runs each clip through the evaluation pipeline: Silero gate → model → rankers → `decide()` with the thresholds frozen in `results/thresholds.json`. The page shows:
+- the decision (candidate / unknown / no speech) and **which gate decided it**;
+- the top 3 phrases with scores, and the transcript;
+- the VAD and Whisper signals;
+- server and round-trip latency.
+
+"Save last clip" stores it as a labelled recording in `data/own/` on the instance (consent and pseudonym required). That's the quickest way to collect the human recordings the headline numbers need.
+
+```bash
+brev exec marginal-sapphire-whale 'bash ~/serve_ui.sh parakeet-ctc-0.6b ctc_sum'   # (re)start; any model/method from the config
+brev port-forward marginal-sapphire-whale --port 8800:8800                         # laptop (WSL on Windows)
+# open http://localhost:8800 in Chrome/Edge on the laptop
+```
+
+- The server listens on `127.0.0.1` on the instance and is reachable only through the SSH tunnel. Don't expose it publicly.
+- Browsers allow the microphone only on `localhost` or HTTPS, and the tunnel provides `localhost`.
+- On Windows, WSL forwards `localhost` to Windows, so the Windows browser works.
+- `brev port-forward` returns immediately and leaves a persistent SSH connection holding the tunnel.
+- Restart `serve_ui.sh` after an evaluation run so it loads the new thresholds.
+- Round-trip latency in the UI includes your network path to the instance (Kansas City for ours); server time is listed separately.
+
 ### Helper scripts (`asr_eval/scripts/brev/`)
 
 | Script | Runs on | Does |
@@ -101,6 +124,7 @@ brev delete marginal-sapphire-whale
 | `install_cli_wsl.sh` | laptop (WSL/Linux) | Installs the Brev CLI binary after checking its SHA-256 |
 | `sync.sh <inst>` | laptop | `git archive HEAD asr_eval`, copies it and the helpers up, unpacks over `~/asr_eval` |
 | `fetch_results.sh <inst> [--raw]` | laptop | Copies results back. Per-clip CSVs only with `--raw`, because they contain volunteers' transcripts |
+| `serve_ui.sh [model] [method]` | instance | (Re)starts the live test bench on 127.0.0.1:8800 |
 | `run_stage.sh quick\|full\|phases X` | instance | Starts `run_eval.py` under `nohup`, logging to `~/asr_eval/run.log` |
 | `status.sh` | instance | Log tails, data sizes, running jobs, GPU use |
 | `wait_for.sh LOG PATTERN MIN` | instance | Blocks until a job ends, then prints its log tail |

@@ -39,7 +39,9 @@ On a laptop (CPU) the same code runs with `configs/local_smoke.yaml`, which writ
 | `harness/audio.py` | Load/resample, the degradation effects, generated silence/mic noise |
 | `harness/text.py` | Normalisation (contractions expanded), negation detection |
 | `harness/vad.py` | Silero frame probabilities → speech seconds per threshold |
-| `harness/models.py` | Model interface. `hf_ctc` (Parakeet-CTC) implemented; NeMo transducers and faster-whisper are next |
+| `harness/models.py` | Model interface: `hf_ctc` (Parakeet-CTC, forced scoring), `nemo_transducer` (Parakeet-TDT, Nemotron streaming incl. 160/560 ms lookahead), `faster_whisper` |
+| `harness/pipeline.py` | One clip through one model (transcript, phrase scores, timings), shared by `run_eval.py` and `serve.py` |
+| `serve.py`, `static/index.html` | Live push-to-talk test bench and labelled-recording capture |
 | `harness/decide.py` | Rankers (`text`, `ctc_sum`, `ctc_norm`, `ctc_llr`), `decide()`, calib-only threshold search |
 | `harness/metrics.py` | Positive/negative metrics, Wilson CI, rule of three, WER/CER, latency |
 | `harness/report.py` | `summary.md`, plots, `failures.md`, literature context |
@@ -64,9 +66,14 @@ On a laptop (CPU) the same code runs with `configs/local_smoke.yaml`, which writ
 | Milestone | State |
 |---|---|
 | 1. Manifest + Silero + Parakeet-CTC end to end | Passes on CPU (local smoke); running on Brev |
-| 2. Parakeet-TDT, Nemotron Speech Streaming (offline + simulated chunks), faster-whisper small / large-v2 / large-v3-turbo | Next |
+| 2. Parakeet-TDT, Nemotron Speech Streaming (default, 160 ms, 560 ms lookahead), faster-whisper small / large-v2 / large-v3-turbo | Backends verified on Brev; full run in progress |
+| Live test bench (`serve.py`) | Running on Brev, reachable through `brev port-forward` |
 | Optional: sherpa-onnx keyword spotter | Not started |
 | Optional: SAP dysarthric fine-tunes | Skipped (SAP data use agreement) |
+
+## Live test bench
+
+`serve.py` is a push-to-talk page that runs the same pipeline and frozen thresholds as the evaluation. It shows the decision, the gate that made it, the top 3 phrases, the transcript and timings. It can also save labelled recordings straight into `data/own/`. On Brev: `bash ~/serve_ui.sh <model> <method>`, then `brev port-forward <instance> --port 8800:8800` and open http://localhost:8800 ([../docs/BREV.md](../docs/BREV.md)). On a laptop: `python serve.py --config configs/local_smoke.yaml`.
 
 ## Your own recordings (the numbers that matter)
 
