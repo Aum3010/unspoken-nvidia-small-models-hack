@@ -141,7 +141,9 @@ class NemoTransducer(Model):
     reproduces its streaming output at that lookahead (80 ms frames: [70,1] ~ 160 ms, [70,6] ~ 560 ms).
     """
 
-    supports_scoring = True
+    def __init__(self, spec: dict, cfg):
+        super().__init__(spec, cfg)
+        self.supports_scoring = spec.get("forced_scoring", True)
 
     def load(self):
         import nemo.collections.asr as nemo_asr
@@ -165,6 +167,9 @@ class NemoTransducer(Model):
         self.model = m
         self.direct = True
         self._cache = None
+        if not self.supports_scoring:
+            self.notes.append("forced scoring disabled in config")
+            return
         loss_name, loss_kwargs = m.extract_rnnt_loss_cfg(m.cfg.get("loss", None))
         loss_kwargs = dict(loss_kwargs or {})
         n = m.joint.num_classes_with_blank - 1

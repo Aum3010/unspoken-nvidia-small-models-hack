@@ -83,6 +83,7 @@ models:
   - name: parakeet-tdt-0.6b-v2
     kind: nemo_transducer
     checkpoint: nvidia/parakeet-tdt-0.6b-v2
+    forced_scoring: false      # pure-PyTorch TDT loss takes 3.5-7 s per clip; the fast numba kernel needs libNVVM (absent)
     enabled: true
   - name: nemotron-streaming-0.6b
     kind: nemo_transducer

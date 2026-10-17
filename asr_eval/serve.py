@@ -85,7 +85,8 @@ class Bench:
         self.select(model_name, method, point)
 
     def methods_for(self, model_name: str) -> list[str]:
-        scoring = self.cfg.model(model_name)["kind"] in ("hf_ctc", "nemo_transducer")
+        spec = self.cfg.model(model_name)
+        scoring = spec["kind"] == "hf_ctc" or (spec["kind"] == "nemo_transducer" and spec.get("forced_scoring", True))
         return [m for m in self.cfg["decision"]["methods"] if m == "text" or scoring]
 
     def th_key(self, model_name: str, method: str, point: str) -> str:
