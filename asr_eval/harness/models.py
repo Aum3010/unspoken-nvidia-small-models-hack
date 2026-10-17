@@ -161,6 +161,9 @@ class NemoTransducer(Model):
             except Exception:
                 pass
         self.att_all = getattr(m.encoder, "att_context_size_all", None)
+        self.language = None
+        if self.spec.get("target_lang"):  # prompt-conditioned multilingual model (Nemotron 3.5 ASR)
+            self.set_language(self.spec["target_lang"], m)
         if self.spec.get("att_context"):
             m.encoder.set_default_att_context_size(self.spec["att_context"])
             self.notes.append(f"att_context_size={self.spec['att_context']} (available: {self.att_all})")
@@ -181,10 +184,20 @@ class NemoTransducer(Model):
         self.loss = RNNTLoss(num_classes=n, loss_name=torch_name, loss_kwargs=kw, reduction=None)
         self.notes.append(f"forced scoring loss={torch_name} {kw} (model trained with {loss_name})")
 
+    def set_language(self, locale: str, m=None):
+        """Language-ID prompt (e.g. "es-US") for EncDecRNNTBPEModelWithPrompt; it conditions the encoder output."""
+        m = m or self.model
+        if not hasattr(m, "set_inference_prompt"):
+            raise ValueError(f"{self.checkpoint} is not prompt-conditioned; it cannot switch language")
+        m.set_inference_prompt(locale)
+        self.language = locale
+        self._cache = None
+
     def info(self) -> dict:
         return {"checkpoint": self.checkpoint, "revision": self.revision, "params": sum(p.numel() for p in self.model.parameters()),
                 "device": self.dev, "dtype": "bfloat16 autocast" if self.dev == "cuda" else "float32",
-                "class": type(self.model).__name__, "att_context_available": str(self.att_all), "notes": self.notes}
+                "class": type(self.model).__name__, "att_context_available": str(self.att_all),
+                "language": self.language, "notes": self.notes}
 
     def _autocast(self):
         import torch

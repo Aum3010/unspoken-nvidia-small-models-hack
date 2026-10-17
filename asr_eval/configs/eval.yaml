@@ -89,6 +89,11 @@ models:
     kind: nemo_transducer
     checkpoint: nvidia/nemotron-speech-streaming-en-0.6b
     enabled: true              # model's default (largest) lookahead
+  - name: nemotron-3.5-asr-0.6b
+    kind: nemo_transducer
+    checkpoint: nvidia/nemotron-3.5-asr-streaming-0.6b   # multilingual, 40 locales, language-ID prompt; OpenMDW-1.1
+    target_lang: en-US         # English prompt for the like-for-like comparison with the English-only model
+    enabled: true
   - name: nemotron-streaming-0.6b-160ms
     kind: nemo_transducer
     checkpoint: nvidia/nemotron-speech-streaming-en-0.6b
