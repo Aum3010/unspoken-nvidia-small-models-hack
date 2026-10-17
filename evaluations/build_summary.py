@@ -53,7 +53,10 @@ def safety(e2e):
 if __name__ == "__main__":
     e2e = load("e2e")
     summary = {"generated_at": time.strftime("%Y-%m-%dT%H:%M:%S"), "eeg": eeg(), "vsr": load("vsr"), "audio": load("audio"),
-               "coordinator": load("coordinator"), "e2e": e2e, "safety": safety(e2e)}
+               "coordinator": load("coordinator"), "e2e": e2e, "safety": safety(e2e),
+               # original Auto-AVSR vs GRID-adapted decoder and closed phrase list (scripts/finetune_vsr_grid.py)
+               "vsr_adaptation": {"finetune": load("vsr_finetune"), "phrases": load("vsr_phrases"),
+                                  "phrases_hard": load("vsr_phrases_hard")}}
     if summary["vsr"]:
         summary["vsr"].pop("rows", None)
     (RES / "summary.json").write_text(json.dumps(summary, indent=2))

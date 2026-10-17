@@ -1,0 +1,31 @@
+{
+  "test_speakers": [
+    "s1",
+    "s2"
+  ],
+  "n_clips": 200,
+  "method": "rank closed phrase list by teacher-forced decoder+CTC log-likelihood",
+  "results": {
+    "distractors": "differ in <= 1 words",
+    "original": {
+      "N=10": {
+        "top1": 0.91,
+        "top3": 0.985
+      },
+      "N=50": {
+        "top1": 0.785,
+        "top3": 0.975
+      }
+    },
+    "fine-tuned": {
+      "N=10": {
+        "top1": 0.9,
+        "top3": 0.995
+      },
+      "N=50": {
+        "top1": 0.78,
+        "top3": 0.985
+      }
+    }
+  }
+}

@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion'
-import { AArrowUp, Brain, Contrast, Eye, FlaskConical, Home as HomeIcon, MessageSquareText, Moon, Sun, X } from 'lucide-react'
+import { AArrowUp, Brain, Contrast, Eye, FlaskConical, Home as HomeIcon, MessageSquareText, Moon, Sun, UserRound, X } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { BrandMark } from './components/Brand'
 import { StatusBar } from './components/StatusBar'
@@ -11,14 +11,16 @@ import { Calibrate } from './views/Calibrate'
 import { Communicate, type Channel } from './views/Communicate'
 import { Evidence } from './views/Evidence'
 import { Home } from './views/Home'
+import { MyPhrases } from './views/MyPhrases'
 import './app.css'
 
-type View = 'home' | 'communicate' | 'calibrate' | 'brain' | 'evidence'
+type View = 'home' | 'communicate' | 'phrases' | 'calibrate' | 'brain' | 'evidence'
 interface Toast { id: number; text: string; kind: 'error' | 'info' }
 
 const NAV: { id: View; label: string; icon: any }[] = [
   { id: 'home', label: 'Home', icon: HomeIcon },
   { id: 'communicate', label: 'Communicate', icon: MessageSquareText },
+  { id: 'phrases', label: 'My phrases', icon: UserRound },
   { id: 'calibrate', label: 'Eyes', icon: Eye },
   { id: 'brain', label: 'Brain replay', icon: Brain },
   { id: 'evidence', label: 'Evidence', icon: FlaskConical },
@@ -120,6 +122,7 @@ function Shell() {
             {view === 'communicate' && (
               <Communicate state={state} connected={connected} channel={channel} setChannel={setChannel} notify={notify} speak={speak} goCalibrate={() => setView('calibrate')} />
             )}
+            {view === 'phrases' && <MyPhrases notify={notify} />}
             {view === 'calibrate' && <Calibrate onDone={() => setView('communicate')} />}
             {view === 'brain' && <BrainReplay notify={notify} goCommunicate={() => setView('communicate')} />}
             {view === 'evidence' && <Evidence />}

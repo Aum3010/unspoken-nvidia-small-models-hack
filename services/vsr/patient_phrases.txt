@@ -1,0 +1,46 @@
+# Closed phrase list for lip reading (UNSPOKEN_VSR_PHRASES). One phrase per line; '#' lines are ignored.
+# Common bedside requests. Edit freely: no retraining is needed.
+yes
+no
+I need water
+I am thirsty
+I am hungry
+I am in pain
+my back hurts
+my head hurts
+my chest hurts
+I feel sick
+I can not breathe
+I am cold
+I am hot
+I am tired
+I want to sleep
+I need the toilet
+call the nurse
+call my family
+call my daughter
+call my son
+call my wife
+call my husband
+turn me over
+lift my head
+move my pillow
+turn off the light
+turn on the light
+open the window
+close the door
+I want to sit up
+I want to lie down
+please wait
+not now
+thank you
+I love you
+I am scared
+I am okay
+I do not know
+where am I
+what time is it
+help me
+stop
+more
+again

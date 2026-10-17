@@ -48,7 +48,8 @@ def still_clip(src: Path, seconds: float = 3.0) -> bytes:
 def main(per_speaker: int = 20, still_n: int = 8):
     rows = []
     client = httpx.Client(timeout=180)
-    speakers = sorted(p.name for p in GRID.iterdir() if p.is_dir() and p.name.startswith("s") and p.name[1:].isdigit())
+    # s1/s2 only: s3+ may be on disk as fine-tuning data (scripts/finetune_vsr_grid.py)
+    speakers = [s for s in ("s1", "s2") if (GRID / s).is_dir()]
     for spk in speakers:
         clips = sorted((GRID / spk).glob("*.mpg"))
         for clip in clips[:: max(1, len(clips) // per_speaker)][:per_speaker]:

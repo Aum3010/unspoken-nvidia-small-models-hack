@@ -56,6 +56,7 @@ Every target works by click, keyboard, **hover dwell** (head-mouse), **gaze dwel
 | Model budget | **32.04B** of 33B, counted from weight files |
 
 Run `./scripts/run_evals.sh` to reproduce. Details and known gaps are in `docs/EVALUATION.md`.
+Lip reading (pipeline, personal enrollment, training, accuracy and latency) is documented in `docs/LIP_READING.md`.
 
 ## Repository
 

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-17T00:11:18",
+  "generated_at": "2026-10-17T13:57:24",
   "eeg": {
     "subjects": [
       {
@@ -1401,5 +1401,220 @@
     ],
     "unsafe_assertions": 0,
     "exactness": 1.0
+  },
+  "vsr_adaptation": {
+    "finetune": {
+      "dataset": "GRID",
+      "test_speakers": [
+        "s1",
+        "s2"
+      ],
+      "train_speakers": [
+        "s3",
+        "s4",
+        "s5",
+        "s6",
+        "s7",
+        "s8"
+      ],
+      "n_test_clips": 200,
+      "beam": 12,
+      "method": "frozen Auto-AVSR encoder; fine-tuned decoder + CTC head",
+      "results": {
+        "original (LRS3 LM 0.3, deployed)": {
+          "wer": 0.8075,
+          "decode_ms_median": 2032,
+          "examples": [
+            {
+              "clip": "s1/bbaf2n",
+              "truth": "bin blue at f two now",
+              "top1": "people have two now",
+              "wer": 0.6666666666666666,
+              "decode_ms": 3736
+            },
+            {
+              "clip": "s1/bbas3a",
+              "truth": "bin blue at s three again",
+              "top1": "people who ask for the day",
+              "wer": 1.0,
+              "decode_ms": 2157
+            },
+            {
+              "clip": "s1/bbbm1s",
+              "truth": "bin blue by m one soon",
+              "top1": "people you buy one soon",
+              "wer": 0.6666666666666666,
+              "decode_ms": 2277
+            },
+            {
+              "clip": "s1/bbie8n",
+              "truth": "bin blue in e eight now",
+              "top1": "bamboo can i now",
+              "wer": 0.8333333333333334,
+              "decode_ms": 2231
+            },
+            {
+              "clip": "s1/bbir8p",
+              "truth": "bin blue in r eight please",
+              "top1": "bimbo kari please",
+              "wer": 0.8333333333333334,
+              "decode_ms": 2545
+            }
+          ]
+        },
+        "fine-tuned decoder, no LM": {
+          "wer": 0.0458,
+          "decode_ms_median": 1126,
+          "examples": [
+            {
+              "clip": "s1/bbaf2n",
+              "truth": "bin blue at f two now",
+              "top1": "bin blue at two now",
+              "wer": 0.16666666666666666,
+              "decode_ms": 1092
+            },
+            {
+              "clip": "s1/bbas3a",
+              "truth": "bin blue at s three again",
+              "top1": "bin blue at three again",
+              "wer": 0.16666666666666666,
+              "decode_ms": 1084
+            },
+            {
+              "clip": "s1/bbbm1s",
+              "truth": "bin blue by m one soon",
+              "top1": "bin blue by m one soon",
+              "wer": 0.0,
+              "decode_ms": 1229
+            },
+            {
+              "clip": "s1/bbie8n",
+              "truth": "bin blue in e eight now",
+              "top1": "bin blue at e eight now",
+              "wer": 0.16666666666666666,
+              "decode_ms": 1199
+            },
+            {
+              "clip": "s1/bbir8p",
+              "truth": "bin blue in r eight please",
+              "top1": "bin blue at r eight please",
+              "wer": 0.16666666666666666,
+              "decode_ms": 1219
+            }
+          ]
+        },
+        "fine-tuned decoder + LRS3 LM 0.3": {
+          "wer": 0.0642,
+          "decode_ms_median": 1461,
+          "examples": [
+            {
+              "clip": "s1/bbaf2n",
+              "truth": "bin blue at f two now",
+              "top1": "bin blue at two now",
+              "wer": 0.16666666666666666,
+              "decode_ms": 1482
+            },
+            {
+              "clip": "s1/bbas3a",
+              "truth": "bin blue at s three again",
+              "top1": "bin blue at three again",
+              "wer": 0.16666666666666666,
+              "decode_ms": 1338
+            },
+            {
+              "clip": "s1/bbbm1s",
+              "truth": "bin blue by m one soon",
+              "top1": "bin blue by m one soon",
+              "wer": 0.0,
+              "decode_ms": 1345
+            },
+            {
+              "clip": "s1/bbie8n",
+              "truth": "bin blue in e eight now",
+              "top1": "bin blue at k now",
+              "wer": 0.5,
+              "decode_ms": 1346
+            },
+            {
+              "clip": "s1/bbir8p",
+              "truth": "bin blue in r eight please",
+              "top1": "bin blue please",
+              "wer": 0.5,
+              "decode_ms": 1449
+            }
+          ]
+        }
+      }
+    },
+    "phrases": {
+      "test_speakers": [
+        "s1",
+        "s2"
+      ],
+      "n_clips": 200,
+      "method": "rank closed phrase list by teacher-forced decoder+CTC log-likelihood",
+      "results": {
+        "distractors": "random",
+        "original": {
+          "N=10": {
+            "top1": 1.0,
+            "top3": 1.0
+          },
+          "N=50": {
+            "top1": 0.995,
+            "top3": 1.0
+          },
+          "N=100": {
+            "top1": 1.0,
+            "top3": 1.0
+          }
+        },
+        "fine-tuned": {
+          "N=10": {
+            "top1": 1.0,
+            "top3": 1.0
+          },
+          "N=50": {
+            "top1": 1.0,
+            "top3": 1.0
+          },
+          "N=100": {
+            "top1": 0.995,
+            "top3": 1.0
+          }
+        }
+      }
+    },
+    "phrases_hard": {
+      "test_speakers": [
+        "s1",
+        "s2"
+      ],
+      "n_clips": 200,
+      "method": "rank closed phrase list by teacher-forced decoder+CTC log-likelihood",
+      "results": {
+        "distractors": "differ in <= 1 words",
+        "original": {
+          "N=10": {
+            "top1": 0.905,
+            "top3": 0.99
+          },
+          "N=50": {
+            "top1": 0.765,
+            "top3": 0.98
+          }
+        },
+        "fine-tuned": {
+          "N=10": {
+            "top1": 0.94,
+            "top3": 1.0
+          },
+          "N=50": {
+            "top1": 0.815,
+            "top3": 0.99
+          }
+        }
+      }
+    }
   }
 }
