@@ -62,7 +62,9 @@ def main():
             for pname, far in points.items():
                 t = fold_rows(f, dc, cfg, far)
                 key = f"{spec['name']}/{method}"
-                res.setdefault(key, {})[pname] = {"pos": positive_metrics(t), "neg": negative_metrics(t)}
+                real, deg = t[~t["degraded"]], t[t["degraded"]]  # degraded copies are synthetic: never mixed into the headline
+                res.setdefault(key, {})[pname] = {"pos": positive_metrics(real), "neg": negative_metrics(real),
+                                                  "degraded_pos": positive_metrics(deg)}
                 if pname == "balanced" or len(points) == 1:
                     per[key] = t
             print(f"loso {spec['name']}/{method}", flush=True)
@@ -73,9 +75,10 @@ def main():
     order = sorted(res, key=lambda k: -score(k))
     md = ["# Leave-one-speaker-out on own recordings", "",
           "Each person is tested by thresholds tuned on the other people (plus real negatives from the calib split). "
-          "Counts are k/n over all folds; each clip is tested once. Real human speech only.", ""]
+          "Counts are k/n over all folds; each clip is tested once. Main tables: real recordings only (normal, whisper, "
+          "noisy, muffled as spoken). Synthetic degraded copies of the same recordings are reported separately below.", ""]
     for pname, far in points.items():
-        md += [f"## {pname} (false accepts ≤ {100 * far:.0f}% per negative type on calib)", "",
+        md += [f"## {pname} (false accepts ≤ {100 * far:.0f}% per negative type on calib): real recordings", "",
                "| Model / method | Top-1 rank | Top-3 rank | Accepted correct | Wrong accept | Abstain | FA hard negatives | FA silence / noise / cough | FA unrelated speech |",
                "|---|---|---|---|---|---|---|---|---|"]
         for k in sorted(res, key=lambda k: -res[k][pname]["pos"]["accepted_correct"]["rate"]):
@@ -84,7 +87,15 @@ def main():
             md.append(f"| {k} | {fmt(p['top1'], False)} | {fmt(p['top3'], False)} | **{fmt(p['accepted_correct'], False)}** | "
                       f"{fmt(p['wrong_accept'], False)} | {fmt(p['abstain'], False)} | {fmt(n['hard_negative'])} | {fmt(sil)} | {fmt(n['unknown_speech'])} |")
         md.append("")
-    md += ["## By condition and speaker (balanced point, top 4 configurations)", ""]
+    md += ["## Synthetic degraded copies of the same recordings (not headline)", "",
+           "| Model / method | strict: accepted correct | strict: wrong accept | balanced: accepted correct | balanced: wrong accept |",
+           "|---|---|---|---|---|"]
+    for k in order:
+        r = res[k]
+        b = r.get("balanced", r["strict"])
+        md.append(f"| {k} | {fmt(r['strict']['degraded_pos']['accepted_correct'], False)} | {fmt(r['strict']['degraded_pos']['wrong_accept'], False)} | "
+                  f"{fmt(b['degraded_pos']['accepted_correct'], False)} | {fmt(b['degraded_pos']['wrong_accept'], False)} |")
+    md += ["", "## By condition and speaker (balanced point, top 4 configurations; degraded rows are synthetic)", ""]
     for k in [k for k in sorted(res, key=lambda k: -score(k, "balanced" if "balanced" in points else "strict"))][:4]:
         t = per[k]
         pos = t[t["label_type"] == "positive"]

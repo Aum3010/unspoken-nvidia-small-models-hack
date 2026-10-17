@@ -193,7 +193,7 @@ def phase_decide(cfg, args):
     voc = vocabs(cfg)
     thresholds = {}
     raw = cfg.results / "raw"
-    for spec in cfg["models"]:
+    for spec in cfg.enabled_models():  # disabled models may have stale outputs from an older manifest
         d = joined(cfg, args, spec["name"])
         if d is None:
             continue
@@ -236,7 +236,7 @@ def phase_report(cfg, args):
 
     raw = cfg.results / "raw"
     decisions, infos = {}, {}
-    for spec in cfg["models"]:
+    for spec in cfg.enabled_models():
         ip = raw / f"{spec['name']}_info.json"
         if ip.exists():
             infos[spec["name"]] = json.loads(ip.read_text())
