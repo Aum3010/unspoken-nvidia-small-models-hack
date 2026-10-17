@@ -1,0 +1,904 @@
+{
+  "parakeet-ctc-0.6b/text|phrases20": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": -Infinity,
+    "margin_t": 0.375,
+    "calib_objective": 0.9772727272727273,
+    "calib_far": {
+      "unknown_speech": 0.0,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.0,
+    "n_calib_pos": 220,
+    "n_calib_neg": {
+      "unknown_speech": 201,
+      "non_speech": 118,
+      "silence": 120
+    },
+    "far_target": 0.01,
+    "fallback": "calib positives were TTS (no human calib speakers)"
+  },
+  "parakeet-ctc-0.6b/text|phrases20|balanced": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": 0.4246764452113891,
+    "margin_t": 0.08658385093167704,
+    "calib_objective": 0.990909090909091,
+    "calib_far": {
+      "unknown_speech": 0.014925373134328358,
+      "non_speech": 0.00847457627118644,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.009111617312072893,
+    "n_calib_pos": 220,
+    "n_calib_neg": {
+      "unknown_speech": 201,
+      "non_speech": 118,
+      "silence": 120
+    },
+    "far_target": 0.05,
+    "fallback": "calib positives were TTS (no human calib speakers)"
+  },
+  "parakeet-ctc-0.6b/text|torgo_words": {
+    "feasible": false,
+    "vad_t": 0.2,
+    "abs_t": -Infinity,
+    "margin_t": 1.0,
+    "calib_objective": 0.12433862433862433,
+    "calib_far": {
+      "unknown_speech": 0.021505376344086023,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.006042296072507553,
+    "n_calib_pos": 1512,
+    "n_calib_neg": {
+      "unknown_speech": 93,
+      "non_speech": 118,
+      "silence": 120
+    },
+    "far_target": 0.01
+  },
+  "parakeet-ctc-0.6b/text|torgo_words|balanced": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": -Infinity,
+    "margin_t": 1.0,
+    "calib_objective": 0.12433862433862433,
+    "calib_far": {
+      "unknown_speech": 0.021505376344086023,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.006042296072507553,
+    "n_calib_pos": 1512,
+    "n_calib_neg": {
+      "unknown_speech": 93,
+      "non_speech": 118,
+      "silence": 120
+    },
+    "far_target": 0.05
+  },
+  "parakeet-ctc-0.6b/ctc_sum|phrases20": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": -31.398379999999992,
+    "margin_t": 6.547799999999976,
+    "calib_objective": 1.0,
+    "calib_far": {
+      "unknown_speech": 0.0,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.0,
+    "n_calib_pos": 220,
+    "n_calib_neg": {
+      "unknown_speech": 201,
+      "non_speech": 118,
+      "silence": 120
+    },
+    "far_target": 0.01,
+    "fallback": "calib positives were TTS (no human calib speakers)"
+  },
+  "parakeet-ctc-0.6b/ctc_sum|phrases20|balanced": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": -31.398379999999992,
+    "margin_t": 6.547799999999976,
+    "calib_objective": 1.0,
+    "calib_far": {
+      "unknown_speech": 0.0,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.0,
+    "n_calib_pos": 220,
+    "n_calib_neg": {
+      "unknown_speech": 201,
+      "non_speech": 118,
+      "silence": 120
+    },
+    "far_target": 0.05,
+    "fallback": "calib positives were TTS (no human calib speakers)"
+  },
+  "parakeet-ctc-0.6b/ctc_sum|torgo_words": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": -Infinity,
+    "margin_t": 11.5001,
+    "calib_objective": 0.18716931216931218,
+    "calib_far": {
+      "unknown_speech": 0.0,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.0,
+    "n_calib_pos": 1512,
+    "n_calib_neg": {
+      "unknown_speech": 93,
+      "non_speech": 118,
+      "silence": 120
+    },
+    "far_target": 0.01
+  },
+  "parakeet-ctc-0.6b/ctc_sum|torgo_words|balanced": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": -0.1143,
+    "margin_t": 3.0,
+    "calib_objective": 0.4212962962962963,
+    "calib_far": {
+      "unknown_speech": 0.043010752688172046,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.012084592145015106,
+    "n_calib_pos": 1512,
+    "n_calib_neg": {
+      "unknown_speech": 93,
+      "non_speech": 118,
+      "silence": 120
+    },
+    "far_target": 0.05
+  },
+  "parakeet-ctc-0.6b/ctc_norm|phrases20": {
+    "feasible": true,
+    "vad_t": 0.6,
+    "abs_t": -12.42165,
+    "margin_t": 2.5034,
+    "calib_objective": 0.990909090909091,
+    "calib_far": {
+      "unknown_speech": 0.0,
+      "non_speech": 0.00847457627118644,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.002277904328018223,
+    "n_calib_pos": 220,
+    "n_calib_neg": {
+      "unknown_speech": 201,
+      "non_speech": 118,
+      "silence": 120
+    },
+    "far_target": 0.01,
+    "fallback": "calib positives were TTS (no human calib speakers)"
+  },
+  "parakeet-ctc-0.6b/ctc_norm|phrases20|balanced": {
+    "feasible": true,
+    "vad_t": 0.3,
+    "abs_t": -29.981390625,
+    "margin_t": 2.5034,
+    "calib_objective": 0.9954545454545455,
+    "calib_far": {
+      "unknown_speech": 0.014925373134328358,
+      "non_speech": 0.01694915254237288,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.011389521640091117,
+    "n_calib_pos": 220,
+    "n_calib_neg": {
+      "unknown_speech": 201,
+      "non_speech": 118,
+      "silence": 120
+    },
+    "far_target": 0.05,
+    "fallback": "calib positives were TTS (no human calib speakers)"
+  },
+  "parakeet-ctc-0.6b/ctc_norm|torgo_words": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": -Infinity,
+    "margin_t": 11.5001,
+    "calib_objective": 0.18716931216931218,
+    "calib_far": {
+      "unknown_speech": 0.0,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.0,
+    "n_calib_pos": 1512,
+    "n_calib_neg": {
+      "unknown_speech": 93,
+      "non_speech": 118,
+      "silence": 120
+    },
+    "far_target": 0.01
+  },
+  "parakeet-ctc-0.6b/ctc_norm|torgo_words|balanced": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": -0.1143,
+    "margin_t": 3.0,
+    "calib_objective": 0.4212962962962963,
+    "calib_far": {
+      "unknown_speech": 0.043010752688172046,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.012084592145015106,
+    "n_calib_pos": 1512,
+    "n_calib_neg": {
+      "unknown_speech": 93,
+      "non_speech": 118,
+      "silence": 120
+    },
+    "far_target": 0.05
+  },
+  "parakeet-ctc-0.6b/ctc_llr|phrases20": {
+    "feasible": true,
+    "vad_t": 0.6,
+    "abs_t": -4.296713333333333,
+    "margin_t": 1.1033525,
+    "calib_objective": 0.9954545454545455,
+    "calib_far": {
+      "unknown_speech": 0.004975124378109453,
+      "non_speech": 0.00847457627118644,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.004555808656036446,
+    "n_calib_pos": 220,
+    "n_calib_neg": {
+      "unknown_speech": 201,
+      "non_speech": 118,
+      "silence": 120
+    },
+    "far_target": 0.01,
+    "fallback": "calib positives were TTS (no human calib speakers)"
+  },
+  "parakeet-ctc-0.6b/ctc_llr|phrases20|balanced": {
+    "feasible": true,
+    "vad_t": 0.3,
+    "abs_t": -4.296713333333333,
+    "margin_t": 0.6575999999999993,
+    "calib_objective": 1.0,
+    "calib_far": {
+      "unknown_speech": 0.009950248756218905,
+      "non_speech": 0.01694915254237288,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.009111617312072893,
+    "n_calib_pos": 220,
+    "n_calib_neg": {
+      "unknown_speech": 201,
+      "non_speech": 118,
+      "silence": 120
+    },
+    "far_target": 0.05,
+    "fallback": "calib positives were TTS (no human calib speakers)"
+  },
+  "parakeet-ctc-0.6b/ctc_llr|torgo_words": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": -Infinity,
+    "margin_t": 11.5001,
+    "calib_objective": 0.18716931216931218,
+    "calib_far": {
+      "unknown_speech": 0.0,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.0,
+    "n_calib_pos": 1512,
+    "n_calib_neg": {
+      "unknown_speech": 93,
+      "non_speech": 118,
+      "silence": 120
+    },
+    "far_target": 0.01
+  },
+  "parakeet-ctc-0.6b/ctc_llr|torgo_words|balanced": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": -Infinity,
+    "margin_t": 8.099740000000022,
+    "calib_objective": 0.3492063492063492,
+    "calib_far": {
+      "unknown_speech": 0.03225806451612903,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.00906344410876133,
+    "n_calib_pos": 1512,
+    "n_calib_neg": {
+      "unknown_speech": 93,
+      "non_speech": 118,
+      "silence": 120
+    },
+    "far_target": 0.05
+  },
+  "parakeet-tdt-0.6b-v2/text|phrases20": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": 0.3794503691550456,
+    "margin_t": 0.02262845849802373,
+    "calib_objective": 0.9545454545454546,
+    "calib_far": {
+      "unknown_speech": 0.009950248756218905,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.004555808656036446,
+    "n_calib_pos": 220,
+    "n_calib_neg": {
+      "unknown_speech": 201,
+      "non_speech": 118,
+      "silence": 120
+    },
+    "far_target": 0.01,
+    "fallback": "calib positives were TTS (no human calib speakers)"
+  },
+  "parakeet-tdt-0.6b-v2/text|phrases20|balanced": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": 0.3794503691550456,
+    "margin_t": 0.02262845849802373,
+    "calib_objective": 0.9545454545454546,
+    "calib_far": {
+      "unknown_speech": 0.009950248756218905,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.004555808656036446,
+    "n_calib_pos": 220,
+    "n_calib_neg": {
+      "unknown_speech": 201,
+      "non_speech": 118,
+      "silence": 120
+    },
+    "far_target": 0.05,
+    "fallback": "calib positives were TTS (no human calib speakers)"
+  },
+  "parakeet-tdt-0.6b-v2/text|torgo_words": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": -Infinity,
+    "margin_t": 0.6666666666666666,
+    "calib_objective": 0.4279100529100529,
+    "calib_far": {
+      "unknown_speech": 0.0,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.0,
+    "n_calib_pos": 1512,
+    "n_calib_neg": {
+      "unknown_speech": 93,
+      "non_speech": 118,
+      "silence": 120
+    },
+    "far_target": 0.01
+  },
+  "parakeet-tdt-0.6b-v2/text|torgo_words|balanced": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": 0.4,
+    "margin_t": 0.33333333333333337,
+    "calib_objective": 0.6038359788359788,
+    "calib_far": {
+      "unknown_speech": 0.043010752688172046,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.012084592145015106,
+    "n_calib_pos": 1512,
+    "n_calib_neg": {
+      "unknown_speech": 93,
+      "non_speech": 118,
+      "silence": 120
+    },
+    "far_target": 0.05
+  },
+  "nemotron-streaming-0.6b/text|phrases20": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": 0.6666666666666667,
+    "margin_t": 0.0,
+    "calib_objective": 0.9818181818181818,
+    "calib_far": {
+      "unknown_speech": 0.0,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.0,
+    "n_calib_pos": 220,
+    "n_calib_neg": {
+      "unknown_speech": 201,
+      "non_speech": 118,
+      "silence": 120
+    },
+    "far_target": 0.01,
+    "fallback": "calib positives were TTS (no human calib speakers)"
+  },
+  "nemotron-streaming-0.6b/text|phrases20|balanced": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": 0.31480263157894733,
+    "margin_t": 0.03629629629629659,
+    "calib_objective": 0.990909090909091,
+    "calib_far": {
+      "unknown_speech": 0.01990049751243781,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.009111617312072893,
+    "n_calib_pos": 220,
+    "n_calib_neg": {
+      "unknown_speech": 201,
+      "non_speech": 118,
+      "silence": 120
+    },
+    "far_target": 0.05,
+    "fallback": "calib positives were TTS (no human calib speakers)"
+  },
+  "nemotron-streaming-0.6b/text|torgo_words": {
+    "feasible": false,
+    "vad_t": 0.2,
+    "abs_t": -Infinity,
+    "margin_t": 0.75,
+    "calib_objective": 0.35119047619047616,
+    "calib_far": {
+      "unknown_speech": 0.010752688172043012,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.0030211480362537764,
+    "n_calib_pos": 1512,
+    "n_calib_neg": {
+      "unknown_speech": 93,
+      "non_speech": 118,
+      "silence": 120
+    },
+    "far_target": 0.01
+  },
+  "nemotron-streaming-0.6b/text|torgo_words|balanced": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": -Infinity,
+    "margin_t": 0.5,
+    "calib_objective": 0.7771164021164021,
+    "calib_far": {
+      "unknown_speech": 0.03225806451612903,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.00906344410876133,
+    "n_calib_pos": 1512,
+    "n_calib_neg": {
+      "unknown_speech": 93,
+      "non_speech": 118,
+      "silence": 120
+    },
+    "far_target": 0.05
+  },
+  "nemotron-streaming-0.6b-160ms/text|phrases20": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": 0.3607276119402991,
+    "margin_t": 0.0714285714285714,
+    "calib_objective": 0.95,
+    "calib_far": {
+      "unknown_speech": 0.009950248756218905,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.004555808656036446,
+    "n_calib_pos": 220,
+    "n_calib_neg": {
+      "unknown_speech": 201,
+      "non_speech": 118,
+      "silence": 120
+    },
+    "far_target": 0.01,
+    "fallback": "calib positives were TTS (no human calib speakers)"
+  },
+  "nemotron-streaming-0.6b-160ms/text|phrases20|balanced": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": 0.29743069641649755,
+    "margin_t": 0.0714285714285714,
+    "calib_objective": 0.9545454545454546,
+    "calib_far": {
+      "unknown_speech": 0.03482587064676617,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.015945330296127564,
+    "n_calib_pos": 220,
+    "n_calib_neg": {
+      "unknown_speech": 201,
+      "non_speech": 118,
+      "silence": 120
+    },
+    "far_target": 0.05,
+    "fallback": "calib positives were TTS (no human calib speakers)"
+  },
+  "nemotron-streaming-0.6b-160ms/text|torgo_words": {
+    "feasible": false,
+    "vad_t": 0.2,
+    "abs_t": -Infinity,
+    "margin_t": 0.75,
+    "calib_objective": 0.32076719576719576,
+    "calib_far": {
+      "unknown_speech": 0.010752688172043012,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.0030211480362537764,
+    "n_calib_pos": 1512,
+    "n_calib_neg": {
+      "unknown_speech": 93,
+      "non_speech": 118,
+      "silence": 120
+    },
+    "far_target": 0.01
+  },
+  "nemotron-streaming-0.6b-160ms/text|torgo_words|balanced": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": -Infinity,
+    "margin_t": 0.5,
+    "calib_objective": 0.7023809523809523,
+    "calib_far": {
+      "unknown_speech": 0.03225806451612903,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.00906344410876133,
+    "n_calib_pos": 1512,
+    "n_calib_neg": {
+      "unknown_speech": 93,
+      "non_speech": 118,
+      "silence": 120
+    },
+    "far_target": 0.05
+  },
+  "nemotron-streaming-0.6b-560ms/text|phrases20": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": 0.5150000000000035,
+    "margin_t": 0.0,
+    "calib_objective": 0.9727272727272728,
+    "calib_far": {
+      "unknown_speech": 0.0,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.0,
+    "n_calib_pos": 220,
+    "n_calib_neg": {
+      "unknown_speech": 201,
+      "non_speech": 118,
+      "silence": 120
+    },
+    "far_target": 0.01,
+    "fallback": "calib positives were TTS (no human calib speakers)"
+  },
+  "nemotron-streaming-0.6b-560ms/text|phrases20|balanced": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": 0.5150000000000035,
+    "margin_t": 0.0,
+    "calib_objective": 0.9727272727272728,
+    "calib_far": {
+      "unknown_speech": 0.0,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.0,
+    "n_calib_pos": 220,
+    "n_calib_neg": {
+      "unknown_speech": 201,
+      "non_speech": 118,
+      "silence": 120
+    },
+    "far_target": 0.05,
+    "fallback": "calib positives were TTS (no human calib speakers)"
+  },
+  "nemotron-streaming-0.6b-560ms/text|torgo_words": {
+    "feasible": false,
+    "vad_t": 0.2,
+    "abs_t": -Infinity,
+    "margin_t": 0.75,
+    "calib_objective": 0.3544973544973545,
+    "calib_far": {
+      "unknown_speech": 0.010752688172043012,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.0030211480362537764,
+    "n_calib_pos": 1512,
+    "n_calib_neg": {
+      "unknown_speech": 93,
+      "non_speech": 118,
+      "silence": 120
+    },
+    "far_target": 0.01
+  },
+  "nemotron-streaming-0.6b-560ms/text|torgo_words|balanced": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": -Infinity,
+    "margin_t": 0.5,
+    "calib_objective": 0.7665343915343915,
+    "calib_far": {
+      "unknown_speech": 0.03225806451612903,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.00906344410876133,
+    "n_calib_pos": 1512,
+    "n_calib_neg": {
+      "unknown_speech": 93,
+      "non_speech": 118,
+      "silence": 120
+    },
+    "far_target": 0.05
+  },
+  "whisper-large-v3-turbo/text|phrases20": {
+    "feasible": true,
+    "vad_t": 0.4,
+    "abs_t": -Infinity,
+    "margin_t": 0.20833333333333337,
+    "calib_objective": 0.9863636363636363,
+    "calib_far": {
+      "unknown_speech": 0.004975124378109453,
+      "non_speech": 0.00847457627118644,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.004555808656036446,
+    "n_calib_pos": 220,
+    "n_calib_neg": {
+      "unknown_speech": 201,
+      "non_speech": 118,
+      "silence": 120
+    },
+    "far_target": 0.01,
+    "fallback": "calib positives were TTS (no human calib speakers)"
+  },
+  "whisper-large-v3-turbo/text|phrases20|balanced": {
+    "feasible": true,
+    "vad_t": 0.4,
+    "abs_t": 0.33333333333333337,
+    "margin_t": 0.03088023088023098,
+    "calib_objective": 0.990909090909091,
+    "calib_far": {
+      "unknown_speech": 0.024875621890547265,
+      "non_speech": 0.01694915254237288,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.015945330296127564,
+    "n_calib_pos": 220,
+    "n_calib_neg": {
+      "unknown_speech": 201,
+      "non_speech": 118,
+      "silence": 120
+    },
+    "far_target": 0.05,
+    "fallback": "calib positives were TTS (no human calib speakers)"
+  },
+  "whisper-large-v3-turbo/text|torgo_words": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": -Infinity,
+    "margin_t": 1.0,
+    "calib_objective": 0.06944444444444445,
+    "calib_far": {
+      "unknown_speech": 0.0,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.0,
+    "n_calib_pos": 1512,
+    "n_calib_neg": {
+      "unknown_speech": 93,
+      "non_speech": 118,
+      "silence": 120
+    },
+    "far_target": 0.01
+  },
+  "whisper-large-v3-turbo/text|torgo_words|balanced": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": -Infinity,
+    "margin_t": 0.5,
+    "calib_objective": 0.6832010582010583,
+    "calib_far": {
+      "unknown_speech": 0.043010752688172046,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.012084592145015106,
+    "n_calib_pos": 1512,
+    "n_calib_neg": {
+      "unknown_speech": 93,
+      "non_speech": 118,
+      "silence": 120
+    },
+    "far_target": 0.05
+  },
+  "whisper-large-v2/text|phrases20": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": 0.5,
+    "margin_t": 0.0,
+    "calib_objective": 0.9727272727272728,
+    "calib_far": {
+      "unknown_speech": 0.0,
+      "non_speech": 0.00847457627118644,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.002277904328018223,
+    "n_calib_pos": 220,
+    "n_calib_neg": {
+      "unknown_speech": 201,
+      "non_speech": 118,
+      "silence": 120
+    },
+    "far_target": 0.01,
+    "fallback": "calib positives were TTS (no human calib speakers)"
+  },
+  "whisper-large-v2/text|phrases20|balanced": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": 0.2857142857142857,
+    "margin_t": 0.0357142857142857,
+    "calib_objective": 0.9772727272727273,
+    "calib_far": {
+      "unknown_speech": 0.03980099502487562,
+      "non_speech": 0.03389830508474576,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.02733485193621868,
+    "n_calib_pos": 220,
+    "n_calib_neg": {
+      "unknown_speech": 201,
+      "non_speech": 118,
+      "silence": 120
+    },
+    "far_target": 0.05,
+    "fallback": "calib positives were TTS (no human calib speakers)"
+  },
+  "whisper-large-v2/text|torgo_words": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": -Infinity,
+    "margin_t": 0.6666666666666666,
+    "calib_objective": 0.38227513227513227,
+    "calib_far": {
+      "unknown_speech": 0.0,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.0,
+    "n_calib_pos": 1512,
+    "n_calib_neg": {
+      "unknown_speech": 93,
+      "non_speech": 118,
+      "silence": 120
+    },
+    "far_target": 0.01
+  },
+  "whisper-large-v2/text|torgo_words|balanced": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": -Infinity,
+    "margin_t": 0.5,
+    "calib_objective": 0.5866402116402116,
+    "calib_far": {
+      "unknown_speech": 0.021505376344086023,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.006042296072507553,
+    "n_calib_pos": 1512,
+    "n_calib_neg": {
+      "unknown_speech": 93,
+      "non_speech": 118,
+      "silence": 120
+    },
+    "far_target": 0.05
+  },
+  "whisper-small/text|phrases20": {
+    "feasible": true,
+    "vad_t": 0.6,
+    "abs_t": -Infinity,
+    "margin_t": 0.20833333333333337,
+    "calib_objective": 0.9772727272727273,
+    "calib_far": {
+      "unknown_speech": 0.004975124378109453,
+      "non_speech": 0.00847457627118644,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.004555808656036446,
+    "n_calib_pos": 220,
+    "n_calib_neg": {
+      "unknown_speech": 201,
+      "non_speech": 118,
+      "silence": 120
+    },
+    "far_target": 0.01,
+    "fallback": "calib positives were TTS (no human calib speakers)"
+  },
+  "whisper-small/text|phrases20|balanced": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": 0.33333333333333337,
+    "margin_t": 0.033333333333333326,
+    "calib_objective": 0.9863636363636363,
+    "calib_far": {
+      "unknown_speech": 0.03482587064676617,
+      "non_speech": 0.03389830508474576,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.025056947608200455,
+    "n_calib_pos": 220,
+    "n_calib_neg": {
+      "unknown_speech": 201,
+      "non_speech": 118,
+      "silence": 120
+    },
+    "far_target": 0.05,
+    "fallback": "calib positives were TTS (no human calib speakers)"
+  },
+  "whisper-small/text|torgo_words": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": -Infinity,
+    "margin_t": 0.6666666666666666,
+    "calib_objective": 0.455026455026455,
+    "calib_far": {
+      "unknown_speech": 0.0,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.0,
+    "n_calib_pos": 1512,
+    "n_calib_neg": {
+      "unknown_speech": 93,
+      "non_speech": 118,
+      "silence": 120
+    },
+    "far_target": 0.01
+  },
+  "whisper-small/text|torgo_words|balanced": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": 0.5,
+    "margin_t": 0.33333333333333337,
+    "calib_objective": 0.6805555555555556,
+    "calib_far": {
+      "unknown_speech": 0.043010752688172046,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.012084592145015106,
+    "n_calib_pos": 1512,
+    "n_calib_neg": {
+      "unknown_speech": 93,
+      "non_speech": 118,
+      "silence": 120
+    },
+    "far_target": 0.05
+  }
+}

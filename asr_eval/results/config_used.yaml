@@ -1,0 +1,179 @@
+seed: 7
+sample_rate: 16000
+paths:
+  data: data
+  results: results
+phrases:
+  water: I need water
+  pain: I'm in pain
+  nurse: Call the nurse
+  breathe: I can't breathe
+  suction: I need suction
+  reposition: Please reposition me
+  cold: I'm cold
+  hot: I'm too hot
+  bathroom: I need the bathroom
+  light: Turn off the light
+  family: Where is my family
+  time: What time is it
+  sick: I feel sick
+  scared: I'm scared
+  tired: I'm tired
+  pillow: Fix my pillow
+  'yes': 'Yes'
+  'no': 'No'
+  help: Help me
+  stop: Stop
+hard_negatives:
+  hn_dont_need_water: I don't need water
+  hn_not_in_pain: I'm not in pain
+  hn_dont_call_nurse: don't call the nurse
+  hn_can_breathe: I can breathe fine
+  hn_water_plants: water the plants
+  hn_call_family_later: call my family later
+  hn_time_close: what time does it close
+own:
+  conditions:
+  - normal
+  - soft
+  - whisper
+  - slow
+  - muffled
+  - noisy
+  negatives:
+    silence: silence
+    breathing: non_speech
+    cough: non_speech
+    unrelated: unknown_speech
+manifest:
+  calib_fraction: 0.4
+  calib_speakers: {}
+  generated_nonspeech: 300
+  librispeech_n: 200
+  nonspeech_public_n: 300
+  esc50_categories:
+  - breathing
+  - coughing
+  - clock_tick
+  - mouse_click
+  - keyboard_typing
+  - door_wood_knock
+  - footsteps
+  - snoring
+  - sneezing
+  - clapping
+  - drinking_sipping
+  - brushing_teeth
+  torgo_vocab_size: 15
+  torgo_vocab:
+  - 'yes'
+  - 'no'
+  - up
+  - down
+  - left
+  - right
+  - go
+  - one
+  - two
+  - three
+degrade:
+  sources:
+  - own
+  - torgo
+  gain_db:
+  - -12
+  - -24
+  - -36
+  snr_db:
+  - 20
+  - 10
+  - 5
+  - 0
+  bandpass_hz:
+  - 300
+  - 3400
+  lowpass_hz: 1500
+  tempo:
+  - 0.7
+  - 0.85
+  rt60_s:
+  - 0.3
+  - 0.6
+vad:
+  thresholds:
+  - 0.2
+  - 0.3
+  - 0.4
+  - 0.5
+  - 0.6
+  min_speech_ms: 100
+models:
+- name: parakeet-ctc-0.6b
+  kind: hf_ctc
+  checkpoint: nvidia/parakeet-ctc-0.6b
+  revision: null
+  enabled: true
+- name: parakeet-tdt-0.6b-v2
+  kind: nemo_transducer
+  checkpoint: nvidia/parakeet-tdt-0.6b-v2
+  enabled: true
+- name: nemotron-streaming-0.6b
+  kind: nemo_transducer
+  checkpoint: nvidia/nemotron-speech-streaming-en-0.6b
+  enabled: true
+- name: nemotron-streaming-0.6b-160ms
+  kind: nemo_transducer
+  checkpoint: nvidia/nemotron-speech-streaming-en-0.6b
+  att_context:
+  - 70
+  - 1
+  enabled: true
+- name: nemotron-streaming-0.6b-560ms
+  kind: nemo_transducer
+  checkpoint: nvidia/nemotron-speech-streaming-en-0.6b
+  att_context:
+  - 70
+  - 6
+  enabled: true
+- name: whisper-large-v3-turbo
+  kind: faster_whisper
+  checkpoint: large-v3-turbo
+  params_from: openai/whisper-large-v3-turbo
+  enabled: true
+- name: whisper-large-v2
+  kind: faster_whisper
+  checkpoint: large-v2
+  params_from: openai/whisper-large-v2
+  enabled: true
+- name: whisper-small
+  kind: faster_whisper
+  checkpoint: small
+  params_from: openai/whisper-small
+  enabled: true
+- name: parakeet-ctc-0.6b-sapc1
+  kind: hf_ctc
+  checkpoint: dys-asr/parakeet-ctc-0.6b-sapc1
+  enabled: false
+decision:
+  methods:
+  - text
+  - ctc_sum
+  - ctc_norm
+  - ctc_llr
+  far_target: 0.01
+  operating_points:
+    balanced: 0.05
+  far_constraint: max_per_type
+  tune_origins:
+  - real
+  - generated
+  tune_include_degraded: true
+  abs_grid_quantiles: 41
+  margin_grid_quantiles: 21
+  negation_words:
+  - not
+  - false
+  - never
+latency:
+  warmup_runs: 5
+  dtype_cuda: bfloat16
