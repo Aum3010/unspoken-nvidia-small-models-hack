@@ -50,7 +50,8 @@ own:
 
 manifest:
   calib_fraction: 0.4          # share of speakers per source used for threshold tuning
-  calib_speakers: {}           # optional explicit lists per source, e.g. {own: [alice]}
+  calib_speakers:              # explicit calib speakers per source; others go to test
+    own: [p02]                 # p01 (4 conditions) + p03 stay in test; scripts/loso.py rotates all three
   generated_nonspeech: 300     # digital silence + low-level mic-like noise clips (1-6 s)
   librispeech_n: 200
   nonspeech_public_n: 300      # MUSAN + Speech Commands background + ESC-50 cuts
@@ -106,7 +107,7 @@ models:
     kind: faster_whisper
     checkpoint: large-v2
     params_from: openai/whisper-large-v2
-    enabled: true              # reference only: 1.55B does not fit the 33B budget next to the coordinator
+    enabled: false             # ruled out in milestone 2: 1.55B exceeds the budget, slowest, no accuracy gain
   - name: whisper-small
     kind: faster_whisper
     checkpoint: small

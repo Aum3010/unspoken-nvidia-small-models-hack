@@ -57,6 +57,10 @@ def own(cfg) -> list[dict]:
             print(f"  skip (name): {p.name}")
             continue
         spk, cond, pid, _take = parts[0], parts[1], "_".join(parts[2:-1]), parts[-1]
+        dur = sf.info(str(p)).duration
+        if dur < MIN_SOURCE_S:  # released too early: no phrase fits
+            print(f"  skip (too short, {dur:.2f} s): {p.name}")
+            continue
         if pid in cfg.phrases:
             r = row(label_type="positive", phrase_id=pid, text=cfg.phrases[pid])
         elif pid.startswith("neg_"):
