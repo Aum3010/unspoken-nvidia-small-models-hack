@@ -1,0 +1,13 @@
+data
+data/
+results/raw/
+results/cache/
+.env.brev
+setup.log
+__pycache__/
+data_local/
+results_local/
+prepare.log
+tts.log
+run.log
+serve.log

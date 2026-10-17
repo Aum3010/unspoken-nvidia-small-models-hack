@@ -1,0 +1,497 @@
+seed: 7
+sample_rate: 16000
+paths:
+  data: data
+  results: results
+phrases:
+  water: I need water
+  pain: I'm in pain
+  nurse: Call the nurse
+  breathe: I can't breathe
+  suction: I need suction
+  reposition: Please reposition me
+  cold: I'm cold
+  hot: I'm too hot
+  bathroom: I need the bathroom
+  light: Turn off the light
+  family: Where is my family
+  time: What time is it
+  sick: I feel sick
+  scared: I'm scared
+  tired: I'm tired
+  pillow: Fix my pillow
+  'yes': 'Yes'
+  'no': 'No'
+  help: Help me
+  stop: Stop
+hard_negatives:
+  hn_dont_need_water: I don't need water
+  hn_not_in_pain: I'm not in pain
+  hn_dont_call_nurse: don't call the nurse
+  hn_can_breathe: I can breathe fine
+  hn_water_plants: water the plants
+  hn_call_family_later: call my family later
+  hn_time_close: what time does it close
+own:
+  conditions:
+  - normal
+  - soft
+  - whisper
+  - slow
+  - muffled
+  - noisy
+  negatives:
+    silence: silence
+    breathing: non_speech
+    cough: non_speech
+    unrelated: unknown_speech
+manifest:
+  calib_fraction: 0.4
+  calib_speakers:
+    own:
+    - p02
+  generated_nonspeech: 300
+  librispeech_n: 200
+  nonspeech_public_n: 300
+  esc50_categories:
+  - breathing
+  - coughing
+  - clock_tick
+  - mouse_click
+  - keyboard_typing
+  - door_wood_knock
+  - footsteps
+  - snoring
+  - sneezing
+  - clapping
+  - drinking_sipping
+  - brushing_teeth
+  torgo_vocab_size: 15
+  torgo_vocab:
+  - 'yes'
+  - 'no'
+  - up
+  - down
+  - left
+  - right
+  - go
+  - one
+  - two
+  - three
+degrade:
+  sources:
+  - own
+  - torgo
+  gain_db:
+  - -12
+  - -24
+  - -36
+  snr_db:
+  - 20
+  - 10
+  - 5
+  - 0
+  bandpass_hz:
+  - 300
+  - 3400
+  lowpass_hz: 1500
+  tempo:
+  - 0.7
+  - 0.85
+  rt60_s:
+  - 0.3
+  - 0.6
+vad:
+  thresholds:
+  - 0.2
+  - 0.3
+  - 0.4
+  - 0.5
+  - 0.6
+  min_speech_ms: 100
+models:
+- name: parakeet-ctc-0.6b
+  kind: hf_ctc
+  checkpoint: nvidia/parakeet-ctc-0.6b
+  revision: null
+  enabled: true
+- name: parakeet-tdt-0.6b-v2
+  kind: nemo_transducer
+  checkpoint: nvidia/parakeet-tdt-0.6b-v2
+  forced_scoring: false
+  enabled: true
+- name: nemotron-streaming-0.6b
+  kind: nemo_transducer
+  checkpoint: nvidia/nemotron-speech-streaming-en-0.6b
+  enabled: true
+- name: nemotron-3.5-asr-0.6b
+  kind: nemo_transducer
+  checkpoint: nvidia/nemotron-3.5-asr-streaming-0.6b
+  target_lang: en-US
+  enabled: true
+- name: nemotron-streaming-0.6b-160ms
+  kind: nemo_transducer
+  checkpoint: nvidia/nemotron-speech-streaming-en-0.6b
+  att_context:
+  - 70
+  - 1
+  enabled: true
+- name: nemotron-streaming-0.6b-560ms
+  kind: nemo_transducer
+  checkpoint: nvidia/nemotron-speech-streaming-en-0.6b
+  att_context:
+  - 70
+  - 6
+  enabled: true
+- name: whisper-large-v3-turbo
+  kind: faster_whisper
+  checkpoint: large-v3-turbo
+  params_from: openai/whisper-large-v3-turbo
+  enabled: true
+- name: whisper-large-v2
+  kind: faster_whisper
+  checkpoint: large-v2
+  params_from: openai/whisper-large-v2
+  enabled: false
+- name: whisper-small
+  kind: faster_whisper
+  checkpoint: small
+  params_from: openai/whisper-small
+  enabled: true
+- name: parakeet-ctc-0.6b-sapc1
+  kind: hf_ctc
+  checkpoint: dys-asr/parakeet-ctc-0.6b-sapc1
+  enabled: false
+decision:
+  methods:
+  - text
+  - forced_sum
+  - forced_norm
+  - forced_llr
+  far_target: 0.01
+  operating_points:
+    balanced: 0.05
+  far_constraint: max_per_type
+  tune_origins:
+  - real
+  - generated
+  tune_include_degraded: true
+  abs_grid_quantiles: 41
+  margin_grid_quantiles: 21
+  negation_words:
+  - not
+  - false
+  - never
+latency:
+  warmup_runs: 5
+  dtype_cuda: bfloat16
+languages:
+  default: en
+  en:
+    name: English
+    locale: en-US
+    negation_words:
+    - not
+    - 'no'
+    - never
+    review_status: source
+  es:
+    name: "Espa\xF1ol"
+    locale: es-US
+    review_status: draft (needs native-speaker review)
+    negation_words:
+    - 'no'
+    - nunca
+    - ni
+    phrases:
+      water:
+      - Necesito agua
+      pain:
+      - Tengo dolor
+      - Me duele
+      nurse:
+      - Llame a la enfermera
+      - Llame al enfermero
+      breathe:
+      - No puedo respirar
+      suction:
+      - "Necesito succi\xF3n"
+      - "Necesito aspiraci\xF3n"
+      reposition:
+      - "Por favor c\xE1mbieme de posici\xF3n"
+      cold:
+      - "Tengo fr\xEDo"
+      hot:
+      - Tengo mucho calor
+      bathroom:
+      - "Necesito ir al ba\xF1o"
+      light:
+      - Apague la luz
+      family:
+      - "\xBFD\xF3nde est\xE1 mi familia?"
+      time:
+      - "\xBFQu\xE9 hora es?"
+      sick:
+      - Me siento mal
+      - "Tengo n\xE1useas"
+      scared:
+      - Tengo miedo
+      tired:
+      - Estoy cansado
+      - Estoy cansada
+      pillow:
+      - Arregle mi almohada
+      'yes':
+      - "S\xED"
+      'no':
+      - 'No'
+      help:
+      - "Ay\xFAdeme"
+      - Ayuda
+      stop:
+      - Pare
+      - Alto
+      - Basta
+  fr:
+    name: "Fran\xE7ais"
+    locale: fr-FR
+    review_status: draft (needs native-speaker review)
+    negation_words:
+    - ne
+    - n
+    - pas
+    - jamais
+    - non
+    phrases:
+      water:
+      - J'ai besoin d'eau
+      pain:
+      - J'ai mal
+      nurse:
+      - "Appelez l'infirmi\xE8re"
+      - Appelez l'infirmier
+      breathe:
+      - "Je n'arrive pas \xE0 respirer"
+      - Je ne peux pas respirer
+      suction:
+      - J'ai besoin d'une aspiration
+      reposition:
+      - "Changez-moi de position s'il vous pla\xEEt"
+      cold:
+      - J'ai froid
+      hot:
+      - J'ai trop chaud
+      bathroom:
+      - J'ai besoin d'aller aux toilettes
+      light:
+      - "\xC9teignez la lumi\xE8re"
+      family:
+      - "O\xF9 est ma famille ?"
+      time:
+      - Quelle heure est-il ?
+      sick:
+      - Je me sens mal
+      - "J'ai la naus\xE9e"
+      scared:
+      - J'ai peur
+      tired:
+      - "Je suis fatigu\xE9"
+      - "Je suis fatigu\xE9e"
+      pillow:
+      - Arrangez mon oreiller
+      'yes':
+      - Oui
+      'no':
+      - Non
+      help:
+      - Aidez-moi
+      stop:
+      - "Arr\xEAtez"
+      - Stop
+  de:
+    name: Deutsch
+    locale: de-DE
+    review_status: draft (needs native-speaker review)
+    negation_words:
+    - nicht
+    - kein
+    - keine
+    - nein
+    - nie
+    phrases:
+      water:
+      - Ich brauche Wasser
+      pain:
+      - Ich habe Schmerzen
+      nurse:
+      - Rufen Sie die Pflegekraft
+      - Rufen Sie die Krankenschwester
+      breathe:
+      - Ich kann nicht atmen
+      - Ich bekomme keine Luft
+      suction:
+      - Ich muss abgesaugt werden
+      reposition:
+      - Bitte lagern Sie mich um
+      cold:
+      - Mir ist kalt
+      hot:
+      - "Mir ist zu hei\xDF"
+      bathroom:
+      - Ich muss auf die Toilette
+      light:
+      - Machen Sie das Licht aus
+      family:
+      - Wo ist meine Familie?
+      time:
+      - "Wie sp\xE4t ist es?"
+      sick:
+      - "Mir ist \xFCbel"
+      - Mir ist schlecht
+      scared:
+      - Ich habe Angst
+      tired:
+      - "Ich bin m\xFCde"
+      pillow:
+      - Richten Sie mein Kissen
+      'yes':
+      - Ja
+      'no':
+      - Nein
+      help:
+      - Helfen Sie mir
+      stop:
+      - Stopp
+      - "Aufh\xF6ren"
+  zh:
+    name: "\u4E2D\u6587"
+    locale: zh-CN
+    review_status: draft (needs native-speaker review)
+    negation_words:
+    - "\u4E0D"
+    - "\u6CA1"
+    - "\u522B"
+    phrases:
+      water:
+      - "\u6211\u9700\u8981\u6C34"
+      - "\u6211\u8981\u559D\u6C34"
+      pain:
+      - "\u6211\u5F88\u75BC"
+      - "\u6211\u75BC"
+      nurse:
+      - "\u53EB\u62A4\u58EB"
+      breathe:
+      - "\u6211\u5598\u4E0D\u8FC7\u6C14"
+      - "\u6211\u4E0D\u80FD\u547C\u5438"
+      suction:
+      - "\u6211\u9700\u8981\u5438\u75F0"
+      reposition:
+      - "\u8BF7\u5E2E\u6211\u7FFB\u8EAB"
+      cold:
+      - "\u6211\u51B7"
+      - "\u6211\u5F88\u51B7"
+      hot:
+      - "\u6211\u592A\u70ED\u4E86"
+      bathroom:
+      - "\u6211\u8981\u4E0A\u5395\u6240"
+      light:
+      - "\u628A\u706F\u5173\u6389"
+      - "\u5173\u706F"
+      family:
+      - "\u6211\u7684\u5BB6\u4EBA\u5728\u54EA\u91CC"
+      time:
+      - "\u73B0\u5728\u51E0\u70B9\u4E86"
+      sick:
+      - "\u6211\u4E0D\u8212\u670D"
+      - "\u6211\u60F3\u5410"
+      scared:
+      - "\u6211\u5BB3\u6015"
+      tired:
+      - "\u6211\u7D2F\u4E86"
+      pillow:
+      - "\u5E2E\u6211\u6574\u7406\u6795\u5934"
+      'yes':
+      - "\u662F"
+      - "\u5BF9"
+      'no':
+      - "\u4E0D"
+      - "\u4E0D\u662F"
+      help:
+      - "\u5E2E\u5E2E\u6211"
+      stop:
+      - "\u505C"
+      - "\u505C\u4E0B"
+  hi:
+    name: "\u0939\u093F\u0928\u094D\u0926\u0940"
+    locale: hi-IN
+    review_status: draft (needs native-speaker review)
+    negation_words:
+    - "\u0928\u0939\u0940\u0902"
+    - "\u0928"
+    - "\u092E\u0924"
+    phrases:
+      water:
+      - "\u092E\u0941\u091D\u0947 \u092A\u093E\u0928\u0940 \u091A\u093E\u0939\u093F\
+        \u090F"
+      pain:
+      - "\u092E\u0941\u091D\u0947 \u0926\u0930\u094D\u0926 \u0939\u094B \u0930\u0939\
+        \u093E \u0939\u0948"
+      nurse:
+      - "\u0928\u0930\u094D\u0938 \u0915\u094B \u092C\u0941\u0932\u093E\u0907\u090F"
+      breathe:
+      - "\u092E\u0941\u091D\u0947 \u0938\u093E\u0901\u0938 \u0928\u0939\u0940\u0902\
+        \ \u0906 \u0930\u0939\u0940"
+      - "\u092E\u0948\u0902 \u0938\u093E\u0901\u0938 \u0928\u0939\u0940\u0902 \u0932\
+        \u0947 \u092A\u093E \u0930\u0939\u093E \u0939\u0942\u0901"
+      - "\u092E\u0948\u0902 \u0938\u093E\u0901\u0938 \u0928\u0939\u0940\u0902 \u0932\
+        \u0947 \u092A\u093E \u0930\u0939\u0940 \u0939\u0942\u0901"
+      suction:
+      - "\u092E\u0941\u091D\u0947 \u0938\u0915\u094D\u0936\u0928 \u091A\u093E\u0939\
+        \u093F\u090F"
+      reposition:
+      - "\u0915\u0943\u092A\u092F\u093E \u092E\u0947\u0930\u0940 \u0915\u0930\u0935\
+        \u091F \u092C\u0926\u0932\u093F\u090F"
+      cold:
+      - "\u092E\u0941\u091D\u0947 \u0920\u0902\u0921 \u0932\u0917 \u0930\u0939\u0940\
+        \ \u0939\u0948"
+      hot:
+      - "\u092E\u0941\u091D\u0947 \u092C\u0939\u0941\u0924 \u0917\u0930\u094D\u092E\
+        \u0940 \u0932\u0917 \u0930\u0939\u0940 \u0939\u0948"
+      bathroom:
+      - "\u092E\u0941\u091D\u0947 \u092C\u093E\u0925\u0930\u0942\u092E \u091C\u093E\
+        \u0928\u093E \u0939\u0948"
+      - "\u092E\u0941\u091D\u0947 \u0936\u094C\u091A\u093E\u0932\u092F \u091C\u093E\
+        \u0928\u093E \u0939\u0948"
+      light:
+      - "\u0932\u093E\u0907\u091F \u092C\u0902\u0926 \u0915\u0940\u091C\u093F\u090F"
+      - "\u092C\u0924\u094D\u0924\u0940 \u092C\u0902\u0926 \u0915\u0940\u091C\u093F\
+        \u090F"
+      family:
+      - "\u092E\u0947\u0930\u093E \u092A\u0930\u093F\u0935\u093E\u0930 \u0915\u0939\
+        \u093E\u0901 \u0939\u0948"
+      time:
+      - "\u0915\u094D\u092F\u093E \u0938\u092E\u092F \u0939\u0941\u0906 \u0939\u0948"
+      - "\u0915\u093F\u0924\u0928\u0947 \u092C\u091C\u0947 \u0939\u0948\u0902"
+      sick:
+      - "\u092E\u0947\u0930\u0940 \u0924\u092C\u0940\u092F\u0924 \u0920\u0940\u0915\
+        \ \u0928\u0939\u0940\u0902 \u0939\u0948"
+      - "\u092E\u0941\u091D\u0947 \u0909\u0932\u094D\u091F\u0940 \u091C\u0948\u0938\
+        \u093E \u0932\u0917 \u0930\u0939\u093E \u0939\u0948"
+      scared:
+      - "\u092E\u0941\u091D\u0947 \u0921\u0930 \u0932\u0917 \u0930\u0939\u093E \u0939\
+        \u0948"
+      tired:
+      - "\u092E\u0948\u0902 \u0925\u0915 \u0917\u092F\u093E \u0939\u0942\u0901"
+      - "\u092E\u0948\u0902 \u0925\u0915 \u0917\u0908 \u0939\u0942\u0901"
+      pillow:
+      - "\u092E\u0947\u0930\u093E \u0924\u0915\u093F\u092F\u093E \u0920\u0940\u0915\
+        \ \u0915\u0940\u091C\u093F\u090F"
+      'yes':
+      - "\u0939\u093E\u0901"
+      'no':
+      - "\u0928\u0939\u0940\u0902"
+      help:
+      - "\u092E\u0947\u0930\u0940 \u092E\u0926\u0926 \u0915\u0940\u091C\u093F\u090F"
+      stop:
+      - "\u0930\u0941\u0915\u093F\u090F"
+      - "\u092C\u0938"

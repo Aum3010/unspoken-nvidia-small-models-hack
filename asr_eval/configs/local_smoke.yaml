@@ -1,0 +1,16 @@
+# Laptop plumbing test (CPU, no recordings yet). Not for reported numbers.
+extends: [eval.yaml]
+paths:
+  data: data_local
+  results: results_local
+manifest:
+  generated_nonspeech: 12
+degrade:
+  sources: [own, torgo, tts]   # exercise the degradation path on the only speech available locally
+decision:
+  tune_origins: [real, generated, tts]   # flagged in the summary: TTS-tuned thresholds are not valid numbers
+models:                       # laptop: CTC only (NeMo / CTranslate2 GPU models run on Brev)
+  - name: parakeet-ctc-0.6b
+    kind: hf_ctc
+    checkpoint: nvidia/parakeet-ctc-0.6b
+    enabled: true

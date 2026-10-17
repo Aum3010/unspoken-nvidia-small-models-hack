@@ -1,0 +1,279 @@
+# Audio-only ASR evaluation for Unspoken. Every setting that affects a number lives here.
+# Reproduce: python run_eval.py --config configs/eval.yaml
+seed: 7
+sample_rate: 16000
+paths:
+  data: data          # on Brev this is a symlink to /workspace/asr_eval_data (setup_brev.sh)
+  results: results
+
+# Fixed request phrases (phrase_id: text). The agent outputs one id, `unknown`, or `no_speech`.
+phrases:
+  water: I need water
+  pain: I'm in pain
+  nurse: Call the nurse
+  breathe: I can't breathe
+  suction: I need suction
+  reposition: Please reposition me
+  cold: I'm cold
+  hot: I'm too hot
+  bathroom: I need the bathroom
+  light: Turn off the light
+  family: Where is my family
+  time: What time is it
+  sick: I feel sick
+  scared: I'm scared
+  tired: I'm tired
+  pillow: Fix my pillow
+  "yes": "Yes"
+  "no": "No"
+  help: Help me
+  stop: Stop
+
+# Must map to `unknown`. Ids double as the `neg_{id}` names in own recordings.
+hard_negatives:
+  hn_dont_need_water: I don't need water
+  hn_not_in_pain: I'm not in pain
+  hn_dont_call_nurse: don't call the nurse
+  hn_can_breathe: I can breathe fine
+  hn_water_plants: water the plants
+  hn_call_family_later: call my family later
+  hn_time_close: what time does it close
+
+# Own recordings: data/own/{speaker}_{condition}_{phraseid}_{take}.wav ; negatives use phraseid=neg_{name}
+own:
+  conditions: [normal, soft, whisper, slow, muffled, noisy]
+  negatives:          # neg_{name} -> label_type (hard negatives are added automatically)
+    silence: silence
+    breathing: non_speech
+    cough: non_speech
+    unrelated: unknown_speech
+
+manifest:
+  calib_fraction: 0.4          # share of speakers per source used for threshold tuning
+  calib_speakers:              # explicit calib speakers per source; others go to test
+    own: [p02]                 # p01 (4 conditions) + p03 stay in test; scripts/loso.py rotates all three
+  generated_nonspeech: 300     # digital silence + low-level mic-like noise clips (1-6 s)
+  librispeech_n: 200
+  nonspeech_public_n: 300      # MUSAN + Speech Commands background + ESC-50 cuts
+  esc50_categories: [breathing, coughing, clock_tick, mouse_click, keyboard_typing, door_wood_knock, footsteps, snoring, sneezing, clapping, drinking_sipping, brushing_teeth]
+  torgo_vocab_size: 15
+  # Command-style words said by (nearly) every TORGO speaker. The automatic choice (most speakers) picked
+  # articulation minimal pairs (beat/feet/meat, sip/slip), a much harder task than 20 distinct phrases.
+  torgo_vocab: ["yes", "no", up, down, left, right, go, one, two, three]
+
+degrade:
+  sources: [own, torgo]        # positives only, one effect at a time (never stacked)
+  gain_db: [-12, -24, -36]
+  snr_db: [20, 10, 5, 0]       # MUSAN noise; falls back to pink noise only if MUSAN is absent (condition says which)
+  bandpass_hz: [300, 3400]
+  lowpass_hz: 1500
+  tempo: [0.7, 0.85]
+  rt60_s: [0.3, 0.6]
+
+vad:
+  thresholds: [0.2, 0.3, 0.4, 0.5, 0.6]
+  min_speech_ms: 100           # low so single-word "yes"/"no" survive
+
+models:
+  - name: parakeet-ctc-0.6b
+    kind: hf_ctc
+    checkpoint: nvidia/parakeet-ctc-0.6b
+    revision: null             # null = resolve current commit and log it
+    enabled: true
+  - name: parakeet-tdt-0.6b-v2
+    kind: nemo_transducer
+    checkpoint: nvidia/parakeet-tdt-0.6b-v2
+    forced_scoring: false      # pure-PyTorch TDT loss takes 3.5-7 s per clip; the fast numba kernel needs libNVVM (absent)
+    enabled: true
+  - name: nemotron-streaming-0.6b
+    kind: nemo_transducer
+    checkpoint: nvidia/nemotron-speech-streaming-en-0.6b
+    enabled: true              # model's default (largest) lookahead
+  - name: nemotron-3.5-asr-0.6b
+    kind: nemo_transducer
+    checkpoint: nvidia/nemotron-3.5-asr-streaming-0.6b   # multilingual, 40 locales, language-ID prompt; OpenMDW-1.1
+    target_lang: en-US         # English prompt for the like-for-like comparison with the English-only model
+    enabled: true
+  - name: nemotron-streaming-0.6b-160ms
+    kind: nemo_transducer
+    checkpoint: nvidia/nemotron-speech-streaming-en-0.6b
+    att_context: [70, 1]       # right context 1 x 80 ms frame ~ 160 ms chunks
+    enabled: true
+  - name: nemotron-streaming-0.6b-560ms
+    kind: nemo_transducer
+    checkpoint: nvidia/nemotron-speech-streaming-en-0.6b
+    att_context: [70, 6]       # ~ 560 ms chunks
+    enabled: true
+  - name: whisper-large-v3-turbo
+    kind: faster_whisper
+    checkpoint: large-v3-turbo
+    params_from: openai/whisper-large-v3-turbo
+    enabled: true
+  - name: whisper-large-v2
+    kind: faster_whisper
+    checkpoint: large-v2
+    params_from: openai/whisper-large-v2
+    enabled: false             # ruled out in milestone 2: 1.55B exceeds the budget, slowest, no accuracy gain
+  - name: whisper-small
+    kind: faster_whisper
+    checkpoint: small
+    params_from: openai/whisper-small
+    enabled: true
+  - name: parakeet-ctc-0.6b-sapc1
+    kind: hf_ctc
+    checkpoint: dys-asr/parakeet-ctc-0.6b-sapc1
+    enabled: false             # skipped: Speech Accessibility Project data use agreement required
+
+decision:
+  methods: [text, forced_sum, forced_norm, forced_llr]   # forced_* for models with phrase scoring (CTC, RNNT/TDT)
+  far_target: 0.01              # headline operating point (all reported numbers)
+  operating_points:             # extra points, tuned the same way; the live UI can switch to them
+    balanced: 0.05              # guesses more often; every candidate is still confirmed by the patient's gaze
+  far_constraint: max_per_type   # every negative type must be <= far_target on calib (stricter than pooled)
+  tune_origins: [real, generated]    # TTS never tunes headline thresholds
+  tune_include_degraded: true
+  abs_grid_quantiles: 41
+  margin_grid_quantiles: 21
+  negation_words: [not, no, never]
+
+latency:
+  warmup_runs: 5
+  dtype_cuda: bfloat16
+
+# Languages the patient can speak in. The answer is always the English phrase (`phrases` above):
+# the phrase id is the shared key, so nothing is machine-translated at runtime.
+# Translations are DRAFTS until a native speaker has checked them (review_status). Alternatives cover
+# gendered and polite/plain forms; forced scoring keeps the best-matching form.
+languages:
+  default: en
+  en: {name: English, locale: en-US, negation_words: [not, "no", never], review_status: source}
+  es:
+    name: Español
+    locale: es-US
+    review_status: draft (needs native-speaker review)
+    negation_words: ["no", "nunca", "ni"]
+    phrases:
+      water: ["Necesito agua"]
+      pain: ["Tengo dolor", "Me duele"]
+      nurse: ["Llame a la enfermera", "Llame al enfermero"]
+      breathe: ["No puedo respirar"]
+      suction: ["Necesito succión", "Necesito aspiración"]
+      reposition: ["Por favor cámbieme de posición"]
+      cold: ["Tengo frío"]
+      hot: ["Tengo mucho calor"]
+      bathroom: ["Necesito ir al baño"]
+      light: ["Apague la luz"]
+      family: ["¿Dónde está mi familia?"]
+      time: ["¿Qué hora es?"]
+      sick: ["Me siento mal", "Tengo náuseas"]
+      scared: ["Tengo miedo"]
+      tired: ["Estoy cansado", "Estoy cansada"]
+      pillow: ["Arregle mi almohada"]
+      "yes": ["Sí"]
+      "no": ["No"]
+      help: ["Ayúdeme", "Ayuda"]
+      stop: ["Pare", "Alto", "Basta"]
+  fr:
+    name: Français
+    locale: fr-FR
+    review_status: draft (needs native-speaker review)
+    negation_words: ["ne", "n", "pas", "jamais", "non"]
+    phrases:
+      water: ["J'ai besoin d'eau"]
+      pain: ["J'ai mal"]
+      nurse: ["Appelez l'infirmière", "Appelez l'infirmier"]
+      breathe: ["Je n'arrive pas à respirer", "Je ne peux pas respirer"]
+      suction: ["J'ai besoin d'une aspiration"]
+      reposition: ["Changez-moi de position s'il vous plaît"]
+      cold: ["J'ai froid"]
+      hot: ["J'ai trop chaud"]
+      bathroom: ["J'ai besoin d'aller aux toilettes"]
+      light: ["Éteignez la lumière"]
+      family: ["Où est ma famille ?"]
+      time: ["Quelle heure est-il ?"]
+      sick: ["Je me sens mal", "J'ai la nausée"]
+      scared: ["J'ai peur"]
+      tired: ["Je suis fatigué", "Je suis fatiguée"]
+      pillow: ["Arrangez mon oreiller"]
+      "yes": ["Oui"]
+      "no": ["Non"]
+      help: ["Aidez-moi"]
+      stop: ["Arrêtez", "Stop"]
+  de:
+    name: Deutsch
+    locale: de-DE
+    review_status: draft (needs native-speaker review)
+    negation_words: ["nicht", "kein", "keine", "nein", "nie"]
+    phrases:
+      water: ["Ich brauche Wasser"]
+      pain: ["Ich habe Schmerzen"]
+      nurse: ["Rufen Sie die Pflegekraft", "Rufen Sie die Krankenschwester"]
+      breathe: ["Ich kann nicht atmen", "Ich bekomme keine Luft"]
+      suction: ["Ich muss abgesaugt werden"]
+      reposition: ["Bitte lagern Sie mich um"]
+      cold: ["Mir ist kalt"]
+      hot: ["Mir ist zu heiß"]
+      bathroom: ["Ich muss auf die Toilette"]
+      light: ["Machen Sie das Licht aus"]
+      family: ["Wo ist meine Familie?"]
+      time: ["Wie spät ist es?"]
+      sick: ["Mir ist übel", "Mir ist schlecht"]
+      scared: ["Ich habe Angst"]
+      tired: ["Ich bin müde"]
+      pillow: ["Richten Sie mein Kissen"]
+      "yes": ["Ja"]
+      "no": ["Nein"]
+      help: ["Helfen Sie mir"]
+      stop: ["Stopp", "Aufhören"]
+  zh:
+    name: 中文
+    locale: zh-CN
+    review_status: draft (needs native-speaker review)
+    negation_words: ["不", "没", "别"]          # matched as substrings (no spaces in Chinese)
+    phrases:
+      water: ["我需要水", "我要喝水"]
+      pain: ["我很疼", "我疼"]
+      nurse: ["叫护士"]
+      breathe: ["我喘不过气", "我不能呼吸"]
+      suction: ["我需要吸痰"]
+      reposition: ["请帮我翻身"]
+      cold: ["我冷", "我很冷"]
+      hot: ["我太热了"]
+      bathroom: ["我要上厕所"]
+      light: ["把灯关掉", "关灯"]
+      family: ["我的家人在哪里"]
+      time: ["现在几点了"]
+      sick: ["我不舒服", "我想吐"]
+      scared: ["我害怕"]
+      tired: ["我累了"]
+      pillow: ["帮我整理枕头"]
+      "yes": ["是", "对"]
+      "no": ["不", "不是"]
+      help: ["帮帮我"]
+      stop: ["停", "停下"]
+  hi:
+    name: हिन्दी
+    locale: hi-IN
+    review_status: draft (needs native-speaker review)
+    negation_words: ["नहीं", "न", "मत"]
+    phrases:
+      water: ["मुझे पानी चाहिए"]
+      pain: ["मुझे दर्द हो रहा है"]
+      nurse: ["नर्स को बुलाइए"]
+      breathe: ["मुझे साँस नहीं आ रही", "मैं साँस नहीं ले पा रहा हूँ", "मैं साँस नहीं ले पा रही हूँ"]
+      suction: ["मुझे सक्शन चाहिए"]
+      reposition: ["कृपया मेरी करवट बदलिए"]
+      cold: ["मुझे ठंड लग रही है"]
+      hot: ["मुझे बहुत गर्मी लग रही है"]
+      bathroom: ["मुझे बाथरूम जाना है", "मुझे शौचालय जाना है"]
+      light: ["लाइट बंद कीजिए", "बत्ती बंद कीजिए"]
+      family: ["मेरा परिवार कहाँ है"]
+      time: ["क्या समय हुआ है", "कितने बजे हैं"]
+      sick: ["मेरी तबीयत ठीक नहीं है", "मुझे उल्टी जैसा लग रहा है"]
+      scared: ["मुझे डर लग रहा है"]
+      tired: ["मैं थक गया हूँ", "मैं थक गई हूँ"]
+      pillow: ["मेरा तकिया ठीक कीजिए"]
+      "yes": ["हाँ"]
+      "no": ["नहीं"]
+      help: ["मेरी मदद कीजिए"]
+      stop: ["रुकिए", "बस"]

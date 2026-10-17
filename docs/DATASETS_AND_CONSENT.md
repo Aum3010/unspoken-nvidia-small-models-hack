@@ -22,10 +22,53 @@
 - An EEG-derived candidate's text begins with "Recorded EEG replay result:". The policy gate refuses to speak recorded data without that label, and an **operator** (not "the patient") confirms the read-out.
 - No public patient video is downloaded, cropped, transformed or trained on. Clinical papers and videos are linked in the Evidence page for motivation only.
 
+## ASR evaluation datasets (`asr_eval/`, run on Brev)
+
+`asr_eval/scripts/fetch_data.py` downloads these. For each one it saves the landing page and the lines mentioning the licence into `data/provenance.json`, which `results/env.md` reproduces. None of them are committed or re-hosted.
+
+| Dataset | Licence | Used for | Notes |
+|---|---|---|---|
+| TORGO (Rudzicz, Namasivayam & Wolff 2012), official U. Toronto archives F, FC, M, MC | Academic / non-profit research use; cite the paper | Surrogate closed-vocabulary task from frequent single-word prompts (dysarthric vs control reported separately); TORGO sentences not in our phrase list as unknown-speech negatives | Array mic preferred, head mic fallback. Vocabulary chosen automatically (most distinct speakers) and logged to `data/torgo_vocab.json` |
+| LibriSpeech test-clean (OpenSLR 12) | CC BY 4.0 | 200 utterances as unknown-speech negatives; WER sanity check | ELDA mirror first, main OpenSLR server as fallback |
+| MUSAN noise (OpenSLR 17) | CC BY 4.0 per OpenSLR; files carry their own attributions | Half the noise files: non-speech negatives. The other half: additive noise in the degradation grid | Split by file-name hash, so no recording is both a negative and inside a positive |
+| Speech Commands v0.02 `_background_noise_` | CC BY 4.0 | Non-speech negatives | Only that folder is extracted |
+| ESC-50 | CC BY-NC 3.0 | Non-speech negatives from 12 categories (breathing, coughing, clock tick, …) | Non-commercial: evaluation only |
+| Kokoro-82M synthetic speech | Apache-2.0 model output | 20 phrases + 7 hard negatives × every English voice | **Sanity only**; never in headline tables or tuning |
+| Generated silence / mic-like noise | n/a (generated) | Silence negatives | Digital zeros and pink noise + mains hum at −75 to −45 dBFS |
+
+**Gated, referenced but not downloaded:** UASpeech, the Speech Accessibility Project corpus, and CHAINS (LDC2008S09). The dysarthric fine-tunes trained on SAP data (`dys-asr/*`) are skipped for the same reason: they need the SAP data use agreement.
+
 ## Local recordings of teammates or judges
 
-Recordings need explicit opt-in before capture, and the person can opt out at any time. Nothing is retained by default. If a recording is ever kept for evaluation, store it outside the repo with written consent and a deletion date.
+- **Opt-in:** recordings need explicit opt-in before capture, and the person can opt out at any time.
+- **Default:** nothing is retained.
+- **If kept for evaluation:** store it outside the repo, with written consent and a deletion date.
+
+For the ASR evaluation there are two recorders:
+- **The live bench's Record tab** (`asr_eval/serve.py`). It has no consent checkbox, at the project owner's request: it shows a notice that clips are stored on the GPU machine, and the person running the session must get a verbal OK from anyone they record. Speakers are logged by pseudonym in `data/own/speakers.csv`.
+- **The CLI recorder** `asr_eval/scripts/record.py`, described below.
+
+**Recorded so far (2026-10-17):**
+- **Speakers:** 3 pseudonymous speakers, 307 clips.
+  - p01: normal, noisy, whisper, muffled (154 clips);
+  - p02: normal, whisper (102);
+  - p03: normal (51; most clips clipped from recording too loud).
+- **Content:** each speaker covers all 20 phrases plus the near-miss sentences and the other negatives.
+- **Storage:**
+  - on the Brev instance in `/workspace/asr_eval_data/own/`;
+  - a laptop backup in `asr_eval/data/own/`, gitignored;
+  - never in the repository.
+- **Deletion:** both copies are to be deleted after the hackathon. Deleting the instance removes its copy.
+
+`record.py` does the following:
+- It shows the consent text and stores the agreement in `data/own/consent.csv`.
+- It saves raw 16 kHz mono WAVs as `data/own/{pseudonym}_{condition}_{phraseid}_{take}.wav`.
+- Use pseudonyms, never real names.
+- The consent text says the clips are also stored on the project's evaluation GPU machine (Brev) and deleted after the hackathon.
+- Per-clip outputs that contain transcripts (`results/raw/`) are gitignored.
 
 ## Cloud processing
 
-Everything runs locally by default. If the coordinator is moved to vLLM on Brev (`scripts/serve_vllm_brev.sh`), only the structured evidence summary leaves the machine: candidate text, scores and quality flags. Camera frames, audio and EEG never do. Disclose this to the person, and require their opt-in, before turning it on.
+**The app runs locally by default.** If the coordinator is moved to vLLM on Brev (`scripts/serve_vllm_brev.sh`), only the structured evidence summary leaves the machine: candidate text, scores and quality flags. Camera frames, audio and EEG never do. Disclose this to the person, and require their opt-in, before turning it on.
+
+**The ASR evaluation is different.** It uploads audio clips, including consented volunteer recordings, to a Brev GPU instance under `/workspace`. That is covered by the recording consent above. Deleting the instance deletes the disk. See [BREV.md](BREV.md) §6.

@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Voice Agent Bench</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --panel: #ffffff; --ink: #14171c; --muted: #5d6673; --line: #dfe3e8;
+    --accent: #2f6fdb; --ok: #1d8a52; --ok-bg: #e5f5ec; --warn: #a86400; --warn-bg: #fdf1dc;
+    --off: #5d6673; --off-bg: #eef0f3; --rec: #d1362f; --bar: #c9d6ee;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #101317; --panel: #181c22; --ink: #e8ebef; --muted: #9aa4b1; --line: #2a3038;
+      --accent: #6d9cf0; --ok: #4cc488; --ok-bg: #12301f; --warn: #f0b04a; --warn-bg: #33270f;
+      --off: #9aa4b1; --off-bg: #232831; --rec: #ff5a52; --bar: #2c3e5e;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  header { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; padding: 12px 20px; border-bottom: 1px solid var(--line); background: var(--panel); }
+  header h1 { font-size: 17px; margin: 0 8px 0 0; }
+  .tabs { display: flex; gap: 4px; background: var(--off-bg); border-radius: 10px; padding: 3px; }
+  .tabs button { border: 0; background: transparent; padding: 6px 14px; border-radius: 8px; cursor: pointer; font-weight: 600; color: var(--muted); }
+  .tabs button[aria-selected="true"] { background: var(--panel); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+  .meta { color: var(--muted); font-size: 13px; }
+  select, input, button { font: inherit; color: inherit; }
+  select, input[type=text] { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; }
+  main { max-width: 1180px; margin: 0 auto; padding: 16px 20px; }
+  @media (max-width: 700px) { main { padding: 16px; } }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
+  .panel h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 0 0 12px; }
+  .cols { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 16px; }
+  @media (max-width: 900px) { .cols { grid-template-columns: 1fr; } }
+  .stack > * + * { margin-top: 16px; }
+  .setup { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; }
+  .setup label { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
+  .check { display: flex !important; align-items: center; gap: 6px; padding-bottom: 6px; }
+  .prompt { margin: 16px 0; padding: 28px 20px; border-radius: 14px; background: var(--off-bg); text-align: center; }
+  .prompt .say { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+  .prompt .text { font-size: clamp(26px, 4.5vw, 40px); font-weight: 650; margin: 6px 0; }
+  .prompt .tag { font-size: 13px; color: var(--warn); min-height: 1.2em; }
+  .progress { height: 8px; background: var(--off-bg); border-radius: 6px; overflow: hidden; }
+  .progress .fill { height: 100%; width: 0; background: var(--ok); transition: width .2s; }
+  .row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .ptt { width: 128px; height: 128px; border-radius: 50%; border: 0; background: var(--accent); color: #fff; font-weight: 600; cursor: pointer; touch-action: none; user-select: none; flex: none; }
+  .ptt.rec { background: var(--rec); box-shadow: 0 0 0 8px color-mix(in srgb, var(--rec) 25%, transparent); }
+  .ptt:disabled { opacity: .5; cursor: progress; }
+  .meter { flex: 1; min-width: 180px; }
+  .track { height: 10px; background: var(--off-bg); border-radius: 6px; overflow: hidden; }
+  .track .lvl { height: 100%; width: 0; background: var(--accent); transition: width 60ms linear; }
+  .hint { color: var(--muted); font-size: 13px; margin-top: 6px; }
+  .btn { background: var(--accent); color: #fff; border: 0; border-radius: 8px; padding: 8px 14px; cursor: pointer; font-weight: 600; }
+  .btn.ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+  .btn:disabled { opacity: .45; cursor: not-allowed; }
+  .feedback { margin-top: 12px; font-size: 14px; min-height: 1.4em; }
+  .feedback .ok { color: var(--ok); font-weight: 600; } .feedback .miss { color: var(--warn); font-weight: 600; }
+  .decision { margin-top: 16px; border-radius: 12px; padding: 16px; background: var(--off-bg); }
+  .decision.candidate { background: var(--ok-bg); } .decision.unknown { background: var(--warn-bg); }
+  .decision .kind { font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--off); }
+  .decision.candidate .kind { color: var(--ok); } .decision.unknown .kind { color: var(--warn); }
+  .decision .big { font-size: 26px; font-weight: 650; margin: 4px 0; }
+  .decision .why { color: var(--muted); font-size: 13px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+  @media (max-width: 600px) { .grid2 { grid-template-columns: 1fr; } }
+  .kv { font-size: 13px; } .kv b { display: block; color: var(--muted); font-weight: 500; font-size: 12px; margin-top: 8px; }
+  .top3 .r { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; margin: 6px 0; font-size: 14px; }
+  .top3 .bw { grid-column: 1 / -1; height: 6px; background: var(--off-bg); border-radius: 4px; overflow: hidden; }
+  .top3 .bar { height: 100%; background: var(--bar); } .top3 .r:first-of-type .bar { background: var(--accent); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 6px 4px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 500; }
+  .pill { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 12px; background: var(--off-bg); }
+  .pill.candidate { background: var(--ok-bg); color: var(--ok); } .pill.unknown { background: var(--warn-bg); color: var(--warn); }
+  .counts { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 4px 12px; font-size: 13px; }
+  .counts span.done { color: var(--ok); } .counts span.todo { color: var(--muted); }
+  .note { font-size: 12px; color: var(--muted); }
+  .warn { color: var(--warn); font-size: 13px; }
+  kbd { border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; font-size: 12px; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Voice agent bench</h1>
+  <div class="tabs" role="tablist">
+    <button role="tab" id="tab-record" aria-selected="true">Record</button>
+    <button role="tab" id="tab-test" aria-selected="false">Test</button>
+  </div>
+  <label class="meta">Model <select id="model"></select></label>
+  <label class="meta">Method <select id="method"></select></label>
+  <label class="meta">Sensitivity <select id="point"></select></label>
+  <label class="meta">Patient speaks <select id="lang" aria-label="Patient language"></select></label>
+  <span class="meta" id="device"></span>
+  <span class="meta" id="status" role="status">connecting…</span>
+</header>
+
+<main>
+  <!-- RECORD -->
+  <section id="view-record" class="cols">
+    <div class="panel">
+      <div class="setup">
+        <label>Speaker (pseudonym) <input type="text" id="speaker" placeholder="p01" size="8" autocomplete="off"></label>
+        <label>Condition <select id="condition"></select></label>
+        <label>Takes per phrase <select id="takes"><option>1</option><option>2</option></select></label>
+        <label class="check"><input type="checkbox" id="withneg" checked> include negatives</label>
+        <button class="btn" id="startsess">Start / resume</button>
+      </div>
+      <div class="prompt" aria-live="polite">
+        <div class="say" id="say">enter a speaker and press Start</div>
+        <div class="text" id="ptext">—</div>
+        <div class="tag" id="ptag"></div>
+      </div>
+      <div class="progress"><div class="fill" id="pfill"></div></div>
+      <div class="hint" id="pcount"></div>
+      <div class="row" style="margin-top:14px">
+        <button class="ptt" id="ptt-rec" disabled>Hold to record</button>
+        <div class="meter">
+          <div class="track"><div class="lvl"></div></div>
+          <div class="hint">Hold the button or <kbd>Space</kbd>, say the prompt, release. Saved and advanced automatically.</div>
+          <div class="row" style="margin-top:10px; gap:8px">
+            <button class="btn ghost" id="redo" disabled>Redo last <kbd>R</kbd></button>
+            <button class="btn ghost" id="skip" disabled>Skip <kbd>S</kbd></button>
+          </div>
+        </div>
+      </div>
+      <div class="feedback" id="feedback"></div>
+      <p class="note" id="notice"></p>
+    </div>
+    <div class="panel">
+      <h2>This speaker &amp; condition</h2>
+      <div class="counts" id="counts"><span class="todo">Start a session to see progress.</span></div>
+      <h2 style="margin-top:18px">Suggested order</h2>
+      <ol class="note" style="margin:0; padding-left:18px">
+        <li><b>normal</b>, 2 takes, with negatives</li>
+        <li><b>soft</b>, <b>whisper</b>, <b>slow</b>, <b>muffled</b>, <b>noisy</b>: 1 take each</li>
+        <li>Use the laptop mic you'll demo with. Redo any clip where you stumbled.</li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- TEST -->
+  <section id="view-test" class="cols" hidden>
+    <div class="stack">
+      <div class="panel">
+        <h2>Speak one request</h2>
+        <div class="row">
+          <button class="ptt" id="ptt-test">Hold to speak</button>
+          <div class="meter">
+            <div class="track"><div class="lvl"></div></div>
+            <div class="hint">Hold the button or <kbd>Space</kbd>, say one phrase, release. Nothing is saved in Test.</div>
+          </div>
+        </div>
+        <div class="decision" id="decision" aria-live="polite">
+          <div class="kind" id="kind">waiting</div><div class="big" id="big">—</div><div class="why" id="why">Results appear here.</div>
+        </div>
+        <div class="grid2"><div class="top3" id="top3"></div><div class="kv" id="details"></div></div>
+        <div class="warn" id="calnote"></div>
+      </div>
+      <div class="panel"><h2>History</h2>
+        <table><thead><tr><th>Time</th><th>Decision</th><th>Transcript</th><th>Server / round trip</th></tr></thead><tbody id="hist"></tbody></table>
+      </div>
+    </div>
+    <div class="panel">
+      <h2>The 20 phrases</h2>
+      <ol id="phrases" style="columns:2; font-size:13px; padding-left:18px; margin:0"></ol>
+      <p class="note"><b>Must become “unknown”:</b> <span id="hardneg"></span></p>
+    </div>
+  </section>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+let cfg = null, mode = "record", rec = null, chunks = [], stream = null, t0 = 0;
+let session = null;  // {speaker, condition, queue:[{label,text,tag}], i, last}
+
+async function api(path, opts) {
+  const r = await fetch(path, opts);
+  if (!r.ok) { let m = r.statusText; try { m = (await r.json()).detail || m; } catch {} throw new Error(m); }
+  return r.json();
+}
+const post = (path, body) => api(path, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+function fill(sel, items, value) {
+  sel.innerHTML = "";
+  for (const [v, t] of items) { const o = document.createElement("option"); o.value = v; o.textContent = t; sel.appendChild(o); }
+  if (value !== undefined && [...sel.options].some(o => o.value === value)) sel.value = value;
+}
+function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+// ---------- config / model selection ----------
+function renderConfig(c) {
+  cfg = c;
+  fill($("model"), c.models.map(m => [m.name, m.name + (m.tuned.length ? "" : " (untuned)")]), c.model);
+  const m = c.models.find(x => x.name === c.model);
+  fill($("method"), m.methods.map(x => [x, x + (m.tuned.includes(x) ? "" : " (untuned)")]), c.method);
+  fill($("point"), Object.entries(c.points).map(([k, v]) => [k, `${k} (≤${Math.round(v * 100)}% false accepts)`]), c.point);
+  fill($("lang"), c.languages.map(l => [l.code, l.name]), c.language);
+  $("lang").disabled = !m.multilingual;
+  $("lang").title = m.multilingual ? "The model listens in this language; the answer is always English" : "This model is English-only";
+  $("device").textContent = c.device;
+  $("phrases").innerHTML = Object.entries(c.phrases).map(([k, t]) =>
+    `<li>${t}${c.language !== "en" ? ` <span class="note">· ${c.phrases_native[k]}</span>` : ""}</li>`).join("");
+  $("hardneg").textContent = Object.values(c.hard_negatives).map(t => `“${t}”`).join(", ");
+  $("notice").textContent = c.notice;
+  fill($("condition"), c.conditions.map(x => [x, x]), $("condition").value || c.conditions[0]);
+  $("calnote").textContent = [c.thresholds ? (c.thresholds_note ? "Note: thresholds were tuned with " + c.thresholds_note + "." : "")
+                                           : "No tuned thresholds for this model/method/sensitivity yet: rankings are shown, decisions are not.",
+                               c.language_note || ""].filter(Boolean).join(" ");
+  $("status").textContent = "ready";
+}
+async function choose() {
+  $("status").textContent = "loading model…";
+  try { renderConfig(await post("/api/select", { model: $("model").value, method: $("method").value, point: $("point").value, language: $("lang").value })); }
+  catch (e) { $("status").textContent = "error: " + e.message; }
+}
+$("model").onchange = () => { $("method").value = "text"; choose(); };
+$("method").onchange = choose; $("point").onchange = choose; $("lang").onchange = choose;
+
+// ---------- tabs ----------
+function setMode(m) {
+  mode = m;
+  $("tab-record").setAttribute("aria-selected", m === "record"); $("tab-test").setAttribute("aria-selected", m === "test");
+  $("view-record").hidden = m !== "record"; $("view-test").hidden = m !== "test";
+}
+$("tab-record").onclick = () => setMode("record"); $("tab-test").onclick = () => setMode("test");
+
+// ---------- microphone ----------
+async function ensureMic() {
+  if (stream) return;
+  stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: 1 } });
+  const ctx = new AudioContext(), an = ctx.createAnalyser(); an.fftSize = 1024; ctx.createMediaStreamSource(stream).connect(an);
+  const buf = new Float32Array(an.fftSize);
+  (function loop() { an.getFloatTimeDomainData(buf); let s = 0; for (const v of buf) s += v * v;
+    const w = Math.max(0, Math.min(100, (20 * Math.log10(Math.sqrt(s / buf.length) + 1e-9) + 70) * 1.6)) + "%";
+    document.querySelectorAll(".lvl").forEach(el => el.style.width = w); requestAnimationFrame(loop); })();
+}
+function pttButton() { return mode === "record" ? $("ptt-rec") : $("ptt-test"); }
+async function start() {
+  if (rec || pttButton().disabled) return;
+  try { await ensureMic(); } catch (e) { $("status").textContent = "microphone blocked: " + e.message; return; }
+  const type = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4"].find(t => MediaRecorder.isTypeSupported(t));
+  rec = new MediaRecorder(stream, type ? { mimeType: type } : undefined); chunks = [];
+  rec.ondataavailable = (e) => e.data.size && chunks.push(e.data);
+  rec.onstop = send; rec.start(100); t0 = performance.now();
+  const b = pttButton(); b.classList.add("rec"); b.textContent = "Listening…";
+}
+function stop() {
+  if (!rec || rec.state !== "recording") return;
+  rec.stop(); const b = pttButton(); b.classList.remove("rec"); b.disabled = true;
+  b.textContent = mode === "record" ? "Hold to record" : "Hold to speak";
+}
+async function send() {
+  const blob = new Blob(chunks, { type: rec.mimeType }); rec = null;
+  const fd = new FormData(); fd.append("audio", blob, "clip.webm");
+  $("status").textContent = "deciding…"; const s = performance.now();
+  try {
+    const r = await api("/api/recognize", { method: "POST", body: fd }); r.round_trip_ms = Math.round(performance.now() - s);
+    if (mode === "record" && session) await saveForPrompt(r); else { show(r); addHistory(r); }
+    $("status").textContent = "ready";
+  } catch (e) { $("status").textContent = "error: " + e.message; }
+  pttButton().disabled = mode === "record" && (!session || session.i >= session.queue.length);
+}
+
+// ---------- guided recording ----------
+async function startSession() {
+  const speaker = $("speaker").value.trim().toLowerCase(), condition = $("condition").value;
+  if (!/^[a-z0-9]+$/.test(speaker)) { $("feedback").innerHTML = '<span class="miss">Speaker must be letters/digits, e.g. p01</span>'; return; }
+  $("speaker").value = speaker;
+  const takes = +$("takes").value, prog = await api(`/api/progress?speaker=${speaker}&condition=${condition}`);
+  const want = Object.entries(cfg.phrases).map(([k, v]) => ({ label: k, text: v, tag: "", n: takes }));
+  if ($("withneg").checked) {
+    for (const [k, v] of Object.entries(cfg.hard_negatives)) want.push({ label: "neg_" + k, text: v, tag: "negative: say exactly this", n: 1 });
+    for (const k of cfg.negatives) want.push({ label: "neg_" + k, text: cfg.negative_prompts[k] || k,
+      tag: k === "unrelated" ? "negative: say any sentence" : "negative: do this, don't read it aloud", n: 1 });
+  }
+  const queue = [];
+  for (const w of want) for (let t = prog.counts[w.label] || 0; t < w.n; t++) queue.push(w);
+  session = { speaker, condition, queue: shuffle(queue), i: 0, last: null, want, counts: { ...prog.counts } };
+  renderPrompt(); renderCounts();
+  $("feedback").textContent = queue.length ? (prog.total ? `Resuming: ${prog.total} clips already saved for ${speaker} / ${condition}.` : "")
+                                           : `Nothing left for ${speaker} / ${condition}. Pick the next condition.`;
+}
+function renderPrompt() {
+  const s = session, done = s.i >= s.queue.length, p = s.queue[s.i];
+  $("say").textContent = done ? "done" : (p.tag.includes("do this") ? "do this (no words)" : "say");
+  $("ptext").textContent = done ? `${s.condition} complete ✓` : p.text;
+  $("ptag").textContent = done ? "Choose the next condition and press Start." : p.tag;
+  $("pfill").style.width = (s.queue.length ? 100 * s.i / s.queue.length : 100) + "%";
+  $("pcount").textContent = `${Math.min(s.i, s.queue.length)} / ${s.queue.length} in this session`;
+  $("ptt-rec").disabled = done; $("skip").disabled = done; $("redo").disabled = !s.last;
+}
+function renderCounts() {
+  const s = session;
+  $("counts").innerHTML = s.want.map(w => { const n = s.counts[w.label] || 0;
+    return `<span class="${n >= w.n ? "done" : "todo"}">${n >= w.n ? "✓" : "○"} ${w.text.length > 22 ? w.text.slice(0, 21) + "…" : w.text} (${n}/${w.n})</span>`; }).join("");
+}
+async function saveForPrompt(r) {
+  const s = session, p = s.queue[s.i];
+  const saved = await post("/api/save", { clip_id: r.clip_id, speaker: s.speaker, condition: s.condition, label: p.label });
+  s.last = { name: saved.saved, prompt: p, i: s.i }; s.counts[p.label] = (s.counts[p.label] || 0) + 1; s.i++;
+  const heard = r.transcript ? `heard “${r.transcript}”` : "heard nothing";
+  const verdict = r.decision === "candidate" ? (r.phrase_id === p.label ? '<span class="ok">✓ recognised</span>' : `<span class="miss">→ ${r.phrase_text}</span>`)
+                                             : `<span class="miss">→ ${r.decision.replace("_", " ")}</span>`;
+  $("feedback").innerHTML = `Saved <b>${saved.saved}</b> · ${heard} ${verdict} · ${r.timings_ms.server_total} ms`;
+  renderPrompt(); renderCounts();
+}
+$("startsess").onclick = startSession;
+$("skip").onclick = () => { if (!session || session.i >= session.queue.length) return; session.i++; renderPrompt(); };
+$("redo").onclick = async () => {
+  const s = session; if (!s || !s.last) return;
+  try { await post("/api/delete", { name: s.last.name }); } catch (e) { $("feedback").textContent = "Could not delete: " + e.message; return; }
+  s.counts[s.last.prompt.label] = Math.max(0, (s.counts[s.last.prompt.label] || 1) - 1);
+  s.i = s.last.i; s.queue[s.i] = s.last.prompt; $("feedback").textContent = `Deleted ${s.last.name}. Say it again.`; s.last = null;
+  renderPrompt(); renderCounts();
+};
+
+// ---------- test view ----------
+const REASONS = { accepted: "passed every gate", no_speech: "speech gate: no voice detected", low_score: "best score below the threshold",
+  small_margin: "too close to the runner-up", negation: "negation in the transcript does not match the phrase", no_hypothesis: "no hypothesis",
+  empty_transcript: "sound detected but the model heard no words" };
+function show(r) {
+  $("decision").className = "decision " + r.decision;
+  $("kind").textContent = r.decision === "candidate" ? "candidate · confirm with gaze" : r.decision.replace("_", " ");
+  $("big").textContent = r.decision === "candidate" ? r.phrase_text : ({ unknown: "Not sure", no_speech: "Nothing heard" }[r.decision] || "Untuned");
+  $("big").title = r.decision === "candidate" && r.language !== "en" ? "heard as: " + r.phrase_native : "";
+  $("why").textContent = (REASONS[r.reason] || r.reason) + (r.thresholds ? ` · ${r.model}/${r.method} · ${r.point}` : "");
+  const sc = r.top3.map(t => t.score), max = Math.max(...sc), min = Math.min(...sc, 0);
+  $("top3").innerHTML = "<div class='kv'><b>Top 3</b></div>" + r.top3.map(t => {
+    const w = r.method === "text" ? t.score * 100 : (max === min ? 100 : 100 * (t.score - min) / (max - min));
+    const nat = r.language !== "en" ? ` <span class="note">(${t.native})</span>` : "";
+    return `<div class="r"><span>${t.text}${nat}</span><span>${t.score.toFixed(3)}</span><div class="bw"><div class="bar" style="width:${Math.max(3, w)}%"></div></div></div>`;
+  }).join("");
+  const tm = r.timings_ms, sig = r.signals || {};
+  $("details").innerHTML = `<b>Transcript</b>${r.transcript || "<i>(empty)</i>"}
+    <b>Speech gate</b>max prob ${r.vad.vad_prob_max} · speech ${r.vad["vad_speech_s@" + (r.thresholds ? r.thresholds.vad_t : 0.5)] ?? "?"} s of ${r.duration_s} s
+    ${sig.no_speech_prob !== undefined ? `<b>Whisper signals</b>no_speech_prob ${sig.no_speech_prob} · avg_logprob ${sig.avg_logprob}` : ""}
+    <b>Latency</b>decode ${tm.decode} · VAD ${tm.vad} · ASR ${tm.asr} · scoring ${tm.score ?? "—"} · decide ${tm.decide} ms<br>server ${tm.server_total} ms · round trip ${r.round_trip_ms} ms
+    ${r.margin !== null ? `<b>Margin to runner-up</b>${r.margin}` : ""}`;
+}
+function addHistory(r) {
+  const tr = document.createElement("tr");
+  tr.innerHTML = `<td>${new Date().toLocaleTimeString()}</td><td><span class="pill ${r.decision}">${r.decision === "candidate" ? r.phrase_id : r.decision}</span></td>
+    <td>${r.transcript || "<i>(empty)</i>"}</td><td>${r.timings_ms.server_total} / ${r.round_trip_ms} ms</td>`;
+  $("hist").prepend(tr); while ($("hist").children.length > 25) $("hist").lastChild.remove();
+}
+
+// ---------- input bindings ----------
+for (const id of ["ptt-rec", "ptt-test"]) {
+  const b = $(id);
+  b.addEventListener("pointerdown", (e) => { e.preventDefault(); start(); });
+  ["pointerup", "pointerleave", "pointercancel"].forEach(ev => b.addEventListener(ev, stop));
+}
+const typing = (e) => ["INPUT", "SELECT", "TEXTAREA"].includes(e.target.tagName);
+document.addEventListener("keydown", (e) => {
+  if (typing(e)) return;
+  if (e.code === "Space" && !e.repeat) { e.preventDefault(); start(); }
+  if (mode === "record" && e.key.toLowerCase() === "r") $("redo").click();
+  if (mode === "record" && e.key.toLowerCase() === "s") $("skip").click();
+});
+document.addEventListener("keyup", (e) => { if (e.code === "Space" && !typing(e)) { e.preventDefault(); stop(); } });
+
+api("/api/config").then(renderConfig).catch(e => $("status").textContent = "server unreachable: " + e.message);
+</script>
+</body>
+</html>
