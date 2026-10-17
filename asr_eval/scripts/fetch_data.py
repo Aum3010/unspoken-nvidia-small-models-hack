@@ -3,6 +3,8 @@
     python scripts/fetch_data.py                     # all
     python scripts/fetch_data.py librispeech esc50   # some
 
+OpenSLR archives come from the ELDA mirror first (the main server measured ~0.3 MB/s
+from Brev vs ~10 MB/s for ELDA), with the main server as fallback.
 Archives are stream-extracted with a member filter, so only the parts we use hit
 the disk (e.g. MUSAN noise/, Speech Commands _background_noise_). Each dataset's
 landing page is saved next to it and lines mentioning its licence are logged, as
@@ -29,13 +31,13 @@ from harness.config import load_config  # noqa: E402
 DATASETS = {
     "librispeech": {
         "landing": "https://www.openslr.org/12/",
-        "urls": ["https://www.openslr.org/resources/12/test-clean.tar.gz"],
+        "urls": [["https://openslr.elda.org/resources/12/test-clean.tar.gz", "https://www.openslr.org/resources/12/test-clean.tar.gz"]],
         "keep": lambda n: True,
         "license": "CC BY 4.0", "use": "unknown_speech negatives + WER sanity",
     },
     "musan": {
         "landing": "https://www.openslr.org/17/",
-        "urls": ["https://www.openslr.org/resources/17/musan.tar.gz"],
+        "urls": [["https://openslr.elda.org/resources/17/musan.tar.gz", "https://www.openslr.org/resources/17/musan.tar.gz"]],
         "keep": lambda n: "/noise/" in n,
         "license": "CC BY 4.0 (per OpenSLR page; individual files carry their own attributions)", "use": "non_speech negatives + additive noise",
     },
@@ -116,8 +118,17 @@ def fetch(name: str, data: Path, prov: dict, lock: threading.Lock) -> None:
         try:
             total = 0
             for url in d["urls"]:
-                log(f"{name}: downloading {url}")
-                total += stream_extract(url, dest, d["keep"])
+                mirrors = url if isinstance(url, list) else [url]  # official mirrors, fastest first
+                for i, u in enumerate(mirrors):
+                    try:
+                        log(f"{name}: downloading {u}")
+                        total += stream_extract(u, dest, d["keep"])
+                        entry["downloaded_from"] = entry.get("downloaded_from", []) + [u]
+                        break
+                    except Exception as exc:
+                        if i == len(mirrors) - 1:
+                            raise
+                        log(f"{name}: {u} failed ({type(exc).__name__}), trying next mirror")
             done.write_text(time.strftime("%Y-%m-%d %H:%M"))
             entry["notes"] = f"{total} files extracted {time.strftime('%Y-%m-%d')}"
             log(f"{name}: {total} files")

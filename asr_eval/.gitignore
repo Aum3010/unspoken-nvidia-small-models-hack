@@ -8,3 +8,5 @@ __pycache__/
 data_local/
 results_local/
 prepare.log
+tts.log
+run.log
