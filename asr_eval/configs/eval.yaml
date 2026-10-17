@@ -51,11 +51,14 @@ own:
 manifest:
   calib_fraction: 0.4          # share of speakers per source used for threshold tuning
   calib_speakers: {}           # optional explicit lists per source, e.g. {own: [alice]}
-  generated_nonspeech: 60      # digital silence + low-level mic-like noise clips (1-6 s)
+  generated_nonspeech: 300     # digital silence + low-level mic-like noise clips (1-6 s)
   librispeech_n: 200
   nonspeech_public_n: 300      # MUSAN + Speech Commands background + ESC-50 cuts
   esc50_categories: [breathing, coughing, clock_tick, mouse_click, keyboard_typing, door_wood_knock, footsteps, snoring, sneezing, clapping, drinking_sipping, brushing_teeth]
   torgo_vocab_size: 15
+  # Command-style words said by (nearly) every TORGO speaker. The automatic choice (most speakers) picked
+  # articulation minimal pairs (beat/feet/meat, sip/slip), a much harder task than 20 distinct phrases.
+  torgo_vocab: ["yes", "no", up, down, left, right, go, one, two, three]
 
 degrade:
   sources: [own, torgo]        # positives only, one effect at a time (never stacked)
@@ -79,27 +82,40 @@ models:
   - name: parakeet-tdt-0.6b-v2
     kind: nemo_transducer
     checkpoint: nvidia/parakeet-tdt-0.6b-v2
-    enabled: false             # milestone 2
+    enabled: true
   - name: nemotron-streaming-0.6b
     kind: nemo_transducer
     checkpoint: nvidia/nemotron-speech-streaming-en-0.6b
-    enabled: false             # milestone 2
+    enabled: true              # model's default (largest) lookahead
+  - name: nemotron-streaming-0.6b-160ms
+    kind: nemo_transducer
+    checkpoint: nvidia/nemotron-speech-streaming-en-0.6b
+    att_context: [70, 1]       # right context 1 x 80 ms frame ~ 160 ms chunks
+    enabled: true
+  - name: nemotron-streaming-0.6b-560ms
+    kind: nemo_transducer
+    checkpoint: nvidia/nemotron-speech-streaming-en-0.6b
+    att_context: [70, 6]       # ~ 560 ms chunks
+    enabled: true
   - name: whisper-large-v3-turbo
     kind: faster_whisper
     checkpoint: large-v3-turbo
-    enabled: false             # milestone 2
+    params_from: openai/whisper-large-v3-turbo
+    enabled: true
   - name: whisper-large-v2
     kind: faster_whisper
     checkpoint: large-v2
-    enabled: false
+    params_from: openai/whisper-large-v2
+    enabled: true              # reference only: 1.55B does not fit the 33B budget next to the coordinator
   - name: whisper-small
     kind: faster_whisper
     checkpoint: small
-    enabled: false
+    params_from: openai/whisper-small
+    enabled: true
   - name: parakeet-ctc-0.6b-sapc1
     kind: hf_ctc
     checkpoint: dys-asr/parakeet-ctc-0.6b-sapc1
-    enabled: false             # optional; licence terms must be checked first
+    enabled: false             # skipped: Speech Accessibility Project data use agreement required
 
 decision:
   methods: [text, ctc_sum, ctc_norm, ctc_llr]   # ctc_* only for CTC models

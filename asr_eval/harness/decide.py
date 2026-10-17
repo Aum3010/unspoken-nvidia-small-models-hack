@@ -114,6 +114,21 @@ def _decide(a: dict, vad_t: float, abs_t: float, margin_t: float) -> np.ndarray:
     return np.where(~a[f"vad_speech_s@{vad_t}"], "no_speech", np.where(ok, a["best"], "unknown"))
 
 
+def explain(row: dict, th: dict) -> str:
+    """Which gate decided one clip: no_speech, low_score, small_margin, negation, no_hypothesis, or accepted."""
+    if not row.get(f"vad_speech_s@{th['vad_t']}", 0) > 0:
+        return "no_speech"
+    if row.get("best") is None:
+        return "no_hypothesis"
+    if row["best_score"] < th["abs_t"]:
+        return "low_score"
+    if row["margin"] < th["margin_t"]:
+        return "small_margin"
+    if row["neg_mismatch"]:
+        return "negation"
+    return "accepted"
+
+
 def grid(values: np.ndarray, n: int, floor: float) -> list[float]:
     v = values[np.isfinite(values)]
     qs = np.unique(np.quantile(v, np.linspace(0, 1, n))) if len(v) else np.array([])

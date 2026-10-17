@@ -33,6 +33,9 @@ class Model:
         self.spec, self.cfg = spec, cfg
         self.name, self.checkpoint = spec["name"], spec["checkpoint"]
 
+    def info(self) -> dict:
+        return {"checkpoint": self.checkpoint}
+
     def unload(self):
         import torch
 
@@ -123,7 +126,132 @@ class HFCTC(Model):
         return [(IMPOSSIBLE if not np.isfinite(v) else -float(v), len(t)) for v, t in zip(nll.cpu().tolist(), targets)]
 
 
-KINDS = {"hf_ctc": HFCTC}
+# ---- NeMo transducers: Parakeet-TDT, Nemotron Speech Streaming ------------------------------------
+
+class NemoTransducer(Model):
+    """Greedy transcript from a NeMo RNNT/TDT model; no forced phrase scoring (text method only).
+
+    `att_context` (e.g. [70, 1]) sets a cache-aware model's right context. Offline decoding at that
+    context reproduces the model's streaming output at that lookahead (80 ms frames: [70,1] ~ 160 ms
+    chunks, [70,6] ~ 560 ms), so accuracy matches streaming; per-chunk latency is not simulated here.
+    """
+
+    def load(self):
+        import nemo.collections.asr as nemo_asr
+        import torch
+
+        self.dev = device()
+        self.revision = resolve_revision(self.checkpoint, self.spec.get("revision"))
+        self.notes: list[str] = []
+        m = nemo_asr.models.ASRModel.from_pretrained(self.checkpoint, map_location=torch.device(self.dev))
+        m.eval()
+        for attr, val in (("dither", 0.0), ("pad_to", 0)):  # deterministic features
+            try:
+                setattr(m.preprocessor.featurizer, attr, val)
+            except Exception:
+                pass
+        self.att_all = getattr(m.encoder, "att_context_size_all", None)
+        if self.spec.get("att_context"):
+            m.encoder.set_default_att_context_size(self.spec["att_context"])
+            self.notes.append(f"att_context_size={self.spec['att_context']} (available: {self.att_all})")
+        self.model = m
+        self.direct = True
+
+    def info(self) -> dict:
+        return {"checkpoint": self.checkpoint, "revision": self.revision, "params": sum(p.numel() for p in self.model.parameters()),
+                "device": self.dev, "dtype": "bfloat16 autocast" if self.dev == "cuda" else "float32",
+                "class": type(self.model).__name__, "att_context_available": str(self.att_all), "notes": self.notes}
+
+    def transcribe(self, wav):
+        import torch
+
+        if self.direct:
+            try:
+                sig = torch.from_numpy(np.ascontiguousarray(wav, dtype=np.float32))[None].to(self.dev)
+                ln = torch.tensor([len(wav)], device=self.dev)
+                ac = torch.autocast("cuda", dtype=torch.bfloat16) if self.dev == "cuda" else torch.autocast("cpu", enabled=False)
+                with torch.inference_mode(), ac:
+                    enc, enc_len = self.model.forward(input_signal=sig, input_signal_length=ln)
+                    hyps = self.model.decoding.rnnt_decoder_predictions_tensor(encoder_output=enc, encoded_lengths=enc_len,
+                                                                                return_hypotheses=True)
+                if isinstance(hyps, tuple):  # older API: (best, all)
+                    hyps = hyps[0]
+                h = hyps[0]
+                text = h.text if isinstance(h.text, str) else self.model.tokenizer.ids_to_text([int(t) for t in h.y_sequence])
+                return {"text": text.strip(), "nbest": [text.strip()], "path": "direct"}
+            except Exception as exc:  # fall back to the library's own transcribe() and say so
+                self.direct = False
+                self.notes.append(f"direct decode failed ({type(exc).__name__}: {str(exc)[:120]}); using model.transcribe()")
+        out = self.model.transcribe([np.ascontiguousarray(wav, dtype=np.float32)], batch_size=1, verbose=False)
+        out = out[0] if isinstance(out, tuple) else out
+        h = out[0]
+        text = h.text if hasattr(h, "text") else str(h)
+        return {"text": text.strip(), "nbest": [text.strip()], "path": "transcribe"}
+
+
+# ---- faster-whisper (CTranslate2) -------------------------------------------------------------------
+
+def _preload_cudnn():
+    """CTranslate2 needs cuDNN 9; torch's pip wheel ships it under site-packages/nvidia/cudnn/lib."""
+    import ctypes
+    import glob
+    import site
+
+    for sp in site.getsitepackages():
+        for lib in sorted(glob.glob(f"{sp}/nvidia/cudnn/lib/libcudnn*.so.9")) + sorted(glob.glob(f"{sp}/nvidia/cublas/lib/libcublas*.so.12")):
+            try:
+                ctypes.CDLL(lib, mode=ctypes.RTLD_GLOBAL)
+            except OSError:
+                pass
+
+
+class FasterWhisper(Model):
+    """Whisper via faster-whisper: fp16, beam 3, temperature 0, no previous-text conditioning, no built-in VAD.
+
+    no_speech_threshold=None keeps every segment (Whisper's own skip rule would hide text and its
+    signals); no_speech_prob and avg_logprob are recorded per clip instead. Text method only.
+    """
+
+    def load(self):
+        import torch
+
+        if torch.cuda.is_available():
+            _preload_cudnn()
+        from faster_whisper import WhisperModel
+        from faster_whisper.utils import _MODELS
+
+        self.dev = device()
+        self.repo = _MODELS.get(self.checkpoint, self.checkpoint)
+        self.revision = resolve_revision(self.repo, self.spec.get("revision"))
+        self.compute_type = "float16" if self.dev == "cuda" else "int8"
+        self.model = WhisperModel(self.repo, device=self.dev, compute_type=self.compute_type, revision=self.revision)
+
+    def info(self) -> dict:
+        params, source = None, None
+        if self.spec.get("params_from"):
+            try:
+                from huggingface_hub import HfApi
+
+                params = sum(HfApi().get_safetensors_metadata(self.spec["params_from"]).parameter_count.values())
+                source = f"{self.spec['params_from']} safetensors headers"
+            except Exception as exc:
+                source = f"unavailable ({type(exc).__name__})"
+        return {"checkpoint": self.repo, "revision": self.revision, "params": params, "params_source": source,
+                "device": self.dev, "dtype": self.compute_type, "runtime": "ctranslate2"}
+
+    def transcribe(self, wav):
+        segs, info = self.model.transcribe(np.ascontiguousarray(wav, dtype=np.float32), language="en", beam_size=3, temperature=0.0,
+                                           condition_on_previous_text=False, vad_filter=False, no_speech_threshold=None)
+        segs = list(segs)
+        text = " ".join(s.text.strip() for s in segs).strip()
+        out = {"text": text, "nbest": [text]}
+        if segs:
+            out["avg_logprob"] = round(float(np.mean([s.avg_logprob for s in segs])), 4)
+            out["no_speech_prob"] = round(float(max(s.no_speech_prob for s in segs)), 4)
+        return out
+
+
+KINDS = {"hf_ctc": HFCTC, "nemo_transducer": NemoTransducer, "faster_whisper": FasterWhisper}
 
 
 def make(spec: dict, cfg) -> Model:

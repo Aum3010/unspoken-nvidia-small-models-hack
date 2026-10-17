@@ -203,7 +203,21 @@ def torgo(cfg, rng) -> list[dict]:
         common = dict(path=rel(s["wav"], data), source="torgo", speaker_id=f"torgo:{s['spk']}", group=s["group"], text=s["text"], origin="real")
         if s["text"] in vocab:
             rows.append(row(**common, label_type="positive", phrase_id=s["text"], task="torgo_words"))
-    others = [s for s in singles if s["text"] not in vocab]
+    # homophones of a vocabulary word ("know" for "no", "write" for "right") cannot be rejected acoustically,
+    # so they are not valid negatives; identical CMU pronunciation decides
+    from harness.decide import phones
+
+    vocab_phones = {phones(w) for w in vocab} - {None}
+    others, homophones = [], Counter()
+    for s in singles:
+        if s["text"] in vocab:
+            continue
+        if phones(s["text"]) in vocab_phones:
+            homophones[s["text"]] += 1
+        else:
+            others.append(s)
+    if homophones:
+        print(f"  torgo: dropped homophone negatives {dict(homophones)}")
     for i in rng.permutation(len(others))[:300]:
         s = others[i]
         rows.append(row(path=rel(s["wav"], data), source="torgo", speaker_id=f"torgo:{s['spk']}", group=s["group"], text=s["text"],

@@ -94,8 +94,8 @@ def model_worker(cfg, args):
     import torch
 
     from harness import audio
-    from harness.decide import surface_forms
     from harness.models import make
+    from harness.pipeline import analyze, task_forms
 
     spec = cfg.model(args.model)
     raw = cfg.results / "raw"
@@ -105,7 +105,7 @@ def model_worker(cfg, args):
         m = load_manifest(cfg, args.limit)
         voc = vocabs(cfg)
         clips = expand_tasks(m, list(voc))
-        forms = {task: [(pid, f) for pid, txt in v.items() for f in surface_forms(txt)] for task, v in voc.items()}
+        forms = task_forms(voc)
         if torch.cuda.is_available():
             torch.cuda.reset_peak_memory_stats()
             info["device_name"] = torch.cuda.get_device_name()
@@ -116,25 +116,7 @@ def model_worker(cfg, args):
         info.update(model.info())
 
         def run(x, tasks):
-            sync = torch.cuda.synchronize if torch.cuda.is_available() else (lambda: None)
-            sync(); t0 = time.perf_counter()
-            tr = model.transcribe(x)
-            sync(); asr_ms = (time.perf_counter() - t0) * 1000
-            outs = []
-            for task in tasks:
-                sync(); t1 = time.perf_counter()
-                ph = free = None
-                if model.supports_scoring:
-                    texts = [f for _, f in forms[task]] + [tr["text"]]
-                    sc = model.score_phrases(x, texts)
-                    ph = {}
-                    for (pid, _), s in zip(forms[task], sc[:-1]):
-                        if pid not in ph or s[0] > ph[pid][0]:
-                            ph[pid] = [round(s[0], 4), s[1]]
-                    free = [round(sc[-1][0], 4), sc[-1][1]]
-                sync()
-                outs.append((task, ph, free, (time.perf_counter() - t1) * 1000 if model.supports_scoring else None))
-            return tr, asr_ms, outs
+            return analyze(model, x, tasks, forms)
 
         by_path = clips.groupby("path", sort=False)["eval_task"].apply(list)
         warm = list(by_path.items())[: cfg["latency"]["warmup_runs"]]
@@ -162,9 +144,9 @@ def model_worker(cfg, args):
         info["clip_errors"] = len(errors)
         info["clip_error_examples"] = errors[:10]
         if torch.cuda.is_available():
-            info["peak_alloc_gb"] = round(torch.cuda.max_memory_allocated() / 1e9, 3)
+            info["peak_alloc_gb"] = round(torch.cuda.max_memory_allocated() / 1e9, 3)  # torch allocator only (0 for CTranslate2)
             free_b, total_b = torch.cuda.mem_get_info()
-            info["device_used_gb_at_end"] = round((total_b - free_b) / 1e9, 2)
+            info["device_used_gb_at_end"] = round((total_b - free_b) / 1e9, 2)  # whole device incl. CUDA context, any runtime
         else:
             import psutil
 

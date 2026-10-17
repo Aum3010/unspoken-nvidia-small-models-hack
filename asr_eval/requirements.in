@@ -17,3 +17,7 @@ scipy
 kokoro
 sounddevice                 # scripts/record.py (laptop)
 sherpa-onnx                 # optional keyword spotter
+fastapi                     # serve.py live test bench
+uvicorn
+python-multipart
+av                          # decode browser webm/opus

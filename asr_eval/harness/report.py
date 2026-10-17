@@ -128,6 +128,16 @@ def write(cfg, decisions: dict[str, pd.DataFrame], infos: dict[str, dict], thres
                f"Vocabulary ({vocab.get('chosen_by', '')}): {', '.join(vocab.get('vocab', []))}", "",
                "| Model / method | Group | Top-1 rank | Accepted correct | Wrong accept | FA other words | WER / CER (all TORGO clips) |",
                "|---|---|---|---|---|---|---|"] + torgo_rows + [""]
+        tbest = select_best(thresholds, task="torgo_words")
+        if tbest and tbest in tests:
+            d = tests[tbest]
+            g = d[(d["source"] == "torgo") & (d["eval_task"] == "torgo_words") & (d["label_type"] == "positive")]
+            md += [f"### TORGO words by condition ({tbest}, best on calib for this task; degraded rows are synthetic)", "",
+                   "| Condition | Group | n | Top-1 rank | Accepted correct | Wrong accept |", "|---|---|---:|---|---|---|"]
+            for (cond, grp), gg in g.groupby(["condition", "group"]):
+                p = positive_metrics(gg)
+                md.append(f"| {cond} | {grp} | {p['n']} | {_pct(p['top1'])} | {_pct(p['accepted_correct'])} | {_pct(p['wrong_accept'])} |")
+            md.append("")
 
     # ---- negatives by source ------------------------------------------------------------------------------
     md += ["## Negatives by source (test)", "", "| Model / method | Source | Label | False accepts |", "|---|---|---|---|"]
@@ -152,8 +162,8 @@ def write(cfg, decisions: dict[str, pd.DataFrame], infos: dict[str, dict], thres
 
     # ---- latency + resources ------------------------------------------------------------------------------------
     md += ["## Latency (batch 1, warm) and resources", "",
-           "| Model | Params | Load (cold) | Peak GPU alloc | VAD p50 | ASR p50 / p95 / max | Scoring p50 / p95 | Total p50 / p95 / max | RTFx (median) |",
-           "|---|---:|---:|---:|---:|---|---|---|---:|"]
+           "| Model | Params | Load | Peak torch alloc | GPU used (device) | VAD p50 | ASR p50 / p95 / max | Scoring p50 / p95 | Total p50 / p95 / max | RTFx (median) |",
+           "|---|---:|---:|---:|---:|---:|---|---|---|---:|"]
     lat_rows = {}
     for k, d in decisions.items():
         model = k.split("/")[0]
@@ -164,11 +174,14 @@ def write(cfg, decisions: dict[str, pd.DataFrame], infos: dict[str, dict], thres
 
         def trio(c, keys=("p50", "p95", "max")):
             return " / ".join(f"{L[c][q]:.0f}" for q in keys) + " ms" if c in L else "—"
-        md.append(f"| {model} | {info.get('params', 0) / 1e6:.1f}M | {info.get('load_s', math.nan):.1f} s | "
-                  f"{info.get('peak_alloc_gb', 'n/a')} GB | {L.get('vad_ms', {}).get('p50', math.nan):.1f} ms | {trio('asr_ms')} | "
+        params = f"{info['params'] / 1e6:.1f}M" if info.get("params") else "—"
+        md.append(f"| {model} | {params} | {info.get('load_s', math.nan):.1f} s | "
+                  f"{info.get('peak_alloc_gb', 'n/a')} GB | {info.get('device_used_gb_at_end', 'n/a')} GB | "
+                  f"{L.get('vad_ms', {}).get('p50', math.nan):.1f} ms | {trio('asr_ms')} | "
                   f"{trio('score_ms', ('p50', 'p95'))} | {trio('total_ms')} | {L.get('rtfx_median') or math.nan:.1f} |")
-    md += ["", "Total = VAD + ASR + phrase scoring (scoring is the forced pass over all phrases; the text method skips it). "
-           "Network, capture and endpointing are not included. Peak GPU alloc is torch's allocator peak for the process.", ""]
+    md += ["", "'Peak torch alloc' is PyTorch's allocator (0 for CTranslate2/faster-whisper); 'GPU used (device)' is the whole device "
+           "at the end of the model's run, including its CUDA context.", "", "Total = VAD + ASR + phrase scoring (scoring is the forced pass over all phrases; the text method skips it). "
+           "Network, capture and endpointing are not included.", ""]
     md += ["| Model | Checkpoint | Revision | Device |", "|---|---|---|---|"]
     for model, info in infos.items():
         md.append(f"| {model} | {info.get('checkpoint')} | `{str(info.get('revision', ''))[:12]}` | {info.get('device_name', info.get('device'))} |")
