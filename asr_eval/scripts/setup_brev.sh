@@ -6,14 +6,14 @@ cd "$(dirname "$0")/.."
 
 WORK=${WORK:-/workspace}
 if ! mkdir -p "$WORK" 2>/dev/null || [[ ! -w "$WORK" ]]; then
-  sudo mkdir -p "$WORK" && sudo chown "$USER" "$WORK" || WORK="$HOME/workspace"
+  { sudo -n mkdir -p "$WORK" && sudo -n chown "$USER" "$WORK"; } 2>/dev/null || WORK="$HOME/workspace"
 fi
 mkdir -p "$WORK/hf" "$WORK/asr_eval_data"
 export HF_HOME="$WORK/hf"
 echo "WORK=$WORK  HF_HOME=$HF_HOME"
 
 if command -v sudo >/dev/null && command -v apt-get >/dev/null; then
-  sudo apt-get update -qq && sudo apt-get install -y -qq tmux espeak-ng ffmpeg >/dev/null || echo "  (apt packages skipped)"
+  { sudo -n apt-get update -qq && sudo -n DEBIAN_FRONTEND=noninteractive apt-get install -y -qq python3-venv python3-dev tmux espeak-ng ffmpeg; } >/dev/null     || echo "  (apt packages skipped)"
 fi
 
 python3 -m venv "$WORK/venv-asr"

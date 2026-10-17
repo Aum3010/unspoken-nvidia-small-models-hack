@@ -7,3 +7,4 @@ setup.log
 __pycache__/
 data_local/
 results_local/
+prepare.log
