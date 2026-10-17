@@ -64,6 +64,9 @@ brev delete unspoken-asr                            # billing stops; disk is gon
 | GPU | NVIDIA RTX PRO 6000 Blackwell Server Edition, 96 GB, driver 580.126.09 |
 | Host | 16 vCPU, 141 GB RAM, 665 GB free disk, Ubuntu with Python 3.10.12, user `shadeform`, passwordless sudo |
 | Layout | `/workspace/venv-asr` (venv), `/workspace/hf` (HF cache), `/workspace/asr_eval_data` (data, symlinked as `~/asr_eval/data`), `~/asr_eval` (code) |
+| Recordings | `/workspace/asr_eval_data/own/`: 307 clips from 3 speakers (17 MB), backed up to the laptop in `asr_eval/data/own/` on 2026-10-17 |
+| Running | Live test bench on 127.0.0.1:8800 (Nemotron en, `forced_llr`, balanced), reached through `brev port-forward` |
+| Status | **Kept running** for more recording sessions. Billing continues at $2.63/hr until deleted (about $16 by the end of 2026-10-17). Copy recordings home before deleting |
 
 ## 4. The loop
 
@@ -79,16 +82,17 @@ bash asr_eval/scripts/brev/sync.sh marginal-sapphire-whale
 # 2. one-time: environment, requirements.lock, datasets, Kokoro sanity clips (~20-40 min)
 brev exec marginal-sapphire-whale 'cd ~/asr_eval && nohup bash scripts/brev_prepare.sh > prepare.log 2>&1 < /dev/null &'
 
-# 3. quick end-to-end pass (10 clips per group), then the full run
+# 3. quick end-to-end pass (10 clips per group), then the full run (+ leave-one-speaker-out with `all`)
 brev exec marginal-sapphire-whale 'bash ~/run_stage.sh quick'
-brev exec marginal-sapphire-whale 'bash ~/run_stage.sh full'
+brev exec marginal-sapphire-whale 'bash ~/run_stage.sh all'
 
 # 4. watch, or block until done
 brev exec marginal-sapphire-whale 'bash ~/status.sh'
 brev exec marginal-sapphire-whale 'bash ~/wait_for.sh ~/asr_eval/run.log run_eval.py 90'
 
-# 5. bring results home (summary, plots, failures, thresholds, env, requirements.lock)
+# 5. bring results home (summary, plots, failures, thresholds, LOSO, env, requirements.lock) and back up recordings
 bash asr_eval/scripts/brev/fetch_results.sh marginal-sapphire-whale
+brev copy marginal-sapphire-whale:/workspace/asr_eval_data/own/ asr_eval/data/own/   # gitignored; voice data stays out of git
 
 # 6. delete the instance when finished (after step 5!)
 brev delete marginal-sapphire-whale
@@ -130,8 +134,8 @@ brev port-forward marginal-sapphire-whale --port 8800:8800                      
 | `install_cli_wsl.sh` | laptop (WSL/Linux) | Installs the Brev CLI binary after checking its SHA-256 |
 | `sync.sh <inst>` | laptop | `git archive HEAD asr_eval`, copies it and the helpers up, unpacks over `~/asr_eval` |
 | `fetch_results.sh <inst> [--raw]` | laptop | Copies results back. Per-clip CSVs only with `--raw`, because they contain volunteers' transcripts |
-| `serve_ui.sh [model] [method]` | instance | (Re)starts the live test bench on 127.0.0.1:8800 |
-| `run_stage.sh quick\|full\|phases X` | instance | Starts `run_eval.py` under `nohup`, logging to `~/asr_eval/run.log` |
+| `serve_ui.sh [model] [method] [point]` | instance | (Re)starts the live test bench on 127.0.0.1:8800 (default: Nemotron en, `forced_llr`, balanced) |
+| `run_stage.sh quick\|full\|all\|phases X` | instance | Starts `run_eval.py` under `nohup` (`all` = every phase + `scripts/loso.py`), logging to `~/asr_eval/run.log` |
 | `status.sh` | instance | Log tails, data sizes, running jobs, GPU use |
 | `wait_for.sh LOG PATTERN MIN` | instance | Blocks until a job ends, then prints its log tail |
 | `mirror_speed.sh` | instance | Measures OpenSLR mirror speeds |
@@ -151,6 +155,13 @@ Other useful commands: `brev shell <inst>` (interactive shell), `brev port-forwa
 | No `/workspace` | Provider image differs | `setup_brev.sh` creates it with `sudo -n`, falling back to `~/workspace` |
 | Old PyTorch errors with "no kernel image" on Blackwell | Needs CUDA 12.8+ builds | `setup_brev.sh` installs torch from the `cu128` index |
 | Kokoro import fails on Windows ("filename or extension is too long") | spaCy DLL path exceeds Windows MAX_PATH | Generate TTS on Brev. Locally use `make_tts.py --engine sapi` for plumbing tests only |
+| `NvvmSupportError: libNVVM cannot be found` from NeMo's transducer loss | NeMo's RNNT/TDT losses are Numba CUDA kernels; pip PyTorch ships no libNVVM, and the pip NVVM wheel wasn't picked up | Use NeMo's pure-PyTorch losses (`pytorch`, `tdt_pytorch`). RNNT is fast enough (13–21 ms for 66 phrases); TDT is not (3.5–7 s) |
+| `ValueError: lengths must be contiguous` | `expand()` gives stride-0 tensors; NeMo's CUDA losses need contiguous memory | `.contiguous()` on length and target tensors |
+| `CUDA error: an illegal memory access` that then breaks every later clip | B × T × U × V joint tensor over 2³¹ elements (Nemotron 3.5's 13k-token vocabulary × a long clip) overflows int32 indexing | Score phrase forms in chunks capped at 2·10⁸ joint elements; long texts alone |
+| `prompt_indices must be provided when concat mode is enabled` | Nemotron 3.5 is prompt-conditioned | Pass `prompt_indices` (the locale's id from the model's `prompt_dictionary`) to `forward()` |
+| Transcripts end in `<en-US>` | Nemotron 3.5 appends a language tag | Strip `<xx-XX>` tags before matching, scoring and WER |
+| A helper "fails" (exit 1) although it worked | The WSL wrapper's `grep -v` exits 1 when it filters every line | Check the result, not the exit code |
+| `pgrep -f PATTERN` never reports a job as finished | The waiting script's own command line contains PATTERN | Use the `[x]yz` trick: `'[s]cripts/loso.py'` matches the job, not itself |
 
 ## 6. Cost and privacy rules
 

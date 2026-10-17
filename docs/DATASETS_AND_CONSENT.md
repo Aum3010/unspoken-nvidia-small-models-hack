@@ -48,6 +48,18 @@ For the ASR evaluation there are two recorders:
 - **The live bench's Record tab** (`asr_eval/serve.py`). It has no consent checkbox, at the project owner's request: it shows a notice that clips are stored on the GPU machine, and the person running the session must get a verbal OK from anyone they record. Speakers are logged by pseudonym in `data/own/speakers.csv`.
 - **The CLI recorder** `asr_eval/scripts/record.py`, described below.
 
+**Recorded so far (2026-10-17):**
+- **Speakers:** 3 pseudonymous speakers, 307 clips.
+  - p01: normal, noisy, whisper, muffled (154 clips);
+  - p02: normal, whisper (102);
+  - p03: normal (51; most clips clipped from recording too loud).
+- **Content:** each speaker covers all 20 phrases plus the near-miss sentences and the other negatives.
+- **Storage:**
+  - on the Brev instance in `/workspace/asr_eval_data/own/`;
+  - a laptop backup in `asr_eval/data/own/`, gitignored;
+  - never in the repository.
+- **Deletion:** both copies are to be deleted after the hackathon. Deleting the instance removes its copy.
+
 `record.py` does the following:
 - It shows the consent text and stores the agreement in `data/own/consent.csv`.
 - It saves raw 16 kHz mono WAVs as `data/own/{pseudonym}_{condition}_{phraseid}_{take}.wav`.

@@ -60,6 +60,9 @@ MLX has an experimental Linux CUDA backend. Libraries built on it (mlx-whisper, 
 - **Determinism:** turn off feature dither, padding tricks and sampling. Set `temperature=0` and `condition_on_previous_text=False` for Whisper.
 - **Library defaults differ.** faster-whisper skips segments it thinks are silent (`no_speech_threshold`); mlx-whisper's defaults may not. Make silence handling explicit, and record the signals instead of trusting hidden skips.
 - **Memory reporting:** `torch.cuda.max_memory_allocated()` misses non-PyTorch runtimes (CTranslate2, TensorRT). Also record device-level use via `torch.cuda.mem_get_info()` or `nvidia-smi`.
+- **Numba CUDA kernels need libNVVM.** Pip-installed PyTorch doesn't ship it, so libraries that JIT-compile with Numba fail with `NvvmSupportError`. NeMo's RNNT/TDT losses are an example. Prefer a pure-PyTorch implementation if one exists (NeMo: `pytorch`, `tdt_pytorch`), or install the CUDA toolkit's NVVM. Measure speed, because pure-PyTorch versions can be orders of magnitude slower.
+- **Tensors over 2³¹ elements** can overflow int32 indexing inside CUDA kernels. That shows up as `illegal memory access` and poisons the CUDA context for the rest of the process. Chunk big batched tensors (e.g. B × T × U × V transducer joints) to a fixed element budget.
+- **Contiguity:** custom CUDA kernels often require contiguous inputs. Add `.contiguous()` after `expand()`/`transpose()` before calling them.
 - **Parameter counting:** quantised tensors are packed differently.
   - MLX: `U32` + `.scales`, 32/bits values per element.
   - NVFP4: `U8` = 2 weights per byte, plus `F8_E4M3` block scales that are *not* parameters.

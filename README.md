@@ -71,6 +71,13 @@ cd asr_eval && python run_eval.py --config configs/eval.yaml          # on the G
 python run_eval.py --config configs/local_smoke.yaml --limit 6         # CPU plumbing check on a laptop
 ```
 
+**Outcome (2026-10-17):**
+- **Model:** Nemotron Speech Streaming en 0.6B with forced RNNT phrase scoring.
+- **Tested:** on 3 recorded speakers (leave-one-speaker-out).
+- **Results:** it accepted the right phrase 71.5% of the time with 0.4% wrong, resolved 90.2% within one gaze question, and had 0/45 near-miss false accepts, at 43 ms per clip.
+- **Not adopted:** the multilingual Nemotron 3.5 was less accurate and slower on English. Its language selector and draft translations are kept.
+- Details: [asr_eval/README.md](asr_eval/README.md), [docs/EVALUATION.md](docs/EVALUATION.md) §6.
+
 - Setup, the CLI on Windows (WSL), costs and the sync/run/fetch loop: [docs/BREV.md](docs/BREV.md).
 - Models and licences: [docs/MODEL_CARDS_AND_LICENSES.md](docs/MODEL_CARDS_AND_LICENSES.md#asr-candidates-under-evaluation-asr_eval-not-deployed-yet).
 
