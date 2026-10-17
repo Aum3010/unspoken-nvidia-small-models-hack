@@ -1,26 +1,26 @@
-# 20 worst errors (nemotron-streaming-0.6b/text, test split)
+# 20 worst errors (nemotron-streaming-0.6b/forced_norm, test split)
 
 Most confident first: false accepts, then wrong accepts, then missed positives.
 
 | Kind | Path | Source / condition | Truth | Decision | Score | Transcript |
 |---|---|---|---|---|---|---|
-| false accept | `raw/torgo/MC01/Session3/wav_arrayMic/0175.wav` | torgo / clean | (unknown_speech) lip | left | 1.000 | Left. |
-| wrong accept | `degraded/torgo/raw__torgo__M05__Session1__wav_arrayMic/noise_musan_snr10/0032.wav` | torgo / noise_musan_snr10 | left | yes | 1.000 | Yes. |
-| wrong accept | `degraded/torgo/raw__torgo__M05__Session1__wav_arrayMic/gain_-12dB/0032.wav` | torgo / gain_-12dB | left | yes | 1.000 | Yes. |
-| wrong accept | `degraded/torgo/raw__torgo__F03__Session3__wav_arrayMic/reverb_rt60_0.6s/0145.wav` | torgo / reverb_rt60_0.6s | left | right | 1.000 | Right. |
-| wrong accept | `raw/torgo/M05/Session1/wav_arrayMic/0032.wav` | torgo / clean | left | yes | 1.000 | Yes. |
-| wrong accept | `degraded/torgo/raw__torgo__M05__Session1__wav_arrayMic/lowpass_1500/0032.wav` | torgo / lowpass_1500 | left | yes | 1.000 | Yes. |
-| wrong accept | `degraded/torgo/raw__torgo__M05__Session1__wav_arrayMic/bandpass_300-3400/0032.wav` | torgo / bandpass_300-3400 | left | yes | 1.000 | Yes. |
-| wrong accept | `degraded/torgo/raw__torgo__M05__Session1__wav_arrayMic/tempo_0.7x/0032.wav` | torgo / tempo_0.7x | left | yes | 1.000 | Yes. |
-| wrong accept | `own/p01_whisper_breathe_1.wav` | own / whisper | breathe | suction | 0.909 | I need a suction. |
-| false accept | `own/p01_whisper_neg_hn_time_close_1.wav` | own / whisper | (hard_negative) what time does it close | time | 0.818 | What time does it |
-| wrong accept | `degraded/own/own/reverb_rt60_0.6s/p01_normal_cold_2.wav` | own / reverb_rt60_0.6s | cold | no | 0.667 | Unco. |
-| wrong accept | `degraded/own/own/tempo_0.7x/p01_normal_nurse_1.wav` | own / tempo_0.7x | nurse | no | 0.667 | Oh no. |
-| wrong accept | `degraded/own/own/tempo_0.7x/p03_normal_stop_2.wav` | own / tempo_0.7x | stop | yes | 0.667 | Yep. |
-| missed (abstained) | `degraded/torgo/raw__torgo__MC04__Session1__wav_arrayMic/reverb_rt60_0.3s/0481.wav` | torgo / reverb_rt60_0.3s | up | unknown | 1.000 | Up. |
-| missed (abstained) | `degraded/torgo/raw__torgo__MC04__Session2__wav_arrayMic/reverb_rt60_0.3s/0770.wav` | torgo / reverb_rt60_0.3s | three | no_speech | 1.000 | Three. |
-| missed (abstained) | `degraded/torgo/raw__torgo__MC04__Session1__wav_arrayMic/tempo_0.85x/0481.wav` | torgo / tempo_0.85x | up | unknown | 1.000 | Up. |
-| missed (abstained) | `degraded/torgo/raw__torgo__MC04__Session2__wav_arrayMic/reverb_rt60_0.6s/0725.wav` | torgo / reverb_rt60_0.6s | two | no_speech | 1.000 | Two. |
-| missed (abstained) | `degraded/torgo/raw__torgo__MC04__Session2__wav_arrayMic/tempo_0.7x/0725.wav` | torgo / tempo_0.7x | two | no_speech | 1.000 | Two. |
-| missed (abstained) | `degraded/torgo/raw__torgo__MC04__Session2__wav_arrayMic/noise_musan_snr5/0725.wav` | torgo / noise_musan_snr5 | two | no_speech | 1.000 | Two. |
-| missed (abstained) | `degraded/torgo/raw__torgo__MC04__Session2__wav_arrayMic/gain_-24dB/0725.wav` | torgo / gain_-24dB | two | no_speech | 1.000 | Two. |
+| false accept | `raw/torgo/MC01/Session3/wav_arrayMic/0175.wav` | torgo / clean | (unknown_speech) lip | left | -0.094 | Left. |
+| wrong accept | `degraded/torgo/raw__torgo__F03__Session3__wav_arrayMic/reverb_rt60_0.6s/0145.wav` | torgo / reverb_rt60_0.6s | left | right | -0.115 | Right. |
+| wrong accept | `degraded/own/own/reverb_rt60_0.6s/p01_normal_hot_1.wav` | own / reverb_rt60_0.6s | hot | tired | -0.663 | I'm too much. |
+| wrong accept | `own/p01_whisper_breathe_1.wav` | own / whisper | breathe | suction | -0.857 | I need a suction. |
+| wrong accept | `degraded/own/own/tempo_0.7x/p01_normal_tired_2.wav` | own / tempo_0.7x | tired | scared | -0.961 | I'm |
+| wrong accept | `degraded/own/own/reverb_rt60_0.6s/p01_normal_pain_2.wav` | own / reverb_rt60_0.6s | pain | scared | -1.214 | And pay. |
+| wrong accept | `degraded/own/own/tempo_0.7x/p01_normal_time_2.wav` | own / tempo_0.7x | time | tired | -1.379 | No time. |
+| wrong accept | `own/p01_noisy_sick_1.wav` | own / noisy | sick | scared | -1.459 | And so. |
+| false accept | `own/p01_noisy_neg_hn_time_close_1.wav` | own / noisy | (hard_negative) what time does it close | time | -1.527 | Time does it close? |
+| wrong accept | `own/p01_whisper_hot_1.wav` | own / whisper | hot | tired | -1.527 | I told. |
+| wrong accept | `degraded/own/own/noise_musan_snr0/p01_normal_help_2.wav` | own / noise_musan_snr0 | help | scared | -1.546 | How to |
+| false accept | `own/p03_normal_neg_silence_1.wav` | own / normal | (silence) nan | no | -1.612 | I |
+| wrong accept | `own/p01_whisper_suction_1.wav` | own / whisper | suction | cold | -1.685 | I am gone. |
+| wrong accept | `degraded/own/own/reverb_rt60_0.6s/p01_normal_nurse_1.wav` | own / reverb_rt60_0.6s | nurse | tired | -1.689 | Alt. |
+| wrong accept | `own/p01_whisper_light_1.wav` | own / whisper | light | tired | -1.794 | What time? |
+| wrong accept | `degraded/own/own/reverb_rt60_0.3s/p01_normal_time_2.wav` | own / reverb_rt60_0.3s | time | tired | -1.889 | What time? |
+| false accept | `own/p01_whisper_neg_hn_time_close_1.wav` | own / whisper | (hard_negative) what time does it close | time | -1.901 | What time does it |
+| wrong accept | `own/p01_noisy_pain_2.wav` | own / noisy | pain | tired | -1.901 | M ten. |
+| wrong accept | `own/p01_noisy_suction_1.wav` | own / noisy | suction | scared | -1.957 | And it's |
+| wrong accept | `degraded/own/own/reverb_rt60_0.6s/p01_normal_time_2.wav` | own / reverb_rt60_0.6s | time | tired | -2.036 | What time? |

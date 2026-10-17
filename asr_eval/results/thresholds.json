@@ -83,12 +83,12 @@
     },
     "far_target": 0.05
   },
-  "parakeet-ctc-0.6b/ctc_sum|phrases20": {
+  "parakeet-ctc-0.6b/forced_sum|phrases20": {
     "feasible": true,
-    "vad_t": 0.6,
+    "vad_t": 0.2,
     "abs_t": -24.2055,
     "margin_t": 2.5026999999999995,
-    "calib_objective": 0.8498293515358362,
+    "calib_objective": 0.8549488054607508,
     "calib_far": {
       "hard_negative": 0.0,
       "unknown_speech": 0.005649717514124294,
@@ -105,19 +105,19 @@
     },
     "far_target": 0.01
   },
-  "parakeet-ctc-0.6b/ctc_sum|phrases20|balanced": {
+  "parakeet-ctc-0.6b/forced_sum|phrases20|balanced": {
     "feasible": true,
-    "vad_t": 0.5,
+    "vad_t": 0.3,
     "abs_t": -24.2055,
     "margin_t": 0.0,
-    "calib_objective": 0.8668941979522184,
+    "calib_objective": 0.8686006825938567,
     "calib_far": {
       "hard_negative": 0.0,
       "unknown_speech": 0.005649717514124294,
-      "non_speech": 0.040983606557377046,
+      "non_speech": 0.01639344262295082,
       "silence": 0.0
     },
-    "calib_far_pooled": 0.013793103448275862,
+    "calib_far_pooled": 0.006896551724137931,
     "n_calib_pos": 586,
     "n_calib_neg": {
       "hard_negative": 14,
@@ -127,7 +127,7 @@
     },
     "far_target": 0.05
   },
-  "parakeet-ctc-0.6b/ctc_sum|torgo_words": {
+  "parakeet-ctc-0.6b/forced_sum|torgo_words": {
     "feasible": true,
     "vad_t": 0.2,
     "abs_t": -0.02559999999999991,
@@ -147,7 +147,7 @@
     },
     "far_target": 0.01
   },
-  "parakeet-ctc-0.6b/ctc_sum|torgo_words|balanced": {
+  "parakeet-ctc-0.6b/forced_sum|torgo_words|balanced": {
     "feasible": true,
     "vad_t": 0.2,
     "abs_t": -0.3369249999999998,
@@ -167,12 +167,12 @@
     },
     "far_target": 0.05
   },
-  "parakeet-ctc-0.6b/ctc_norm|phrases20": {
+  "parakeet-ctc-0.6b/forced_norm|phrases20": {
     "feasible": true,
-    "vad_t": 0.6,
-    "abs_t": -5.196400000000001,
+    "vad_t": 0.2,
+    "abs_t": -5.463499999999999,
     "margin_t": 0.0,
-    "calib_objective": 0.8959044368600683,
+    "calib_objective": 0.9010238907849829,
     "calib_far": {
       "hard_negative": 0.0,
       "unknown_speech": 0.005649717514124294,
@@ -189,19 +189,19 @@
     },
     "far_target": 0.01
   },
-  "parakeet-ctc-0.6b/ctc_norm|phrases20|balanced": {
+  "parakeet-ctc-0.6b/forced_norm|phrases20|balanced": {
     "feasible": true,
-    "vad_t": 0.3,
+    "vad_t": 0.2,
     "abs_t": -6.2251,
     "margin_t": 0.0,
-    "calib_objective": 0.9078498293515358,
+    "calib_objective": 0.9061433447098977,
     "calib_far": {
       "hard_negative": 0.0,
       "unknown_speech": 0.005649717514124294,
-      "non_speech": 0.040983606557377046,
+      "non_speech": 0.01639344262295082,
       "silence": 0.0
     },
-    "calib_far_pooled": 0.013793103448275862,
+    "calib_far_pooled": 0.006896551724137931,
     "n_calib_pos": 586,
     "n_calib_neg": {
       "hard_negative": 14,
@@ -211,7 +211,7 @@
     },
     "far_target": 0.05
   },
-  "parakeet-ctc-0.6b/ctc_norm|torgo_words": {
+  "parakeet-ctc-0.6b/forced_norm|torgo_words": {
     "feasible": true,
     "vad_t": 0.2,
     "abs_t": -0.02559999999999991,
@@ -231,7 +231,7 @@
     },
     "far_target": 0.01
   },
-  "parakeet-ctc-0.6b/ctc_norm|torgo_words|balanced": {
+  "parakeet-ctc-0.6b/forced_norm|torgo_words|balanced": {
     "feasible": true,
     "vad_t": 0.2,
     "abs_t": -0.3369249999999998,
@@ -251,19 +251,19 @@
     },
     "far_target": 0.05
   },
-  "parakeet-ctc-0.6b/ctc_llr|phrases20": {
+  "parakeet-ctc-0.6b/forced_llr|phrases20": {
     "feasible": true,
-    "vad_t": 0.3,
-    "abs_t": -3.4417125,
-    "margin_t": 0.5496999999999996,
-    "calib_objective": 0.8668941979522184,
+    "vad_t": 0.2,
+    "abs_t": -4.1127,
+    "margin_t": 0.8637500000000009,
+    "calib_objective": 0.8703071672354948,
     "calib_far": {
       "hard_negative": 0.0,
-      "unknown_speech": 0.0,
+      "unknown_speech": 0.005649717514124294,
       "non_speech": 0.00819672131147541,
       "silence": 0.0
     },
-    "calib_far_pooled": 0.0022988505747126436,
+    "calib_far_pooled": 0.004597701149425287,
     "n_calib_pos": 586,
     "n_calib_neg": {
       "hard_negative": 14,
@@ -273,7 +273,7 @@
     },
     "far_target": 0.01
   },
-  "parakeet-ctc-0.6b/ctc_llr|phrases20|balanced": {
+  "parakeet-ctc-0.6b/forced_llr|phrases20|balanced": {
     "feasible": true,
     "vad_t": 0.2,
     "abs_t": -3.4417125,
@@ -282,10 +282,10 @@
     "calib_far": {
       "hard_negative": 0.0,
       "unknown_speech": 0.03954802259887006,
-      "non_speech": 0.02459016393442623,
+      "non_speech": 0.01639344262295082,
       "silence": 0.0
     },
-    "calib_far_pooled": 0.022988505747126436,
+    "calib_far_pooled": 0.020689655172413793,
     "n_calib_pos": 586,
     "n_calib_neg": {
       "hard_negative": 14,
@@ -295,7 +295,7 @@
     },
     "far_target": 0.05
   },
-  "parakeet-ctc-0.6b/ctc_llr|torgo_words": {
+  "parakeet-ctc-0.6b/forced_llr|torgo_words": {
     "feasible": true,
     "vad_t": 0.2,
     "abs_t": -Infinity,
@@ -315,7 +315,7 @@
     },
     "far_target": 0.01
   },
-  "parakeet-ctc-0.6b/ctc_llr|torgo_words|balanced": {
+  "parakeet-ctc-0.6b/forced_llr|torgo_words|balanced": {
     "feasible": true,
     "vad_t": 0.2,
     "abs_t": -Infinity,
@@ -503,6 +503,594 @@
     },
     "far_target": 0.05
   },
+  "nemotron-streaming-0.6b/forced_sum|phrases20": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": -12.5515,
+    "margin_t": 0.8472999999999989,
+    "calib_objective": 0.962457337883959,
+    "calib_far": {
+      "hard_negative": 0.0,
+      "unknown_speech": 0.0,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.0,
+    "n_calib_pos": 586,
+    "n_calib_neg": {
+      "hard_negative": 14,
+      "unknown_speech": 177,
+      "non_speech": 122,
+      "silence": 122
+    },
+    "far_target": 0.01
+  },
+  "nemotron-streaming-0.6b/forced_sum|phrases20|balanced": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": -15.386849999999997,
+    "margin_t": 0.0,
+    "calib_objective": 0.9658703071672355,
+    "calib_far": {
+      "hard_negative": 0.0,
+      "unknown_speech": 0.022598870056497175,
+      "non_speech": 0.00819672131147541,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.011494252873563218,
+    "n_calib_pos": 586,
+    "n_calib_neg": {
+      "hard_negative": 14,
+      "unknown_speech": 177,
+      "non_speech": 122,
+      "silence": 122
+    },
+    "far_target": 0.05
+  },
+  "nemotron-streaming-0.6b/forced_sum|torgo_words": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": -0.6682875,
+    "margin_t": 0.0,
+    "calib_objective": 0.7222222222222222,
+    "calib_far": {
+      "unknown_speech": 0.0,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.0,
+    "n_calib_pos": 1512,
+    "n_calib_neg": {
+      "unknown_speech": 90,
+      "non_speech": 122,
+      "silence": 122
+    },
+    "far_target": 0.01
+  },
+  "nemotron-streaming-0.6b/forced_sum|torgo_words|balanced": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": -1.7305499999999983,
+    "margin_t": 0.0,
+    "calib_objective": 0.7903439153439153,
+    "calib_far": {
+      "unknown_speech": 0.03333333333333333,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.008982035928143712,
+    "n_calib_pos": 1512,
+    "n_calib_neg": {
+      "unknown_speech": 90,
+      "non_speech": 122,
+      "silence": 122
+    },
+    "far_target": 0.05
+  },
+  "nemotron-streaming-0.6b/forced_norm|phrases20": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": -2.1856541666666667,
+    "margin_t": 0.0,
+    "calib_objective": 0.9658703071672355,
+    "calib_far": {
+      "hard_negative": 0.0,
+      "unknown_speech": 0.0,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.0,
+    "n_calib_pos": 586,
+    "n_calib_neg": {
+      "hard_negative": 14,
+      "unknown_speech": 177,
+      "non_speech": 122,
+      "silence": 122
+    },
+    "far_target": 0.01
+  },
+  "nemotron-streaming-0.6b/forced_norm|phrases20|balanced": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": -2.6549714285714288,
+    "margin_t": 0.0,
+    "calib_objective": 0.9675767918088737,
+    "calib_far": {
+      "hard_negative": 0.0,
+      "unknown_speech": 0.01694915254237288,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.006896551724137931,
+    "n_calib_pos": 586,
+    "n_calib_neg": {
+      "hard_negative": 14,
+      "unknown_speech": 177,
+      "non_speech": 122,
+      "silence": 122
+    },
+    "far_target": 0.05
+  },
+  "nemotron-streaming-0.6b/forced_norm|torgo_words": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": -0.1483708333333333,
+    "margin_t": 0.0,
+    "calib_objective": 0.6706349206349206,
+    "calib_far": {
+      "unknown_speech": 0.0,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.0,
+    "n_calib_pos": 1512,
+    "n_calib_neg": {
+      "unknown_speech": 90,
+      "non_speech": 122,
+      "silence": 122
+    },
+    "far_target": 0.01
+  },
+  "nemotron-streaming-0.6b/forced_norm|torgo_words|balanced": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": -0.6861562499999999,
+    "margin_t": 0.6172500000000001,
+    "calib_objective": 0.796957671957672,
+    "calib_far": {
+      "unknown_speech": 0.044444444444444446,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.011976047904191617,
+    "n_calib_pos": 1512,
+    "n_calib_neg": {
+      "unknown_speech": 90,
+      "non_speech": 122,
+      "silence": 122
+    },
+    "far_target": 0.05
+  },
+  "nemotron-streaming-0.6b/forced_llr|phrases20": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": -Infinity,
+    "margin_t": 1.17987,
+    "calib_objective": 0.9436860068259386,
+    "calib_far": {
+      "hard_negative": 0.0,
+      "unknown_speech": 0.0,
+      "non_speech": 0.00819672131147541,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.0022988505747126436,
+    "n_calib_pos": 586,
+    "n_calib_neg": {
+      "hard_negative": 14,
+      "unknown_speech": 177,
+      "non_speech": 122,
+      "silence": 122
+    },
+    "far_target": 0.01
+  },
+  "nemotron-streaming-0.6b/forced_llr|phrases20|balanced": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": -1.1550501315789474,
+    "margin_t": 0.4054818181818183,
+    "calib_objective": 0.9590443686006825,
+    "calib_far": {
+      "hard_negative": 0.0,
+      "unknown_speech": 0.01694915254237288,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.006896551724137931,
+    "n_calib_pos": 586,
+    "n_calib_neg": {
+      "hard_negative": 14,
+      "unknown_speech": 177,
+      "non_speech": 122,
+      "silence": 122
+    },
+    "far_target": 0.05
+  },
+  "nemotron-streaming-0.6b/forced_llr|torgo_words": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": -Infinity,
+    "margin_t": 2.1499975,
+    "calib_objective": 0.5046296296296297,
+    "calib_far": {
+      "unknown_speech": 0.0,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.0,
+    "n_calib_pos": 1512,
+    "n_calib_neg": {
+      "unknown_speech": 90,
+      "non_speech": 122,
+      "silence": 122
+    },
+    "far_target": 0.01
+  },
+  "nemotron-streaming-0.6b/forced_llr|torgo_words|balanced": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": -Infinity,
+    "margin_t": 1.1626950000000003,
+    "calib_objective": 0.783068783068783,
+    "calib_far": {
+      "unknown_speech": 0.044444444444444446,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.011976047904191617,
+    "n_calib_pos": 1512,
+    "n_calib_neg": {
+      "unknown_speech": 90,
+      "non_speech": 122,
+      "silence": 122
+    },
+    "far_target": 0.05
+  },
+  "nemotron-3.5-asr-0.6b/text|phrases20": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": 0.625,
+    "margin_t": 0.0,
+    "calib_objective": 0.78839590443686,
+    "calib_far": {
+      "hard_negative": 0.0,
+      "unknown_speech": 0.0,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.0,
+    "n_calib_pos": 586,
+    "n_calib_neg": {
+      "hard_negative": 14,
+      "unknown_speech": 177,
+      "non_speech": 122,
+      "silence": 122
+    },
+    "far_target": 0.01
+  },
+  "nemotron-3.5-asr-0.6b/text|phrases20|balanced": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": 0.625,
+    "margin_t": 0.0,
+    "calib_objective": 0.78839590443686,
+    "calib_far": {
+      "hard_negative": 0.0,
+      "unknown_speech": 0.0,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.0,
+    "n_calib_pos": 586,
+    "n_calib_neg": {
+      "hard_negative": 14,
+      "unknown_speech": 177,
+      "non_speech": 122,
+      "silence": 122
+    },
+    "far_target": 0.05
+  },
+  "nemotron-3.5-asr-0.6b/text|torgo_words": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": -Infinity,
+    "margin_t": 0.75,
+    "calib_objective": 0.2804232804232804,
+    "calib_far": {
+      "unknown_speech": 0.0,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.0,
+    "n_calib_pos": 1512,
+    "n_calib_neg": {
+      "unknown_speech": 90,
+      "non_speech": 122,
+      "silence": 122
+    },
+    "far_target": 0.01
+  },
+  "nemotron-3.5-asr-0.6b/text|torgo_words|balanced": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": 0.75,
+    "margin_t": 0.0,
+    "calib_objective": 0.6428571428571429,
+    "calib_far": {
+      "unknown_speech": 0.03333333333333333,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.008982035928143712,
+    "n_calib_pos": 1512,
+    "n_calib_neg": {
+      "unknown_speech": 90,
+      "non_speech": 122,
+      "silence": 122
+    },
+    "far_target": 0.05
+  },
+  "nemotron-3.5-asr-0.6b/forced_sum|phrases20": {
+    "feasible": true,
+    "vad_t": 0.3,
+    "abs_t": -14.4931,
+    "margin_t": 0.0,
+    "calib_objective": 0.856655290102389,
+    "calib_far": {
+      "hard_negative": 0.0,
+      "unknown_speech": 0.005649717514124294,
+      "non_speech": 0.00819672131147541,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.004597701149425287,
+    "n_calib_pos": 586,
+    "n_calib_neg": {
+      "hard_negative": 14,
+      "unknown_speech": 177,
+      "non_speech": 122,
+      "silence": 122
+    },
+    "far_target": 0.01
+  },
+  "nemotron-3.5-asr-0.6b/forced_sum|phrases20|balanced": {
+    "feasible": true,
+    "vad_t": 0.3,
+    "abs_t": -14.4931,
+    "margin_t": 0.0,
+    "calib_objective": 0.856655290102389,
+    "calib_far": {
+      "hard_negative": 0.0,
+      "unknown_speech": 0.005649717514124294,
+      "non_speech": 0.00819672131147541,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.004597701149425287,
+    "n_calib_pos": 586,
+    "n_calib_neg": {
+      "hard_negative": 14,
+      "unknown_speech": 177,
+      "non_speech": 122,
+      "silence": 122
+    },
+    "far_target": 0.05
+  },
+  "nemotron-3.5-asr-0.6b/forced_sum|torgo_words": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": -1.7869,
+    "margin_t": 0.0,
+    "calib_objective": 0.24272486772486773,
+    "calib_far": {
+      "unknown_speech": 0.0,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.0,
+    "n_calib_pos": 1512,
+    "n_calib_neg": {
+      "unknown_speech": 90,
+      "non_speech": 122,
+      "silence": 122
+    },
+    "far_target": 0.01
+  },
+  "nemotron-3.5-asr-0.6b/forced_sum|torgo_words|balanced": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": -5.616589999999999,
+    "margin_t": 0.0,
+    "calib_objective": 0.6984126984126984,
+    "calib_far": {
+      "unknown_speech": 0.044444444444444446,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.011976047904191617,
+    "n_calib_pos": 1512,
+    "n_calib_neg": {
+      "unknown_speech": 90,
+      "non_speech": 122,
+      "silence": 122
+    },
+    "far_target": 0.05
+  },
+  "nemotron-3.5-asr-0.6b/forced_norm|phrases20": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": -2.448266666666667,
+    "margin_t": 0.0,
+    "calib_objective": 0.8720136518771331,
+    "calib_far": {
+      "hard_negative": 0.0,
+      "unknown_speech": 0.0,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.0,
+    "n_calib_pos": 586,
+    "n_calib_neg": {
+      "hard_negative": 14,
+      "unknown_speech": 177,
+      "non_speech": 122,
+      "silence": 122
+    },
+    "far_target": 0.01
+  },
+  "nemotron-3.5-asr-0.6b/forced_norm|phrases20|balanced": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": -2.448266666666667,
+    "margin_t": 0.0,
+    "calib_objective": 0.8720136518771331,
+    "calib_far": {
+      "hard_negative": 0.0,
+      "unknown_speech": 0.0,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.0,
+    "n_calib_pos": 586,
+    "n_calib_neg": {
+      "hard_negative": 14,
+      "unknown_speech": 177,
+      "non_speech": 122,
+      "silence": 122
+    },
+    "far_target": 0.05
+  },
+  "nemotron-3.5-asr-0.6b/forced_norm|torgo_words": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": -0.8817032499999998,
+    "margin_t": 2.03263125,
+    "calib_objective": 0.3723544973544973,
+    "calib_far": {
+      "unknown_speech": 0.0,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.0,
+    "n_calib_pos": 1512,
+    "n_calib_neg": {
+      "unknown_speech": 90,
+      "non_speech": 122,
+      "silence": 122
+    },
+    "far_target": 0.01
+  },
+  "nemotron-3.5-asr-0.6b/forced_norm|torgo_words|balanced": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": -1.9081125,
+    "margin_t": 0.6986366666666665,
+    "calib_objective": 0.6898148148148148,
+    "calib_far": {
+      "unknown_speech": 0.03333333333333333,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.008982035928143712,
+    "n_calib_pos": 1512,
+    "n_calib_neg": {
+      "unknown_speech": 90,
+      "non_speech": 122,
+      "silence": 122
+    },
+    "far_target": 0.05
+  },
+  "nemotron-3.5-asr-0.6b/forced_llr|phrases20": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": -0.033307692307692295,
+    "margin_t": 0.4677282828282827,
+    "calib_objective": 0.7969283276450512,
+    "calib_far": {
+      "hard_negative": 0.0,
+      "unknown_speech": 0.005649717514124294,
+      "non_speech": 0.00819672131147541,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.004597701149425287,
+    "n_calib_pos": 586,
+    "n_calib_neg": {
+      "hard_negative": 14,
+      "unknown_speech": 177,
+      "non_speech": 122,
+      "silence": 122
+    },
+    "far_target": 0.01
+  },
+  "nemotron-3.5-asr-0.6b/forced_llr|phrases20|balanced": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": -0.033307692307692295,
+    "margin_t": 0.07212676056338019,
+    "calib_objective": 0.8071672354948806,
+    "calib_far": {
+      "hard_negative": 0.0,
+      "unknown_speech": 0.02824858757062147,
+      "non_speech": 0.01639344262295082,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.016091954022988506,
+    "n_calib_pos": 586,
+    "n_calib_neg": {
+      "hard_negative": 14,
+      "unknown_speech": 177,
+      "non_speech": 122,
+      "silence": 122
+    },
+    "far_target": 0.05
+  },
+  "nemotron-3.5-asr-0.6b/forced_llr|torgo_words": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": 3.3479016666666723,
+    "margin_t": 0.0,
+    "calib_objective": 0.057539682539682536,
+    "calib_far": {
+      "unknown_speech": 0.0,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.0,
+    "n_calib_pos": 1512,
+    "n_calib_neg": {
+      "unknown_speech": 90,
+      "non_speech": 122,
+      "silence": 122
+    },
+    "far_target": 0.01
+  },
+  "nemotron-3.5-asr-0.6b/forced_llr|torgo_words|balanced": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": -Infinity,
+    "margin_t": 0.9885550000000003,
+    "calib_objective": 0.6951058201058201,
+    "calib_far": {
+      "unknown_speech": 0.044444444444444446,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.011976047904191617,
+    "n_calib_pos": 1512,
+    "n_calib_neg": {
+      "unknown_speech": 90,
+      "non_speech": 122,
+      "silence": 122
+    },
+    "far_target": 0.05
+  },
   "nemotron-streaming-0.6b-160ms/text|phrases20": {
     "feasible": true,
     "vad_t": 0.2,
@@ -663,6 +1251,258 @@
       "silence": 0.0
     },
     "calib_far_pooled": 0.008982035928143712,
+    "n_calib_pos": 1512,
+    "n_calib_neg": {
+      "unknown_speech": 90,
+      "non_speech": 122,
+      "silence": 122
+    },
+    "far_target": 0.05
+  },
+  "nemotron-streaming-0.6b-560ms/forced_sum|phrases20": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": -12.4532,
+    "margin_t": 0.0,
+    "calib_objective": 0.9590443686006825,
+    "calib_far": {
+      "hard_negative": 0.0,
+      "unknown_speech": 0.0,
+      "non_speech": 0.00819672131147541,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.0022988505747126436,
+    "n_calib_pos": 586,
+    "n_calib_neg": {
+      "hard_negative": 14,
+      "unknown_speech": 177,
+      "non_speech": 122,
+      "silence": 122
+    },
+    "far_target": 0.01
+  },
+  "nemotron-streaming-0.6b-560ms/forced_sum|phrases20|balanced": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": -15.520849999999996,
+    "margin_t": 0.0,
+    "calib_objective": 0.9607508532423208,
+    "calib_far": {
+      "hard_negative": 0.0,
+      "unknown_speech": 0.01694915254237288,
+      "non_speech": 0.00819672131147541,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.009195402298850575,
+    "n_calib_pos": 586,
+    "n_calib_neg": {
+      "hard_negative": 14,
+      "unknown_speech": 177,
+      "non_speech": 122,
+      "silence": 122
+    },
+    "far_target": 0.05
+  },
+  "nemotron-streaming-0.6b-560ms/forced_sum|torgo_words": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": -0.683525,
+    "margin_t": 0.0,
+    "calib_objective": 0.7208994708994709,
+    "calib_far": {
+      "unknown_speech": 0.0,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.0,
+    "n_calib_pos": 1512,
+    "n_calib_neg": {
+      "unknown_speech": 90,
+      "non_speech": 122,
+      "silence": 122
+    },
+    "far_target": 0.01
+  },
+  "nemotron-streaming-0.6b-560ms/forced_sum|torgo_words|balanced": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": -2.808962499999999,
+    "margin_t": 0.0,
+    "calib_objective": 0.8055555555555556,
+    "calib_far": {
+      "unknown_speech": 0.044444444444444446,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.011976047904191617,
+    "n_calib_pos": 1512,
+    "n_calib_neg": {
+      "unknown_speech": 90,
+      "non_speech": 122,
+      "silence": 122
+    },
+    "far_target": 0.05
+  },
+  "nemotron-streaming-0.6b-560ms/forced_norm|phrases20": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": -2.4198285714285714,
+    "margin_t": 0.0,
+    "calib_objective": 0.9590443686006825,
+    "calib_far": {
+      "hard_negative": 0.0,
+      "unknown_speech": 0.0,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.0,
+    "n_calib_pos": 586,
+    "n_calib_neg": {
+      "hard_negative": 14,
+      "unknown_speech": 177,
+      "non_speech": 122,
+      "silence": 122
+    },
+    "far_target": 0.01
+  },
+  "nemotron-streaming-0.6b-560ms/forced_norm|phrases20|balanced": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": -2.6800111111111113,
+    "margin_t": 0.0,
+    "calib_objective": 0.9607508532423208,
+    "calib_far": {
+      "hard_negative": 0.0,
+      "unknown_speech": 0.01694915254237288,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.006896551724137931,
+    "n_calib_pos": 586,
+    "n_calib_neg": {
+      "hard_negative": 14,
+      "unknown_speech": 177,
+      "non_speech": 122,
+      "silence": 122
+    },
+    "far_target": 0.05
+  },
+  "nemotron-streaming-0.6b-560ms/forced_norm|torgo_words": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": -0.5746866666666662,
+    "margin_t": 1.438049583333334,
+    "calib_objective": 0.6898148148148148,
+    "calib_far": {
+      "unknown_speech": 0.0,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.0,
+    "n_calib_pos": 1512,
+    "n_calib_neg": {
+      "unknown_speech": 90,
+      "non_speech": 122,
+      "silence": 122
+    },
+    "far_target": 0.01
+  },
+  "nemotron-streaming-0.6b-560ms/forced_norm|torgo_words|balanced": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": -0.7591499999999993,
+    "margin_t": 0.4077799999999998,
+    "calib_objective": 0.7982804232804233,
+    "calib_far": {
+      "unknown_speech": 0.044444444444444446,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.011976047904191617,
+    "n_calib_pos": 1512,
+    "n_calib_neg": {
+      "unknown_speech": 90,
+      "non_speech": 122,
+      "silence": 122
+    },
+    "far_target": 0.05
+  },
+  "nemotron-streaming-0.6b-560ms/forced_llr|phrases20": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": -Infinity,
+    "margin_t": 1.2019,
+    "calib_objective": 0.9351535836177475,
+    "calib_far": {
+      "hard_negative": 0.0,
+      "unknown_speech": 0.0,
+      "non_speech": 0.00819672131147541,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.0022988505747126436,
+    "n_calib_pos": 586,
+    "n_calib_neg": {
+      "hard_negative": 14,
+      "unknown_speech": 177,
+      "non_speech": 122,
+      "silence": 122
+    },
+    "far_target": 0.01
+  },
+  "nemotron-streaming-0.6b-560ms/forced_llr|phrases20|balanced": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": -1.15535876984127,
+    "margin_t": 0.40525714285714276,
+    "calib_objective": 0.9539249146757679,
+    "calib_far": {
+      "hard_negative": 0.0,
+      "unknown_speech": 0.02824858757062147,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.011494252873563218,
+    "n_calib_pos": 586,
+    "n_calib_neg": {
+      "hard_negative": 14,
+      "unknown_speech": 177,
+      "non_speech": 122,
+      "silence": 122
+    },
+    "far_target": 0.05
+  },
+  "nemotron-streaming-0.6b-560ms/forced_llr|torgo_words": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": -Infinity,
+    "margin_t": 2.185160000000001,
+    "calib_objective": 0.44312169312169314,
+    "calib_far": {
+      "unknown_speech": 0.0,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.0,
+    "n_calib_pos": 1512,
+    "n_calib_neg": {
+      "unknown_speech": 90,
+      "non_speech": 122,
+      "silence": 122
+    },
+    "far_target": 0.01
+  },
+  "nemotron-streaming-0.6b-560ms/forced_llr|torgo_words|balanced": {
+    "feasible": true,
+    "vad_t": 0.2,
+    "abs_t": -0.13169999999999943,
+    "margin_t": 0.0,
+    "calib_objective": 0.7824074074074074,
+    "calib_far": {
+      "unknown_speech": 0.044444444444444446,
+      "non_speech": 0.0,
+      "silence": 0.0
+    },
+    "calib_far_pooled": 0.011976047904191617,
     "n_calib_pos": 1512,
     "n_calib_neg": {
       "unknown_speech": 90,
