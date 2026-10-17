@@ -4,7 +4,7 @@
  Browser (web/, React + Vite)                         ── all camera/mic frames stay on this Mac ──
  ┌───────────────────────────────────────────────────────────────────────────────────────────────┐
  │ MediaPipe Face Landmarker (wasm/GPU): mouth ROI overlay, face-quality hints, deliberate blink  │
- │ WebGazer.js: calibrated gaze estimate → dwell engine (hysteresis, cooldown, longer confirm)    │
+ │ Gaze: MediaPipe iris + MobileGaze (ONNX Web) → ridge calibration → dwell or look+blink         │
  │ Selection engine: click · keyboard · hover dwell · gaze dwell · blink scan → audited method    │
  │ MediaRecorder: silent mouth clip (webm) · voice clip (webm/opus)                               │
  └──────────────┬─────────────────────────────────────────────────────────────▲──────────────────┘
@@ -33,7 +33,7 @@
 | Lip-reading (vsr) | mouth video clip | n-best raw transcripts, beam scores, face/mouth-motion quality | rewrite or "correct" text (Chaplin's LLM correction is deliberately not used) |
 | Voice (audio) | microphone clip | raw-audio and enhanced-audio transcripts with word probabilities and a word diff | merge the two, or emit words when no voice activity is detected |
 | EEG replay (eeg) | recorded BNCI2014-008 trials | per-flash P300 scores, decoded row/column/letter | read ground-truth labels before predicting; claim live brain input |
-| Gaze / blink (browser) | webcam | selection events with method + dwell | count as confirmation unless the person dwells on the separate confirm target |
+| Gaze / blink (browser) | webcam (MediaPipe iris + MobileGaze eye-image model, per-person ridge calibration) | selection events with method + dwell | count as confirmation unless the person dwells, or holds a look and blinks deliberately, on the separate confirm target |
 | Coordinator | structured evidence summary (no media) | exactly one typed tool call: `ask_confirmation`, `request_retake`, `switch_input_method`, (`speak_confirmed_text`, always rejected without a confirmation event) | write, rephrase or choose the patient's message |
 | Policy gate (code) | message + audit log | TTS token or `PolicyViolation` | — |
 | TTS | token + text | audio of exactly that text | speak anything without a matching token |

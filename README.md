@@ -30,7 +30,7 @@ Requirements: Python 3.12 via `uv`, Node 20+, Ollama with `nemotron-3.5-lightnin
 | View | What it does |
 |---|---|
 | **Communicate** | Live camera with a MediaPipe mouth overlay and the "model view" crop; silent-mouth and weak-voice capture; candidate cards with source badges, raw scores and low-confidence words; coordinator note with its exact tool call; separate **Speak it** confirm dock; phrase board and two-step spelling board; live agent graph and timeline; conversation history with audit trail; a button that tries to speak an unconfirmed guess so you can watch the policy gate block it |
-| **Eyes** | Hands-free 9-point WebGazer calibration with a measured error in pixels (gaze stays off if it is poor), plus deliberate-blink tuning |
+| **Eyes** | Webcam gaze from the MediaPipe iris landmarks plus the MobileGaze eye-image model (ONNX Runtime Web), fitted to the person with a hands-free calibration (2 rounds of 9 dots). The error is measured in pixels on 5 unseen dots, and gaze stays off if it is poor (≥ 220 px). Plus deliberate-blink tuning and a head fine-tune setting |
 | **Brain replay** | 8 ALS participants; the 6×6 matrix replays the recording's real flash sequence while row/column P300 evidence accumulates; scrolling EEG trace; ERP and accuracy-vs-repetitions charts; ground truth revealed only after inference; decoded letters can be routed into the communication panel, labelled `RECORDED EEG` |
 | **Evidence** | Parameter ledger counted from the weight files, per-modality held-out results, NeMo Gym coordinator scores, safety tests, saved failures, sources and licences |
 

@@ -65,5 +65,5 @@ Supporting components in the harness:
 - **Auto-AVSR** was trained on LRS3 broadcast speech. Its benchmark WER (~19–20%) is not webcam or patient accuracy; see EVALUATION.md for unseen-speaker GRID results. A still face makes it hallucinate fluent sentences, so mouth-motion gating is mandatory.
 - **Whisper** is not validated on dysarthric speech, and it hallucinates on silence. The voice agent returns no hypotheses when RNNoise finds no voice activity.
 - **RNNoise + gain** can make ASR *worse* in heavy noise (measured). Raw and enhanced transcripts are always shown side by side.
-- **WebGazer** gives an estimate of screen position with tens to hundreds of pixels of error. It is not clinical eye tracking.
+- **Webcam gaze** (MediaPipe iris + MobileGaze, per-person calibration) is an estimate, not clinical eye tracking. The best calibration error measured in development was 79 px, against 334 px with the WebGazer setup it replaced (commit 9451d6d). Accuracy varies with lighting, head motion and the person, so selection uses dwell, hysteresis scaled to the measured error, and a separate confirm target. Gaze stays off when calibration error is ≥ 220 px.
 - **Nemotron** is used only to pick the next interaction step. Every call is validated by code, and it cannot produce message text.
