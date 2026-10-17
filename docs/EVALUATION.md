@@ -79,7 +79,15 @@ Both raw models fail on the same thing: history. After two failed retakes they a
   - Thresholds are tuned on calib only. Objective: the most correct accepts with a false-accept rate ≤ 1% for every negative type.
 - **Reporting:** every rate comes with k/n and a Wilson interval, plus the rule-of-three bound when k = 0. TTS and degraded rows are kept apart from real recordings. The best configuration is selected on calib and reported on test.
 
-**Status (2026-10-17).**
+**Result (2026-10-17, 3 recorded speakers, leave-one-speaker-out, `asr_eval/results/loso.md`).** Nemotron Speech Streaming en 0.6B with forced RNNT phrase scoring (`forced_llr`) is the voice agent's model.
+- It accepted the right phrase for 168/235 real recordings (71.5%), with 1 wrong phrase.
+- It resolved 212/235 (90.2%) within one gaze question (candidate, or the right phrase in the coordinator's top 3).
+- False accepts: 0/45 near-miss sentences, 1/19 silence/noise/cough, 0/7 unrelated speech.
+- Latency: 43 ms median, 94 ms p95, per clip on the GPU.
+- Remaining losses are noisy, muffled and whispered speech.
+- The multilingual Nemotron 3.5 was tested with an English prompt and was less accurate and slower, so it was not adopted.
+
+**Earlier status (2026-10-17).**
 - Milestone 1 (Silero + Parakeet-CTC 0.6B + manifest) passes end to end on CPU and is running on Brev (RTX PRO 6000).
 - The other models (Parakeet-TDT, Nemotron Speech Streaming, Whisper via faster-whisper) follow.
 - Results go to `asr_eval/results/summary.md` and replace this paragraph when measured.

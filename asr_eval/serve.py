@@ -1,7 +1,7 @@
 """Live test bench: speak into your local browser, decide on the GPU box.
 
     # on the GPU box (or the laptop, CPU)
-    python serve.py --config configs/eval.yaml --model nemotron-streaming-0.6b --method forced_sum --port 8800
+    python serve.py --config configs/eval.yaml --model nemotron-streaming-0.6b --method forced_llr --port 8800
     # on the laptop
     brev port-forward <instance> --port 8800:8800      # then open http://localhost:8800
 
@@ -308,7 +308,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--config", default="configs/eval.yaml")
     ap.add_argument("--model", default="nemotron-streaming-0.6b")
-    ap.add_argument("--method", default="forced_sum")
+    ap.add_argument("--method", default="forced_llr")
     ap.add_argument("--point", default="balanced", help="operating point: strict (headline) or a name from decision.operating_points")
     ap.add_argument("--language", default="en", help="patient language code from `languages` (multilingual models only)")
     ap.add_argument("--host", default="127.0.0.1", help="keep 127.0.0.1 and reach it through brev port-forward")
