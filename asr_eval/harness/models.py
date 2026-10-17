@@ -16,7 +16,10 @@ import gc
 
 import numpy as np
 
+import re
+
 SR = 16000
+LANG_TAG = re.compile(r"\s*<[a-z]{2,3}(?:-[A-Za-z]{2,4})?>\s*")  # "<en-US>" appended by prompt-conditioned models
 IMPOSSIBLE = -1e6  # log P for an alignment that cannot exist (target longer than the audio allows)
 
 
@@ -238,26 +241,35 @@ class NemoTransducer(Model):
                     hyps = hyps[0]
                 h = hyps[0]
                 text = h.text if isinstance(h.text, str) else self.model.tokenizer.ids_to_text([int(t) for t in h.y_sequence])
-                return {"text": text.strip(), "nbest": [text.strip()], "path": "direct"}
+                text = LANG_TAG.sub(" ", text).strip()
+                return {"text": text, "nbest": [text], "path": "direct"}
             except Exception as exc:  # fall back to the library's own transcribe() and say so
                 self.direct = False
                 self.notes.append(f"direct decode failed ({type(exc).__name__}: {str(exc)[:120]}); using model.transcribe()")
         out = self.model.transcribe([np.ascontiguousarray(wav, dtype=np.float32)], batch_size=1, verbose=False)
         out = out[0] if isinstance(out, tuple) else out
         h = out[0]
-        text = h.text if hasattr(h, "text") else str(h)
-        return {"text": text.strip(), "nbest": [text.strip()], "path": "transcribe"}
+        text = LANG_TAG.sub(" ", h.text if hasattr(h, "text") else str(h)).strip()
+        return {"text": text, "nbest": [text], "path": "transcribe"}
 
     LONG_TEXT = 32  # tokens; longer texts (free transcripts of long negatives) are scored alone, not padded into the batch
+    MAX_JOINT = 2e8  # elements per joint tensor (B x T x U x V); larger batches are chunked (int32 indexing limit is 2^31)
 
     def score_phrases(self, wav, texts):
         tok = self.model.tokenizer
         ids = [tok.text_to_ids(t) if t.strip() else [] for t in texts]
         short = [k for k, i in enumerate(ids) if len(i) <= self.LONG_TEXT]
         out: list = [None] * len(ids)
+        enc, _ = self._encode(wav)
+        frames, vocab = enc.shape[-1], self.model.joint.num_classes_with_blank + 1
         for group in [short] + [[k] for k in range(len(ids)) if k not in set(short)]:
-            if group:
-                for k, v in zip(group, self._score_ids(wav, [ids[k] for k in group])):
+            if not group:
+                continue
+            u = max(1, max(len(ids[k]) for k in group)) + 1
+            step = max(1, int(self.MAX_JOINT // (frames * u * vocab)))
+            for i in range(0, len(group), step):
+                chunk = group[i:i + step]
+                for k, v in zip(chunk, self._score_ids(wav, [ids[k] for k in chunk])):
                     out[k] = v
         return out
 
