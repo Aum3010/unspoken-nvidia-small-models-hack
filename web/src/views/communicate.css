@@ -15,15 +15,22 @@
 .channel-glow { position: absolute; left: 16px; right: 16px; bottom: 0; height: 3px; border-radius: 3px; background: var(--c); box-shadow: 0 0 18px var(--c); }
 
 .comm-grid { display: grid; grid-template-columns: minmax(320px, 400px) minmax(0, 1fr) minmax(300px, 360px); gap: 18px; align-items: start; }
+.comm-grid.board-only { grid-template-columns: minmax(280px, 340px) minmax(0, 1fr) minmax(360px, 460px); }
 .col-left, .col-center, .col-right { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
 .col-right { position: sticky; top: 92px; }
 @media (max-width: 1320px) {
   .comm-grid { grid-template-columns: minmax(300px, 380px) minmax(0, 1fr); }
   .col-right { grid-column: 1 / -1; position: static; display: grid; grid-template-columns: 1fr 1fr; }
+  /* phrases/spell: keep board and message side by side; selection settings move below */
+  .comm-grid.board-only { grid-template-columns: minmax(0, 1fr) minmax(340px, 420px); }
+  .board-only .col-center { grid-column: 1; grid-row: 1; }
+  .board-only .col-right { grid-column: 2; grid-row: 1; position: sticky; display: flex; }
+  .board-only .col-left { grid-column: 1 / -1; grid-row: 2; }
 }
 @media (max-width: 900px) {
-  .comm-grid { grid-template-columns: 1fr; }
+  .comm-grid, .comm-grid.board-only { grid-template-columns: 1fr; }
   .col-right { grid-template-columns: 1fr; }
+  .board-only .col-center, .board-only .col-right, .board-only .col-left { grid-column: 1; grid-row: auto; position: static; }
 }
 
 .modes { display: grid; gap: 8px; }
