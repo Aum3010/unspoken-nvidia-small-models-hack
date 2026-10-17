@@ -133,8 +133,9 @@ class NemoTransducer(Model):
 
     score_phrases: log P(phrase | audio) = -loss over all alignments, from the same encoder pass as the
     transcript (prediction network + joint batched over every phrase form). The loss comes from the model's
-    own config (TDT for Parakeet-TDT, RNNT for Nemotron) with FastEmit off: that is a training regulariser and
-    would bias scores. If the GPU loss kernel is unavailable, the joint output is scored on the CPU.
+    own config (TDT for Parakeet-TDT, RNNT for Nemotron), using NeMo's pure-PyTorch implementations: the default
+    numba kernels need libNVVM, which pip-installed PyTorch does not ship. FastEmit (a training regulariser) is
+    not applied, so scores are plain -log P.
 
     `att_context` (e.g. [70, 1]) sets a cache-aware model's right context. Offline decoding at that context
     reproduces its streaming output at that lookahead (80 ms frames: [70,1] ~ 160 ms, [70,6] ~ 560 ms).
@@ -166,14 +167,14 @@ class NemoTransducer(Model):
         self._cache = None
         loss_name, loss_kwargs = m.extract_rnnt_loss_cfg(m.cfg.get("loss", None))
         loss_kwargs = dict(loss_kwargs or {})
-        if "fastemit_lambda" in loss_kwargs:
-            loss_kwargs["fastemit_lambda"] = 0.0
         n = m.joint.num_classes_with_blank - 1
         if loss_name == "tdt":
             n -= getattr(m.joint, "num_extra_outputs", 0)
-        self.loss = RNNTLoss(num_classes=n, loss_name=loss_name, loss_kwargs=loss_kwargs, reduction=None)
-        self.notes.append(f"forced scoring loss={loss_name}")
-        self.loss_on_cpu = False
+            torch_name, kw = "tdt_pytorch", {k: loss_kwargs[k] for k in ("durations", "sigma") if k in loss_kwargs}
+        else:
+            torch_name, kw = "pytorch", {}
+        self.loss = RNNTLoss(num_classes=n, loss_name=torch_name, loss_kwargs=kw, reduction=None)
+        self.notes.append(f"forced scoring loss={torch_name} {kw} (model trained with {loss_name})")
 
     def info(self) -> dict:
         return {"checkpoint": self.checkpoint, "revision": self.revision, "params": sum(p.numel() for p in self.model.parameters()),
@@ -247,13 +248,7 @@ class NemoTransducer(Model):
         return out
 
     def _nll(self, logits, targets, enc_len, tlen):
-        if not self.loss_on_cpu:
-            try:
-                return self.loss(log_probs=logits, targets=targets, input_lengths=enc_len, target_lengths=tlen).reshape(-1)
-            except Exception as exc:
-                self.loss_on_cpu = True
-                self.notes.append(f"GPU transducer loss failed ({type(exc).__name__}); scoring on CPU")
-        return self.loss(log_probs=logits.cpu(), targets=targets.cpu(), input_lengths=enc_len.cpu(), target_lengths=tlen.cpu()).reshape(-1)
+        return self.loss(log_probs=logits, targets=targets, input_lengths=enc_len, target_lengths=tlen).reshape(-1)
 
 
 # ---- faster-whisper (CTranslate2) -------------------------------------------------------------------
