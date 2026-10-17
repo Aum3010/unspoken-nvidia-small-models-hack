@@ -1,0 +1,37 @@
+# Unspoken backend — Python 3.12, Apple Silicon (Metal via MPS + MLX). Tested versions.
+fastapi==0.143.3
+uvicorn[standard]==0.54.0
+pydantic==2.14.1
+httpx==0.28.1
+python-multipart==0.0.32
+websockets==17.2
+numpy==1.26.4            # mediapipe 0.10.21 needs numpy<2
+scipy==1.17.1
+scikit-learn==1.9.1
+scikit-image==0.26.0
+joblib==1.6.0
+soundfile==0.14.0
+av==19.0.1               # bundles ffmpeg: decodes browser webm/mp4
+opencv-python-headless==4.11.0.86
+# visual speech (Chaplin / Auto-AVSR on MPS)
+torch==2.14.1
+torchvision==0.29.1
+torchaudio==2.11.0
+mediapipe==0.10.21       # last line with mp.solutions face detection used by Chaplin
+six==1.17.0
+# audio
+mlx-whisper==0.4.3
+pyrnnoise==0.4.5
+# speech output (Kokoro-82M on MLX)
+mlx-audio==0.5.9
+misaki[en]==0.9.4
+en_core_web_sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl
+# optional: serve the coordinator with MLX instead of Ollama
+mlx-lm==0.32.2
+# EEG replay
+mne==1.13.2
+pyriemann==0.7           # 0.8+ needs numpy>=2
+pypdf
+# evaluation
+jiwer==4.0.0
+pytest==9.1.1
