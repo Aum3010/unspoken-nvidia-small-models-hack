@@ -33,7 +33,7 @@ def audit_bigp3bci(res: AuditResult) -> dict:
         return stats
     chars_by_rec, rec_rows, hdr = {}, [], defaultdict(dict)
     run_rows, sel_rows, ev_rows, tgt_rows, lab_rows = [], [], [], [], []
-    for p in sorted(RAW_BIG.rglob("*.edf")):
+    for p in sorted(RAW_BIG.glob("StudyF/**/*.edf")):     # the Study F benchmark audit; other studies have their own scripts
         out = bigp3bci.read_recording(p, RAW_BIG, res)
         stats["files"] += 1
         if out is None:

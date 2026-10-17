@@ -20,7 +20,7 @@ from services.eeg.datasets.schema import AuditResult, Protocol
 STATE = ["StimulusType", "SelectedTarget", "SelectedRow", "SelectedColumn", "PhaseInSequence", "StimulusBegin",
          "StimulusCode", "CurrentTarget", "FakeFeedback", "DisplayResults"]
 KNOWN_PHASES = {0, 1, 2, 3}
-FILE_RE = re.compile(r"(?P<p>[A-Z0-9]+_\d+)_SE(?P<s>\d{3})_(?:(?P<c>[A-Za-z]+)_)?(?P<t>Train|Test)(?P<i>\d+)\.edf$")
+FILE_RE = re.compile(r"(?P<p>[A-Z0-9]+_\d+)_SE(?P<s>\d{3})_(?:(?P<c>[A-Za-z][A-Za-z0-9]*)_)?(?P<t>Train|Test)(?P<i>\d+)\.edf$")
 CHAR_RE = re.compile(r"^(?P<ch>.+)_(?P<r>\d)_(?P<c>\d)$")
 ET_PREFIX = "ET"
 
