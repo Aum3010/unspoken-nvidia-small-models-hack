@@ -6,6 +6,7 @@ import { PhraseBoard, SpellBoard } from '../components/Board'
 import { Composer } from '../components/Composer'
 import { SensorStage } from '../components/SensorStage'
 import { api } from '../lib/api'
+import { trackCameraInBackground } from '../lib/face'
 import { gazeState, startGaze } from '../lib/gaze'
 import { useSelection, type InputMode } from '../lib/selection'
 import type { SessionState, SpokenItem } from '../lib/types'
@@ -59,6 +60,15 @@ export function Communicate({ state, connected, channel, setChannel, notify, spe
     sel.setSettings({ mode: m })
   }
 
+  // blink scanning needs face tracking; on the boards there is no visible camera to provide it
+  useEffect(() => {
+    if (sel.mode !== 'scan' || !(channel === 'board' || channel === 'spell')) return
+    let release: (() => void) | null = null
+    let cancelled = false
+    trackCameraInBackground().then((r) => { if (cancelled) r(); else release = r }).catch(() => notify('Camera permission needed for blink scanning', 'error'))
+    return () => { cancelled = true; release?.() }
+  }, [sel.mode, channel, notify])
+
   const run = useCallback(async (fn: () => Promise<unknown>) => {
     setBusy(true)
     try { await fn() } catch (e: any) { notify(e.message ?? 'Something went wrong', 'error') } finally { setBusy(false) }
@@ -85,6 +95,10 @@ export function Communicate({ state, connected, channel, setChannel, notify, spe
   }
 
   const sensorChannel: 'lip' | 'audio' = channel === 'audio' ? 'audio' : 'lip'
+  // Phrases/Spell need no lip or voice capture: hide that panel and put the board beside the message
+  const boardOnly = channel === 'board' || channel === 'spell'
+  const composer = <Composer state={state} onSpoken={speak} onSwitch={onSwitch} onRetake={(m) => setChannel(m === 'audio' ? 'audio' : 'lip')} notify={notify} />
+  const board = channel === 'spell' ? <SpellBoard notify={notify} /> : <PhraseBoard notify={notify} />
 
   return (
     <div className="container comm">
@@ -101,14 +115,16 @@ export function Communicate({ state, connected, channel, setChannel, notify, spe
         })}
       </div>
 
-      <div className="comm-grid">
+      <div className={`comm-grid${boardOnly ? ' board-only' : ''}`}>
         <section className="col-left">
-          <SensorStage
-            mode={sensorChannel}
-            busy={busy}
-            onLipClip={(b) => run(() => api.captureLip(b))}
-            onAudioClip={(b, enhance) => run(() => api.captureAudio(b, enhance))}
-          />
+          {!boardOnly && (
+            <SensorStage
+              mode={sensorChannel}
+              busy={busy}
+              onLipClip={(b) => run(() => api.captureLip(b))}
+              onAudioClip={(b, enhance) => run(() => api.captureAudio(b, enhance))}
+            />
+          )}
           <div className="glass panel">
             <div className="panel-title">How you select</div>
             <div className="modes">
@@ -148,11 +164,12 @@ export function Communicate({ state, connected, channel, setChannel, notify, spe
         </section>
 
         <section className="col-center">
-          <Composer state={state} onSpoken={speak} onSwitch={onSwitch} onRetake={(m) => setChannel(m === 'audio' ? 'audio' : 'lip')} notify={notify} />
-          {channel === 'spell' ? <SpellBoard notify={notify} /> : <PhraseBoard notify={notify} />}
+          {!boardOnly && composer}
+          {board}
         </section>
 
         <section className="col-right">
+          {boardOnly && composer}
           <AgentTrace timeline={state.timeline} />
           <History spoken={state.spoken} onReplay={replay} />
         </section>

@@ -25,7 +25,7 @@ export function PhraseBoard({ notify }: { notify: (m: string, k?: 'error' | 'inf
         <div className="panel-title" style={{ margin: 0 }}>Phrase board</div>
         <div className="seg">
           {PHRASES.map((g, i) => (
-            <button key={g.group} aria-pressed={i === group} onClick={() => setGroup(i)}>{g.group}</button>
+            <DwellButton key={g.group} aria-pressed={i === group} onActivate={() => setGroup(i)}>{g.group}</DwellButton>
           ))}
         </div>
       </div>

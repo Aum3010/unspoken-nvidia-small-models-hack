@@ -1,8 +1,10 @@
 // MediaPipe Face Landmarker (runs locally in the browser, wasm + GPU delegate).
 // Used for: mouth ROI overlay/crop preview, face-quality hints before a lip
-// capture, and deliberate-blink detection. Landmarks do not decode words.
+// capture, deliberate-blink detection, and the iris + head-pose features used for gaze
+// (lib/gaze.ts). Landmarks do not decode words.
 
 import { FaceLandmarker, FilesetResolver } from '@mediapipe/tasks-vision'
+import { getCamera } from './capture'
 
 export interface FaceFrame {
   present: boolean
@@ -12,6 +14,7 @@ export interface FaceFrame {
   blinkL: number
   blinkR: number
   yaw: number            // rough left/right head turn, -1..1
+  pose: number[] | null  // 4x4 facial transformation matrix (flattened), head rotation + translation
   t: number
 }
 
@@ -42,6 +45,7 @@ export function initFace(): Promise<FaceLandmarker> {
       runningMode: 'VIDEO',
       numFaces: 1,
       outputFaceBlendshapes: true,
+      outputFacialTransformationMatrixes: true,
     })
     return landmarker
   })()
@@ -75,7 +79,7 @@ export function trackVideo(video: HTMLVideoElement): () => void {
         yaw = ((nose.x - l.x) / Math.max(1e-3, r.x - l.x) - 0.5) * 2
       }
       const frame: FaceFrame = {
-        present: !!lm, landmarks: lm, mouthBox, yaw,
+        present: !!lm, landmarks: lm, mouthBox, yaw, pose: res.facialTransformationMatrixes?.[0]?.data ?? null,
         mouthOpen: shapes.jawOpen ?? 0, blinkL: shapes.eyeBlinkLeft ?? 0, blinkR: shapes.eyeBlinkRight ?? 0, t,
       }
       detectBlink(frame)
@@ -86,6 +90,31 @@ export function trackVideo(video: HTMLVideoElement): () => void {
   }
   initFace().then(step).catch((e) => console.warn('face landmarker unavailable', e))
   return () => { stopped = true }
+}
+
+// Background tracking for pages with no visible camera (gaze, blink scanning on the boards).
+// Reference-counted: one off-screen video and one tracking loop, however many users.
+let bg: { video: HTMLVideoElement; stop: () => void } | null = null
+let bgUsers = 0
+export async function trackCameraInBackground(): Promise<() => void> {
+  bgUsers++
+  if (!bg) {
+    const video = document.createElement('video')
+    // off-screen but rendered: display:none would stop frame decoding
+    Object.assign(video.style, { position: 'fixed', width: '2px', height: '2px', opacity: '0', pointerEvents: 'none', left: '0', top: '0' })
+    video.muted = true
+    video.playsInline = true
+    document.body.appendChild(video)
+    video.srcObject = await getCamera()
+    await video.play()
+    bg = { video, stop: trackVideo(video) }
+  }
+  let released = false
+  return () => {
+    if (released) return
+    released = true
+    if (--bgUsers === 0 && bg) { bg.stop(); bg.video.remove(); bg = null }
+  }
 }
 
 function detectBlink(f: FaceFrame) {

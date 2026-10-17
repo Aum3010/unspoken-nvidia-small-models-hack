@@ -32,3 +32,13 @@
 .tile.letter { min-height: 104px; font-size: 2.6rem; font-family: var(--font-display); font-weight: 400; }
 .tile.back { color: var(--text-3); }
 .spell-ctrl { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+
+/* Gaze dwell: webcam gaze is off by tens of pixels, so targets get bigger and gaps wider than that error */
+[data-input='gaze'] .board { gap: 22px; }
+[data-input='gaze'] .seg { gap: 10px; padding: 6px; }
+[data-input='gaze'] .seg button { padding: 18px 22px; font-size: 1.05rem; }
+[data-input='gaze'] .yesno { gap: 40px; }
+[data-input='gaze'] .yesno .tile { min-height: 150px; font-size: 2rem; }
+[data-input='gaze'] .tiles { grid-template-columns: repeat(2, 1fr); gap: 40px 40px; }
+[data-input='gaze'] .tile { min-height: 132px; font-size: 1.3rem; }
+[data-input='gaze'] .tile:hover { transform: none; }
