@@ -91,6 +91,7 @@
   <label class="meta">Model <select id="model"></select></label>
   <label class="meta">Method <select id="method"></select></label>
   <label class="meta">Sensitivity <select id="point"></select></label>
+  <label class="meta">Patient speaks <select id="lang" aria-label="Patient language"></select></label>
   <span class="meta" id="device"></span>
   <span class="meta" id="status" role="status">connecting…</span>
 </header>
@@ -194,22 +195,27 @@ function renderConfig(c) {
   const m = c.models.find(x => x.name === c.model);
   fill($("method"), m.methods.map(x => [x, x + (m.tuned.includes(x) ? "" : " (untuned)")]), c.method);
   fill($("point"), Object.entries(c.points).map(([k, v]) => [k, `${k} (≤${Math.round(v * 100)}% false accepts)`]), c.point);
+  fill($("lang"), c.languages.map(l => [l.code, l.name]), c.language);
+  $("lang").disabled = !m.multilingual;
+  $("lang").title = m.multilingual ? "The model listens in this language; the answer is always English" : "This model is English-only";
   $("device").textContent = c.device;
-  $("phrases").innerHTML = Object.values(c.phrases).map(t => `<li>${t}</li>`).join("");
+  $("phrases").innerHTML = Object.entries(c.phrases).map(([k, t]) =>
+    `<li>${t}${c.language !== "en" ? ` <span class="note">· ${c.phrases_native[k]}</span>` : ""}</li>`).join("");
   $("hardneg").textContent = Object.values(c.hard_negatives).map(t => `“${t}”`).join(", ");
   $("notice").textContent = c.notice;
   fill($("condition"), c.conditions.map(x => [x, x]), $("condition").value || c.conditions[0]);
-  $("calnote").textContent = c.thresholds ? (c.thresholds_note ? "Note: thresholds were tuned with " + c.thresholds_note + "." : "")
-                                          : "No tuned thresholds for this model/method/sensitivity yet: rankings are shown, decisions are not.";
+  $("calnote").textContent = [c.thresholds ? (c.thresholds_note ? "Note: thresholds were tuned with " + c.thresholds_note + "." : "")
+                                           : "No tuned thresholds for this model/method/sensitivity yet: rankings are shown, decisions are not.",
+                               c.language_note || ""].filter(Boolean).join(" ");
   $("status").textContent = "ready";
 }
 async function choose() {
   $("status").textContent = "loading model…";
-  try { renderConfig(await post("/api/select", { model: $("model").value, method: $("method").value, point: $("point").value })); }
+  try { renderConfig(await post("/api/select", { model: $("model").value, method: $("method").value, point: $("point").value, language: $("lang").value })); }
   catch (e) { $("status").textContent = "error: " + e.message; }
 }
 $("model").onchange = () => { $("method").value = "text"; choose(); };
-$("method").onchange = choose; $("point").onchange = choose;
+$("method").onchange = choose; $("point").onchange = choose; $("lang").onchange = choose;
 
 // ---------- tabs ----------
 function setMode(m) {
@@ -317,11 +323,13 @@ function show(r) {
   $("decision").className = "decision " + r.decision;
   $("kind").textContent = r.decision === "candidate" ? "candidate · confirm with gaze" : r.decision.replace("_", " ");
   $("big").textContent = r.decision === "candidate" ? r.phrase_text : ({ unknown: "Not sure", no_speech: "Nothing heard" }[r.decision] || "Untuned");
+  $("big").title = r.decision === "candidate" && r.language !== "en" ? "heard as: " + r.phrase_native : "";
   $("why").textContent = (REASONS[r.reason] || r.reason) + (r.thresholds ? ` · ${r.model}/${r.method} · ${r.point}` : "");
   const sc = r.top3.map(t => t.score), max = Math.max(...sc), min = Math.min(...sc, 0);
   $("top3").innerHTML = "<div class='kv'><b>Top 3</b></div>" + r.top3.map(t => {
     const w = r.method === "text" ? t.score * 100 : (max === min ? 100 : 100 * (t.score - min) / (max - min));
-    return `<div class="r"><span>${t.text}</span><span>${t.score.toFixed(3)}</span><div class="bw"><div class="bar" style="width:${Math.max(3, w)}%"></div></div></div>`;
+    const nat = r.language !== "en" ? ` <span class="note">(${t.native})</span>` : "";
+    return `<div class="r"><span>${t.text}${nat}</span><span>${t.score.toFixed(3)}</span><div class="bw"><div class="bar" style="width:${Math.max(3, w)}%"></div></div></div>`;
   }).join("");
   const tm = r.timings_ms, sig = r.signals || {};
   $("details").innerHTML = `<b>Transcript</b>${r.transcript || "<i>(empty)</i>"}

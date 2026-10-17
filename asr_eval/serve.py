@@ -71,28 +71,39 @@ def decode(data: bytes) -> np.ndarray:
 
 
 class Bench:
-    def __init__(self, cfg, model_name: str, method: str, point: str = "balanced"):
+    def __init__(self, cfg, model_name: str, method: str, point: str = "balanced", language: str = "en"):
         self.cfg = cfg
+        langs = cfg.get("languages") or {}
+        self.languages = {k: v for k, v in langs.items() if k != "default"} or {"en": {"name": "English", "locale": "en-US"}}
+        self.lang = "en"
         self.points = {"strict": cfg["decision"]["far_target"], **(cfg["decision"].get("operating_points") or {})}
         self.lock = threading.Lock()
         self.vad = Vad()
         self.vocab = {"phrases20": cfg.phrases}
         self.forms = task_forms(self.vocab)
+        self.language_note = None
         th_path = cfg.results / "thresholds.json"
         self.thresholds = json.loads(th_path.read_text()) if th_path.exists() else {}
         self.clips: OrderedDict[str, np.ndarray] = OrderedDict()
         self.model = None
-        self.select(model_name, method, point)
+        self.select(model_name, method, point, language)
 
     def methods_for(self, model_name: str) -> list[str]:
         spec = self.cfg.model(model_name)
         scoring = spec["kind"] == "hf_ctc" or (spec["kind"] == "nemo_transducer" and spec.get("forced_scoring", True))
         return [m for m in self.cfg["decision"]["methods"] if m == "text" or scoring]
 
+    def supports_language(self, model_name: str) -> bool:
+        spec = self.cfg.model(model_name)
+        return spec["kind"] == "nemo_transducer" and bool(spec.get("target_lang"))
+
+    def negation_words(self) -> set[str]:
+        return set(self.languages.get(self.lang, {}).get("negation_words") or self.cfg["decision"]["negation_words"])
+
     def th_key(self, model_name: str, method: str, point: str) -> str:
         return f"{model_name}/{method}|phrases20" + ("" if point == "strict" else f"|{point}")
 
-    def select(self, model_name: str, method: str, point: str = "balanced"):
+    def select(self, model_name: str, method: str, point: str = "balanced", language: str = "en"):
         with self.lock:
             if self.model is None or self.model.name != model_name:
                 if self.model is not None:
@@ -108,6 +119,18 @@ class Bench:
                 method = "text"
             self.method = method
             self.point = point if point in self.points else "strict"
+            # language: the patient speaks it; the answer is always the English phrase (phrase id is the shared key)
+            if language not in self.languages or (language != "en" and not self.supports_language(model_name)):
+                language = "en"
+            if self.supports_language(model_name):
+                self.model.set_language(self.languages[language]["locale"])
+            self.lang = language
+            phrases = self.cfg.phrases if language == "en" else self.languages[language]["phrases"]
+            self.vocab = {"phrases20": phrases}
+            self.forms = task_forms(self.vocab, language)
+            self.language_note = None if language == "en" else (
+                f"Listening in {self.languages[language]['name']}: thresholds were tuned on English recordings and are untested "
+                f"for this language; translations are {self.languages[language].get('review_status', 'unreviewed')}.")
             self.th = self.thresholds.get(self.th_key(model_name, method, self.point))
 
     def recognize(self, wav: np.ndarray) -> dict:
@@ -121,7 +144,7 @@ class Bench:
         t1 = time.perf_counter()
         row = {"path": "live", "eval_task": "phrases20", "transcript": tr["text"], "phrase_logp": ph, "free_logp": free,
                "label_type": "live", "phrase_id": "", **vs}
-        f = features(pd.DataFrame([row]), self.vocab, self.method, set(self.cfg["decision"]["negation_words"]))
+        f = features(pd.DataFrame([row]), self.vocab, self.method, self.negation_words(), self.lang)
         r = f.iloc[0].to_dict()
         if self.th:
             decision = str(decide_arrays(f, self.th["vad_t"], self.th["abs_t"], self.th["margin_t"])[0])
@@ -130,13 +153,18 @@ class Bench:
             decision, reason = "untuned", "no thresholds for this model/method/sensitivity yet (its evaluation has not finished)"
         from harness.decide import rank_scores
 
-        ranked = rank_scores(r, self.vocab["phrases20"], self.method) if r.get("best") is not None else []
+        ranked = rank_scores(r, self.vocab["phrases20"], self.method, self.lang) if r.get("best") is not None else []
+        voc = self.vocab["phrases20"]
+
+        def native(p):
+            return voc[p][0] if isinstance(voc[p], list) else voc[p]
         decide_ms = (time.perf_counter() - t1) * 1000
         return {
             "decision": decision if decision in ("unknown", "no_speech", "untuned") else "candidate",
             "phrase_id": decision if decision not in ("unknown", "no_speech", "untuned") else None,
             "phrase_text": self.cfg.phrases.get(decision), "reason": reason,
-            "top3": [{"id": p, "text": self.cfg.phrases[p], "score": round(float(s), 4)} for p, s in ranked[:3]],
+            "top3": [{"id": p, "text": self.cfg.phrases[p], "native": native(p), "score": round(float(s), 4)} for p, s in ranked[:3]],
+            "language": self.lang, "phrase_native": native(decision) if decision in voc else None,
             "margin": None if not np.isfinite(r.get("margin", np.nan)) else round(float(min(r["margin"], 1e6)), 4),
             "negation_mismatch": bool(r.get("neg_mismatch")), "transcript": tr["text"],
             "signals": {k: v for k, v in tr.items() if k not in ("text", "nbest")}, "vad": vs,
@@ -151,6 +179,7 @@ class Select(BaseModel):
     model: str
     method: str
     point: str = "balanced"
+    language: str = "en"
 
 
 class Save(BaseModel):
@@ -180,10 +209,14 @@ def build_app(bench: Bench):
             "phrases": cfg.phrases, "hard_negatives": cfg.hard_negatives,
             "conditions": cfg["own"]["conditions"], "negatives": list(cfg["own"]["negatives"]),
             "models": [{"name": m["name"], "kind": m["kind"], "methods": bench.methods_for(m["name"]),
-                        "tuned": [x for x in bench.methods_for(m["name"]) if bench.th_key(m["name"], x, bench.point) in bench.thresholds]}
+                        "tuned": [x for x in bench.methods_for(m["name"]) if bench.th_key(m["name"], x, bench.point) in bench.thresholds],
+                        "multilingual": bench.supports_language(m["name"])}
                        for m in cfg.enabled_models()],
             "model": bench.model.name, "method": bench.method, "point": bench.point,
             "points": {k: v for k, v in bench.points.items()}, "thresholds": json_safe(bench.th), "load_s": bench.load_s,
+            "languages": [{"code": k, "name": v.get("name", k), "review_status": v.get("review_status", "")} for k, v in bench.languages.items()],
+            "language": bench.lang, "language_note": bench.language_note,
+            "phrases_native": {p: (t[0] if isinstance(t, list) else t) for p, t in bench.vocab["phrases20"].items()},
             "device": torch.cuda.get_device_name() if torch.cuda.is_available() else "CPU", "notice": NOTICE,
             "negative_prompts": {"silence": "(stay silent, then release)", "breathing": "(breathe in and out audibly)", "cough": "(cough or clear your throat)",
                                  "unrelated": "Say any unrelated sentence"},
@@ -193,7 +226,7 @@ def build_app(bench: Bench):
     @app.post("/api/select")
     def select(body: Select):
         try:
-            bench.select(body.model, body.method, body.point)
+            bench.select(body.model, body.method, body.point, body.language)
         except Exception as exc:
             raise HTTPException(500, f"{type(exc).__name__}: {exc}")
         return config()
@@ -220,6 +253,8 @@ def build_app(bench: Bench):
     @app.post("/api/save")
     def save(body: Save):
         cfg = bench.cfg
+        if bench.lang != "en":
+            raise HTTPException(400, "recordings are English-only for now (the evaluation is English); switch to English to record")
         if not re.fullmatch(r"[a-z0-9]+", body.speaker):
             raise HTTPException(400, "speaker must be a pseudonym of lowercase letters/digits")
         if body.condition not in cfg["own"]["conditions"]:
@@ -275,12 +310,13 @@ def main():
     ap.add_argument("--model", default="nemotron-streaming-0.6b")
     ap.add_argument("--method", default="forced_sum")
     ap.add_argument("--point", default="balanced", help="operating point: strict (headline) or a name from decision.operating_points")
+    ap.add_argument("--language", default="en", help="patient language code from `languages` (multilingual models only)")
     ap.add_argument("--host", default="127.0.0.1", help="keep 127.0.0.1 and reach it through brev port-forward")
     ap.add_argument("--port", type=int, default=8800)
     a = ap.parse_args()
     import uvicorn
 
-    bench = Bench(load_config(a.config), a.model, a.method, a.point)
+    bench = Bench(load_config(a.config), a.model, a.method, a.point, a.language)
     print(f"ready: {bench.model.name}/{bench.method} [{bench.point}] on http://{a.host}:{a.port}", flush=True)
     uvicorn.run(build_app(bench), host=a.host, port=a.port, log_level="warning")
 
