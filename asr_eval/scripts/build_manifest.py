@@ -231,16 +231,22 @@ def assign_splits(df: pd.DataFrame, cfg, seed: int) -> pd.DataFrame:
 
 
 def add_degraded(df: pd.DataFrame, cfg, noise_pool: list[Path]) -> pd.DataFrame:
+    from concurrent.futures import ProcessPoolExecutor
+
     dcfg = cfg["degrade"]
     base = df[(df.label_type == "positive") & df.source.isin(dcfg["sources"]) & ~df.degraded]
     base = base[(base.source != "own") | (base.condition == "normal")]  # never stack on whisper/soft/... takes
-    new = []
-    for _, r in base.iterrows():
-        src = cfg.data / r["path"]
-        out_dir = cfg.data / "degraded" / r["source"] / Path(r["path"]).parent.as_posix().replace("/", "__")
-        for cond, dst in degrade_file(src, out_dir, dcfg, noise_pool):
-            new.append({**r.to_dict(), "path": rel(dst, cfg.data), "condition": cond, "degraded": True, "derived_from": r["path"]})
-    return pd.concat([df, pd.DataFrame(new)], ignore_index=True) if new else df
+    if base.empty:
+        return df
+    jobs = [(cfg.data / r["path"], cfg.data / "degraded" / r["source"] / Path(r["path"]).parent.as_posix().replace("/", "__"))
+            for _, r in base.iterrows()]
+    with ProcessPoolExecutor() as pool:
+        made = list(pool.map(degrade_file, [j[0] for j in jobs], [j[1] for j in jobs], [dcfg] * len(jobs),
+                             [noise_pool] * len(jobs), chunksize=16))
+    new = [{**r.to_dict(), "path": rel(dst, cfg.data), "condition": cond, "degraded": True, "derived_from": r["path"]}
+           for (_, r), copies in zip(base.iterrows(), made) for cond, dst in copies]
+    print(f"  degraded copies: {len(new)} from {len(base)} positives")
+    return pd.concat([df, pd.DataFrame(new)], ignore_index=True)
 
 
 def main():
@@ -265,4 +271,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main()  # the process pool re-imports this module; keep work under the main guard
