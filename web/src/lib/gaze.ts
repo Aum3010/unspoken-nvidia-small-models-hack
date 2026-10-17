@@ -45,6 +45,21 @@ export function setHeadAssist(p: Partial<typeof headAssist>) {
 }
 export function setCalibrating(on: boolean) { gazeState.calibrating = on; anchor = null }
 
+// Whether new calibrations use the MobileGaze eye-image features (saved per device)
+export const appearanceSetting = (() => {
+  try { return { enabled: true, ...JSON.parse(localStorage.getItem('unspoken.gaze.appearance') ?? '{}') } } catch { return { enabled: true } }
+})() as { enabled: boolean }
+export function setAppearanceSetting(enabled: boolean) {
+  appearanceSetting.enabled = enabled
+  try { localStorage.setItem('unspoken.gaze.appearance', JSON.stringify(appearanceSetting)) } catch { /* ignore */ }
+}
+
+// Diagnostics: per-frame features labelled with the dot being looked at, for offline tuning.
+// Numbers only (landmark-derived features, model angles, dot positions) -- no images.
+type DiagFrame = { t: number; phase: 'calib' | 'test'; tx: number; ty: number; geo: number[]; app: [number, number] | null; pred: [number, number] | null }
+let diag: DiagFrame[] = []
+let label: { phase: 'calib' | 'test'; x: number; y: number; until: number } | null = null
+
 let stopTracking: (() => void) | null = null
 let offFace: (() => void) | null = null
 let recent: number[][] = []
@@ -123,7 +138,6 @@ function features(f: FaceFrame): number[] | null {
   // appearance features: required when the calibration was made with them, so samples and
   // predictions always have the same layout
   const app = gazeState.appearance ? currentAppearance() : null
-  if (gazeState.appearance && !app) return null
   const [hR, vR, oR] = eye(lm, R)
   const [hL, vL, oL] = eye(lm, L)
   const p = f.pose
@@ -132,6 +146,12 @@ function features(f: FaceFrame): number[] | null {
   // the unused entries are constant and drop out), plus quadratic eye terms for screen edges
   const pose = [p[2], p[6], p[8], p[9], p[3], p[7], p[11], p[12], p[13], p[14]]
   const geo = [hR, vR, oR, hL, vL, oL, ...pose, hm * hm, vm * vm, hm * vm]
+  if (label && performance.now() < label.until) {
+    const a = currentAppearance()
+    diag.push({ t: Math.round(f.t), phase: label.phase, tx: Math.round(label.x), ty: Math.round(label.y), geo: geo.map((v) => +v.toFixed(6)),
+      app: a ? [+a.yaw.toFixed(5), +a.pitch.toFixed(5)] : null, pred: null })
+  }
+  if (gazeState.appearance && !app) return null
   return app ? [...geo, app.yaw, app.pitch] : geo
 }
 
@@ -192,6 +212,8 @@ function onFrame(f: FaceFrame) {
   history = [...history.filter((h) => f.t - h.t < 4000), current]
   if (!gazeState.running || !model) return
   const [px, py] = predictRidge(model, avg)
+  const last = diag[diag.length - 1]
+  if (last && last.t === Math.round(f.t)) last.pred = [Math.round(px), Math.round(py)]
   const [cx, cy] = position(fx.filter(px, f.t), fy.filter(py, f.t), f.landmarks!, f.t)
   emit({ x: Math.min(window.innerWidth, Math.max(0, cx)), y: Math.min(window.innerHeight, Math.max(0, cy)), t: f.t })
 }
@@ -245,7 +267,8 @@ export function clearCalibration() {
   implicit.length = 0
   model = null
   anchor = null
-  gazeState.appearance = appearanceState.ready   // new calibrations use the eye-image features when available
+  gazeState.appearance = appearanceState.ready && appearanceSetting.enabled   // eye-image features when available and wanted
+  diag = []
   fx.reset(); fy.reset()
   gazeState.calibrated = false
   gazeState.accuracyPx = null
@@ -254,6 +277,7 @@ export function clearCalibration() {
 
 /** Feed one explicit calibration sample: the person is looking at (x, y) right now. */
 export function recordCalibrationPoint(x: number, y: number) {
+  label = { phase: 'calib', x, y, until: performance.now() + 120 }
   if (blinking || !current || performance.now() - current.t > 200) return  // blink or no fresh face frame
   samples.push({ f: current.f, x, y })
   refit()
@@ -275,6 +299,20 @@ export function learnFromSelection(x: number, y: number, dwellMs: number) {
 
 export function calibrationSampleCount() { return samples.length }
 
+/** Downloads the last calibration's labelled features as JSON (for offline tuning). */
+export function downloadDiagnostics() {
+  const data = {
+    version: 1, createdAt: new Date().toISOString(), screen: { w: window.innerWidth, h: window.innerHeight },
+    accuracyPx: gazeState.accuracyPx, usedAppearance: gazeState.appearance, appearance: { ...appearanceState },
+    geoFeatures: 'hR,vR,openR,hL,vL,openL,pose[2,6,8,9,3,7,11,12,13,14],hm2,vm2,hm*vm', frames: diag,
+  }
+  const a = document.createElement('a')
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(data)], { type: 'application/json' }))
+  a.download = `gaze-calibration-${Date.now()}.json`
+  a.click()
+  URL.revokeObjectURL(a.href)
+}
+
 function emit(p: GazePoint | null) {
   listeners.forEach((l) => l(p))
 }
@@ -286,6 +324,7 @@ export function onGaze(l: Listener) {
 
 /** Collect gaze for `ms` while the person fixates a known point; returns mean error in px. */
 export function measureAccuracy(target: { x: number; y: number }, ms = 2500): Promise<number | null> {
+  label = { phase: 'test', x: target.x, y: target.y, until: performance.now() + ms }
   return new Promise((resolve) => {
     const errs: number[] = []
     const off = onGaze((p) => { if (p) errs.push(Math.hypot(p.x - target.x, p.y - target.y)) })

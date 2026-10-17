@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { getCamera } from '../lib/capture'
 import { blinkConfig, onBlink, trackVideo } from '../lib/face'
 import { appearanceState } from '../lib/appearance'
-import { calibrationSampleCount, clearCalibration, forgetCalibration, gazeState, headAssist, measureAccuracy, onGaze, recordCalibrationPoint, saveCalibration, setCalibrating, setHeadAssist, startGaze } from '../lib/gaze'
+import { appearanceSetting, calibrationSampleCount, clearCalibration, downloadDiagnostics, forgetCalibration, gazeState, headAssist, measureAccuracy, onGaze, recordCalibrationPoint, saveCalibration, setAppearanceSetting, setCalibrating, setHeadAssist, startGaze } from '../lib/gaze'
 import { useSelection } from '../lib/selection'
 import './calibrate.css'
 
@@ -27,6 +27,7 @@ export function Calibrate({ onDone }: { onDone: () => void }) {
   const [acc, setAcc] = useState<number | null>(gazeState.accuracyPx)
   const [blinks, setBlinks] = useState(0)
   const [assist, setAssist] = useState({ ...headAssist })
+  const [useApp, setUseApp] = useState(appearanceSetting.enabled)
   const [gaze, setGaze] = useState<{ x: number; y: number } | null>(null)
   const video = useRef<HTMLVideoElement>(null)
 
@@ -165,6 +166,10 @@ export function Calibrate({ onDone }: { onDone: () => void }) {
                 onChange={(e) => { setHeadAssist({ sensitivity: +e.target.value }); setAssist({ ...headAssist }) }} />
             </label>
           )}
+          <label className="row" style={{ gap: 10, alignItems: 'center' }}>
+            <input type="checkbox" checked={useApp} onChange={(e) => { setAppearanceSetting(e.target.checked); setUseApp(e.target.checked) }} />
+            <span className="muted">Use the eye-image model (MobileGaze) — applies to the next calibration</span>
+          </label>
           <div className="faint" style={{ fontSize: '.8rem' }}>
             Eye-image model (MobileGaze): {appearanceState.ready ? `on · ${appearanceState.provider}${appearanceState.ms ? ` · ${appearanceState.ms} ms` : ''}` : 'loads when calibration starts'}
           </div>
@@ -178,6 +183,9 @@ export function Calibrate({ onDone }: { onDone: () => void }) {
               {phase === 'starting' ? <Loader2 className="spin" size={20} /> : phase === 'done' ? <RotateCcw size={20} /> : <Eye size={20} />}
               {phase === 'done' ? 'Calibrate again' : 'Start calibration'}
             </button>
+            {(phase === 'done' || phase === 'noface') && (
+              <button className="btn lg ghost" onClick={downloadDiagnostics}>Save gaze data</button>
+            )}
             {phase === 'done' && quality !== 'poor' && (
               <button className="btn lg" onClick={() => { sel.setSettings({ mode: 'gaze' }); onDone() }}>Use gaze to communicate</button>
             )}
