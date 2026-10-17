@@ -102,7 +102,13 @@ brev delete marginal-sapphire-whale
 - the VAD and Whisper signals;
 - server and round-trip latency.
 
-"Save last clip" stores it as a labelled recording in `data/own/` on the instance (consent and pseudonym required). That's the quickest way to collect the human recordings the headline numbers need.
+The **Record** tab is a guided recorder:
+1. Enter a pseudonym and pick a condition.
+2. Prompts (the 20 phrases, optionally the negatives) appear one at a time in random order.
+3. Hold, speak, release: the clip is saved under that prompt in `data/own/` and the next prompt appears.
+4. **R** redoes the last clip, **S** skips one, and a session resumes where that speaker and condition left off.
+
+The **Test** tab shows full decisions without saving anything. A **Sensitivity** selector switches between the strict (headline) and balanced operating points.
 
 ```bash
 brev exec marginal-sapphire-whale 'bash ~/serve_ui.sh parakeet-ctc-0.6b ctc_sum'   # (re)start; any model/method from the config

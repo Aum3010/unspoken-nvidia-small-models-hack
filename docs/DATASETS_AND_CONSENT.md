@@ -44,7 +44,11 @@
 - **Default:** nothing is retained.
 - **If kept for evaluation:** store it outside the repo, with written consent and a deletion date.
 
-For the ASR evaluation, `asr_eval/scripts/record.py` does the following:
+For the ASR evaluation there are two recorders:
+- **The live bench's Record tab** (`asr_eval/serve.py`). It has no consent checkbox, at the project owner's request: it shows a notice that clips are stored on the GPU machine, and the person running the session must get a verbal OK from anyone they record. Speakers are logged by pseudonym in `data/own/speakers.csv`.
+- **The CLI recorder** `asr_eval/scripts/record.py`, described below.
+
+`record.py` does the following:
 - It shows the consent text and stores the agreement in `data/own/consent.csv`.
 - It saves raw 16 kHz mono WAVs as `data/own/{pseudonym}_{condition}_{phraseid}_{take}.wav`.
 - Use pseudonyms, never real names.

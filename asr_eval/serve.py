@@ -41,8 +41,20 @@ from harness.models import make  # noqa: E402
 from harness.pipeline import analyze, task_forms  # noqa: E402
 from harness.vad import Vad, stats  # noqa: E402
 
-CONSENT = ("I agree that these recordings of my voice are stored on the project's evaluation GPU machine and used only to "
-           "evaluate this prototype's speech recognition. They will not be published, and will be deleted after the hackathon.")
+NOTICE = ("Clips are saved on the evaluation GPU machine (data/own/) and used only to evaluate this prototype. "
+          "Get a verbal OK from anyone you record, and use pseudonyms, not names.")
+OWN_NAME = re.compile(r"^[a-z0-9]+_[a-z]+_[a-z0-9_]+_\d+\.wav$")
+
+
+def json_safe(obj):
+    """JSON has no infinity: a threshold of -inf ("no minimum") becomes null."""
+    if isinstance(obj, dict):
+        return {k: json_safe(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [json_safe(v) for v in obj]
+    if isinstance(obj, float) and not np.isfinite(obj):
+        return None
+    return obj
 
 
 def decode(data: bytes) -> np.ndarray:
@@ -130,7 +142,7 @@ class Bench:
             "duration_s": round(len(wav) / audio.SR, 2),
             "timings_ms": {"vad": round(vad_ms, 1), "asr": round(asr_ms, 1), "score": round(score_ms, 1) if score_ms else None,
                            "decide": round(decide_ms, 1)},
-            "model": self.model.name, "method": self.method, "point": self.point, "thresholds": self.th,
+            "model": self.model.name, "method": self.method, "point": self.point, "thresholds": json_safe(self.th),
         }
 
 
@@ -145,7 +157,10 @@ class Save(BaseModel):
     speaker: str
     condition: str
     label: str
-    consent: bool
+
+
+class Delete(BaseModel):
+    name: str
 
 
 def build_app(bench: Bench):
@@ -167,8 +182,10 @@ def build_app(bench: Bench):
                         "tuned": [x for x in bench.methods_for(m["name"]) if bench.th_key(m["name"], x, bench.point) in bench.thresholds]}
                        for m in cfg.enabled_models()],
             "model": bench.model.name, "method": bench.method, "point": bench.point,
-            "points": {k: v for k, v in bench.points.items()}, "thresholds": bench.th, "load_s": bench.load_s,
-            "device": torch.cuda.get_device_name() if torch.cuda.is_available() else "CPU", "consent": CONSENT,
+            "points": {k: v for k, v in bench.points.items()}, "thresholds": json_safe(bench.th), "load_s": bench.load_s,
+            "device": torch.cuda.get_device_name() if torch.cuda.is_available() else "CPU", "notice": NOTICE,
+            "negative_prompts": {"silence": "Stay silent, then release", "breathing": "Breathe audibly", "cough": "Cough or clear your throat",
+                                 "unrelated": "Say any unrelated sentence"},
             "thresholds_note": next((v.get("fallback") for k, v in bench.thresholds.items() if k.endswith("|phrases20") and v.get("fallback")), None),
         }
 
@@ -202,8 +219,6 @@ def build_app(bench: Bench):
     @app.post("/api/save")
     def save(body: Save):
         cfg = bench.cfg
-        if not body.consent:
-            raise HTTPException(400, "consent is required to keep a recording")
         if not re.fullmatch(r"[a-z0-9]+", body.speaker):
             raise HTTPException(400, "speaker must be a pseudonym of lowercase letters/digits")
         if body.condition not in cfg["own"]["conditions"]:
@@ -216,10 +231,10 @@ def build_app(bench: Bench):
             raise HTTPException(404, "clip expired; record it again")
         out = cfg.data / "own"
         out.mkdir(parents=True, exist_ok=True)
-        log = out / "consent.csv"
+        log = out / "speakers.csv"  # who recorded when (pseudonyms only)
         if not (log.exists() and any(r and r[0] == body.speaker for r in csv.reader(log.open()))):
             with log.open("a", newline="") as fh:
-                csv.writer(fh).writerow([body.speaker, time.strftime("%Y-%m-%d %H:%M"), CONSENT, "web"])
+                csv.writer(fh).writerow([body.speaker, time.strftime("%Y-%m-%d %H:%M"), "web"])
         take = 1
         while (out / f"{body.speaker}_{body.condition}_{body.label}_{take}.wav").exists():
             take += 1
@@ -227,6 +242,28 @@ def build_app(bench: Bench):
         audio.save(path, wav)
         n = sum(1 for _ in out.glob(f"{body.speaker}_*.wav"))
         return {"saved": path.name, "speaker_total": n}
+
+    @app.post("/api/delete")
+    def delete(body: Delete):
+        """Undo a save (Redo in the recorder). Only names the recorder itself produces are accepted."""
+        if not OWN_NAME.fullmatch(body.name):
+            raise HTTPException(400, "not a recording name")
+        path = bench.cfg.data / "own" / body.name
+        if not path.exists():
+            raise HTTPException(404, "already gone")
+        path.unlink()
+        return {"deleted": body.name}
+
+    @app.get("/api/progress")
+    def progress(speaker: str, condition: str):
+        """Saved clips per label for one speaker + condition, so a session can resume."""
+        if not re.fullmatch(r"[a-z0-9]+", speaker) or condition not in bench.cfg["own"]["conditions"]:
+            raise HTTPException(400, "bad speaker or condition")
+        counts: dict[str, int] = {}
+        for f in (bench.cfg.data / "own").glob(f"{speaker}_{condition}_*.wav"):
+            label = f.stem[len(f"{speaker}_{condition}_"):].rsplit("_", 1)[0]
+            counts[label] = counts.get(label, 0) + 1
+        return {"counts": counts, "total": sum(counts.values())}
 
     return app
 
