@@ -143,24 +143,35 @@ function headDir(lm: P[]): [number, number] {
   return [(nose.x - (l.x + r.x) / 2) / w, (nose.y - (top.y + chin.y) / 2) / h]
 }
 
-// cursor = gaze anchor + head offset since the anchor was set
-const JUMP_MS = 120          // a gaze shift must persist this long to count as a real eye jump
-let anchor: { gx: number; gy: number; hx: number; hy: number; away: number | null } | null = null
+// cursor = gaze anchor + a bounded head offset since the anchor was set
+const JUMP_MS = 150          // a gaze shift must persist this long to count as moving to a new target
+const RECENTRE_S = 4         // the head reference slowly follows posture drift (time constant, seconds)
+let anchor: { gx: number; gy: number; hx: number; hy: number; away: number | null; t: number } | null = null
 const hfx = new OneEuro(1.0, 0.02), hfy = new OneEuro(1.0, 0.02)
 
 function position(gx: number, gy: number, lm: P[], t: number): [number, number] {
   if (!headAssist.enabled || gazeState.calibrating || !gazeState.calibrated) { anchor = null; return [gx, gy] }
   const [rx, ry] = headDir(lm)
   const hx = hfx.filter(rx, t), hy = hfy.filter(ry, t)
-  const jump = Math.max(120, (gazeState.accuracyPx ?? 80) * 1.6)   // beyond normal gaze error = a new target
-  if (!anchor) anchor = { gx, gy, hx, hy, away: null }
-  if (Math.hypot(gx - anchor.gx, gy - anchor.gy) > jump) {
+  const err = gazeState.accuracyPx ?? 80
+  if (!anchor) anchor = { gx, gy, hx, hy, away: null, t }
+  // the eyes moved further than the normal gaze error: follow them (new target)
+  if (Math.hypot(gx - anchor.gx, gy - anchor.gy) > Math.max(70, err)) {
     anchor.away ??= t
-    if (t - anchor.away > JUMP_MS) anchor = { gx, gy, hx, hy, away: null }
+    if (t - anchor.away > JUMP_MS) anchor = { gx, gy, hx, hy, away: null, t }
   } else anchor.away = null
-  // turning to the user's right moves the nose toward image-left (camera is not mirrored) -> cursor right
-  const k = headAssist.sensitivity * window.innerWidth
-  return [anchor.gx - k * (hx - anchor.hx), anchor.gy + k * (hy - anchor.hy) * 0.8]
+  // slow posture drift must not accumulate into an offset: let the reference creep toward the head
+  const dt = Math.max(0, (t - anchor.t) / 1000)
+  anchor.t = t
+  const a = 1 - Math.exp(-dt / RECENTRE_S)
+  anchor.hx += a * (hx - anchor.hx); anchor.hy += a * (hy - anchor.hy)
+  // turning to the user's right moves the nose toward image-left (camera is not mirrored) -> cursor right.
+  // The head only corrects the gaze error, so its reach is bounded to about that error.
+  const k = headAssist.sensitivity * 0.25 * window.innerWidth
+  const reach = Math.max(60, err * 1.2)
+  const ox = Math.max(-reach, Math.min(reach, -k * (hx - anchor.hx)))
+  const oy = Math.max(-reach, Math.min(reach, k * 0.8 * (hy - anchor.hy)))
+  return [anchor.gx + ox, anchor.gy + oy]
 }
 
 function onFrame(f: FaceFrame) {
