@@ -21,3 +21,4 @@ fastapi                     # serve.py live test bench
 uvicorn
 python-multipart
 av                          # decode browser webm/opus
+misaki[zh]                  # Kokoro Mandarin voices (multilingual sanity check)
