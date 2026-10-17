@@ -207,16 +207,21 @@ def phase_decide(cfg, args):
                 cal = ft[(ft["split"] == "calib") & ft["origin"].isin(dc["tune_origins"])]
                 if not dc["tune_include_degraded"]:
                     cal = cal[~cal["degraded"]]
-                th = tune(cal, cfg["vad"]["thresholds"], dc["far_target"], dc["far_constraint"],
-                          dc["abs_grid_quantiles"], dc["margin_grid_quantiles"])
-                if th.get("reason") == "no calib positives" and "tts" not in dc["tune_origins"]:
+                fallback = None
+                if not (cal["label_type"] == "positive").any() and "tts" not in dc["tune_origins"]:
                     # no human calib speakers for this task: fall back to TTS positives, real negatives, and say so
-                    cal2 = ft[(ft["split"] == "calib") & (ft["origin"].isin(dc["tune_origins"]) |
-                                                          ((ft["origin"] == "tts") & (ft["label_type"] == "positive")))]
-                    th = tune(cal2, cfg["vad"]["thresholds"], dc["far_target"], dc["far_constraint"],
+                    cal = ft[(ft["split"] == "calib") & (ft["origin"].isin(dc["tune_origins"]) |
+                                                         ((ft["origin"] == "tts") & (ft["label_type"] == "positive")))]
+                    fallback = "calib positives were TTS (no human calib speakers)"
+                points = {"": dc["far_target"], **{f"|{k}": v for k, v in (dc.get("operating_points") or {}).items()}}
+                for suffix, far_target in points.items():
+                    th = tune(cal, cfg["vad"]["thresholds"], far_target, dc["far_constraint"],
                               dc["abs_grid_quantiles"], dc["margin_grid_quantiles"])
-                    th["fallback"] = "calib positives were TTS (no human calib speakers)"
-                thresholds[f"{spec['name']}/{method}|{task}"] = th
+                    th["far_target"] = far_target
+                    if fallback:
+                        th["fallback"] = fallback
+                    thresholds[f"{spec['name']}/{method}|{task}{suffix}"] = th
+                th = thresholds[f"{spec['name']}/{method}|{task}"]  # headline operating point decides the reported rows
                 ft = ft.assign(decision=decide_arrays(ft, th["vad_t"], th["abs_t"], th["margin_t"]))
                 parts.append(ft)
             out = pd.concat(parts, ignore_index=True)

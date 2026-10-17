@@ -119,7 +119,9 @@ models:
 
 decision:
   methods: [text, ctc_sum, ctc_norm, ctc_llr]   # ctc_* only for CTC models
-  far_target: 0.01
+  far_target: 0.01              # headline operating point (all reported numbers)
+  operating_points:             # extra points, tuned the same way; the live UI can switch to them
+    balanced: 0.05              # guesses more often; every candidate is still confirmed by the patient's gaze
   far_constraint: max_per_type   # every negative type must be <= far_target on calib (stricter than pooled)
   tune_origins: [real, generated]    # TTS never tunes headline thresholds
   tune_include_degraded: true

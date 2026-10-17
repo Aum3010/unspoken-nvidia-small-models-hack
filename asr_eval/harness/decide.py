@@ -139,7 +139,7 @@ def tune(f: pd.DataFrame, vad_thresholds: list[float], far_target: float, constr
     """Maximise accepted top-1 accuracy (correct accepts / positives) with false-accept rate <= target.
 
     constraint='max_per_type' applies the target to every negative type separately.
-    Ties: lower worst-case FAR, then the stricter thresholds.
+    Ties: lower worst-case FAR, then the most permissive thresholds (accept more while staying within the limit).
     """
     pos = (f["label_type"] == "positive").to_numpy()
     truth = f["phrase_id"].fillna("").to_numpy()
@@ -163,7 +163,9 @@ def tune(f: pd.DataFrame, vad_thresholds: list[float], far_target: float, constr
                 worst = max(fars.values()) if fars else 0.0
                 far = worst if constraint == "max_per_type" else pooled
                 feasible = far <= far_target
-                key = (feasible, obj if feasible else -far, -worst, vt, at, mt)
+                # ties (common on easy calib data, e.g. clean TTS) go to the MOST permissive thresholds that still
+                # meet the false-accept limit: the limit is the safety constraint, so inside it we accept as much as possible
+                key = (feasible, obj if feasible else -far, -worst, -at, -mt, -vt)
                 if best is None or key > best[0]:
                     best = (key, {"feasible": feasible, "vad_t": vt, "abs_t": at, "margin_t": mt, "calib_objective": obj,
                                   "calib_far": fars, "calib_far_pooled": pooled, "n_calib_pos": int(pos.sum()),

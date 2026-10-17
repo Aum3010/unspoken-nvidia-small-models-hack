@@ -70,11 +70,11 @@ def write(cfg, decisions: dict[str, pd.DataFrame], infos: dict[str, dict], thres
     if not any_real_pos:
         warn.append("No real human recordings of the 20 phrases in the test split yet: the headline positive columns are empty. "
                     "TTS rows below are sanity checks only.")
-    fallback = [k for k, v in thresholds.items() if v.get("fallback")]
+    fallback = [k for k, v in thresholds.items() if v.get("fallback") and k.count("|") == 1]
     if fallback:
         warn.append("Thresholds for " + ", ".join(fallback) + " were tuned with **TTS positives** (no human calib speakers for that task) "
                     "against real negatives. Record at least two speakers so tuning uses human speech.")
-    infeasible = [k for k, v in thresholds.items() if not v.get("feasible")]
+    infeasible = [k for k, v in thresholds.items() if not v.get("feasible") and k.count("|") == 1]
     if infeasible:
         warn.append(f"No threshold met the calib false-accept target for: {', '.join(infeasible)} (strictest point used; see Thresholds).")
     md += [f"> ⚠️ {w}" for w in warn] + ([""] if warn else [])
@@ -188,7 +188,10 @@ def write(cfg, decisions: dict[str, pd.DataFrame], infos: dict[str, dict], thres
     md.append("")
 
     # ---- thresholds ------------------------------------------------------------------------------------------------
-    md += ["## Thresholds (frozen from calib)", "", "| Model / method · task | VAD thr | abs | margin | Calib accepted correct | Calib FA by type | Feasible |",
+    md += ["## Thresholds (frozen from calib)", "",
+           "Rows ending in a name (e.g. · balanced) are extra operating points for the live UI; every number above uses the headline point "
+           f"(false accepts ≤ {100 * cfg['decision']['far_target']:.0f}% per negative type on calib).", "",
+           "| Model / method · task | VAD thr | abs | margin | Calib accepted correct | Calib FA by type | Feasible |",
            "|---|---|---|---|---|---|---|"]
     for k, v in thresholds.items():
         fars = ", ".join(f"{t} {100 * f:.1f}% (n={v['n_calib_neg'][t]})" for t, f in (v.get("calib_far") or {}).items())

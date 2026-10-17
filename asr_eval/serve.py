@@ -59,8 +59,9 @@ def decode(data: bytes) -> np.ndarray:
 
 
 class Bench:
-    def __init__(self, cfg, model_name: str, method: str):
+    def __init__(self, cfg, model_name: str, method: str, point: str = "balanced"):
         self.cfg = cfg
+        self.points = {"strict": cfg["decision"]["far_target"], **(cfg["decision"].get("operating_points") or {})}
         self.lock = threading.Lock()
         self.vad = Vad()
         self.vocab = {"phrases20": cfg.phrases}
@@ -69,13 +70,16 @@ class Bench:
         self.thresholds = json.loads(th_path.read_text()) if th_path.exists() else {}
         self.clips: OrderedDict[str, np.ndarray] = OrderedDict()
         self.model = None
-        self.select(model_name, method)
+        self.select(model_name, method, point)
 
     def methods_for(self, model_name: str) -> list[str]:
         scoring = self.cfg.model(model_name)["kind"] == "hf_ctc"
         return [m for m in self.cfg["decision"]["methods"] if m == "text" or scoring]
 
-    def select(self, model_name: str, method: str):
+    def th_key(self, model_name: str, method: str, point: str) -> str:
+        return f"{model_name}/{method}|phrases20" + ("" if point == "strict" else f"|{point}")
+
+    def select(self, model_name: str, method: str, point: str = "balanced"):
         with self.lock:
             if self.model is None or self.model.name != model_name:
                 if self.model is not None:
@@ -90,7 +94,8 @@ class Bench:
             if method not in self.methods_for(model_name):
                 method = "text"
             self.method = method
-            self.th = self.thresholds.get(f"{model_name}/{method}|phrases20")
+            self.point = point if point in self.points else "strict"
+            self.th = self.thresholds.get(self.th_key(model_name, method, self.point))
 
     def recognize(self, wav: np.ndarray) -> dict:
         t0 = time.perf_counter()
@@ -109,14 +114,14 @@ class Bench:
             decision = str(decide_arrays(f, self.th["vad_t"], self.th["abs_t"], self.th["margin_t"])[0])
             reason = explain(r, self.th)
         else:
-            decision, reason = "uncalibrated", "no thresholds for this model/method yet (run the evaluation first)"
+            decision, reason = "untuned", "no thresholds for this model/method/sensitivity yet (its evaluation has not finished)"
         from harness.decide import rank_scores
 
         ranked = rank_scores(r, self.vocab["phrases20"], self.method) if r.get("best") is not None else []
         decide_ms = (time.perf_counter() - t1) * 1000
         return {
-            "decision": decision if decision in ("unknown", "no_speech", "uncalibrated") else "candidate",
-            "phrase_id": decision if decision not in ("unknown", "no_speech", "uncalibrated") else None,
+            "decision": decision if decision in ("unknown", "no_speech", "untuned") else "candidate",
+            "phrase_id": decision if decision not in ("unknown", "no_speech", "untuned") else None,
             "phrase_text": self.cfg.phrases.get(decision), "reason": reason,
             "top3": [{"id": p, "text": self.cfg.phrases[p], "score": round(float(s), 4)} for p, s in ranked[:3]],
             "margin": None if not np.isfinite(r.get("margin", np.nan)) else round(float(min(r["margin"], 1e6)), 4),
@@ -125,13 +130,14 @@ class Bench:
             "duration_s": round(len(wav) / audio.SR, 2),
             "timings_ms": {"vad": round(vad_ms, 1), "asr": round(asr_ms, 1), "score": round(score_ms, 1) if score_ms else None,
                            "decide": round(decide_ms, 1)},
-            "model": self.model.name, "method": self.method, "thresholds": self.th,
+            "model": self.model.name, "method": self.method, "point": self.point, "thresholds": self.th,
         }
 
 
 class Select(BaseModel):
     model: str
     method: str
+    point: str = "balanced"
 
 
 class Save(BaseModel):
@@ -158,9 +164,10 @@ def build_app(bench: Bench):
             "phrases": cfg.phrases, "hard_negatives": cfg.hard_negatives,
             "conditions": cfg["own"]["conditions"], "negatives": list(cfg["own"]["negatives"]),
             "models": [{"name": m["name"], "kind": m["kind"], "methods": bench.methods_for(m["name"]),
-                        "calibrated": [x for x in bench.methods_for(m["name"]) if f"{m['name']}/{x}|phrases20" in bench.thresholds]}
+                        "tuned": [x for x in bench.methods_for(m["name"]) if bench.th_key(m["name"], x, bench.point) in bench.thresholds]}
                        for m in cfg.enabled_models()],
-            "model": bench.model.name, "method": bench.method, "thresholds": bench.th, "load_s": bench.load_s,
+            "model": bench.model.name, "method": bench.method, "point": bench.point,
+            "points": {k: v for k, v in bench.points.items()}, "thresholds": bench.th, "load_s": bench.load_s,
             "device": torch.cuda.get_device_name() if torch.cuda.is_available() else "CPU", "consent": CONSENT,
             "thresholds_note": next((v.get("fallback") for k, v in bench.thresholds.items() if k.endswith("|phrases20") and v.get("fallback")), None),
         }
@@ -168,7 +175,7 @@ def build_app(bench: Bench):
     @app.post("/api/select")
     def select(body: Select):
         try:
-            bench.select(body.model, body.method)
+            bench.select(body.model, body.method, body.point)
         except Exception as exc:
             raise HTTPException(500, f"{type(exc).__name__}: {exc}")
         return config()
@@ -229,13 +236,14 @@ def main():
     ap.add_argument("--config", default="configs/eval.yaml")
     ap.add_argument("--model", default="parakeet-ctc-0.6b")
     ap.add_argument("--method", default="ctc_sum")
+    ap.add_argument("--point", default="balanced", help="operating point: strict (headline) or a name from decision.operating_points")
     ap.add_argument("--host", default="127.0.0.1", help="keep 127.0.0.1 and reach it through brev port-forward")
     ap.add_argument("--port", type=int, default=8800)
     a = ap.parse_args()
     import uvicorn
 
-    bench = Bench(load_config(a.config), a.model, a.method)
-    print(f"ready: {bench.model.name}/{bench.method} on http://{a.host}:{a.port}", flush=True)
+    bench = Bench(load_config(a.config), a.model, a.method, a.point)
+    print(f"ready: {bench.model.name}/{bench.method} [{bench.point}] on http://{a.host}:{a.port}", flush=True)
     uvicorn.run(build_app(bench), host=a.host, port=a.port, log_level="warning")
 
 

@@ -71,6 +71,7 @@
   <h1>Voice agent bench</h1>
   <label class="meta">Model <select id="model" aria-label="Model"></select></label>
   <label class="meta">Method <select id="method" aria-label="Decision method"></select></label>
+  <label class="meta">Sensitivity <select id="point" aria-label="Operating point"></select></label>
   <span class="meta" id="device"></span>
   <span class="meta" id="status" role="status">connecting…</span>
 </header>
@@ -139,9 +140,10 @@ function fill(sel, items, value) {
 
 function renderConfig(c) {
   cfg = c;
-  fill($("model"), c.models.map(m => [m.name, m.name + (m.calibrated.length ? "" : " (uncalibrated)")]), c.model);
+  fill($("model"), c.models.map(m => [m.name, m.name + (m.tuned.length ? "" : " (untuned)")]), c.model);
   const m = c.models.find(x => x.name === c.model);
-  fill($("method"), m.methods.map(x => [x, x + (m.calibrated.includes(x) ? "" : " (uncalibrated)")]), c.method);
+  fill($("method"), m.methods.map(x => [x, x + (m.tuned.includes(x) ? "" : " (untuned)")]), c.method);
+  fill($("point"), Object.entries(c.points).map(([k, v]) => [k, `${k} (≤${Math.round(v * 100)}% false accepts)`]), c.point);
   $("device").textContent = c.device + (c.load_s ? ` · loaded in ${c.load_s}s` : "");
   $("phrases").innerHTML = Object.values(c.phrases).map(t => `<li>${t}</li>`).join("");
   $("hardneg").textContent = Object.values(c.hard_negatives).map(t => `“${t}”`).join(", ");
@@ -152,7 +154,7 @@ function renderConfig(c) {
     .concat(c.negatives.map(k => ["neg_" + k, "(negative) " + k]));
   fill($("label"), labels, $("label").value || labels[0][0]);
   $("calnote").textContent = c.thresholds ? (c.thresholds_note ? "Note: thresholds were tuned with " + c.thresholds_note + "." : "")
-                                          : "This model/method has no tuned thresholds yet: rankings are shown, decisions are not.";
+                                          : "No tuned thresholds for this model/method/sensitivity yet: rankings are shown, decisions are not.";
   $("status").textContent = "ready";
 }
 
@@ -164,12 +166,13 @@ async function choose() {
   $("status").textContent = "loading model…"; $("ptt").disabled = true;
   try {
     renderConfig(await api("/api/select", { method: "POST", headers: { "content-type": "application/json" },
-      body: JSON.stringify({ model: $("model").value, method: $("method").value }) }));
+      body: JSON.stringify({ model: $("model").value, method: $("method").value, point: $("point").value }) }));
   } catch (e) { $("status").textContent = "error: " + e.message; }
   $("ptt").disabled = false;
 }
 $("model").onchange = () => { $("method").value = "text"; choose(); };
 $("method").onchange = choose;
+$("point").onchange = choose;
 
 async function ensureMic() {
   if (stream) return;
@@ -217,8 +220,8 @@ const REASONS = { accepted: "passed every gate", no_speech: "speech gate: no voi
 function show(r) {
   const d = $("decision"); d.className = "decision " + r.decision;
   $("kind").textContent = r.decision === "candidate" ? "candidate · confirm with gaze" : r.decision.replace("_", " ");
-  $("big").textContent = r.decision === "candidate" ? r.phrase_text : (r.decision === "unknown" ? "Not sure" : r.decision === "no_speech" ? "Nothing heard" : "Uncalibrated");
-  $("why").textContent = (REASONS[r.reason] || r.reason) + (r.thresholds ? ` · ${r.model}/${r.method}` : "");
+  $("big").textContent = r.decision === "candidate" ? r.phrase_text : (r.decision === "unknown" ? "Not sure" : r.decision === "no_speech" ? "Nothing heard" : "Untuned");
+  $("why").textContent = (REASONS[r.reason] || r.reason) + (r.thresholds ? ` · ${r.model}/${r.method} · ${r.point}` : "");
   const max = Math.max(...r.top3.map(t => t.score)), min = Math.min(...r.top3.map(t => t.score), 0);
   $("top3").innerHTML = "<div class='kv'><b>Top 3</b></div>" + r.top3.map(t => {
     const w = r.method === "text" ? t.score * 100 : (max === min ? 100 : 100 * (t.score - min) / (max - min || 1));
