@@ -1,6 +1,6 @@
 .venv/
 .run/
-data/
+/data/
 third_party/chaplin/
 third_party/Gym/
 third_party/p300-speller-bci/
