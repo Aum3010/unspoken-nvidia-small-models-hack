@@ -1,0 +1,25 @@
+unspoken_communication:
+  resources_servers:
+    unspoken_communication:
+      entrypoint: app.py
+      domain: agent
+      verified: false
+      description: Assistive-communication coordinator — one typed tool call per decision, scored on valid / action / safety
+      value: Measures whether a small coordinator asks the right question without ever speaking unconfirmed text
+unspoken_communication_simple_agent:
+  responses_api_agents:
+    simple_agent:
+      entrypoint: app.py
+      resources_server:
+        type: resources_servers
+        name: unspoken_communication
+      model_server:
+        type: responses_api_models
+        name: policy_model
+      datasets:
+      - name: example
+        type: example
+        jsonl_fpath: resources_servers/unspoken_communication/data/example.jsonl
+      - name: eval
+        type: eval
+        jsonl_fpath: resources_servers/unspoken_communication/data/eval.jsonl
