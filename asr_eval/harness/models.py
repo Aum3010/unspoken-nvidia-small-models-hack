@@ -238,7 +238,8 @@ class NemoTransducer(Model):
                 g, _, _ = self.model.decoder(targets=targets, target_length=tlen)
                 f = enc.expand(b, -1, -1)
                 logits = self.model.joint.joint(f.transpose(1, 2), g.transpose(1, 2))
-            nll = self._nll(logits.float(), targets, enc_len.expand(b).long(), tlen)
+            # the CUDA loss kernels need contiguous length tensors (expand() gives a stride-0 view)
+            nll = self._nll(logits.float().contiguous(), targets.contiguous(), enc_len.expand(b).long().contiguous(), tlen.contiguous())
         out = []
         for k in range(b):
             v = float(nll[k])
