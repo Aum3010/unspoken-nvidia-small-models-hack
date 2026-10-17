@@ -42,7 +42,7 @@ On a laptop (CPU) the same code runs with `configs/local_smoke.yaml`, which writ
 | `harness/models.py` | Model interface: `hf_ctc` (Parakeet-CTC, forced scoring), `nemo_transducer` (Parakeet-TDT, Nemotron streaming incl. 160/560 ms lookahead), `faster_whisper` |
 | `harness/pipeline.py` | One clip through one model (transcript, phrase scores, timings), shared by `run_eval.py` and `serve.py` |
 | `serve.py`, `static/index.html` | Live push-to-talk test bench and labelled-recording capture |
-| `harness/decide.py` | Rankers (`text`, `ctc_sum`, `ctc_norm`, `ctc_llr`), `decide()`, calib-only threshold search |
+| `harness/decide.py` | Rankers (`text`, `forced_sum`, `forced_norm`, `forced_llr`), `decide()`, calib-only threshold search |
 | `harness/metrics.py` | Positive/negative metrics, Wilson CI, rule of three, WER/CER, latency |
 | `harness/report.py` | `summary.md`, plots, `failures.md`, literature context |
 | `scripts/build_manifest.py` | Ingests every source, speaker split (TORGO stratified), degraded copies in a process pool |
@@ -55,7 +55,7 @@ On a laptop (CPU) the same code runs with `configs/local_smoke.yaml`, which writ
 
 - **Closed set, not open transcription.** Every model's transcript is matched to the phrases phonetically (CMU dictionary, Levenshtein on phonemes; char ratio for out-of-dictionary words). CTC models also score each phrase directly: `log P(phrase | audio)` via `ctc_loss`, one encoder pass for everything.
 - **Impossible is not perfect.** `ctc_loss(zero_infinity=True)` maps impossible alignments (a long phrase on a short clip) to loss 0, which reads as a perfect score. The harness keeps them impossible.
-- **Silence favours short phrases.** In local tests, forced scoring on silence ranked "yes" first among phrases. That's why the VAD gate comes first, and why `ctc_llr` compares each phrase with the model's own free transcript.
+- **Silence favours short phrases.** In local tests, forced scoring on silence ranked "yes" first among phrases. That's why the VAD gate comes first, and why `forced_llr` compares each phrase with the model's own free transcript.
 - **Negation is a hard gate.** "I'm not in pain" must never become `pain`. A transcript whose negation (not/no/never, after expanding contractions) disagrees with the best phrase becomes `unknown`.
 - **Tuning sees calib only.** Objective: correct accepts ÷ positives, subject to a false-accept rate ≤ 1% for *each* negative type (stricter than pooled). Ties go to the stricter thresholds. If a task has no human calib speakers, positives fall back to TTS, and the summary says so.
 - **The winner is chosen on calib** and reported on test, so selection never sees test labels.

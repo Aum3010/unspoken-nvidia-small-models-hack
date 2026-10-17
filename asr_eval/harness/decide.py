@@ -3,9 +3,9 @@
 Rankers (per clip, per task vocabulary):
   text      Method A, every model: normalised transcript vs each phrase, CMU phonetic similarity
             (Levenshtein on phoneme sequences), char ratio when a word is out of the CMU dictionary
-  ctc_sum   Method B: forced CTC log P(phrase | audio)
-  ctc_norm  Method B: the same, divided by the phrase's token count
-  ctc_llr   (extra) per-token log-likelihood ratio of each phrase against the model's own free
+  forced_sum   Method B: forced log P(phrase | audio) from the model's own loss (CTC, or RNNT/TDT for transducers)
+  forced_norm  Method B: the same, divided by the phrase's token count
+  forced_llr   (extra) per-token log-likelihood ratio of each phrase against the model's own free
             transcript, scored the same way: ~0 when the phrase is what the model heard anyway
 
 decide(): no_speech if the VAD gate fails; unknown if best < abs, margin < margin, or the
@@ -51,9 +51,13 @@ def similarity(a_norm: str, b_norm: str) -> float:
 
 
 def surface_forms(text: str) -> list[str]:
-    """CTC scoring forms: as written (lowercase, apostrophes kept) and contraction-expanded."""
+    """Surface forms scored for one phrase (forced scoring); the phrase keeps its best form."""
     written = " ".join(re.sub(r"[^a-z0-9' ]+", " ", text.lower().replace("’", "'")).split())
-    return list(dict.fromkeys([written, normalize(text)]))
+    cased = " ".join(re.sub(r"[^A-Za-z0-9' ]+", " ", text.replace("’", "'")).split())
+    cased = cased[:1].upper() + cased[1:]
+    # lowercase forms for lowercase vocabularies (Parakeet-CTC); cased and full-stop forms for models trained with
+    # punctuation and capitals (Parakeet-TDT, Nemotron). Each phrase keeps the best-scoring form.
+    return list(dict.fromkeys([written, normalize(text), cased, cased + "."]))
 
 
 def rank_scores(row: dict, vocab: dict[str, str], method: str) -> list[tuple[str, float]]:
@@ -65,11 +69,11 @@ def rank_scores(row: dict, vocab: dict[str, str], method: str) -> list[tuple[str
         ph = row["phrase_logp"]  # {pid: [logp, n_tokens]}
         if not ph:
             return []
-        if method == "ctc_sum":
+        if method == "forced_sum":
             scores = {pid: v[0] for pid, v in ph.items()}
-        elif method == "ctc_norm":
+        elif method == "forced_norm":
             scores = {pid: v[0] / max(1, v[1]) for pid, v in ph.items()}
-        elif method == "ctc_llr":
+        elif method == "forced_llr":
             free_lp, free_n = row["free_logp"]
             scores = {pid: (v[0] - free_lp) / max(1, v[1], free_n) for pid, v in ph.items()}
         else:

@@ -129,16 +129,23 @@ class HFCTC(Model):
 # ---- NeMo transducers: Parakeet-TDT, Nemotron Speech Streaming ------------------------------------
 
 class NemoTransducer(Model):
-    """Greedy transcript from a NeMo RNNT/TDT model; no forced phrase scoring (text method only).
+    """NeMo RNNT/TDT model: greedy transcript plus forced phrase scoring with the model's own transducer loss.
 
-    `att_context` (e.g. [70, 1]) sets a cache-aware model's right context. Offline decoding at that
-    context reproduces the model's streaming output at that lookahead (80 ms frames: [70,1] ~ 160 ms
-    chunks, [70,6] ~ 560 ms), so accuracy matches streaming; per-chunk latency is not simulated here.
+    score_phrases: log P(phrase | audio) = -loss over all alignments, from the same encoder pass as the
+    transcript (prediction network + joint batched over every phrase form). The loss comes from the model's
+    own config (TDT for Parakeet-TDT, RNNT for Nemotron) with FastEmit off: that is a training regulariser and
+    would bias scores. If the GPU loss kernel is unavailable, the joint output is scored on the CPU.
+
+    `att_context` (e.g. [70, 1]) sets a cache-aware model's right context. Offline decoding at that context
+    reproduces its streaming output at that lookahead (80 ms frames: [70,1] ~ 160 ms, [70,6] ~ 560 ms).
     """
+
+    supports_scoring = True
 
     def load(self):
         import nemo.collections.asr as nemo_asr
         import torch
+        from nemo.collections.asr.losses.rnnt import RNNTLoss
 
         self.dev = device()
         self.revision = resolve_revision(self.checkpoint, self.spec.get("revision"))
@@ -156,22 +163,47 @@ class NemoTransducer(Model):
             self.notes.append(f"att_context_size={self.spec['att_context']} (available: {self.att_all})")
         self.model = m
         self.direct = True
+        self._cache = None
+        loss_name, loss_kwargs = m.extract_rnnt_loss_cfg(m.cfg.get("loss", None))
+        loss_kwargs = dict(loss_kwargs or {})
+        if "fastemit_lambda" in loss_kwargs:
+            loss_kwargs["fastemit_lambda"] = 0.0
+        n = m.joint.num_classes_with_blank - 1
+        if loss_name == "tdt":
+            n -= getattr(m.joint, "num_extra_outputs", 0)
+        self.loss = RNNTLoss(num_classes=n, loss_name=loss_name, loss_kwargs=loss_kwargs, reduction=None)
+        self.notes.append(f"forced scoring loss={loss_name}")
+        self.loss_on_cpu = False
 
     def info(self) -> dict:
         return {"checkpoint": self.checkpoint, "revision": self.revision, "params": sum(p.numel() for p in self.model.parameters()),
                 "device": self.dev, "dtype": "bfloat16 autocast" if self.dev == "cuda" else "float32",
                 "class": type(self.model).__name__, "att_context_available": str(self.att_all), "notes": self.notes}
 
+    def _autocast(self):
+        import torch
+
+        return torch.autocast("cuda", dtype=torch.bfloat16) if self.dev == "cuda" else torch.autocast("cpu", enabled=False)
+
+    def _encode(self, wav):
+        import torch
+
+        if self._cache is not None and self._cache[0] is wav:  # holds the array, so identity cannot be reused
+            return self._cache[1], self._cache[2]
+        sig = torch.from_numpy(np.ascontiguousarray(wav, dtype=np.float32))[None].to(self.dev)
+        ln = torch.tensor([len(wav)], device=self.dev)
+        with torch.inference_mode(), self._autocast():
+            enc, enc_len = self.model.forward(input_signal=sig, input_signal_length=ln)
+        self._cache = (wav, enc, enc_len)
+        return enc, enc_len
+
     def transcribe(self, wav):
         import torch
 
         if self.direct:
             try:
-                sig = torch.from_numpy(np.ascontiguousarray(wav, dtype=np.float32))[None].to(self.dev)
-                ln = torch.tensor([len(wav)], device=self.dev)
-                ac = torch.autocast("cuda", dtype=torch.bfloat16) if self.dev == "cuda" else torch.autocast("cpu", enabled=False)
-                with torch.inference_mode(), ac:
-                    enc, enc_len = self.model.forward(input_signal=sig, input_signal_length=ln)
+                enc, enc_len = self._encode(wav)
+                with torch.inference_mode(), self._autocast():
                     hyps = self.model.decoding.rnnt_decoder_predictions_tensor(encoder_output=enc, encoded_lengths=enc_len,
                                                                                 return_hypotheses=True)
                 if isinstance(hyps, tuple):  # older API: (best, all)
@@ -187,6 +219,40 @@ class NemoTransducer(Model):
         h = out[0]
         text = h.text if hasattr(h, "text") else str(h)
         return {"text": text.strip(), "nbest": [text.strip()], "path": "transcribe"}
+
+    def score_phrases(self, wav, texts):
+        import torch
+
+        enc, enc_len = self._encode(wav)
+        tok = self.model.tokenizer
+        ids = [tok.text_to_ids(t) if t.strip() else [] for t in texts]
+        b, u = len(ids), max(1, max(len(i) for i in ids))
+        targets = torch.zeros(b, u, dtype=torch.long)
+        for k, seq in enumerate(ids):
+            if seq:
+                targets[k, : len(seq)] = torch.tensor(seq, dtype=torch.long)
+        tlen = torch.tensor([len(i) for i in ids], dtype=torch.long)
+        targets, tlen = targets.to(self.dev), tlen.to(self.dev)
+        with torch.inference_mode():
+            with self._autocast():
+                g, _, _ = self.model.decoder(targets=targets, target_length=tlen)
+                f = enc.expand(b, -1, -1)
+                logits = self.model.joint.joint(f.transpose(1, 2), g.transpose(1, 2))
+            nll = self._nll(logits.float(), targets, enc_len.expand(b).long(), tlen)
+        out = []
+        for k in range(b):
+            v = float(nll[k])
+            out.append((IMPOSSIBLE if not np.isfinite(v) else -v, len(ids[k]) + 1))
+        return out
+
+    def _nll(self, logits, targets, enc_len, tlen):
+        if not self.loss_on_cpu:
+            try:
+                return self.loss(log_probs=logits, targets=targets, input_lengths=enc_len, target_lengths=tlen).reshape(-1)
+            except Exception as exc:
+                self.loss_on_cpu = True
+                self.notes.append(f"GPU transducer loss failed ({type(exc).__name__}); scoring on CPU")
+        return self.loss(log_probs=logits.cpu(), targets=targets.cpu(), input_lengths=enc_len.cpu(), target_lengths=tlen.cpu()).reshape(-1)
 
 
 # ---- faster-whisper (CTranslate2) -------------------------------------------------------------------

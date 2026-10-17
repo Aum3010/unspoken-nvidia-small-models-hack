@@ -119,7 +119,7 @@ models:
     enabled: false             # skipped: Speech Accessibility Project data use agreement required
 
 decision:
-  methods: [text, ctc_sum, ctc_norm, ctc_llr]   # ctc_* only for CTC models
+  methods: [text, forced_sum, forced_norm, forced_llr]   # forced_* for models with phrase scoring (CTC, RNNT/TDT)
   far_target: 0.01              # headline operating point (all reported numbers)
   operating_points:             # extra points, tuned the same way; the live UI can switch to them
     balanced: 0.05              # guesses more often; every candidate is still confirmed by the patient's gaze
