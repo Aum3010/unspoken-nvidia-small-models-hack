@@ -95,5 +95,9 @@
     }
   ],
   "verified": true,
-  "rule": "Distinct deployed weights; MoE total (not active) parameters; quantization does not reduce count; the coordinator weights are shared by all logical agent roles and counted once."
+  "rule": "Distinct deployed weights; MoE total (not active) parameters; quantization does not reduce count; the coordinator weights are shared by all logical agent roles and counted once.",
+  "checkpoint_total_b": 32.0394,
+  "organizer_counted_total_b": 30.4615,
+  "organizer_counted_headroom_b": 2.5385,
+  "organizer_counted_within_budget": true
 }

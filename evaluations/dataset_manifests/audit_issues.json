@@ -1,0 +1,8 @@
+[
+ {
+  "level": "INFO",
+  "check": "bnci_present",
+  "where": "/home/claude/unspoken-nvidia-small-models-hack/data/bnci2014_008",
+  "detail": "no BNCI2014-008 files on disk; BNCI audit not run (source host unreachable from the audit container)"
+ }
+]

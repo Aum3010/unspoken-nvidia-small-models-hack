@@ -1,0 +1,4 @@
+session_id,participant_id,dataset,session,n_runs,alsfrs_r
+bigp3bci/F_03/SE001,F_03,bigp3bci,1,9,21
+bigp3bci/F_03/SE002,F_03,bigp3bci,2,9,21
+bigp3bci/F_03/SE003,F_03,bigp3bci,3,9,21

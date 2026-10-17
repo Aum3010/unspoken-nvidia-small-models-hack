@@ -1,0 +1,2 @@
+participant_id,dataset,sex,als_flag,alsfrs_r,alsfrs_r_by_session,n_sessions
+F_03,bigp3bci,Female,True,21,"{""1"": 21, ""2"": 21, ""3"": 21}",3

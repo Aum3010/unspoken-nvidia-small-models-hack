@@ -15,6 +15,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 HF = Path.home() / ".cache" / "huggingface" / "hub"
 BUDGET_B = 33.0
+ORGANIZER_COORDINATOR_PARAMS = 30_000_000_000  # organizer-confirmed: counted as the marketed 30B model
 
 
 def _header(path: Path) -> dict:
@@ -101,7 +102,14 @@ def main():
                  "params_b": 0.00000005, "source": "pyriemann 0.7, trained locally", "note": "~45 LR weights + 4 xDAWN filters", "verified": True})
 
     total = sum(r["params"] or 0 for r in rows)
+    # Organizer clarification (2026-10-17): Nemotron Lightning counts as its marketed 30B, not the 31.578B checkpoint.
+    coord = next(r for r in rows if r["component"] == "Coordinator")
+    organizer_total = total - coord["params"] + ORGANIZER_COORDINATOR_PARAMS
     out = {"budget_b": BUDGET_B, "total_b": round(total / 1e9, 4), "within_budget": total / 1e9 <= BUDGET_B,
+           "checkpoint_total_b": round(total / 1e9, 4),
+           "organizer_counted_total_b": round(organizer_total / 1e9, 4),
+           "organizer_counted_headroom_b": round(BUDGET_B - organizer_total / 1e9, 4),
+           "organizer_counted_within_budget": organizer_total / 1e9 <= BUDGET_B,
            "components": rows, "verified": True,
            "rule": "Distinct deployed weights; MoE total (not active) parameters; quantization does not reduce count; "
                    "the coordinator weights are shared by all logical agent roles and counted once."}
@@ -110,7 +118,8 @@ def main():
     path.write_text(json.dumps(out, indent=2))
     for r in rows:
         print(f"{r['component']:<36} {('%.4fB' % r['params_b']) if r['params_b'] is not None else 'n/a':>10}  {r['note']}")
-    print(f"{'TOTAL':<36} {out['total_b']:>9.4f}B  of {BUDGET_B}B  -> {'OK' if out['within_budget'] else 'OVER BUDGET'}")
+    print(f"{'TOTAL (actual checkpoints)':<36} {out['total_b']:>9.4f}B  of {BUDGET_B}B  -> {'OK' if out['within_budget'] else 'OVER BUDGET'}")
+    print(f"{'TOTAL (organizer-counted)':<36} {out['organizer_counted_total_b']:>9.4f}B  headroom {out['organizer_counted_headroom_b']}B")
 
 
 if __name__ == "__main__":
