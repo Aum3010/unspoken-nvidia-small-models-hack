@@ -40,20 +40,29 @@ def phones(norm_text: str) -> tuple[str, ...] | None:
     return tuple(out)
 
 
-def similarity(a_norm: str, b_norm: str) -> float:
+def similarity(a_norm: str, b_norm: str, lang: str = "en") -> float:
     from rapidfuzz import fuzz
     from rapidfuzz.distance import Levenshtein
 
     if not a_norm or not b_norm:
         return 0.0
+    if lang != "en":  # CMU pronunciations are English-only
+        return fuzz.ratio(a_norm, b_norm) / 100.0
     pa, pb = phones(a_norm), phones(b_norm)
     if pa is not None and pb is not None:
         return float(Levenshtein.normalized_similarity(pa, pb))
     return fuzz.ratio(a_norm, b_norm) / 100.0
 
 
-def surface_forms(text: str) -> list[str]:
+END_MARK = {"zh": "。", "ja": "。", "hi": "।"}
+
+
+def surface_forms(text: str, lang: str = "en") -> list[str]:
     """Surface forms scored for one phrase (forced scoring); the phrase keeps its best form."""
+    if lang != "en":
+        t = text.strip()
+        base = t.rstrip("?.!。？！। ").strip()
+        return list(dict.fromkeys([t, base, base + ".", base + END_MARK.get(lang, ".")]))
     written = " ".join(re.sub(r"[^a-z0-9' ]+", " ", text.lower().replace("’", "'")).split())
     cased = " ".join(re.sub(r"[^A-Za-z0-9' ]+", " ", text.replace("’", "'")).split())
     cased = cased[:1].upper() + cased[1:]
@@ -62,11 +71,18 @@ def surface_forms(text: str) -> list[str]:
     return list(dict.fromkeys([written, normalize(text), cased, cased + "."]))
 
 
-def rank_scores(row: dict, vocab: dict[str, str], method: str) -> list[tuple[str, float]]:
-    """Ranked (phrase_id, score) for one clip; row holds the model outputs for its task."""
+def alternatives(txt) -> list[str]:
+    return list(txt) if isinstance(txt, (list, tuple)) else [txt]
+
+
+def rank_scores(row: dict, vocab: dict, method: str, lang: str = "en") -> list[tuple[str, float]]:
+    """Ranked (phrase_id, score) for one clip; row holds the model outputs for its task.
+
+    vocab values are a phrase or a list of alternatives (other languages); the best alternative counts.
+    """
     if method == "text":
-        t = normalize(row["transcript"])
-        scores = {pid: similarity(t, normalize(txt)) for pid, txt in vocab.items()}
+        t = normalize(row["transcript"], lang)
+        scores = {pid: max(similarity(t, normalize(a, lang), lang) for a in alternatives(txt)) for pid, txt in vocab.items()}
     else:
         ph = row["phrase_logp"]  # {pid: [logp, n_tokens]}
         if not ph:
@@ -83,23 +99,23 @@ def rank_scores(row: dict, vocab: dict[str, str], method: str) -> list[tuple[str
     return sorted(scores.items(), key=lambda kv: -kv[1])
 
 
-def features(rows: pd.DataFrame, vocabs: dict[str, dict[str, str]], method: str, negation_words: set[str]) -> pd.DataFrame:
+def features(rows: pd.DataFrame, vocabs: dict[str, dict], method: str, negation_words: set[str], lang: str = "en") -> pd.DataFrame:
     """One row per clip with the ranked list and the decision features for `method`."""
     out = []
     for r in rows.to_dict("records"):
         vocab = vocabs[r["eval_task"]]
-        ranked = rank_scores(r, vocab, method)
+        ranked = rank_scores(r, vocab, method, lang)
         if not ranked:
             out.append({**r, "ranked": [], "best": None, "best_score": -np.inf, "margin": 0.0, "neg_mismatch": False,
-                        "empty_transcript": not normalize(r["transcript"])})
+                        "empty_transcript": not normalize(r["transcript"], lang)})
             continue
         best, best_s = ranked[0]
         second = ranked[1][1] if len(ranked) > 1 else -np.inf
-        t_neg = has_negation(normalize(r["transcript"]), negation_words)
-        p_neg = has_negation(normalize(vocab[best]), negation_words)
+        t_neg = has_negation(normalize(r["transcript"], lang), negation_words, lang)
+        p_neg = has_negation(normalize(alternatives(vocab[best])[0], lang), negation_words, lang)
         out.append({**r, "ranked": [p for p, _ in ranked[:5]], "best": best, "best_score": float(best_s),
                     "margin": float(best_s - second) if np.isfinite(second) else 1e9, "neg_mismatch": t_neg != p_neg,
-                    "empty_transcript": not normalize(r["transcript"])})
+                    "empty_transcript": not normalize(r["transcript"], lang)})
     return pd.DataFrame(out)
 
 

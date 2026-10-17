@@ -161,7 +161,7 @@ class NemoTransducer(Model):
             except Exception:
                 pass
         self.att_all = getattr(m.encoder, "att_context_size_all", None)
-        self.language = None
+        self.language, self.prompt_id = None, None
         if self.spec.get("target_lang"):  # prompt-conditioned multilingual model (Nemotron 3.5 ASR)
             self.set_language(self.spec["target_lang"], m)
         if self.spec.get("att_context"):
@@ -189,7 +189,15 @@ class NemoTransducer(Model):
         m = m or self.model
         if not hasattr(m, "set_inference_prompt"):
             raise ValueError(f"{self.checkpoint} is not prompt-conditioned; it cannot switch language")
-        m.set_inference_prompt(locale)
+        prompts = None
+        for ds in ("test_ds", "validation_ds", "train_ds"):
+            prompts = (m.cfg.get(ds) or {}).get("prompt_dictionary") or prompts
+            if prompts:
+                break
+        if not prompts or locale not in prompts:
+            raise ValueError(f"locale {locale!r} not in the model's prompt dictionary")
+        m.set_inference_prompt(locale)  # used by the library's transcribe() fallback
+        self.prompt_id = int(prompts[locale])  # passed as prompt_indices on every direct encoder pass
         self.language = locale
         self._cache = None
 
@@ -211,8 +219,9 @@ class NemoTransducer(Model):
             return self._cache[1], self._cache[2]
         sig = torch.from_numpy(np.ascontiguousarray(wav, dtype=np.float32))[None].to(self.dev)
         ln = torch.tensor([len(wav)], device=self.dev)
+        kw = {} if self.prompt_id is None else {"prompt_indices": torch.full((1,), self.prompt_id, dtype=torch.long, device=self.dev)}
         with torch.inference_mode(), self._autocast():
-            enc, enc_len = self.model.forward(input_signal=sig, input_signal_length=ln)
+            enc, enc_len = self.model.forward(input_signal=sig, input_signal_length=ln, **kw)
         self._cache = (wav, enc, enc_len)
         return enc, enc_len
 
@@ -239,12 +248,23 @@ class NemoTransducer(Model):
         text = h.text if hasattr(h, "text") else str(h)
         return {"text": text.strip(), "nbest": [text.strip()], "path": "transcribe"}
 
+    LONG_TEXT = 32  # tokens; longer texts (free transcripts of long negatives) are scored alone, not padded into the batch
+
     def score_phrases(self, wav, texts):
+        tok = self.model.tokenizer
+        ids = [tok.text_to_ids(t) if t.strip() else [] for t in texts]
+        short = [k for k, i in enumerate(ids) if len(i) <= self.LONG_TEXT]
+        out: list = [None] * len(ids)
+        for group in [short] + [[k] for k in range(len(ids)) if k not in set(short)]:
+            if group:
+                for k, v in zip(group, self._score_ids(wav, [ids[k] for k in group])):
+                    out[k] = v
+        return out
+
+    def _score_ids(self, wav, ids):
         import torch
 
         enc, enc_len = self._encode(wav)
-        tok = self.model.tokenizer
-        ids = [tok.text_to_ids(t) if t.strip() else [] for t in texts]
         b, u = len(ids), max(1, max(len(i) for i in ids))
         targets = torch.zeros(b, u, dtype=torch.long)
         for k, seq in enumerate(ids):

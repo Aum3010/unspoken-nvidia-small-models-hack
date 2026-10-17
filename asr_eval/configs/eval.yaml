@@ -139,3 +139,141 @@ decision:
 latency:
   warmup_runs: 5
   dtype_cuda: bfloat16
+
+# Languages the patient can speak in. The answer is always the English phrase (`phrases` above):
+# the phrase id is the shared key, so nothing is machine-translated at runtime.
+# Translations are DRAFTS until a native speaker has checked them (review_status). Alternatives cover
+# gendered and polite/plain forms; forced scoring keeps the best-matching form.
+languages:
+  default: en
+  en: {name: English, locale: en-US, negation_words: [not, "no", never], review_status: source}
+  es:
+    name: Español
+    locale: es-US
+    review_status: draft (needs native-speaker review)
+    negation_words: ["no", "nunca", "ni"]
+    phrases:
+      water: ["Necesito agua"]
+      pain: ["Tengo dolor", "Me duele"]
+      nurse: ["Llame a la enfermera", "Llame al enfermero"]
+      breathe: ["No puedo respirar"]
+      suction: ["Necesito succión", "Necesito aspiración"]
+      reposition: ["Por favor cámbieme de posición"]
+      cold: ["Tengo frío"]
+      hot: ["Tengo mucho calor"]
+      bathroom: ["Necesito ir al baño"]
+      light: ["Apague la luz"]
+      family: ["¿Dónde está mi familia?"]
+      time: ["¿Qué hora es?"]
+      sick: ["Me siento mal", "Tengo náuseas"]
+      scared: ["Tengo miedo"]
+      tired: ["Estoy cansado", "Estoy cansada"]
+      pillow: ["Arregle mi almohada"]
+      "yes": ["Sí"]
+      "no": ["No"]
+      help: ["Ayúdeme", "Ayuda"]
+      stop: ["Pare", "Alto", "Basta"]
+  fr:
+    name: Français
+    locale: fr-FR
+    review_status: draft (needs native-speaker review)
+    negation_words: ["ne", "n", "pas", "jamais", "non"]
+    phrases:
+      water: ["J'ai besoin d'eau"]
+      pain: ["J'ai mal"]
+      nurse: ["Appelez l'infirmière", "Appelez l'infirmier"]
+      breathe: ["Je n'arrive pas à respirer", "Je ne peux pas respirer"]
+      suction: ["J'ai besoin d'une aspiration"]
+      reposition: ["Changez-moi de position s'il vous plaît"]
+      cold: ["J'ai froid"]
+      hot: ["J'ai trop chaud"]
+      bathroom: ["J'ai besoin d'aller aux toilettes"]
+      light: ["Éteignez la lumière"]
+      family: ["Où est ma famille ?"]
+      time: ["Quelle heure est-il ?"]
+      sick: ["Je me sens mal", "J'ai la nausée"]
+      scared: ["J'ai peur"]
+      tired: ["Je suis fatigué", "Je suis fatiguée"]
+      pillow: ["Arrangez mon oreiller"]
+      "yes": ["Oui"]
+      "no": ["Non"]
+      help: ["Aidez-moi"]
+      stop: ["Arrêtez", "Stop"]
+  de:
+    name: Deutsch
+    locale: de-DE
+    review_status: draft (needs native-speaker review)
+    negation_words: ["nicht", "kein", "keine", "nein", "nie"]
+    phrases:
+      water: ["Ich brauche Wasser"]
+      pain: ["Ich habe Schmerzen"]
+      nurse: ["Rufen Sie die Pflegekraft", "Rufen Sie die Krankenschwester"]
+      breathe: ["Ich kann nicht atmen", "Ich bekomme keine Luft"]
+      suction: ["Ich muss abgesaugt werden"]
+      reposition: ["Bitte lagern Sie mich um"]
+      cold: ["Mir ist kalt"]
+      hot: ["Mir ist zu heiß"]
+      bathroom: ["Ich muss auf die Toilette"]
+      light: ["Machen Sie das Licht aus"]
+      family: ["Wo ist meine Familie?"]
+      time: ["Wie spät ist es?"]
+      sick: ["Mir ist übel", "Mir ist schlecht"]
+      scared: ["Ich habe Angst"]
+      tired: ["Ich bin müde"]
+      pillow: ["Richten Sie mein Kissen"]
+      "yes": ["Ja"]
+      "no": ["Nein"]
+      help: ["Helfen Sie mir"]
+      stop: ["Stopp", "Aufhören"]
+  zh:
+    name: 中文
+    locale: zh-CN
+    review_status: draft (needs native-speaker review)
+    negation_words: ["不", "没", "别"]          # matched as substrings (no spaces in Chinese)
+    phrases:
+      water: ["我需要水", "我要喝水"]
+      pain: ["我很疼", "我疼"]
+      nurse: ["叫护士"]
+      breathe: ["我喘不过气", "我不能呼吸"]
+      suction: ["我需要吸痰"]
+      reposition: ["请帮我翻身"]
+      cold: ["我冷", "我很冷"]
+      hot: ["我太热了"]
+      bathroom: ["我要上厕所"]
+      light: ["把灯关掉", "关灯"]
+      family: ["我的家人在哪里"]
+      time: ["现在几点了"]
+      sick: ["我不舒服", "我想吐"]
+      scared: ["我害怕"]
+      tired: ["我累了"]
+      pillow: ["帮我整理枕头"]
+      "yes": ["是", "对"]
+      "no": ["不", "不是"]
+      help: ["帮帮我"]
+      stop: ["停", "停下"]
+  hi:
+    name: हिन्दी
+    locale: hi-IN
+    review_status: draft (needs native-speaker review)
+    negation_words: ["नहीं", "न", "मत"]
+    phrases:
+      water: ["मुझे पानी चाहिए"]
+      pain: ["मुझे दर्द हो रहा है"]
+      nurse: ["नर्स को बुलाइए"]
+      breathe: ["मुझे साँस नहीं आ रही", "मैं साँस नहीं ले पा रहा हूँ", "मैं साँस नहीं ले पा रही हूँ"]
+      suction: ["मुझे सक्शन चाहिए"]
+      reposition: ["कृपया मेरी करवट बदलिए"]
+      cold: ["मुझे ठंड लग रही है"]
+      hot: ["मुझे बहुत गर्मी लग रही है"]
+      bathroom: ["मुझे बाथरूम जाना है", "मुझे शौचालय जाना है"]
+      light: ["लाइट बंद कीजिए", "बत्ती बंद कीजिए"]
+      family: ["मेरा परिवार कहाँ है"]
+      time: ["क्या समय हुआ है", "कितने बजे हैं"]
+      sick: ["मेरी तबीयत ठीक नहीं है", "मुझे उल्टी जैसा लग रहा है"]
+      scared: ["मुझे डर लग रहा है"]
+      tired: ["मैं थक गया हूँ", "मैं थक गई हूँ"]
+      pillow: ["मेरा तकिया ठीक कीजिए"]
+      "yes": ["हाँ"]
+      "no": ["नहीं"]
+      help: ["मेरी मदद कीजिए"]
+      stop: ["रुकिए", "बस"]

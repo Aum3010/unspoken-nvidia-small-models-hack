@@ -8,12 +8,13 @@ from __future__ import annotations
 
 import time
 
-from harness.decide import surface_forms
+from harness.decide import alternatives, surface_forms
 
 
-def task_forms(vocabs: dict[str, dict[str, str]]) -> dict[str, list[tuple[str, str]]]:
-    """(phrase_id, surface form) pairs per task; a phrase's score is the max over its forms."""
-    return {task: [(pid, f) for pid, txt in v.items() for f in surface_forms(txt)] for task, v in vocabs.items()}
+def task_forms(vocabs: dict[str, dict], lang: str = "en") -> dict[str, list[tuple[str, str]]]:
+    """(phrase_id, surface form) pairs per task; a phrase's score is the max over its forms and alternatives."""
+    return {task: list(dict.fromkeys((pid, f) for pid, txt in v.items() for a in alternatives(txt) for f in surface_forms(a, lang)))
+            for task, v in vocabs.items()}
 
 
 def _sync():
