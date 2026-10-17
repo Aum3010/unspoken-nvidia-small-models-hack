@@ -1,0 +1,24 @@
+.trace { display: flex; flex-direction: column; min-height: 0; }
+.agent-graph { width: 100%; height: auto; max-height: 220px; margin: -4px 0 8px; }
+.agent-graph text { font-family: var(--font-ui); }
+.agent-graph .flow { animation: dash 0.8s linear infinite; }
+@keyframes dash { to { stroke-dashoffset: -4; } }
+
+.trace-list { display: flex; flex-direction: column; gap: 4px; max-height: 420px; margin: 0 -6px; padding: 0 6px; }
+.trace-item { display: flex; gap: 12px; padding: 10px 10px; border-radius: 14px; position: relative; }
+.trace-item:hover { background: var(--surface); }
+.trace-item.error { background: color-mix(in srgb, var(--danger) 8%, transparent); }
+.trace-dot { flex: none; width: 9px; height: 9px; margin-top: 6px; border-radius: 50%; background: var(--c); box-shadow: 0 0 10px var(--c); }
+.trace-item.pending .trace-dot { animation: pulse 1s infinite; }
+.trace-top { display: flex; justify-content: space-between; gap: 8px; font-size: .72rem; }
+.trace-agent { font-weight: 600; color: var(--c); letter-spacing: .03em; text-transform: uppercase; font-size: .68rem; }
+.trace-title { font-weight: 600; font-size: .92rem; }
+.trace-detail { font-size: .82rem; color: var(--text-2); overflow-wrap: anywhere; }
+
+.history { display: flex; flex-direction: column; min-height: 0; }
+.history-list { display: flex; flex-direction: column; gap: 10px; max-height: 380px; }
+.hist { padding: 12px; border-radius: 16px; background: var(--surface); border: 1px solid var(--hairline); border-left: 3px solid var(--c); }
+.hist-row { display: flex; align-items: center; gap: 12px; }
+.hist-text { font-weight: 600; font-size: 1.05rem; }
+.hist-meta { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; font-size: .75rem; margin-top: 4px; }
+.audit { margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--hairline-strong); display: grid; gap: 4px; font-size: .8rem; }
