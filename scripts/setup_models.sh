@@ -52,9 +52,8 @@ fi
 
 echo "== Web app + on-device browser models"
 (cd web && npm install)
-mkdir -p web/public/mediapipe web/public/vendor
+mkdir -p web/public/mediapipe
 cp -r web/node_modules/@mediapipe/tasks-vision/wasm web/public/mediapipe/
-cp web/node_modules/webgazer/dist/webgazer.js web/public/vendor/
 [[ -s web/public/mediapipe/face_landmarker.task ]] || curl -sSL -o web/public/mediapipe/face_landmarker.task \
   https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task
 # gaze: MobileGaze MobileOne-S0 eye-image model (MIT, yakhyo/gaze-estimation)

@@ -8,7 +8,8 @@ const pct = (v?: number | null, d = 0) => (v == null ? '—' : `${(v * 100).toFi
 const SOURCES: [string, string, string][] = [
   ['Chaplin (VSR pipeline, Auto-AVSR wrapper)', 'https://github.com/amanvirparhar/chaplin', 'MIT'],
   ['Auto-AVSR', 'https://github.com/mpc001/auto_avsr', 'Apache-2.0 (code); model per dataset terms'],
-  ['WebGazer.js', 'https://github.com/brownhci/webgazer', 'GPLv3'],
+  ['MobileGaze (MobileOne-S0 gaze model)', 'https://github.com/yakhyo/gaze-estimation', 'MIT'],
+  ['ONNX Runtime Web', 'https://github.com/microsoft/onnxruntime', 'MIT'],
   ['MediaPipe Face Landmarker', 'https://developers.google.com/edge/mediapipe/solutions/vision/face_landmarker', 'Apache-2.0'],
   ['Whisper (MLX port)', 'https://github.com/openai/whisper', 'MIT'],
   ['RNNoise', 'https://github.com/xiph/rnnoise', 'BSD-3'],

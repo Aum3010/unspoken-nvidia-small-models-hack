@@ -47,6 +47,6 @@ MODEL_LEDGER = [
     {"component": "Audio enhancement", "model": "RNNoise (xiph)", "params_b": 0.00009, "source": "pyrnnoise"},
     {"component": "TTS", "model": "Kokoro-82M (MLX bf16)", "params_b": 0.082, "source": "mlx-community/Kokoro-82M-bf16"},
     {"component": "Face / blink (browser)", "model": "MediaPipe Face Landmarker", "params_b": 0.0013, "source": "face_landmarker.task float16"},
-    {"component": "Gaze (browser)", "model": "WebGazer.js (TF.js facemesh + ridge regression)", "params_b": 0.0012, "source": "webgazer 3.5.3"},
+    {"component": "Gaze (browser)", "model": "MobileGaze MobileOne-S0 (eye-image gaze) + iris ridge calibration", "params_b": 0.00124, "source": "yakhyo/gaze-estimation mobileone_s0_gaze.onnx (MIT)"},
     {"component": "P300 decoder", "model": "xDAWN covariances + tangent space + logistic regression", "params_b": 0.0000002, "source": "pyriemann, trained per participant"},
 ]

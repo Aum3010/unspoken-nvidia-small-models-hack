@@ -14,7 +14,7 @@ const MODES = [
   { key: 'audio', svc: 'audio', title: 'Weak speech', icon: AudioLines, color: 'var(--audio)', badge: 'LIVE MICROPHONE',
     text: 'Whisper, however faintly. Raw and denoised transcripts are compared word by word — never silently merged.', model: 'Whisper + RNNoise · MLX' },
   { key: 'eyes', svc: null, title: 'Eyes', icon: Eye, color: 'var(--gaze)', badge: 'LIVE CAMERA',
-    text: 'Look to choose. Calibrated gaze dwell, or deliberate-blink scanning, over large phrase and spelling targets.', model: 'WebGazer + MediaPipe · in browser' },
+    text: 'Look to choose. Calibrated gaze dwell, or deliberate-blink scanning, over large phrase and spelling targets.', model: 'MediaPipe iris + MobileGaze · in browser' },
   { key: 'brain', svc: 'eeg', title: 'Brain signals', icon: Brain, color: 'var(--eeg)', badge: 'RECORDED EEG DEMO',
     text: 'Research replay: a P300 decoder runs now on EEG recorded from people with ALS. No headset, no live brain input.', model: 'xDAWN + Riemann · BNCI2014-008' },
 ] as const
