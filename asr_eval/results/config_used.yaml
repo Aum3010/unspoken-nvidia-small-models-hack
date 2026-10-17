@@ -47,7 +47,9 @@ own:
     unrelated: unknown_speech
 manifest:
   calib_fraction: 0.4
-  calib_speakers: {}
+  calib_speakers:
+    own:
+    - p02
   generated_nonspeech: 300
   librispeech_n: 200
   nonspeech_public_n: 300
@@ -144,7 +146,7 @@ models:
   kind: faster_whisper
   checkpoint: large-v2
   params_from: openai/whisper-large-v2
-  enabled: true
+  enabled: false
 - name: whisper-small
   kind: faster_whisper
   checkpoint: small
