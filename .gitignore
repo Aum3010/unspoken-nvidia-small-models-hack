@@ -12,3 +12,10 @@ web/public/vendor/
 __pycache__/
 *.pyc
 .DS_Store
+
+# NeMo Gym run artifacts when `gym env start` runs from the repo root
+/resources_servers/
+/responses_api_agents/
+/environment_servers/
+/responses_api_models/
+/outputs/

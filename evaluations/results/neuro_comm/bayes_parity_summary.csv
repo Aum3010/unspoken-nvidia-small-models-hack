@@ -1,0 +1,7 @@
+policy,tau,n,gym_abstentions,std_abstentions,gym_not_correct,std_not_correct,gym_mean_reps,std_mean_reps,mismatched_episodes
+bayes,0.9,120,0,0,34,34,8.2,8.2,0
+bayes,0.99,120,0,0,29,29,9.375,9.375,0
+bayes,0.9999,120,0,0,29,29,10.55,10.55,0
+bayes_abstain,0.9,120,43,43,48,48,8.2,8.2,0
+bayes_abstain,0.99,120,52,52,52,52,9.375,9.375,0
+bayes_abstain,0.9999,120,60,60,60,60,10.55,10.55,0
