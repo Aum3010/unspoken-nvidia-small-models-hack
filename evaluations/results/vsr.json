@@ -1,0 +1,855 @@
+{
+  "dataset": "GRID corpus (unseen speakers)",
+  "speakers": [
+    "s1",
+    "s2"
+  ],
+  "n_clips": 40,
+  "wer": 0.7958,
+  "cer": 0.5501,
+  "oracle_wer": 0.7125,
+  "latency_ms_median": 7852,
+  "speech_motion_median": 2.619,
+  "still": {
+    "n": 8,
+    "flag_rate": 1.0,
+    "false_phrase_rate": 0.0,
+    "motion_median": 0.09
+  },
+  "examples": [
+    {
+      "clip": "s2/pbwx1p.mpg",
+      "truth": "place blue with x one please",
+      "top1": "place blue with x one please",
+      "nbest": [
+        "place blue with x one please",
+        "place pluto with x one please",
+        "please blue with x one please",
+        "place bloom with x one please",
+        "but it's blue with x one please"
+      ],
+      "wer": 0.0,
+      "cer": 0.0,
+      "oracle_wer": 0.0,
+      "flags": [],
+      "latency_ms": 5442,
+      "motion": 2.552
+    },
+    {
+      "clip": "s2/bwbg7n.mpg",
+      "truth": "bin white by g seven now",
+      "top1": "be wise by g seven now",
+      "nbest": [
+        "be wise by g seven now",
+        "bit wise by g seven now",
+        "ben wise by g seven now",
+        "ben wise by g seven no",
+        "ben wise by g 7 now"
+      ],
+      "wer": 0.3333333333333333,
+      "cer": 0.16666666666666666,
+      "oracle_wer": 0.3333333333333333,
+      "flags": [],
+      "latency_ms": 7428,
+      "motion": 2.566
+    },
+    {
+      "clip": "s1/lwbs1s.mpg",
+      "truth": "lay white by s one soon",
+      "top1": "late white page one soon",
+      "nbest": [
+        "late white page one soon",
+        "lightweight page one two",
+        "light white bears want to",
+        "lightweight bands want to",
+        "light white bass one two"
+      ],
+      "wer": 0.5,
+      "cer": 0.2608695652173913,
+      "oracle_wer": 0.5,
+      "flags": [],
+      "latency_ms": 7618,
+      "motion": 3.138
+    },
+    {
+      "clip": "s2/swau9p.mpg",
+      "truth": "set white at u nine please",
+      "top1": "said why is it you and i can please",
+      "nbest": [
+        "said why is it you and i can please",
+        "he said why didn't you guide me",
+        "he said why is it you and i can please",
+        "he said why didn't you and i please",
+        "said why don't you and i can please"
+      ],
+      "wer": 1.3333333333333333,
+      "cer": 0.6538461538461539,
+      "oracle_wer": 1.1666666666666667,
+      "flags": [],
+      "latency_ms": 7719,
+      "motion": 2.76
+    },
+    {
+      "clip": "s2/brif4s.mpg",
+      "truth": "bin red in f four soon",
+      "top1": "i'd be right on that first note",
+      "nbest": [
+        "i'd be right on that first note",
+        "i'd been right on that first note",
+        "i've been right on that first note",
+        "i'll be right on that first note",
+        "i've been riding that for so long"
+      ],
+      "wer": 1.1666666666666667,
+      "cer": 1.0,
+      "oracle_wer": 1.1666666666666667,
+      "flags": [],
+      "latency_ms": 8108,
+      "motion": 2.444
+    },
+    {
+      "clip": "s1/lbaq6p.mpg",
+      "truth": "lay blue at q six please",
+      "top1": "label and use this piece",
+      "nbest": [
+        "label and use this piece",
+        "label acoustics please",
+        "label acoustic speeds",
+        "light blue acoustics please",
+        "late blue acoustics please"
+      ],
+      "wer": 1.0,
+      "cer": 0.6666666666666666,
+      "oracle_wer": 0.6666666666666666,
+      "flags": [],
+      "latency_ms": 8347,
+      "motion": 3.067
+    }
+  ],
+  "rows": [
+    {
+      "clip": "s1/bbaf2n.mpg",
+      "truth": "bin blue at f two now",
+      "top1": "people have two now",
+      "nbest": [
+        "people have two now",
+        "people have to now",
+        "people who have two now",
+        "pimp you have two now",
+        "people you have to know now"
+      ],
+      "wer": 0.6666666666666666,
+      "cer": 0.47619047619047616,
+      "oracle_wer": 0.6666666666666666,
+      "flags": [],
+      "latency_ms": 7199,
+      "motion": 2.772
+    },
+    {
+      "clip": "s1/bbwm4n.mpg",
+      "truth": "bin blue with m four now",
+      "top1": "pimple with him for now",
+      "nbest": [
+        "pimple with him for now",
+        "i've been born with him for now",
+        "i've been born with m4 now",
+        "i've been born with m four now",
+        "i've been bored with him for now"
+      ],
+      "wer": 0.6666666666666666,
+      "cer": 0.3333333333333333,
+      "oracle_wer": 0.5,
+      "flags": [],
+      "latency_ms": 8160,
+      "motion": 2.945
+    },
+    {
+      "clip": "s1/bgin3a.mpg",
+      "truth": "bin green in n three again",
+      "top1": "be quick after it again",
+      "nbest": [
+        "be quick after it again",
+        "be quick and free again",
+        "be a green country again",
+        "be quick enough to it again",
+        "being green i'm green again"
+      ],
+      "wer": 0.8333333333333334,
+      "cer": 0.6153846153846154,
+      "oracle_wer": 0.6666666666666666,
+      "flags": [],
+      "latency_ms": 6231,
+      "motion": 2.45
+    },
+    {
+      "clip": "s1/brif6p.mpg",
+      "truth": "bin red in f six please",
+      "top1": "be ready if six please",
+      "nbest": [
+        "be ready if six please",
+        "be ready at f six please",
+        "be ready in f six please",
+        "be right at f six please",
+        "be right in f six please"
+      ],
+      "wer": 0.6666666666666666,
+      "cer": 0.2608695652173913,
+      "oracle_wer": 0.3333333333333333,
+      "flags": [],
+      "latency_ms": 6902,
+      "motion": 2.987
+    },
+    {
+      "clip": "s1/bwbg8n.mpg",
+      "truth": "bin white by g eight now",
+      "top1": "been right by jay now",
+      "nbest": [
+        "been right by jay now",
+        "been wiped by j now",
+        "been wiped by jane now",
+        "been wiped by jay now",
+        "been wet by jay now"
+      ],
+      "wer": 0.6666666666666666,
+      "cer": 0.5833333333333334,
+      "oracle_wer": 0.6666666666666666,
+      "flags": [],
+      "latency_ms": 5593,
+      "motion": 3.409
+    },
+    {
+      "clip": "s1/lbaq6p.mpg",
+      "truth": "lay blue at q six please",
+      "top1": "label and use this piece",
+      "nbest": [
+        "label and use this piece",
+        "label acoustics please",
+        "label acoustic speeds",
+        "light blue acoustics please",
+        "late blue acoustics please"
+      ],
+      "wer": 1.0,
+      "cer": 0.6666666666666666,
+      "oracle_wer": 0.6666666666666666,
+      "flags": [],
+      "latency_ms": 8347,
+      "motion": 3.067
+    },
+    {
+      "clip": "s1/lbwy6n.mpg",
+      "truth": "lay blue with y six now",
+      "top1": "labor with righteousness",
+      "nbest": [
+        "labor with righteousness",
+        "april of righteousness",
+        "april of righteous",
+        "labor with righteous",
+        "in april of righteousness"
+      ],
+      "wer": 0.8333333333333334,
+      "cer": 0.7391304347826086,
+      "oracle_wer": 0.8333333333333334,
+      "flags": [],
+      "latency_ms": 7056,
+      "motion": 2.554
+    },
+    {
+      "clip": "s1/lgwg2n.mpg",
+      "truth": "lay green with g two now",
+      "top1": "later we move to the corner",
+      "nbest": [
+        "later we move to the corner",
+        "late we moved to a corner",
+        "later we moved to a corner",
+        "later we move to a corner",
+        "late we move to the corner"
+      ],
+      "wer": 1.0,
+      "cer": 0.7916666666666666,
+      "oracle_wer": 1.0,
+      "flags": [],
+      "latency_ms": 8397,
+      "motion": 2.746
+    },
+    {
+      "clip": "s1/lrik4p.mpg",
+      "truth": "lay red in k four please",
+      "top1": "late wedding day for a piece",
+      "nbest": [
+        "late wedding day for a piece",
+        "a wedding day for a piece",
+        "late wedding day for the piece",
+        "late wedding day for a bit",
+        "late wedding day for a peace"
+      ],
+      "wer": 1.0,
+      "cer": 0.5833333333333334,
+      "oracle_wer": 1.0,
+      "flags": [],
+      "latency_ms": 10514,
+      "motion": 2.523
+    },
+    {
+      "clip": "s1/lwbs1s.mpg",
+      "truth": "lay white by s one soon",
+      "top1": "late white page one soon",
+      "nbest": [
+        "late white page one soon",
+        "lightweight page one two",
+        "light white bears want to",
+        "lightweight bands want to",
+        "light white bass one two"
+      ],
+      "wer": 0.5,
+      "cer": 0.2608695652173913,
+      "oracle_wer": 0.5,
+      "flags": [],
+      "latency_ms": 7618,
+      "motion": 3.138
+    },
+    {
+      "clip": "s1/pbav2n.mpg",
+      "truth": "place blue at v two now",
+      "top1": "plays beautifully too now",
+      "nbest": [
+        "plays beautifully too now",
+        "plays beautifully to now",
+        "but it's purely two now",
+        "but it's beautifully two now",
+        "but it's beautifully too now"
+      ],
+      "wer": 0.8333333333333334,
+      "cer": 0.5217391304347826,
+      "oracle_wer": 0.6666666666666666,
+      "flags": [],
+      "latency_ms": 7556,
+      "motion": 2.461
+    },
+    {
+      "clip": "s1/pbwx3a.mpg",
+      "truth": "place blue with x three again",
+      "top1": "please prove that you really can",
+      "nbest": [
+        "please prove that you really can",
+        "placebo that's really good",
+        "place proof that's really good",
+        "place proof that you really can",
+        "place blue that's really good"
+      ],
+      "wer": 1.0,
+      "cer": 0.7241379310344828,
+      "oracle_wer": 0.6666666666666666,
+      "flags": [],
+      "latency_ms": 8677,
+      "motion": 3.145
+    },
+    {
+      "clip": "s1/pgwe6n.mpg",
+      "truth": "place green with e six now",
+      "top1": "please we will be six now",
+      "nbest": [
+        "please we will be six now",
+        "please read with each other now",
+        "please read it with each other now",
+        "blessed we will be six now",
+        "please read it with each other"
+      ],
+      "wer": 0.6666666666666666,
+      "cer": 0.34615384615384615,
+      "oracle_wer": 0.6666666666666666,
+      "flags": [],
+      "latency_ms": 6059,
+      "motion": 3.147
+    },
+    {
+      "clip": "s1/pric4p.mpg",
+      "truth": "place red in c four please",
+      "top1": "please wait and see four please",
+      "nbest": [
+        "please wait and see four please",
+        "please wait and see for please",
+        "please wait and see for it please",
+        "please wait and see for you please",
+        "please wait and see four police"
+      ],
+      "wer": 0.6666666666666666,
+      "cer": 0.4230769230769231,
+      "oracle_wer": 0.6666666666666666,
+      "flags": [],
+      "latency_ms": 5985,
+      "motion": 2.914
+    },
+    {
+      "clip": "s1/pwbk1s.mpg",
+      "truth": "place white by k one soon",
+      "top1": "place right by ken wilson",
+      "nbest": [
+        "place right by ken wilson",
+        "place right by kate wilson",
+        "placed right by ken wilson",
+        "placed right by kate wilson",
+        "placed right by kate walter"
+      ],
+      "wer": 0.6666666666666666,
+      "cer": 0.48,
+      "oracle_wer": 0.6666666666666666,
+      "flags": [],
+      "latency_ms": 9473,
+      "motion": 3.081
+    },
+    {
+      "clip": "s1/sbah1a.mpg",
+      "truth": "set blue at h one again",
+      "top1": "temple age one again",
+      "nbest": [
+        "temple age one again",
+        "temple h1 again",
+        "temple aged one again",
+        "temple hwan again",
+        "temple adjoining"
+      ],
+      "wer": 0.6666666666666666,
+      "cer": 0.34782608695652173,
+      "oracle_wer": 0.6666666666666666,
+      "flags": [],
+      "latency_ms": 10883,
+      "motion": 2.84
+    },
+    {
+      "clip": "s1/sbwo1s.mpg",
+      "truth": "set blue with o one soon",
+      "top1": "shampoo or o one two",
+      "nbest": [
+        "shampoo or o one two",
+        "shampoo of o one two",
+        "shampoo or roll one two",
+        "shampoo of all one two",
+        "shampoo or rogue one two"
+      ],
+      "wer": 0.6666666666666666,
+      "cer": 0.5833333333333334,
+      "oracle_wer": 0.6666666666666666,
+      "flags": [],
+      "latency_ms": 10949,
+      "motion": 2.694
+    },
+    {
+      "clip": "s1/sgio8p.mpg",
+      "truth": "set green in o eight please",
+      "top1": "secrecy ospreys",
+      "nbest": [
+        "secrecy ospreys",
+        "segregated ospreys",
+        "segregate ospreys",
+        "segregated oasis",
+        "staggering ospreys"
+      ],
+      "wer": 1.0,
+      "cer": 0.6666666666666666,
+      "oracle_wer": 1.0,
+      "flags": [],
+      "latency_ms": 11006,
+      "motion": 2.794
+    },
+    {
+      "clip": "s1/srbu6n.mpg",
+      "truth": "set red by u six now",
+      "top1": "stay read by you six now",
+      "nbest": [
+        "stay read by you six now",
+        "stay read by use this now",
+        "say read by you six now",
+        "stay read by u six now",
+        "same way by use this now"
+      ],
+      "wer": 0.5,
+      "cer": 0.3,
+      "oracle_wer": 0.3333333333333333,
+      "flags": [],
+      "latency_ms": 8068,
+      "motion": 2.538
+    },
+    {
+      "clip": "s1/swav1a.mpg",
+      "truth": "set white at v one again",
+      "top1": "jay why don't we want again",
+      "nbest": [
+        "jay why don't we want again",
+        "sam why don't we want again",
+        "jay why don't we run again",
+        "jay why don't we one again",
+        "jake why don't we want again"
+      ],
+      "wer": 0.8333333333333334,
+      "cer": 0.5833333333333334,
+      "oracle_wer": 0.6666666666666666,
+      "flags": [],
+      "latency_ms": 10089,
+      "motion": 3.016
+    },
+    {
+      "clip": "s2/bbaf1n.mpg",
+      "truth": "bin blue at f one now",
+      "top1": "and i'm being blown off one now",
+      "nbest": [
+        "and i'm being blown off one now",
+        "and i'm being blown out of one now",
+        "but i'm brewing f one now",
+        "and i'm being blown out of one",
+        "but i'm blue and i've won now"
+      ],
+      "wer": 0.8333333333333334,
+      "cer": 0.7619047619047619,
+      "oracle_wer": 0.5,
+      "flags": [],
+      "latency_ms": 9329,
+      "motion": 2.745
+    },
+    {
+      "clip": "s2/bbwgzs.mpg",
+      "truth": "bin blue with g zero soon",
+      "top1": "i've been playing with cheesy around school",
+      "nbest": [
+        "i've been playing with cheesy around school",
+        "i've been playing with cheesy around the school",
+        "i've been playing with cheesy around school and",
+        "i'd be in bed with cheesy around school",
+        "it's been built with cheesy grounds too"
+      ],
+      "wer": 1.0,
+      "cer": 1.04,
+      "oracle_wer": 1.0,
+      "flags": [],
+      "latency_ms": 9739,
+      "motion": 2.307
+    },
+    {
+      "clip": "s2/bgin1p.mpg",
+      "truth": "bin green in n one please",
+      "top1": "being created in one place",
+      "nbest": [
+        "being created in one place",
+        "being rated at one place",
+        "being created at one place",
+        "being created that in one place",
+        "being rated in one place"
+      ],
+      "wer": 0.6666666666666666,
+      "cer": 0.4,
+      "oracle_wer": 0.6666666666666666,
+      "flags": [],
+      "latency_ms": 6443,
+      "motion": 2.451
+    },
+    {
+      "clip": "s2/brif4s.mpg",
+      "truth": "bin red in f four soon",
+      "top1": "i'd be right on that first note",
+      "nbest": [
+        "i'd be right on that first note",
+        "i'd been right on that first note",
+        "i've been right on that first note",
+        "i'll be right on that first note",
+        "i've been riding that for so long"
+      ],
+      "wer": 1.1666666666666667,
+      "cer": 1.0,
+      "oracle_wer": 1.1666666666666667,
+      "flags": [],
+      "latency_ms": 8108,
+      "motion": 2.444
+    },
+    {
+      "clip": "s2/bwbg7n.mpg",
+      "truth": "bin white by g seven now",
+      "top1": "be wise by g seven now",
+      "nbest": [
+        "be wise by g seven now",
+        "bit wise by g seven now",
+        "ben wise by g seven now",
+        "ben wise by g seven no",
+        "ben wise by g 7 now"
+      ],
+      "wer": 0.3333333333333333,
+      "cer": 0.16666666666666666,
+      "oracle_wer": 0.3333333333333333,
+      "flags": [],
+      "latency_ms": 7428,
+      "motion": 2.566
+    },
+    {
+      "clip": "s2/lbaq5p.mpg",
+      "truth": "lay blue at q five please",
+      "top1": "i'll let it blow into you five please",
+      "nbest": [
+        "i'll let it blow into you five please",
+        "i'll let it blew into you five please",
+        "i'll let him blew into you five please",
+        "i'll let you blew into your five please",
+        "i'll let you blew into your five plays"
+      ],
+      "wer": 1.0,
+      "cer": 0.72,
+      "oracle_wer": 1.0,
+      "flags": [],
+      "latency_ms": 7985,
+      "motion": 2.348
+    },
+    {
+      "clip": "s2/lbwy5n.mpg",
+      "truth": "lay blue with y five now",
+      "top1": "i'll help you on wi fi now",
+      "nbest": [
+        "i'll help you on wi fi now",
+        "i'll keep you on wi fi now",
+        "i'll help you on wi five now",
+        "i'll let you in wi fi now",
+        "i'll let you in wi five now"
+      ],
+      "wer": 1.0,
+      "cer": 0.75,
+      "oracle_wer": 0.8333333333333334,
+      "flags": [],
+      "latency_ms": 7343,
+      "motion": 2.53
+    },
+    {
+      "clip": "s2/lgwg1n.mpg",
+      "truth": "lay green with g one now",
+      "top1": "lincoln when she won now",
+      "nbest": [
+        "lincoln when she won now",
+        "lincoln when she won now i",
+        "he'll linger in when she won now",
+        "i'll linger in when she won now",
+        "lincoln when she won now i'm"
+      ],
+      "wer": 0.8333333333333334,
+      "cer": 0.625,
+      "oracle_wer": 0.8333333333333334,
+      "flags": [
+        "low_mouth_motion"
+      ],
+      "latency_ms": 8446,
+      "motion": 2.13
+    },
+    {
+      "clip": "s2/lrik3p.mpg",
+      "truth": "lay red in k three please",
+      "top1": "i'll let you write it in three please",
+      "nbest": [
+        "i'll let you write it in three please",
+        "i'll let ryan get three please",
+        "i'll let you write it in three minutes",
+        "i'll let you write it in the right place",
+        "i'll let you know how to get three please"
+      ],
+      "wer": 1.0,
+      "cer": 0.68,
+      "oracle_wer": 0.6666666666666666,
+      "flags": [],
+      "latency_ms": 8094,
+      "motion": 2.236
+    },
+    {
+      "clip": "s2/lwbr9n.mpg",
+      "truth": "lay white by r nine now",
+      "top1": "it's my heart and i know",
+      "nbest": [
+        "it's my heart and i know",
+        "lewis my heart and i know",
+        "it's my heart and i know it",
+        "lynn why's my heart now",
+        "it's my heart and i know it's"
+      ],
+      "wer": 1.0,
+      "cer": 0.7391304347826086,
+      "oracle_wer": 0.8333333333333334,
+      "flags": [],
+      "latency_ms": 7212,
+      "motion": 2.726
+    },
+    {
+      "clip": "s2/pbapza.mpg",
+      "truth": "place blue at p zero again",
+      "top1": "it's brewing b zero again",
+      "nbest": [
+        "it's brewing b zero again",
+        "that's brewing b zero again",
+        "it's brewing p zero again",
+        "that's brewing p zero again",
+        "it's brewing b zero again and"
+      ],
+      "wer": 0.6666666666666666,
+      "cer": 0.46153846153846156,
+      "oracle_wer": 0.5,
+      "flags": [],
+      "latency_ms": 9470,
+      "motion": 2.315
+    },
+    {
+      "clip": "s2/pbwx1p.mpg",
+      "truth": "place blue with x one please",
+      "top1": "place blue with x one please",
+      "nbest": [
+        "place blue with x one please",
+        "place pluto with x one please",
+        "please blue with x one please",
+        "place bloom with x one please",
+        "but it's blue with x one please"
+      ],
+      "wer": 0.0,
+      "cer": 0.0,
+      "oracle_wer": 0.0,
+      "flags": [],
+      "latency_ms": 5442,
+      "motion": 2.552
+    },
+    {
+      "clip": "s2/pgix8a.mpg",
+      "truth": "place green in x eight again",
+      "top1": "please read the next eight again",
+      "nbest": [
+        "please read the next eight again",
+        "please read the next eighteen",
+        "please to read the next eight again",
+        "pleased to read the next eight again",
+        "please read it next day it's again"
+      ],
+      "wer": 0.6666666666666666,
+      "cer": 0.39285714285714285,
+      "oracle_wer": 0.6666666666666666,
+      "flags": [],
+      "latency_ms": 6676,
+      "motion": 2.493
+    },
+    {
+      "clip": "s2/pric2s.mpg",
+      "truth": "place red in c two soon",
+      "top1": "place ready to start soon",
+      "nbest": [
+        "place ready to start soon",
+        "place ready to start your school",
+        "place ready to start in your school",
+        "place ready to start in your suit",
+        "place ready to start at your school"
+      ],
+      "wer": 0.6666666666666666,
+      "cer": 0.391304347826087,
+      "oracle_wer": 0.6666666666666666,
+      "flags": [],
+      "latency_ms": 8564,
+      "motion": 2.283
+    },
+    {
+      "clip": "s2/pwbd8a.mpg",
+      "truth": "place white by d eight again",
+      "top1": "plus wise biscuits again",
+      "nbest": [
+        "plus wise biscuits again",
+        "plus wise biscuit to gain",
+        "plus wise biscuits again the",
+        "plus why it's by diaz again",
+        "plus why it's bid to gain"
+      ],
+      "wer": 0.8333333333333334,
+      "cer": 0.4642857142857143,
+      "oracle_wer": 0.8333333333333334,
+      "flags": [],
+      "latency_ms": 6325,
+      "motion": 2.672
+    },
+    {
+      "clip": "s2/sbag8s.mpg",
+      "truth": "set blue at g eight soon",
+      "top1": "it's dead blue and gigantic",
+      "nbest": [
+        "it's dead blue and gigantic",
+        "it's dead blue and she ain't",
+        "it's dead blue and she ain't too",
+        "it's dead blue it's gigantic",
+        "it's dead blue and she ain't two"
+      ],
+      "wer": 1.0,
+      "cer": 0.75,
+      "oracle_wer": 1.0,
+      "flags": [
+        "low_mouth_motion"
+      ],
+      "latency_ms": 7664,
+      "motion": 2.125
+    },
+    {
+      "clip": "s2/sbwn9n.mpg",
+      "truth": "set blue with n nine now",
+      "top1": "said bloom with anne i know",
+      "nbest": [
+        "said bloom with anne i know",
+        "said bloom with anne and how",
+        "said bloom with anne and now",
+        "said bloom with anne and i",
+        "a sunburn with anne and how"
+      ],
+      "wer": 0.8333333333333334,
+      "cer": 0.5,
+      "oracle_wer": 0.6666666666666666,
+      "flags": [],
+      "latency_ms": 8672,
+      "motion": 2.365
+    },
+    {
+      "clip": "s2/sgio7p.mpg",
+      "truth": "set green in o seven please",
+      "top1": "he's getting ready to go seven please",
+      "nbest": [
+        "he's getting ready to go seven please",
+        "it's getting ready to go seven please",
+        "and it's getting ready to go seven please",
+        "and he's getting ready to go seven please",
+        "he's getting ready to go seven please he's"
+      ],
+      "wer": 0.8333333333333334,
+      "cer": 0.5555555555555556,
+      "oracle_wer": 0.8333333333333334,
+      "flags": [],
+      "latency_ms": 6714,
+      "motion": 2.5
+    },
+    {
+      "clip": "s2/srbu5n.mpg",
+      "truth": "set red by u five now",
+      "top1": "it's then read by you five",
+      "nbest": [
+        "it's then read by you five",
+        "it's then read by you five you",
+        "it's said and read by you five",
+        "it's said and read by you five you",
+        "it's then read by you five loom"
+      ],
+      "wer": 0.8333333333333334,
+      "cer": 0.6666666666666666,
+      "oracle_wer": 0.8333333333333334,
+      "flags": [],
+      "latency_ms": 7127,
+      "motion": 3.057
+    },
+    {
+      "clip": "s2/swau9p.mpg",
+      "truth": "set white at u nine please",
+      "top1": "said why is it you and i can please",
+      "nbest": [
+        "said why is it you and i can please",
+        "he said why didn't you guide me",
+        "he said why is it you and i can please",
+        "he said why didn't you and i please",
+        "said why don't you and i can please"
+      ],
+      "wer": 1.3333333333333333,
+      "cer": 0.6538461538461539,
+      "oracle_wer": 1.1666666666666667,
+      "flags": [],
+      "latency_ms": 7719,
+      "motion": 2.76
+    }
+  ]
+}

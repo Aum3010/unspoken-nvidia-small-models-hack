@@ -1,0 +1,339 @@
+{
+  "subjects": [
+    {
+      "subject": "A01",
+      "meta": {
+        "sex": "male",
+        "age": "55",
+        "alsfrs_r": "13",
+        "onset": "spinal"
+      },
+      "models": {
+        "xdawn_riemann_lr": {
+          "test_auc": 0.8254,
+          "accuracy_by_reps": [
+            0.2,
+            0.35,
+            0.45,
+            0.65,
+            0.7,
+            0.75,
+            0.75,
+            0.9,
+            0.9,
+            0.95
+          ]
+        },
+        "decimated_lda": {
+          "test_auc": 0.8149,
+          "accuracy_by_reps": [
+            0.1,
+            0.35,
+            0.4,
+            0.45,
+            0.5,
+            0.55,
+            0.65,
+            0.75,
+            0.85,
+            0.9
+          ]
+        }
+      }
+    },
+    {
+      "subject": "A02",
+      "meta": {
+        "sex": "male",
+        "age": "59",
+        "alsfrs_r": "37",
+        "onset": "spinal"
+      },
+      "models": {
+        "xdawn_riemann_lr": {
+          "test_auc": 0.7826,
+          "accuracy_by_reps": [
+            0.15,
+            0.3,
+            0.55,
+            0.6,
+            0.65,
+            0.95,
+            0.95,
+            0.95,
+            0.95,
+            0.9
+          ]
+        },
+        "decimated_lda": {
+          "test_auc": 0.7593,
+          "accuracy_by_reps": [
+            0.05,
+            0.3,
+            0.45,
+            0.45,
+            0.6,
+            0.75,
+            0.7,
+            0.75,
+            0.9,
+            0.9
+          ]
+        }
+      }
+    },
+    {
+      "subject": "A03",
+      "meta": {
+        "sex": "male",
+        "age": "43",
+        "alsfrs_r": "33",
+        "onset": "spinal"
+      },
+      "models": {
+        "xdawn_riemann_lr": {
+          "test_auc": 0.8881,
+          "accuracy_by_reps": [
+            0.4,
+            0.6,
+            0.6,
+            0.65,
+            0.85,
+            0.95,
+            1.0,
+            1.0,
+            1.0,
+            0.9
+          ]
+        },
+        "decimated_lda": {
+          "test_auc": 0.8749,
+          "accuracy_by_reps": [
+            0.25,
+            0.6,
+            0.6,
+            0.7,
+            0.6,
+            0.85,
+            0.9,
+            0.9,
+            0.95,
+            0.95
+          ]
+        }
+      }
+    },
+    {
+      "subject": "A04",
+      "meta": {
+        "sex": "female",
+        "age": "75",
+        "alsfrs_r": "38",
+        "onset": "bulbar"
+      },
+      "models": {
+        "xdawn_riemann_lr": {
+          "test_auc": 0.8296,
+          "accuracy_by_reps": [
+            0.2,
+            0.55,
+            0.4,
+            0.75,
+            0.8,
+            0.85,
+            0.85,
+            0.95,
+            0.9,
+            0.95
+          ]
+        },
+        "decimated_lda": {
+          "test_auc": 0.8207,
+          "accuracy_by_reps": [
+            0.2,
+            0.4,
+            0.5,
+            0.6,
+            0.7,
+            0.85,
+            0.9,
+            0.95,
+            0.95,
+            0.95
+          ]
+        }
+      }
+    },
+    {
+      "subject": "A05",
+      "meta": {
+        "sex": "female",
+        "age": "60",
+        "alsfrs_r": "34",
+        "onset": "bulbar"
+      },
+      "models": {
+        "xdawn_riemann_lr": {
+          "test_auc": 0.8545,
+          "accuracy_by_reps": [
+            0.35,
+            0.5,
+            0.8,
+            0.85,
+            0.9,
+            0.95,
+            0.9,
+            0.95,
+            0.95,
+            0.95
+          ]
+        },
+        "decimated_lda": {
+          "test_auc": 0.8313,
+          "accuracy_by_reps": [
+            0.3,
+            0.45,
+            0.75,
+            0.85,
+            0.9,
+            0.85,
+            0.9,
+            0.9,
+            0.9,
+            0.95
+          ]
+        }
+      }
+    },
+    {
+      "subject": "A06",
+      "meta": {
+        "sex": "male",
+        "age": "40",
+        "alsfrs_r": "31",
+        "onset": "Spinal"
+      },
+      "models": {
+        "xdawn_riemann_lr": {
+          "test_auc": 0.8544,
+          "accuracy_by_reps": [
+            0.35,
+            0.65,
+            0.7,
+            0.8,
+            0.8,
+            0.8,
+            0.95,
+            0.95,
+            1.0,
+            0.9
+          ]
+        },
+        "decimated_lda": {
+          "test_auc": 0.8744,
+          "accuracy_by_reps": [
+            0.5,
+            0.8,
+            0.8,
+            0.85,
+            0.8,
+            0.9,
+            0.9,
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      }
+    },
+    {
+      "subject": "A07",
+      "meta": {
+        "sex": "male",
+        "age": "61",
+        "alsfrs_r": "28",
+        "onset": "Bulbar"
+      },
+      "models": {
+        "xdawn_riemann_lr": {
+          "test_auc": 0.8233,
+          "accuracy_by_reps": [
+            0.3,
+            0.4,
+            0.5,
+            0.55,
+            0.75,
+            0.85,
+            0.95,
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "decimated_lda": {
+          "test_auc": 0.8474,
+          "accuracy_by_reps": [
+            0.4,
+            0.5,
+            0.7,
+            0.95,
+            0.95,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      }
+    },
+    {
+      "subject": "A08",
+      "meta": {
+        "sex": "Female",
+        "age": "72",
+        "alsfrs_r": "41",
+        "onset": "Spinal"
+      },
+      "models": {
+        "xdawn_riemann_lr": {
+          "test_auc": 0.9394,
+          "accuracy_by_reps": [
+            0.55,
+            0.95,
+            0.95,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "decimated_lda": {
+          "test_auc": 0.9416,
+          "accuracy_by_reps": [
+            0.65,
+            0.9,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      }
+    }
+  ],
+  "mean": {
+    "auc": 0.8496625,
+    "acc1": 0.3125,
+    "acc5": 0.80625,
+    "acc10": 0.94375,
+    "lda10": 0.95625
+  }
+}

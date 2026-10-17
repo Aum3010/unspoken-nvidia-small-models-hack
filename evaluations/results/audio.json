@@ -1,0 +1,158 @@
+{
+  "conditions": [
+    {
+      "name": "Normal level, quiet room",
+      "level_dbfs": -20,
+      "snr_db": 40,
+      "n": 10,
+      "wer_raw": 0.0,
+      "wer_enhanced": 0.0,
+      "fabricated_raw": 0,
+      "fabricated_enh": 0
+    },
+    {
+      "name": "Very quiet (-42 dBFS), quiet room",
+      "level_dbfs": -42,
+      "snr_db": 30,
+      "n": 10,
+      "wer_raw": 0.0,
+      "wer_enhanced": 0.0,
+      "fabricated_raw": 0,
+      "fabricated_enh": 0
+    },
+    {
+      "name": "Normal level, noisy (SNR 5 dB)",
+      "level_dbfs": -22,
+      "snr_db": 5,
+      "n": 10,
+      "wer_raw": 0.0,
+      "wer_enhanced": 0.0196,
+      "fabricated_raw": 0,
+      "fabricated_enh": 0
+    },
+    {
+      "name": "Whisper-level + noise (SNR 0 dB)",
+      "level_dbfs": -40,
+      "snr_db": 0,
+      "n": 10,
+      "wer_raw": 0.0392,
+      "wer_enhanced": 0.0196,
+      "fabricated_raw": 1,
+      "fabricated_enh": 0
+    },
+    {
+      "name": "Whisper-level + heavy noise (SNR -5 dB)",
+      "level_dbfs": -40,
+      "snr_db": -5,
+      "n": 10,
+      "wer_raw": 0.0784,
+      "wer_enhanced": 0.1765,
+      "fabricated_raw": 0,
+      "fabricated_enh": 1
+    },
+    {
+      "name": "Whisper-level + very heavy noise (SNR -10 dB)",
+      "level_dbfs": -40,
+      "snr_db": -10,
+      "n": 10,
+      "wer_raw": 0.4902,
+      "wer_enhanced": 0.6471,
+      "fabricated_raw": 4,
+      "fabricated_enh": 4
+    },
+    {
+      "name": "Noise only, no speech (10 clips)",
+      "level_dbfs": null,
+      "snr_db": null,
+      "n": 10,
+      "wer_raw": null,
+      "wer_enhanced": null,
+      "fabricated_raw": 0,
+      "fabricated_enh": 0,
+      "declined": 10
+    }
+  ],
+  "examples": [
+    {
+      "condition": "Normal level, noisy (SNR 5 dB)",
+      "truth": "Can you turn off the light",
+      "raw": "Can you turn off the light?",
+      "enhanced": "and you turn off the light.",
+      "flags": [
+        "enhancer_disagrees",
+        "low_word_confidence"
+      ]
+    },
+    {
+      "condition": "Whisper-level + noise (SNR 0 dB)",
+      "truth": "I would like to sit up",
+      "raw": "I would like to sit on it.",
+      "enhanced": "I would like to sit.",
+      "flags": [
+        "enhancer_disagrees",
+        "low_word_confidence"
+      ]
+    },
+    {
+      "condition": "Whisper-level + heavy noise (SNR -5 dB)",
+      "truth": "I need some water please",
+      "raw": "I need some water please.",
+      "enhanced": "I meet some daughter please.",
+      "flags": [
+        "enhancer_disagrees",
+        "low_word_confidence"
+      ]
+    },
+    {
+      "condition": "Whisper-level + heavy noise (SNR -5 dB)",
+      "truth": "Please call my daughter",
+      "raw": "Please call my dog.",
+      "enhanced": "Please call my daughter.",
+      "flags": [
+        "enhancer_disagrees",
+        "low_word_confidence"
+      ]
+    },
+    {
+      "condition": "Whisper-level + heavy noise (SNR -5 dB)",
+      "truth": "Can you turn off the light",
+      "raw": "and you turn off the light.",
+      "enhanced": "Can you turn off the light?",
+      "flags": [
+        "enhancer_disagrees",
+        "low_word_confidence"
+      ]
+    },
+    {
+      "condition": "Whisper-level + heavy noise (SNR -5 dB)",
+      "truth": "I would like to sit up",
+      "raw": "I would like to see you.",
+      "enhanced": "I will talk to you soon.",
+      "flags": [
+        "enhancer_disagrees",
+        "low_word_confidence"
+      ]
+    },
+    {
+      "condition": "Whisper-level + heavy noise (SNR -5 dB)",
+      "truth": "Please move my pillow",
+      "raw": "Please move my pillow.",
+      "enhanced": "Please move by pillow.",
+      "flags": [
+        "enhancer_disagrees",
+        "low_word_confidence"
+      ]
+    },
+    {
+      "condition": "Whisper-level + heavy noise (SNR -5 dB)",
+      "truth": "I want to go home",
+      "raw": "I want to go home.",
+      "enhanced": "I want to go for him.",
+      "flags": [
+        "enhancer_disagrees",
+        "low_word_confidence"
+      ]
+    }
+  ],
+  "note": "Synthetic Kokoro utterances (5 voices) degraded with pink noise; reference text exact. 'Fabricated' = inserted words (noise-only: any word surfaced as a candidate). Noise-only clips the voice agent declined to transcribe: 10/10. Not a dysarthria benchmark."
+}
