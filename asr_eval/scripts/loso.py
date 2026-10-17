@@ -39,6 +39,22 @@ def fold_rows(f: pd.DataFrame, dc: dict, cfg, far_target: float) -> pd.DataFrame
     return pd.concat(out, ignore_index=True)
 
 
+def system_view(t: pd.DataFrame) -> dict:
+    """How the clip plays out in the full app (gateway + coordinator + gaze confirmation).
+
+    candidate -> one candidate to confirm; unknown (speech present) -> the coordinator offers the top 3 for a gaze
+    choice; no_speech -> retake / switch modality. A positive is resolved within one gaze question if the candidate
+    was right, or it was unknown and the truth was in the top 3. On negatives, an unknown costs one extra question
+    (answered "none of these"); a candidate there is a false accept.
+    """
+    pos = t[t["label_type"] == "positive"]
+    neg = t[t["label_type"] != "positive"]
+    right = (pos["decision"] == pos["phrase_id"])
+    offered = (pos["decision"] == "unknown") & [p in (r or [])[:3] for p, r in zip(pos["phrase_id"], pos["ranked"])]
+    return {"one_question": rate(int((right | offered).sum()), len(pos)),
+            "extra_question_on_negatives": rate(int((neg["decision"] == "unknown").sum()), len(neg))}
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--config", default="configs/eval.yaml")
@@ -64,7 +80,7 @@ def main():
                 key = f"{spec['name']}/{method}"
                 real, deg = t[~t["degraded"]], t[t["degraded"]]  # degraded copies are synthetic: never mixed into the headline
                 res.setdefault(key, {})[pname] = {"pos": positive_metrics(real), "neg": negative_metrics(real),
-                                                  "degraded_pos": positive_metrics(deg)}
+                                                  "degraded_pos": positive_metrics(deg), "system": system_view(real)}
                 if pname == "balanced" or len(points) == 1:
                     per[key] = t
             print(f"loso {spec['name']}/{method}", flush=True)
@@ -76,16 +92,21 @@ def main():
     md = ["# Leave-one-speaker-out on own recordings", "",
           "Each person is tested by thresholds tuned on the other people (plus real negatives from the calib split). "
           "Counts are k/n over all folds; each clip is tested once. Main tables: real recordings only (normal, whisper, "
-          "noisy, muffled as spoken). Synthetic degraded copies of the same recordings are reported separately below.", ""]
+          "noisy, muffled as spoken). Synthetic degraded copies of the same recordings are reported separately below.", "",
+          "**Resolved ≤1 gaze question**: the candidate was right, or the agent said unknown and the coordinator's top-3 "
+          "question contained the right phrase (README: the coordinator asks the smallest useful question). "
+          "**Extra question on negatives**: negatives that trigger a top-3 question the person answers with \"none of these\".", ""]
     for pname, far in points.items():
         md += [f"## {pname} (false accepts ≤ {100 * far:.0f}% per negative type on calib): real recordings", "",
-               "| Model / method | Top-1 rank | Top-3 rank | Accepted correct | Wrong accept | Abstain | FA hard negatives | FA silence / noise / cough | FA unrelated speech |",
-               "|---|---|---|---|---|---|---|---|---|"]
+               "| Model / method | Top-1 rank | Top-3 rank | Accepted correct | Wrong accept | Abstain | **Resolved ≤1 gaze question** | FA hard negatives | FA silence / noise / cough | FA unrelated speech | Extra question on negatives |",
+               "|---|---|---|---|---|---|---|---|---|---|---|"]
         for k in sorted(res, key=lambda k: -res[k][pname]["pos"]["accepted_correct"]["rate"]):
             p, n = res[k][pname]["pos"], res[k][pname]["neg"]
             sil = rate(n["silence"]["k"] + n["non_speech"]["k"], n["silence"]["n"] + n["non_speech"]["n"])
+            sv = res[k][pname]["system"]
             md.append(f"| {k} | {fmt(p['top1'], False)} | {fmt(p['top3'], False)} | **{fmt(p['accepted_correct'], False)}** | "
-                      f"{fmt(p['wrong_accept'], False)} | {fmt(p['abstain'], False)} | {fmt(n['hard_negative'])} | {fmt(sil)} | {fmt(n['unknown_speech'])} |")
+                      f"{fmt(p['wrong_accept'], False)} | {fmt(p['abstain'], False)} | **{fmt(sv['one_question'], False)}** | "
+                      f"{fmt(n['hard_negative'])} | {fmt(sil)} | {fmt(n['unknown_speech'])} | {fmt(sv['extra_question_on_negatives'], False)} |")
         md.append("")
     md += ["## Synthetic degraded copies of the same recordings (not headline)", "",
            "| Model / method | strict: accepted correct | strict: wrong accept | balanced: accepted correct | balanced: wrong accept |",
