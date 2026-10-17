@@ -265,7 +265,8 @@ async function startSession() {
   const want = Object.entries(cfg.phrases).map(([k, v]) => ({ label: k, text: v, tag: "", n: takes }));
   if ($("withneg").checked) {
     for (const [k, v] of Object.entries(cfg.hard_negatives)) want.push({ label: "neg_" + k, text: v, tag: "negative: say exactly this", n: 1 });
-    for (const k of cfg.negatives) want.push({ label: "neg_" + k, text: cfg.negative_prompts[k] || k, tag: "negative", n: 1 });
+    for (const k of cfg.negatives) want.push({ label: "neg_" + k, text: cfg.negative_prompts[k] || k,
+      tag: k === "unrelated" ? "negative: say any sentence" : "negative: do this, don't read it aloud", n: 1 });
   }
   const queue = [];
   for (const w of want) for (let t = prog.counts[w.label] || 0; t < w.n; t++) queue.push(w);
@@ -276,7 +277,7 @@ async function startSession() {
 }
 function renderPrompt() {
   const s = session, done = s.i >= s.queue.length, p = s.queue[s.i];
-  $("say").textContent = done ? "done" : (p.tag.startsWith("negative") && !p.tag.includes("say") ? "do this" : "say");
+  $("say").textContent = done ? "done" : (p.tag.includes("do this") ? "do this (no words)" : "say");
   $("ptext").textContent = done ? `${s.condition} complete ✓` : p.text;
   $("ptag").textContent = done ? "Choose the next condition and press Start." : p.tag;
   $("pfill").style.width = (s.queue.length ? 100 * s.i / s.queue.length : 100) + "%";
@@ -310,7 +311,8 @@ $("redo").onclick = async () => {
 
 // ---------- test view ----------
 const REASONS = { accepted: "passed every gate", no_speech: "speech gate: no voice detected", low_score: "best score below the threshold",
-  small_margin: "too close to the runner-up", negation: "negation in the transcript does not match the phrase", no_hypothesis: "no hypothesis" };
+  small_margin: "too close to the runner-up", negation: "negation in the transcript does not match the phrase", no_hypothesis: "no hypothesis",
+  empty_transcript: "sound detected but the model heard no words" };
 function show(r) {
   $("decision").className = "decision " + r.decision;
   $("kind").textContent = r.decision === "candidate" ? "candidate · confirm with gaze" : r.decision.replace("_", " ");

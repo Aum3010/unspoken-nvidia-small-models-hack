@@ -185,7 +185,7 @@ def build_app(bench: Bench):
             "model": bench.model.name, "method": bench.method, "point": bench.point,
             "points": {k: v for k, v in bench.points.items()}, "thresholds": json_safe(bench.th), "load_s": bench.load_s,
             "device": torch.cuda.get_device_name() if torch.cuda.is_available() else "CPU", "notice": NOTICE,
-            "negative_prompts": {"silence": "Stay silent, then release", "breathing": "Breathe audibly", "cough": "Cough or clear your throat",
+            "negative_prompts": {"silence": "(stay silent, then release)", "breathing": "(breathe in and out audibly)", "cough": "(cough or clear your throat)",
                                  "unrelated": "Say any unrelated sentence"},
             "thresholds_note": next((v.get("fallback") for k, v in bench.thresholds.items() if k.endswith("|phrases20") and v.get("fallback")), None),
         }

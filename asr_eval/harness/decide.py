@@ -8,8 +8,10 @@ Rankers (per clip, per task vocabulary):
   forced_llr   (extra) per-token log-likelihood ratio of each phrase against the model's own free
             transcript, scored the same way: ~0 when the phrase is what the model heard anyway
 
-decide(): no_speech if the VAD gate fails; unknown if best < abs, margin < margin, or the
-transcript's negation disagrees with the best phrase's; otherwise candidate = best phrase.
+decide(): no_speech if the VAD gate fails; unknown if best < abs, margin < margin, the transcript's
+negation disagrees with the best phrase's, or the model's own transcript is empty (it heard no words, so
+forced scoring must not create one: plan.md "never infer words absent from all usable input");
+otherwise candidate = best phrase.
 """
 
 from __future__ import annotations
@@ -88,14 +90,16 @@ def features(rows: pd.DataFrame, vocabs: dict[str, dict[str, str]], method: str,
         vocab = vocabs[r["eval_task"]]
         ranked = rank_scores(r, vocab, method)
         if not ranked:
-            out.append({**r, "ranked": [], "best": None, "best_score": -np.inf, "margin": 0.0, "neg_mismatch": False})
+            out.append({**r, "ranked": [], "best": None, "best_score": -np.inf, "margin": 0.0, "neg_mismatch": False,
+                        "empty_transcript": not normalize(r["transcript"])})
             continue
         best, best_s = ranked[0]
         second = ranked[1][1] if len(ranked) > 1 else -np.inf
         t_neg = has_negation(normalize(r["transcript"]), negation_words)
         p_neg = has_negation(normalize(vocab[best]), negation_words)
         out.append({**r, "ranked": [p for p, _ in ranked[:5]], "best": best, "best_score": float(best_s),
-                    "margin": float(best_s - second) if np.isfinite(second) else 1e9, "neg_mismatch": t_neg != p_neg})
+                    "margin": float(best_s - second) if np.isfinite(second) else 1e9, "neg_mismatch": t_neg != p_neg,
+                    "empty_transcript": not normalize(r["transcript"])})
     return pd.DataFrame(out)
 
 
@@ -106,7 +110,7 @@ def decide_arrays(f: pd.DataFrame, vad_t: float, abs_t: float, margin_t: float) 
 def _arrays(f: pd.DataFrame) -> dict:
     a = {"best": f["best"].fillna("").to_numpy(dtype=object), "score": f["best_score"].to_numpy(dtype=float),
          "margin": f["margin"].to_numpy(dtype=float), "neg": f["neg_mismatch"].to_numpy(dtype=bool),
-         "has": f["best"].notna().to_numpy()}
+         "has": f["best"].notna().to_numpy() & ~f["empty_transcript"].to_numpy(dtype=bool)}
     for c in f.columns:
         if c.startswith("vad_speech_s@"):
             a[c] = f[c].to_numpy() > 0
@@ -124,6 +128,8 @@ def explain(row: dict, th: dict) -> str:
         return "no_speech"
     if row.get("best") is None:
         return "no_hypothesis"
+    if row.get("empty_transcript"):
+        return "empty_transcript"
     if row["best_score"] < th["abs_t"]:
         return "low_score"
     if row["margin"] < th["margin_t"]:

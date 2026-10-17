@@ -247,7 +247,9 @@ def phase_report(cfg, args):
                 d["degraded"] = d["degraded"].astype(str).str.lower() == "true"
                 d["ranked"] = d["ranked"].apply(lambda s: ast.literal_eval(s) if isinstance(s, str) else [])
                 d["transcript"] = d["transcript"].fillna("")
-                d["neg_mismatch"] = d["neg_mismatch"].astype(str).str.lower() == "true"
+                for col in ("neg_mismatch", "empty_transcript"):  # CSV round trip turns booleans into strings
+                    if col in d:
+                        d[col] = d[col].astype(str).str.lower() == "true"
                 decisions[f"{spec['name']}/{method}"] = d
     th = json.loads((cfg.results / "thresholds.json").read_text())  # +-Infinity round-trips as floats
     report.write(cfg, decisions, infos, th)
