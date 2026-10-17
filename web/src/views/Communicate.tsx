@@ -3,6 +3,7 @@ import { AudioLines, Crosshair, Eye, Grid3x3, Keyboard, MousePointer2, ScanLine,
 import { useCallback, useEffect, useState } from 'react'
 import { AgentTrace, History } from '../components/AgentTrace'
 import { PhraseBoard, SpellBoard } from '../components/Board'
+import { CardCalibration } from '../components/CardCalibration'
 import { Composer } from '../components/Composer'
 import { SensorStage } from '../components/SensorStage'
 import { api } from '../lib/api'
@@ -41,6 +42,7 @@ interface Props {
 export function Communicate({ state, connected, channel, setChannel, notify, speak, goCalibrate }: Props) {
   const sel = useSelection()
   const [busy, setBusy] = useState(false)
+  const [cardCal, setCardCal] = useState(false)
 
   // keep the gateway informed about which inputs the person can use
   useEffect(() => {
@@ -159,6 +161,14 @@ export function Communicate({ state, connected, channel, setChannel, notify, spe
                 <button className="btn sm" onClick={goCalibrate}>Recalibrate</button>
               </div>
             )}
+            {(sel.mode === 'gaze' || boardOnly) && (
+              <div className="gaze-q">
+                <span className="faint" style={{ fontSize: '.8rem' }}>
+                  {sel.cardSnap ? 'Calibrated on these cards · pointer snaps to the nearest card' : 'For the best accuracy, calibrate on the card layout itself'}
+                </span>
+                <button className="btn sm" onClick={() => setCardCal(true)}>Calibrate on these cards</button>
+              </div>
+            )}
           </div>
           <SafetyProbe notify={notify} />
         </section>
@@ -174,6 +184,12 @@ export function Communicate({ state, connected, channel, setChannel, notify, spe
           <History spoken={state.spoken} onReplay={replay} />
         </section>
       </div>
+      {cardCal && (
+        <CardCalibration onDone={(acc) => {
+          setCardCal(false)
+          notify(acc == null ? 'Card calibration failed: eyes not visible enough' : `Card calibration done · error ≈ ${Math.round(acc)} px`, acc == null ? 'error' : 'info')
+        }} />
+      )}
     </div>
   )
 }

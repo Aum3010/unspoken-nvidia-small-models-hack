@@ -38,7 +38,7 @@ export function Calibrate({ onDone }: { onDone: () => void }) {
     getCamera().then((s) => {
       if (!video.current) return
       video.current.srcObject = s
-      video.current.play().then(() => { stop = trackVideo(video.current!) })
+      video.current.play().then(() => { stop = trackVideo(video.current!) }).catch(() => undefined)
     }).catch(() => undefined)
     return () => stop()
   }, [])

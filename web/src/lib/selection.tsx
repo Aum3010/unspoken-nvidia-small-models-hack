@@ -27,6 +27,7 @@ interface Target {
 interface Settings {
   mode: InputMode
   gazeSelect: GazeSelect
+  cardSnap: boolean   // gaze goes to the nearest card centre (after calibrating on the cards themselves)
   dwellMs: number
   confirmDwellMs: number
   scanMs: number
@@ -34,6 +35,7 @@ interface Settings {
 
 interface Ctx extends Settings {
   setSettings: (s: Partial<Settings>) => void
+  targetRects: () => DOMRect[]   // on-screen targets (the fixed card layout), in reading order
   register: (t: Target) => () => void
   gaze: GazePoint | null
 }
@@ -47,7 +49,7 @@ const BLINK_AIM_MS = 350          // look at a target this long before a blink c
 const BLINK_CONFIRM_AIM_MS = 700  // longer for confirm targets (Speak it)
 
 function load(): Settings {
-  const d: Settings = { mode: 'pointer', gazeSelect: 'dwell', dwellMs: 1100, confirmDwellMs: 1700, scanMs: 1500 }
+  const d: Settings = { mode: 'pointer', gazeSelect: 'dwell', cardSnap: false, dwellMs: 1100, confirmDwellMs: 1700, scanMs: 1500 }
   try { return { ...d, ...JSON.parse(localStorage.getItem('unspoken.selection') ?? '{}') } } catch { return d }
 }
 
@@ -84,6 +86,10 @@ export function SelectionProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const live = () => [...targets.current.values()]
+  const onScreen = (r: DOMRect) => r.width > 0 && r.bottom > 0 && r.right > 0 && r.top < window.innerHeight && r.left < window.innerWidth
+  const targetRects = useCallback(() => [...targets.current.values()]
+    .sort((a, b) => (a.el.compareDocumentPosition(b.el) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1))
+    .map((t) => t.el.getBoundingClientRect()).filter(onScreen), [])
   useEffect(() => {
     targets.current.forEach((t) => { t.setProgress(0); t.setFocus(false) })
     current.current = null
@@ -123,9 +129,23 @@ export function SelectionProvider({ children }: { children: ReactNode }) {
       }
       return best
     }
+    // card snap: the target whose centre is nearest the gaze (the calibration was made on these centres)
+    const nearestCentre = (p: GazePoint, cur: Target | null) => {
+      let best: Target | null = null, bestD = Infinity, curD = Infinity
+      for (const t of live()) {
+        const r = t.el.getBoundingClientRect()
+        if (!onScreen(r) || t.el.hasAttribute('disabled')) continue
+        const d = Math.hypot(p.x - (r.left + r.width / 2), p.y - (r.top + r.height / 2))
+        if (t === cur) curD = d
+        if (d < bestD) { best = t; bestD = d }
+      }
+      const reach = Math.max(150, (gazeState.accuracyPx ?? 80) * 2.5)
+      if (bestD > reach) return null
+      return cur && curD <= bestD * 1.25 + 20 ? cur : best   // hysteresis: stay unless clearly closer to another card
+    }
     const loop = () => {
       raf = requestAnimationFrame(loop)
-      const { mode, gazeSelect, dwellMs, confirmDwellMs } = s.current
+      const { mode, gazeSelect, cardSnap, dwellMs, confirmDwellMs } = s.current
       if (mode !== 'gaze' && mode !== 'hover') return
       const p = mode === 'gaze' ? gazeRef.current : pointer.current
       const now = performance.now()
@@ -133,8 +153,9 @@ export function SelectionProvider({ children }: { children: ReactNode }) {
       if (p) {
         // hysteresis: stay on the current target while the point is near it
         const slack = mode === 'gaze' ? gazeSlack() : HYSTERESIS_PX
-        const cur = current.current && targets.current.get(current.current.id)
-        t = cur && hit(p, slack) === cur ? cur : hit(p, 0) ?? (mode === 'gaze' ? nearest(p, slack) : null)
+        const cur = current.current ? targets.current.get(current.current.id) ?? null : null
+        t = mode === 'gaze' && cardSnap ? nearestCentre(p, cur)
+          : cur && hit(p, slack) === cur ? cur : hit(p, 0) ?? (mode === 'gaze' ? nearest(p, slack) : null)
       }
       if (cooldown.current && t?.id === cooldown.current.id && now < cooldown.current.until) t = null
       if (!t || t.el.hasAttribute('disabled')) {
@@ -214,7 +235,7 @@ export function SelectionProvider({ children }: { children: ReactNode }) {
     return () => { window.clearInterval(id); offBlink(); window.removeEventListener('keydown', key) }
   }, [settings.mode, settings.scanMs])
 
-  const value = useMemo(() => ({ ...settings, setSettings, register, gaze }), [settings, setSettings, register, gaze])
+  const value = useMemo(() => ({ ...settings, setSettings, register, gaze, targetRects }), [settings, setSettings, register, gaze, targetRects])
   return <SelectionContext.Provider value={value}>{children}</SelectionContext.Provider>
 }
 
