@@ -46,6 +46,11 @@ const gazeSlack = () => Math.max(HYSTERESIS_PX, Math.min(140, (gazeState.accurac
 const COOLDOWN_MS = 900
 const BLINK_AIM_MS = 350          // look at a target this long before a blink can select it
 const BLINK_CONFIRM_AIM_MS = 700  // longer for confirm targets (Speak it)
+// Gaze lock (card snap): once the gaze has rested on a card this long it locks there, and jitter or a
+// brief drift toward a neighbour no longer moves it. It unlocks only when the gaze is clearly on
+// another card for UNLOCK_MS, and holds through blinks / short tracking gaps up to HOLD_MS.
+const LOCK_MS = 250, UNLOCK_MS = 200, HOLD_MS = 500
+const CLEARLY_CLOSER = 0.85       // the other card's centre must be at least 15% nearer than the locked one
 
 function load(): Settings {
   const d: Settings = { mode: 'pointer', gazeSelect: 'dwell', cardSnap: false, dwellMs: 1100, confirmDwellMs: 1700, scanMs: 1500 }
@@ -62,6 +67,10 @@ export function SelectionProvider({ children }: { children: ReactNode }) {
   const scanFocus = useRef<string | null>(null)
   const pointer = useRef<GazePoint | null>(null)
   const gazeRef = useRef<GazePoint | null>(null)
+  const lock = useRef<{ id: string } | null>(null)
+  const cand = useRef<{ id: string; since: number } | null>(null)
+  const leave = useRef<{ id: string; since: number } | null>(null)
+  const lastSeen = useRef(0)
   const s = useRef(settings)
   s.current = settings
 
@@ -140,6 +149,36 @@ export function SelectionProvider({ children }: { children: ReactNode }) {
       if (bestD > reach) return null
       return cur && curD <= bestD * 1.25 + 20 ? cur : best   // hysteresis: stay unless clearly closer to another card
     }
+    const centreDist = (p: GazePoint, t: Target) => {
+      const r = t.el.getBoundingClientRect()
+      return Math.hypot(p.x - (r.left + r.width / 2), p.y - (r.top + r.height / 2))
+    }
+    // card snap with gaze lock (see LOCK_MS)
+    const lockedPick = (p: GazePoint | null, now: number, cur: Target | null): Target | null => {
+      const locked = lock.current ? targets.current.get(lock.current.id) ?? null : null
+      if (!p) {  // blink or tracking gap: hold the lock briefly
+        if (locked && now - lastSeen.current < HOLD_MS) return locked
+        lock.current = null; cand.current = null; leave.current = null
+        return null
+      }
+      lastSeen.current = now
+      const raw = nearestCentre(p, null)
+      if (locked && !locked.el.hasAttribute('disabled')) {
+        const away = raw && raw !== locked && centreDist(p, raw) < centreDist(p, locked) * CLEARLY_CLOSER
+        if (!away) { leave.current = null; return locked }
+        if (leave.current?.id !== raw!.id) leave.current = { id: raw!.id, since: now }
+        if (now - leave.current.since < UNLOCK_MS) return locked
+        // the eyes really moved: unlock and start locking onto the new card
+        lock.current = null; cand.current = { id: raw!.id, since: leave.current.since }; leave.current = null
+        return raw
+      }
+      lock.current = null
+      const pick = nearestCentre(p, cur)
+      if (!pick) { cand.current = null; return null }
+      if (cand.current?.id !== pick.id) cand.current = { id: pick.id, since: now }
+      if (now - cand.current.since >= LOCK_MS) lock.current = { id: pick.id }
+      return pick
+    }
     const loop = () => {
       raf = requestAnimationFrame(loop)
       const { mode, gazeSelect, cardSnap, dwellMs, confirmDwellMs } = s.current
@@ -147,12 +186,13 @@ export function SelectionProvider({ children }: { children: ReactNode }) {
       const p = mode === 'gaze' ? gazeRef.current : pointer.current
       const now = performance.now()
       let t: Target | null = null
-      if (p) {
+      if (mode === 'gaze' && cardSnap) {
+        t = lockedPick(p, now, current.current ? targets.current.get(current.current.id) ?? null : null)
+      } else if (p) {
         // hysteresis: stay on the current target while the point is near it
         const slack = mode === 'gaze' ? gazeSlack() : HYSTERESIS_PX
         const cur = current.current ? targets.current.get(current.current.id) ?? null : null
-        t = mode === 'gaze' && cardSnap ? nearestCentre(p, cur)
-          : cur && hit(p, slack) === cur ? cur : hit(p, 0) ?? (mode === 'gaze' ? nearest(p, slack) : null)
+        t = cur && hit(p, slack) === cur ? cur : hit(p, 0) ?? (mode === 'gaze' ? nearest(p, slack) : null)
       }
       if (cooldown.current && t?.id === cooldown.current.id && now < cooldown.current.until) t = null
       if (!t || t.el.hasAttribute('disabled')) {
@@ -175,6 +215,7 @@ export function SelectionProvider({ children }: { children: ReactNode }) {
         t.setProgress(0)
         current.current = null
         cooldown.current = { id: t.id, until: now + COOLDOWN_MS * 3 }
+        lock.current = null; cand.current = null; leave.current = null  // a new selection needs a fresh lock
         if (mode === 'gaze') learnFromSelection(...centre(t), need)
         t.activate(mode === 'gaze' ? 'gaze_dwell_confirmed' : 'other_explicit_user_confirmed')
       }
