@@ -8,4 +8,4 @@ manifest:
 degrade:
   sources: [own, torgo, tts]   # exercise the degradation path on the only speech available locally
 decision:
-  tune_origins: [human, generated, tts]   # flagged in the summary: TTS-tuned thresholds are not valid numbers
+  tune_origins: [real, generated, tts]   # flagged in the summary: TTS-tuned thresholds are not valid numbers

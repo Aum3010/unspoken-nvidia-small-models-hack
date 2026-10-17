@@ -105,7 +105,7 @@ decision:
   methods: [text, ctc_sum, ctc_norm, ctc_llr]   # ctc_* only for CTC models
   far_target: 0.01
   far_constraint: max_per_type   # every negative type must be <= far_target on calib (stricter than pooled)
-  tune_origins: [human, generated]   # TTS never tunes headline thresholds
+  tune_origins: [real, generated]    # TTS never tunes headline thresholds
   tune_include_degraded: true
   abs_grid_quantiles: 41
   margin_grid_quantiles: 21
