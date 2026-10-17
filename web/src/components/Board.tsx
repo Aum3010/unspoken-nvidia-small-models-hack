@@ -5,7 +5,7 @@ import { api } from '../lib/api'
 import { DwellButton } from './DwellButton'
 import './board.css'
 
-const PHRASES: { group: string; items: string[] }[] = [
+export const PHRASES: { group: string; items: string[] }[] = [
   { group: 'Needs', items: ['I need water', 'I need the bathroom', 'Please call the nurse', 'I am in pain', 'I need suction', 'I want to sit up'] },
   { group: 'Comfort', items: ['I am too hot', 'I am too cold', 'Please move my pillow', 'Turn off the light', 'Turn me, please', 'Itchy — please scratch'] },
   { group: 'People', items: ['Where is my family?', 'Please call my family', 'I love you', 'Thank you', 'Please stay with me', 'I want to rest'] },

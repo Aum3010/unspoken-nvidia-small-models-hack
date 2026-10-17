@@ -27,7 +27,7 @@ interface Target {
 interface Settings {
   mode: InputMode
   gazeSelect: GazeSelect
-  cardSnap: boolean   // gaze goes to the nearest card centre (after calibrating on the cards themselves)
+  cardSnap: boolean   // gaze goes to the nearest card centre (set by the Gaze cards page)
   dwellMs: number
   confirmDwellMs: number
   scanMs: number
@@ -35,7 +35,6 @@ interface Settings {
 
 interface Ctx extends Settings {
   setSettings: (s: Partial<Settings>) => void
-  targetRects: () => DOMRect[]   // on-screen targets (the fixed card layout), in reading order
   register: (t: Target) => () => void
   gaze: GazePoint | null
 }
@@ -87,9 +86,7 @@ export function SelectionProvider({ children }: { children: ReactNode }) {
 
   const live = () => [...targets.current.values()]
   const onScreen = (r: DOMRect) => r.width > 0 && r.bottom > 0 && r.right > 0 && r.top < window.innerHeight && r.left < window.innerWidth
-  const targetRects = useCallback(() => [...targets.current.values()]
-    .sort((a, b) => (a.el.compareDocumentPosition(b.el) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1))
-    .map((t) => t.el.getBoundingClientRect()).filter(onScreen), [])
+
   useEffect(() => {
     targets.current.forEach((t) => { t.setProgress(0); t.setFocus(false) })
     current.current = null
@@ -235,7 +232,7 @@ export function SelectionProvider({ children }: { children: ReactNode }) {
     return () => { window.clearInterval(id); offBlink(); window.removeEventListener('keydown', key) }
   }, [settings.mode, settings.scanMs])
 
-  const value = useMemo(() => ({ ...settings, setSettings, register, gaze, targetRects }), [settings, setSettings, register, gaze, targetRects])
+  const value = useMemo(() => ({ ...settings, setSettings, register, gaze }), [settings, setSettings, register, gaze])
   return <SelectionContext.Provider value={value}>{children}</SelectionContext.Provider>
 }
 
