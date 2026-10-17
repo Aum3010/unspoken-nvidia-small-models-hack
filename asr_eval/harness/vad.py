@@ -23,9 +23,12 @@ class Vad:
     def probs(self, wav: np.ndarray) -> np.ndarray:
         import torch
 
+        x = np.ascontiguousarray(wav, dtype=np.float32)
+        if len(x) < 512:  # Silero needs one full 32 ms frame
+            x = np.pad(x, (0, 512 - len(x)))
         with torch.no_grad():
             self.model.reset_states()
-            return self.model.audio_forward(torch.from_numpy(np.ascontiguousarray(wav, dtype=np.float32)), 16000)[0].numpy()
+            return self.model.audio_forward(torch.from_numpy(x), 16000)[0].numpy()
 
 
 def speech_seconds(probs: np.ndarray, threshold: float, min_speech_ms: float) -> float:

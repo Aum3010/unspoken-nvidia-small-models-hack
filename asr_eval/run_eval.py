@@ -142,18 +142,25 @@ def model_worker(cfg, args):
             run(audio.load(cfg.data / p), tasks)
         n = 0
         with open(out_path, "w", encoding="utf-8") as f:
+            errors = []
             for i, (p, tasks) in enumerate(by_path.items()):
                 x = audio.load(cfg.data / p)
-                tr, asr_ms, outs = run(x, tasks)
+                try:
+                    tr, asr_ms, outs = run(x, tasks)
+                except Exception as exc:  # one bad clip must not stop the model; it is counted and listed
+                    errors.append({"path": p, "error": f"{type(exc).__name__}: {str(exc)[:200]}"})
+                    tr, asr_ms, outs = {"text": "", "error": errors[-1]["error"]}, None, [(t, None, None, None) for t in tasks]
                 for task, ph, free, score_ms in outs:
                     f.write(json.dumps({"path": p, "eval_task": task, "transcript": tr["text"], "nbest": tr.get("nbest"),
                                         "signals": {k: v for k, v in tr.items() if k not in ("text", "nbest")},
-                                        "phrase_logp": ph, "free_logp": free, "asr_ms": round(asr_ms, 2),
+                                        "phrase_logp": ph, "free_logp": free, "asr_ms": round(asr_ms, 2) if asr_ms is not None else None,
                                         "score_ms": round(score_ms, 2) if score_ms is not None else None}) + "\n")
                     n += 1
                 if i % 200 == 0:
                     log(f"{spec['name']} {i}/{len(by_path)}")
         info["n_rows"] = n
+        info["clip_errors"] = len(errors)
+        info["clip_error_examples"] = errors[:10]
         if torch.cuda.is_available():
             info["peak_alloc_gb"] = round(torch.cuda.max_memory_allocated() / 1e9, 3)
             free_b, total_b = torch.cuda.mem_get_info()

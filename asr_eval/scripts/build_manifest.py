@@ -31,6 +31,7 @@ from harness import audio  # noqa: E402
 from harness.config import load_config  # noqa: E402
 from harness.text import normalize  # noqa: E402
 
+MIN_SOURCE_S = 0.2
 COLUMNS = ["path", "source", "speaker_id", "condition", "label_type", "phrase_id", "split", "duration_s",
            "task", "text", "origin", "degraded", "derived_from", "group"]
 
@@ -166,13 +167,17 @@ def torgo(cfg, rng) -> list[dict]:
     if not root.exists():
         return []
     phrase_norms = {normalize(t) for t in {**cfg.phrases, **cfg.hard_negatives}.values()}
-    singles, sentences = [], []
+    singles, sentences, excluded = [], [], []
     for prompt in sorted(root.rglob("prompts/*.txt")):
         session = prompt.parent.parent
         spk = next((p for p in prompt.parts if re.fullmatch(r"[FM]C?\d\d", p)), None)
         wav = next((session / mic / f"{prompt.stem}.wav" for mic in ("wav_arrayMic", "wav_headMic")
                     if (session / mic / f"{prompt.stem}.wav").exists()), None)
         if not spk or wav is None:
+            continue
+        dur = sf.info(str(wav)).duration
+        if dur < MIN_SOURCE_S:  # truncated recordings in the corpus (e.g. 9-75 ms); no word fits
+            excluded.append({"path": rel(wav, data), "duration_s": round(dur, 3), "reason": f"shorter than {MIN_SOURCE_S} s"})
             continue
         text = prompt.read_text(errors="ignore").strip()
         if not text or any(c in text for c in "[]/") or "xxx" in text.lower() or ".jpg" in text.lower():
@@ -208,6 +213,9 @@ def torgo(cfg, rng) -> list[dict]:
         rows.append(row(path=rel(s["wav"], data), source="torgo", speaker_id=f"torgo:{s['spk']}", group=s["group"], text=s["text"],
                         origin="real", label_type="unknown_speech", task="phrases20"))
     print(f"  torgo vocab ({len(vocab)}): {vocab}")
+    if excluded:
+        pd.DataFrame(excluded).to_csv(data / "excluded_clips.csv", index=False)
+        print(f"  torgo: excluded {len(excluded)} truncated recordings -> excluded_clips.csv")
     return rows
 
 
