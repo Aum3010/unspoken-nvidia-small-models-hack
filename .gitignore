@@ -1,0 +1,14 @@
+.venv/
+.run/
+data/
+third_party/chaplin/
+third_party/Gym/
+third_party/p300-speller-bci/
+evaluations/results/pytest.xml
+web/node_modules/
+web/dist/
+web/public/mediapipe/
+web/public/vendor/
+__pycache__/
+*.pyc
+.DS_Store
