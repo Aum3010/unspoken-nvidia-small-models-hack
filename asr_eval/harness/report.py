@@ -70,6 +70,10 @@ def write(cfg, decisions: dict[str, pd.DataFrame], infos: dict[str, dict], thres
     if not any_real_pos:
         warn.append("No real human recordings of the 20 phrases in the test split yet: the headline positive columns are empty. "
                     "TTS rows below are sanity checks only.")
+    fallback = [k for k, v in thresholds.items() if v.get("fallback")]
+    if fallback:
+        warn.append("Thresholds for " + ", ".join(fallback) + " were tuned with **TTS positives** (no human calib speakers for that task) "
+                    "against real negatives. Record at least two speakers so tuning uses human speech.")
     infeasible = [k for k, v in thresholds.items() if not v.get("feasible")]
     if infeasible:
         warn.append(f"No threshold met the calib false-accept target for: {', '.join(infeasible)} (strictest point used; see Thresholds).")
@@ -176,7 +180,7 @@ def write(cfg, decisions: dict[str, pd.DataFrame], infos: dict[str, dict], thres
     for k, v in thresholds.items():
         fars = ", ".join(f"{t} {100 * f:.1f}% (n={v['n_calib_neg'][t]})" for t, f in (v.get("calib_far") or {}).items())
         md.append(f"| {k.replace('|', ' · ')} | {v['vad_t']} | {v['abs_t']:.3f} | {v['margin_t']:.3f} | "
-                  f"{100 * v.get('calib_objective', 0):.1f}% (n={v.get('n_calib_pos', 0)}) | {fars or v.get('reason', '')} | {'yes' if v.get('feasible') else 'NO'} |")
+                  f"{100 * v.get('calib_objective', 0):.1f}% (n={v.get('n_calib_pos', 0)}{', TTS' if v.get('fallback') else ''}) | {fars or v.get('reason', '')} | {'yes' if v.get('feasible') else 'NO'} |")
     md.append("")
 
     # ---- verdict --------------------------------------------------------------------------------------------------------

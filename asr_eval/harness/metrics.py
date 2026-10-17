@@ -18,14 +18,14 @@ def wilson(k: int, n: int, z: float = 1.96) -> tuple[float, float]:
     d = 1 + z * z / n
     c = p + z * z / (2 * n)
     m = z * math.sqrt(p * (1 - p) / n + z * z / (4 * n * n))
-    return ((c - m) / d, (c + m) / d)
+    return (max(0.0, (c - m) / d), min(1.0, (c + m) / d))
 
 
 def rate(k: int, n: int) -> dict:
     lo, hi = wilson(k, n)
     out = {"k": int(k), "n": int(n), "rate": (k / n) if n else math.nan, "ci_lo": lo, "ci_hi": hi}
     if n and k == 0:
-        out["rule_of_three"] = 3 / n
+        out["rule_of_three"] = min(1.0, 3 / n)
     return out
 
 
