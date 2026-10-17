@@ -54,6 +54,37 @@ Both raw models fail on the same thing: history. After two failed retakes they a
 - In the end-to-end test, 10 phrases were selected → confirmed → spoken by Kokoro → re-transcribed by Whisper. **10/10 matched the confirmed string exactly.**
 - **Unconfirmed or contradicted text reaching TTS: 0**, enforced by construction (HMAC token over the exact text) and tested.
 
+## 6. Voice agent model selection: 20-phrase task (in progress, `asr_eval/`)
+
+**Question.** Which open ASR model can map a weak or impaired utterance onto **one of 20 request phrases**, and refuse otherwise? The voice agent's output is a phrase candidate, `unknown`, or `no_speech`.
+- Proposing a phrase on silence, noise or unrelated speech is the worst failure.
+- The wrong phrase is next worst.
+- Abstaining is acceptable.
+
+**Protocol** (full settings in `asr_eval/configs/eval.yaml`, one command to reproduce):
+- **Data:**
+  - Own consented recordings in six conditions (normal, soft, whisper, slow, muffled, noisy).
+  - TORGO dysarthric and control speakers.
+  - LibriSpeech, MUSAN, Speech Commands and ESC-50 negatives.
+  - Generated silence.
+  - Hard negatives such as "I'm not in pain" and "water the plants".
+  - Kokoro TTS as a sanity check only.
+  - A degradation grid (gain, SNR, telephone band, low-pass, tempo, reverb), one effect at a time.
+- **Split:** by speaker into calib and test. Augmented copies inherit their source's split, and overlap is asserted.
+- **Speech gate:** Silero VAD with a 100 ms minimum, so "yes" and "no" survive.
+- **Decision:**
+  - Every model: phonetic matching of the transcript.
+  - CTC models only: forced phrase scoring.
+  - `unknown` on a low score, a small margin, or a negation mismatch.
+  - Thresholds are tuned on calib only. Objective: the most correct accepts with a false-accept rate ≤ 1% for every negative type.
+- **Reporting:** every rate comes with k/n and a Wilson interval, plus the rule-of-three bound when k = 0. TTS and degraded rows are kept apart from real recordings. The best configuration is selected on calib and reported on test.
+
+**Status (2026-10-17).**
+- Milestone 1 (Silero + Parakeet-CTC 0.6B + manifest) passes end to end on CPU and is running on Brev (RTX PRO 6000).
+- The other models (Parakeet-TDT, Nemotron Speech Streaming, Whisper via faster-whisper) follow.
+- Results go to `asr_eval/results/summary.md` and replace this paragraph when measured.
+- Brev workflow: [BREV.md](BREV.md).
+
 ## Not yet measured (honest gaps)
 
 - Live webcam lip reading on unfamiliar, consenting people. This needs local opt-in recordings.

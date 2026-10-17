@@ -57,6 +57,23 @@ Every target works by click, keyboard, **hover dwell** (head-mouse), **gaze dwel
 
 Run `./scripts/run_evals.sh` to reproduce. Details and known gaps are in `docs/EVALUATION.md`.
 
+## Choosing the voice model on Brev (in progress)
+
+`asr_eval/` is an audio-only benchmark that picks the voice agent's next ASR. Candidates:
+- Parakeet-CTC/TDT
+- Nemotron Speech Streaming
+- Whisper (several sizes)
+
+It runs on an NVIDIA Brev GPU with no other Unspoken model loaded. The task is a **20-phrase closed set with abstention**: output a phrase, `unknown`, or `no_speech`. The data covers your own recordings, TORGO dysarthric speech and real noise negatives.
+
+```bash
+cd asr_eval && python run_eval.py --config configs/eval.yaml          # on the GPU box
+python run_eval.py --config configs/local_smoke.yaml --limit 6         # CPU plumbing check on a laptop
+```
+
+- Setup, the CLI on Windows (WSL), costs and the sync/run/fetch loop: [docs/BREV.md](docs/BREV.md).
+- Models and licences: [docs/MODEL_CARDS_AND_LICENSES.md](docs/MODEL_CARDS_AND_LICENSES.md#asr-candidates-under-evaluation-asr_eval-not-deployed-yet).
+
 ## Repository
 
 ```
@@ -69,8 +86,10 @@ services/coordinator/   Nemotron tool calling, outside validation, deterministic
 services/tts/           Kokoro-82M (MLX), refuses without a gateway token
 shared/                 schemas, confirmation gate, provenance + ports
 evaluations/            safety tests, modality baselines, e2e exactness, NeMo Gym env, results
+asr_eval/               audio-only ASR benchmark for the voice agent (Brev GPU or CPU): manifest, VAD gate,
+                        models, phrase decision, calib-only tuning, summary/plots; scripts/brev/ helpers
 scripts/                setup, run, evals, weights ledger, vLLM/MLX serving, smoke test
-docs/                   architecture, model cards & licences, datasets & consent, evaluation
+docs/                   architecture, model cards & licences, datasets & consent, evaluation, BREV.md
 ```
 
 ## Product invariant

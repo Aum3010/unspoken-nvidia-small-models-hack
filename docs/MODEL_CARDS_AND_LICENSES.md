@@ -18,6 +18,39 @@ Parameter counts below come from `scripts/verify_weights.py`, which reads the we
 
 Not deployed and not counted: LipVoicer and VoiceBridge, which are research references only (no verified checkpoint for VoiceBridge). `granite4.2:8b` appears in the coordinator evaluation only as a comparison policy.
 
+## ASR candidates under evaluation (`asr_eval/`, not deployed yet)
+
+These models are benchmarked on Brev to choose a replacement for Whisper base in the voice agent (see [BREV.md](BREV.md) and `asr_eval/README.md`).
+- Licences were read from each Hugging Face model card on 2026-10-17.
+- "Measured" parameter counts come from the loaded weights (`results/raw/{model}_info.json`). The others are model-card figures until measured.
+- Revisions are pinned at run time and logged.
+
+| Model | Checkpoint (revision) | Params | Runtime in harness | Licence | Phrase scoring | Status |
+|---|---|---:|---|---|---|---|
+| Parakeet-CTC 0.6B | `nvidia/parakeet-ctc-0.6b` (`ad09ba1cc627`) | 608.8 M (measured) | transformers `ParakeetForCTC` | CC-BY-4.0 | Forced CTC (`ctc_loss`) + text | Milestone 1: running on Brev |
+| Parakeet-TDT 0.6B v2 | `nvidia/parakeet-tdt-0.6b-v2` (`ae9ad07059`) | ~0.6 B (card) | NeMo | CC-BY-4.0 | Text | Milestone 2 |
+| Nemotron Speech Streaming en 0.6B | `nvidia/nemotron-speech-streaming-en-0.6b` (`ebe59e5a81`) | ~0.6 B (card) | NeMo; offline + simulated 160/560 ms chunks if the API allows | NVIDIA Open Model License | Text | Milestone 2 |
+| Whisper large-v3-turbo | faster-whisper → `mobiuslabsgmbh/faster-whisper-large-v3-turbo` | ~0.81 B (card) | faster-whisper fp16, beam 3, T=0 | MIT (OpenAI and conversion) | Text + `no_speech_prob`/`avg_logprob` | Milestone 2 |
+| Whisper large-v2 | faster-whisper → `Systran/faster-whisper-large-v2` | ~1.55 B (card) | faster-whisper | Apache-2.0 (OpenAI) / MIT (conversion) | Text | Milestone 2, reference only (does not fit the budget) |
+| Whisper small | faster-whisper → `Systran/faster-whisper-small` | ~0.24 B (card) | faster-whisper | Apache-2.0 (OpenAI) / MIT (conversion) | Text | Milestone 2 |
+| Canary-1B-Flash | `nvidia/canary-1b-flash` | ~1 B (card) | NeMo | CC-BY-4.0 | Text | Optional |
+| Parakeet-CTC 0.6B SAPC1 (dysarthric fine-tune) | `dys-asr/parakeet-ctc-0.6b-sapc1` | ~0.6 B | transformers | Speech Accessibility Project DUA | — | **Skipped**: needs the SAP data use agreement. Also outputs upper-case text |
+| Parakeet-TDT 0.6B unconstrained (dysarthric) | `dys-asr/parakeet-tdt-0.6b-unconstrained` | ~0.6 B | NeMo | SAP DUA, gated (manual approval) | — | **Skipped**: same reason |
+
+Supporting components in the harness:
+
+| Component | Use | Licence |
+|---|---|---|
+| Silero VAD 6.x (`silero-vad`) | Speech gate before any phrase is proposed | MIT |
+| Kokoro-82M (`hexgrad/Kokoro-82M`, all English voices) | Generates synthetic phrases for **sanity checks only**, never headline numbers | Apache-2.0 |
+| `pronouncing` + `cmudict` (CMU Pronouncing Dictionary) | Phonetic similarity for transcript → phrase matching | `pronouncing`: BSD-style (licence file); the `cmudict` Python package declares GPL-3.0-or-later. Evaluation-only dependency: keep it out of shipped app code, or swap in a permissive phonetic source before deployment |
+| DeepFilterNet | Enhancement ablation, off by default | MIT / Apache-2.0 |
+
+**Budget.** The deployed ledger is 32.04 B of 33 B, and Whisper base accounts for 0.07 B of it. Replacing Whisper base leaves about 1.03 B for the new ASR:
+- a 0.6 B Parakeet/Nemotron fits;
+- Whisper large-v3-turbo (0.81 B) fits;
+- Whisper large-v2 (1.55 B) does not, and two candidates together do not.
+
 ## Pinned upstream code
 
 | Repo | Commit | Use |

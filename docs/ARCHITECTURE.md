@@ -53,6 +53,25 @@
 - TTS down → the browser's speech synthesis speaks the same confirmed string.
 - Gaze calibration poor (≥220 px mean error) → gaze selection stays off; click, hover-dwell and blink-scan remain available.
 
+## Offline evaluation harness: choosing the voice agent's ASR (`asr_eval/`)
+
+`asr_eval/` is separate from the running app. It answers one question before the voice agent changes: **which ASR model, gated how, can propose one of 20 fixed phrases without ever proposing one on silence?**
+
+```text
+manifest.csv ─► Silero VAD ─► model (own process) ─► rankers ─► decide() ─► metrics ─► summary.md
+ own / TORGO /   speech s @    transcript +           text (CMU       no_speech / unknown /
+ LibriSpeech /   thr 0.2-0.6   forced phrase          phonetic),      candidate, thresholds
+ noise / TTS /                 log-probs (CTC)        ctc_sum/norm/   tuned on calib only
+ degradations                                         llr
+```
+
+- **Model interface** (`harness/models.py`): `load()`, `transcribe(wav)`, `score_phrases(wav, texts)`, `info()`.
+  - Forced scoring reuses the transcription's encoder pass.
+  - CTC alignments that can't exist keep an impossible score; `zero_infinity` would turn them into perfect ones.
+- **Decision** (`harness/decide.py`): the same three gates for every model (VAD, absolute score + margin, negation mismatch). The best configuration is chosen on calib.
+- **Where it runs:** on a Brev GPU via `run_eval.py` (see [BREV.md](BREV.md)), or on CPU with `configs/local_smoke.yaml`.
+- **What happens next:** the winning configuration will replace Whisper base + text candidates in `services/audio/`. It will still emit typed `Evidence`, so the gateway, coordinator and policy gate don't change. The patient's confirmation stays the final say.
+
 ## Ports & processes
 
 `scripts/run_all.sh` starts gateway 8000, vsr 8101, audio 8102, eeg 8103, tts 8104, coordinator 8105 and the web app on 5317. Logs go to `.run/logs/`. Each service exposes `/health`; the gateway aggregates them at `/api/health`.
