@@ -4,5 +4,35 @@
   "check": "bnci_present",
   "where": "/home/claude/unspoken-nvidia-small-models-hack/data/bnci2014_008",
   "detail": "no BNCI2014-008 files on disk; BNCI audit not run (source host unreachable from the audit container)"
+ },
+ {
+  "level": "WARN",
+  "check": "truncated_fixed_selection",
+  "where": "bigp3bci/F_20/SE002/Train/CBCol01#t00",
+  "detail": "CBCol selection has 108 of 126 flashes (12 whole repetitions); kept and flagged"
+ },
+ {
+  "level": "WARN",
+  "check": "truncated_fixed_selection",
+  "where": "bigp3bci/F_21/SE001/Test/Static01#t00",
+  "detail": "Static selection has 108 of 126 flashes (12 whole repetitions); kept and flagged"
+ },
+ {
+  "level": "WARN",
+  "check": "truncated_fixed_selection",
+  "where": "bigp3bci/F_21/SE002/Train/CBCol01#t00",
+  "detail": "CBCol selection has 108 of 126 flashes (12 whole repetitions); kept and flagged"
+ },
+ {
+  "level": "WARN",
+  "check": "truncated_fixed_selection",
+  "where": "bigp3bci/F_21/SE003/Test/Static01#t00",
+  "detail": "Static selection has 36 of 126 flashes (4 whole repetitions); kept and flagged"
+ },
+ {
+  "level": "WARN",
+  "check": "unusual_selection_count",
+  "where": "bigp3bci/F_06/SE001/Test/Dyn09",
+  "detail": "5 selections, usual for Dyn is 6"
  }
 ]

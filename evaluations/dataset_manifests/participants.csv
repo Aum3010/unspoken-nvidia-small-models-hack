@@ -1,2 +1,11 @@
 participant_id,dataset,sex,als_flag,alsfrs_r,alsfrs_r_by_session,n_sessions
 F_03,bigp3bci,Female,True,21,"{""1"": 21, ""2"": 21, ""3"": 21}",3
+F_05,bigp3bci,Male,True,3,"{""1"": 3, ""2"": 3, ""3"": 3}",3
+F_06,bigp3bci,Male,True,3,"{""1"": 3, ""2"": 3, ""3"": 3}",3
+F_07,bigp3bci,Female,True,21,"{""1"": 21, ""2"": 21, ""3"": 21}",3
+F_08,bigp3bci,Female,True,42,"{""1"": 42, ""2"": 42, ""3"": 42}",3
+F_20,bigp3bci,Male,True,5,"{""1"": 5, ""2"": 5, ""3"": 5}",3
+F_21,bigp3bci,Female,True,1,"{""1"": 1, ""2"": 1, ""3"": 1}",3
+F_23,bigp3bci,Male,True,30,"{""1"": 30, ""2"": 30, ""3"": 30}",3
+F_24,bigp3bci,Male,True,33,"{""1"": 33, ""2"": 33, ""3"": 33}",3
+F_25,bigp3bci,Male,True,33,"{""1"": 33, ""2"": 33, ""3"": 33}",3

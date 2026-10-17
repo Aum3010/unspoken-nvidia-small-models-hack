@@ -91,6 +91,36 @@ def audit_bigp3bci(res: AuditResult) -> dict:
     return stats
 
 
+def participant_stats(res: AuditResult) -> list[dict]:
+    """One row per participant: sessions, runs/selections per condition, fixed vs dynamic trials, channels, fs, repetitions."""
+    runs = {r["run_id"]: r for r in res.tables.get("runs", [])}
+    recs = defaultdict(list)
+    for r in res.tables.get("recordings", []):
+        recs[r["participant_id"]].append(r)
+    by_p = defaultdict(list)
+    for s in res.tables.get("selections", []):
+        by_p[s["participant_id"]].append(s)
+    part = {p["participant_id"]: p for p in res.tables.get("participants", [])}
+    rows = []
+    for pid, ss in sorted(by_p.items()):
+        cond = Counter(runs[s["run_id"]]["condition"] for s in ss)
+        fixed = [s for s in ss if not runs[s["run_id"]]["condition"].startswith("Dyn")]
+        dyn = [s for s in ss if runs[s["run_id"]]["condition"].startswith("Dyn")]
+        rows.append({
+            "participant_id": pid, "sessions": sorted({s["session"] for s in ss}).__len__(),
+            "runs": len({s["run_id"] for s in ss}),
+            "selections_by_condition": json.dumps(dict(sorted(cond.items()))),
+            "n_fixed_length_selections": len(fixed), "n_dynamic_selections": len(dyn),
+            "n_truncated_fixed_selections": sum(1 for s in fixed if s["evidence_truncated"]),
+            "dyn_flashes_min_median_max": json.dumps([min(s["n_flashes"] for s in dyn), sorted(s["n_flashes"] for s in dyn)[len(dyn) // 2],
+                                                      max(s["n_flashes"] for s in dyn)]),
+            "eeg_channels": sorted({r["n_eeg_channels"] for r in recs[pid]})[0], "fs_hz": sorted({r["fs_hz"] for r in recs[pid]})[0],
+            "has_eye_tracking": any(r["has_eye_tracking"] for r in recs[pid]),
+            "total_flashes": sum(s["n_flashes"] for s in ss), "alsfrs_r": part[pid]["alsfrs_r"],
+        })
+    return rows
+
+
 def split_manifest(res: AuditResult) -> list[dict]:
     """Session-level split per participant. Roles: calibration | evaluation | held_out_unused | dynamic_replay_only."""
     rows = []
@@ -129,6 +159,10 @@ def write_tables(res: AuditResult, out: Path, split_rows: list[dict]) -> None:
         with open(out / f"{name}.csv", "w", newline="") as f:
             w = csv.DictWriter(f, fieldnames=COLUMNS[name], extrasaction="ignore")
             w.writeheader(); w.writerows(rows)
+    ps = participant_stats(res)
+    if ps:
+        with open(out / "participant_stats.csv", "w", newline="") as f:
+            w = csv.DictWriter(f, fieldnames=list(ps[0])); w.writeheader(); w.writerows(ps)
     with open(out / "splits_session_3way.csv", "w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=["participant_id", "session", "run_id", "run_type", "condition", "role", "reason"])
         w.writeheader(); w.writerows(split_rows)

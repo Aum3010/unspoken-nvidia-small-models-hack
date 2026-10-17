@@ -73,13 +73,18 @@ def test_missing_target_is_error():
     assert r.errors
 
 
-def test_fixed_length_run_with_varying_flashes_is_error_but_dyn_is_not():
+def test_truncated_fixed_selection_is_warning_if_whole_repetitions_else_error():
+    base = {"max_flashes_in_protocol": 126, "evidence_truncated": True}
     runs = [{"run_id": "a", "condition": "Static"}, {"run_id": "b", "condition": "Dyn"}]
-    sels = [{"run_id": "a", "n_flashes": 126}, {"run_id": "a", "n_flashes": 40},
-            {"run_id": "b", "n_flashes": 20}, {"run_id": "b", "n_flashes": 30}]
+    sels = [{"run_id": "a", "selection_id": "a#0", "n_flashes": 126, "evidence_truncated": False, "complete_repetitions": 14,
+             "flashes_in_partial_repetition": 0, "max_flashes_in_protocol": 126},
+            {"run_id": "a", "selection_id": "a#1", "n_flashes": 36, "complete_repetitions": 4, "flashes_in_partial_repetition": 0, **base},
+            {"run_id": "a", "selection_id": "a#2", "n_flashes": 40, "complete_repetitions": 4, "flashes_in_partial_repetition": 4, **base},
+            {"run_id": "b", "selection_id": "b#0", "n_flashes": 20, "complete_repetitions": 2, "flashes_in_partial_repetition": 2, **base}]
     r = _res(runs=runs, selections=sels)
     qa.check_sequences(r)
-    assert [i.where for i in r.errors] == ["a"]
+    assert [i.where for i in r.errors] == ["a#2"]
+    assert [i.where for i in r.issues if i.check == "truncated_fixed_selection"] == ["a#1"]
 
 
 def test_session_leakage_detected():
@@ -164,9 +169,12 @@ def test_study_f_static_runs_complete_dyn_runs_truncated(audit):
     for s in res.tables["selections"]:
         cond = runs[s["run_id"]]["condition"]
         if cond in ("Static", "CBCol"):
-            assert s["n_flashes"] == 126 and s["complete_repetitions"] == 14 and not s["evidence_truncated"]
+            # recorded truncations (whole repetitions only) are flagged; everything else is the full 126 flashes
+            assert (s["n_flashes"] == 126 and s["complete_repetitions"] == 14 and not s["evidence_truncated"]) or \
+                (s["evidence_truncated"] and s["flashes_in_partial_repetition"] == 0)
         else:
-            assert s["evidence_truncated"] and s["n_flashes"] < 126
+            # online dynamic stopping: <=14 repetitions, plus at most one flash of a 15th seen before the stop
+            assert s["n_flashes"] <= 127
 
 
 @pytest.mark.skipif(not HAVE_F, reason="Study F EDF files not downloaded")

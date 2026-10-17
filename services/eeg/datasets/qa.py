@@ -51,14 +51,36 @@ def check_targets(res: AuditResult) -> None:
 
 
 def check_sequences(res: AuditResult) -> None:
-    """Flag selections whose evidence stops early (dynamic stopping) or is inconsistent with the run's protocol."""
+    """Fixed-length runs should give every selection the protocol's full evidence.
+
+    A shorter selection in a Static/CBCol run is a recorded truncation (the trial ended early in the file). It is kept,
+    flagged (selections.evidence_truncated) and reported as a WARNING; a truncation that is not a whole number of
+    repetitions is an ERROR because repetition accounting would be ambiguous. Runs with an unusual selection count
+    are also reported.
+    """
     runs = {r["run_id"]: r for r in res.tables.get("runs", [])}
-    full = defaultdict(list)
+    sels = defaultdict(list)
     for s in res.tables.get("selections", []):
-        full[s["run_id"]].append(s["n_flashes"])
-    for rid, ns in full.items():
-        if len(set(ns)) > 1 and not runs[rid]["condition"].startswith("Dyn"):
-            res.error("incomplete_sequence", rid, f"fixed-length run has varying flashes/selection {sorted(set(ns))}")
+        sels[s["run_id"]].append(s)
+    for rid, ss in sels.items():
+        cond = runs[rid]["condition"]
+        if cond.startswith("Dyn"):
+            continue
+        for s in ss:
+            if s["evidence_truncated"]:
+                if s["flashes_in_partial_repetition"]:
+                    res.error("incomplete_sequence", s["selection_id"], f"truncated mid-repetition ({s['n_flashes']} flashes)")
+                else:
+                    res.warn("truncated_fixed_selection", s["selection_id"],
+                             f"{cond} selection has {s['n_flashes']} of {s['max_flashes_in_protocol']} flashes "
+                             f"({s['complete_repetitions']} whole repetitions); kept and flagged")
+    by_cond = defaultdict(list)
+    for rid, ss in sels.items():
+        by_cond[runs[rid]["condition"]].append(len(ss))
+    for rid, ss in sels.items():
+        common = max(set(by_cond[runs[rid]["condition"]]), key=by_cond[runs[rid]["condition"]].count)
+        if len(ss) != common:
+            res.warn("unusual_selection_count", rid, f"{len(ss)} selections, usual for {runs[rid]['condition']} is {common}")
 
 
 def check_split_manifest(res: AuditResult, split_rows: list[dict]) -> None:

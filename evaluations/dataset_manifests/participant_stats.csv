@@ -1,0 +1,11 @@
+participant_id,sessions,runs,selections_by_condition,n_fixed_length_selections,n_dynamic_selections,n_truncated_fixed_selections,dyn_flashes_min_median_max,eeg_channels,fs_hz,has_eye_tracking,total_flashes,alsfrs_r
+F_03,3,27,"{""CBCol"": 54, ""Dyn"": 36, ""DynBigram"": 36, ""Static"": 36}",90,72,0,"[14, 25, 59]",16,256,False,13351,21
+F_05,3,27,"{""CBCol"": 54, ""Dyn"": 36, ""DynBigram"": 36, ""Static"": 36}",90,72,0,"[14, 20, 60]",16,256,False,12961,3
+F_06,3,27,"{""CBCol"": 54, ""Dyn"": 35, ""DynBigram"": 36, ""Static"": 36}",90,71,0,"[36, 127, 127]",16,256,False,19162,3
+F_07,3,27,"{""CBCol"": 54, ""Dyn"": 36, ""DynBigram"": 36, ""Static"": 36}",90,72,0,"[37, 127, 127]",16,256,False,19786,21
+F_08,3,27,"{""CBCol"": 54, ""Dyn"": 36, ""DynBigram"": 36, ""Static"": 36}",90,72,0,"[14, 19, 28]",16,256,False,12674,42
+F_20,3,27,"{""CBCol"": 54, ""Dyn"": 36, ""DynBigram"": 36, ""Static"": 36}",90,72,1,"[14, 30, 60]",16,256,False,13573,5
+F_21,3,27,"{""CBCol"": 54, ""Dyn"": 36, ""DynBigram"": 36, ""Static"": 36}",90,72,3,"[16, 30, 61]",16,256,False,13517,1
+F_23,3,27,"{""CBCol"": 54, ""Dyn"": 36, ""DynBigram"": 36, ""Static"": 36}",90,72,0,"[40, 110, 127]",16,256,False,18620,30
+F_24,3,27,"{""CBCol"": 54, ""Dyn"": 36, ""DynBigram"": 36, ""Static"": 36}",90,72,0,"[15, 35, 120]",16,256,False,14204,33
+F_25,3,27,"{""CBCol"": 54, ""Dyn"": 36, ""DynBigram"": 36, ""Static"": 36}",90,72,0,"[14, 47, 127]",16,256,False,15354,33

@@ -1,0 +1,19 @@
+{
+ "recorded_median_inter_selection_pause_s": 3.5,
+ "taus": [
+  0.1,
+  0.2,
+  0.35,
+  0.5,
+  0.7,
+  0.8,
+  0.9,
+  0.95,
+  0.98,
+  0.99,
+  0.999,
+  0.9999
+ ],
+ "target_oof_error": 0.05,
+ "bootstrap": "2000 resamples of participants, percentile 95% CI"
+}

@@ -1,0 +1,176 @@
+{
+ "dataset": "bigP3BCI",
+ "version": "1.0.0",
+ "doi": "10.13026/0byy-ry86",
+ "license": "CC BY 4.0",
+ "source_page": "https://physionet.org/content/bigp3bci/1.0.0/",
+ "download_mirror": "https://physionet-open.s3.amazonaws.com/bigp3bci/1.0.0/",
+ "checksums": "SHA256SUMS.txt from the same mirror",
+ "acquired_utc": "2026-10-17T18:09:07+00:00",
+ "study": "F",
+ "participant": "F_25",
+ "files": [
+  {
+   "file": "StudyF/F_25/SE001/Test/Dyn/F_25_SE001_Dyn_Test01.edf",
+   "bytes": 4635158,
+   "sha256": "9d1b1f3d25459a4822621ed312292433fef92fa9178aef2dab8b8bb779cd6b63",
+   "status": "downloaded"
+  },
+  {
+   "file": "StudyF/F_25/SE001/Test/Dyn/F_25_SE001_Dyn_Test02.edf",
+   "bytes": 4063766,
+   "sha256": "f409c1cbda2d51a8b73eb82b0ba5395855c15c71c183b2e512d5a186559463e0",
+   "status": "downloaded"
+  },
+  {
+   "file": "StudyF/F_25/SE001/Test/DynBigram/F_25_SE001_DynBigram_Test01.edf",
+   "bytes": 4381206,
+   "sha256": "8a4bdceb74b64f4fe383b8abcdf15e92ff8a4890843fc9da3e8d953b6c9da7f2",
+   "status": "downloaded"
+  },
+  {
+   "file": "StudyF/F_25/SE001/Test/DynBigram/F_25_SE001_DynBigram_Test02.edf",
+   "bytes": 4476438,
+   "sha256": "deef37c107be484ed3deec9b72be7fb3f743ac3196811c027a72fd0f2cd1f765",
+   "status": "downloaded"
+  },
+  {
+   "file": "StudyF/F_25/SE001/Test/Static/F_25_SE001_Static_Test01.edf",
+   "bytes": 6936598,
+   "sha256": "ad7895c8b3a4c78eb7dfce88f22caf0a01924786b7b0fabaea18cb2f471dbede",
+   "status": "downloaded"
+  },
+  {
+   "file": "StudyF/F_25/SE001/Test/Static/F_25_SE001_Static_Test02.edf",
+   "bytes": 6936598,
+   "sha256": "c8e3dbc936c2ad0d16097eafe3ab819b26feb870589c0954af97fa6d8994fff0",
+   "status": "downloaded"
+  },
+  {
+   "file": "StudyF/F_25/SE001/Train/CBCol/F_25_SE001_CBCol_Train01.edf",
+   "bytes": 6936598,
+   "sha256": "6c110c413faa8e577bffc1959dd4baa21a23ec7460850e64ad586839bdb89f00",
+   "status": "downloaded"
+  },
+  {
+   "file": "StudyF/F_25/SE001/Train/CBCol/F_25_SE001_CBCol_Train02.edf",
+   "bytes": 6936598,
+   "sha256": "efd524a35515487071919044948fffe0e7f2ac0eae5534ac975b57368e37ce19",
+   "status": "downloaded"
+  },
+  {
+   "file": "StudyF/F_25/SE001/Train/CBCol/F_25_SE001_CBCol_Train03.edf",
+   "bytes": 6936598,
+   "sha256": "25ca457f5cac61feb956c1ce912c4e3078c0240f95e66dd6405b903c37b4e58c",
+   "status": "downloaded"
+  },
+  {
+   "file": "StudyF/F_25/SE002/Test/Dyn/F_25_SE002_Dyn_Test01.edf",
+   "bytes": 1976598,
+   "sha256": "38d6bff359b55aa833ff0d4b59dc09341ef0fd38b1c8e022571bdb6dbcfcc47d",
+   "status": "downloaded"
+  },
+  {
+   "file": "StudyF/F_25/SE002/Test/Dyn/F_25_SE002_Dyn_Test02.edf",
+   "bytes": 2190870,
+   "sha256": "f80ad28dc4247ed6e44f846c8b5e7f39be0fbe10fff28adfeeff010dcdeee74e",
+   "status": "downloaded"
+  },
+  {
+   "file": "StudyF/F_25/SE002/Test/DynBigram/F_25_SE002_DynBigram_Test01.edf",
+   "bytes": 1849622,
+   "sha256": "48be3cfff8501349fa6a848259d046c4e9bfcd86ded2ebc765fd1c98ea1067af",
+   "status": "downloaded"
+  },
+  {
+   "file": "StudyF/F_25/SE002/Test/DynBigram/F_25_SE002_DynBigram_Test02.edf",
+   "bytes": 2230550,
+   "sha256": "711bbf8282d93f4f9235eafacd42bd3e28b58ea474dd5d196335de992c867154",
+   "status": "downloaded"
+  },
+  {
+   "file": "StudyF/F_25/SE002/Test/Static/F_25_SE002_Static_Test01.edf",
+   "bytes": 6936598,
+   "sha256": "6c67a782d9dbcb0ab91928d7336255f3488780abf75b5c3f00eaecbdb853339f",
+   "status": "downloaded"
+  },
+  {
+   "file": "StudyF/F_25/SE002/Test/Static/F_25_SE002_Static_Test02.edf",
+   "bytes": 6936598,
+   "sha256": "7f9004826be3e43dd5ddffda4fdab051762b965e5f4d40631beed05c7dfc854a",
+   "status": "downloaded"
+  },
+  {
+   "file": "StudyF/F_25/SE002/Train/CBCol/F_25_SE002_CBCol_Train01.edf",
+   "bytes": 6936598,
+   "sha256": "63b68cc3a85a1a05ae7bd5ddae2ac0b0c5b665501647cad767cc6f3926b4dbe2",
+   "status": "downloaded"
+  },
+  {
+   "file": "StudyF/F_25/SE002/Train/CBCol/F_25_SE002_CBCol_Train02.edf",
+   "bytes": 6936598,
+   "sha256": "30bdbba45b320a78d96dc8adf3b5c2ba1eaf106ff9e2841c4035bc3cb4ca2d49",
+   "status": "downloaded"
+  },
+  {
+   "file": "StudyF/F_25/SE002/Train/CBCol/F_25_SE002_CBCol_Train03.edf",
+   "bytes": 6936598,
+   "sha256": "e244671b4c350b929f85de93fa10c13f40cdab52e9f6e4ff362d53e49e07f15e",
+   "status": "downloaded"
+  },
+  {
+   "file": "StudyF/F_25/SE003/Test/Dyn/F_25_SE003_Dyn_Test01.edf",
+   "bytes": 4825622,
+   "sha256": "1f2e24cf824c7b570fff94a8cde350093bbcdd1ad9571378a51f20b7340f4f2b",
+   "status": "downloaded"
+  },
+  {
+   "file": "StudyF/F_25/SE003/Test/Dyn/F_25_SE003_Dyn_Test02.edf",
+   "bytes": 4603414,
+   "sha256": "ee2f99bb227f296c85dc9ef75ef39380a2045d6c41795d7bc4aceb335cca7e0e",
+   "status": "downloaded"
+  },
+  {
+   "file": "StudyF/F_25/SE003/Test/DynBigram/F_25_SE003_DynBigram_Test01.edf",
+   "bytes": 4143126,
+   "sha256": "044d784067f35931b1fa5cf10b0df7593039ef9a7353570bd9f1b974a4c41098",
+   "status": "downloaded"
+  },
+  {
+   "file": "StudyF/F_25/SE003/Test/DynBigram/F_25_SE003_DynBigram_Test02.edf",
+   "bytes": 3722518,
+   "sha256": "1e7642044c978d47350edfe18e43cc354dd70efc14443c87fba109c5171a8c78",
+   "status": "downloaded"
+  },
+  {
+   "file": "StudyF/F_25/SE003/Test/Static/F_25_SE003_Static_Test01.edf",
+   "bytes": 6936598,
+   "sha256": "3398fac281033245d63daa5b0fc258c63c0ec2883c99fbbb9724165141df231b",
+   "status": "downloaded"
+  },
+  {
+   "file": "StudyF/F_25/SE003/Test/Static/F_25_SE003_Static_Test02.edf",
+   "bytes": 6936598,
+   "sha256": "fc99e64abc5f3714fd4b81a13877fdf0356b27539fb77ff41e6a71f4848e74a2",
+   "status": "downloaded"
+  },
+  {
+   "file": "StudyF/F_25/SE003/Train/CBCol/F_25_SE003_CBCol_Train01.edf",
+   "bytes": 6936598,
+   "sha256": "bd32e4497c25b5b0e90612e72680292d533d5ae3636bab05e1d29d91c8ed6c7a",
+   "status": "downloaded"
+  },
+  {
+   "file": "StudyF/F_25/SE003/Train/CBCol/F_25_SE003_CBCol_Train02.edf",
+   "bytes": 6936598,
+   "sha256": "a1f64917336c4628f94255e4b7035f0be3b87b4f1b0d65109dfad69ed724bbf0",
+   "status": "downloaded"
+  },
+  {
+   "file": "StudyF/F_25/SE003/Train/CBCol/F_25_SE003_CBCol_Train03.edf",
+   "bytes": 6936598,
+   "sha256": "7ea7391494262c324a19a8723ec390b4982913a7712d1661b96df9a47560cfe1",
+   "status": "downloaded"
+  }
+ ]
+}

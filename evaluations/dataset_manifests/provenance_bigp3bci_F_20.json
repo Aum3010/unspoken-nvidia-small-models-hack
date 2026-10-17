@@ -1,0 +1,176 @@
+{
+ "dataset": "bigP3BCI",
+ "version": "1.0.0",
+ "doi": "10.13026/0byy-ry86",
+ "license": "CC BY 4.0",
+ "source_page": "https://physionet.org/content/bigp3bci/1.0.0/",
+ "download_mirror": "https://physionet-open.s3.amazonaws.com/bigp3bci/1.0.0/",
+ "checksums": "SHA256SUMS.txt from the same mirror",
+ "acquired_utc": "2026-10-17T18:08:34+00:00",
+ "study": "F",
+ "participant": "F_20",
+ "files": [
+  {
+   "file": "StudyF/F_20/SE001/Test/Dyn/F_20_SE001_Dyn_Test01.edf",
+   "bytes": 2524182,
+   "sha256": "8217cdb5946b2d4f87c9f88e93c74d4e99cac003f96998f2122481bb42c99d85",
+   "status": "already_present"
+  },
+  {
+   "file": "StudyF/F_20/SE001/Test/Dyn/F_20_SE001_Dyn_Test02.edf",
+   "bytes": 2127382,
+   "sha256": "5ec590150145fd5f2eb2514f23f0149894bc9abfaba6bb8d307fb3e5bb60f3df",
+   "status": "already_present"
+  },
+  {
+   "file": "StudyF/F_20/SE001/Test/DynBigram/F_20_SE001_DynBigram_Test01.edf",
+   "bytes": 2421014,
+   "sha256": "bc0972b34398cf638df753fd1f02b3cda5b6989968b8b464b97ddb1773f5b0e4",
+   "status": "already_present"
+  },
+  {
+   "file": "StudyF/F_20/SE001/Test/DynBigram/F_20_SE001_DynBigram_Test02.edf",
+   "bytes": 2913046,
+   "sha256": "53831127b6b8b708f77c07b5f7b18a1556eb77dee682275f5f45f1a310606bc9",
+   "status": "already_present"
+  },
+  {
+   "file": "StudyF/F_20/SE001/Test/Static/F_20_SE001_Static_Test01.edf",
+   "bytes": 6936598,
+   "sha256": "33486fbc52a0bf445e5254d81934782dddae0e3e9668b3c69b13747d1852b73f",
+   "status": "already_present"
+  },
+  {
+   "file": "StudyF/F_20/SE001/Test/Static/F_20_SE001_Static_Test02.edf",
+   "bytes": 6936598,
+   "sha256": "4ddb5c06051ea3633d5dedcdda2b8d9c95a0ae876e4edcdd6da9edde1190257d",
+   "status": "already_present"
+  },
+  {
+   "file": "StudyF/F_20/SE001/Train/CBCol/F_20_SE001_CBCol_Train01.edf",
+   "bytes": 6936598,
+   "sha256": "212237ad6792dbc0a215bcda3d9a9e9706ba1edc158d53be55cdfb208ab9d03e",
+   "status": "already_present"
+  },
+  {
+   "file": "StudyF/F_20/SE001/Train/CBCol/F_20_SE001_CBCol_Train02.edf",
+   "bytes": 6936598,
+   "sha256": "b4862669f534680085b2298387430f5c707bad267876a16b906a86aca6543853",
+   "status": "already_present"
+  },
+  {
+   "file": "StudyF/F_20/SE001/Train/CBCol/F_20_SE001_CBCol_Train03.edf",
+   "bytes": 6936598,
+   "sha256": "95dc4d499cf9b02daaf52b7e0befc4016813b615e3166d1a2c059c1149edbdc8",
+   "status": "already_present"
+  },
+  {
+   "file": "StudyF/F_20/SE002/Test/Dyn/F_20_SE002_Dyn_Test01.edf",
+   "bytes": 2524182,
+   "sha256": "0c4225d6d0ffba0a555bf0db2c429814b902692a16145bd2b1a95abfb581fe14",
+   "status": "already_present"
+  },
+  {
+   "file": "StudyF/F_20/SE002/Test/Dyn/F_20_SE002_Dyn_Test02.edf",
+   "bytes": 2174998,
+   "sha256": "b0584e0dd2b05e6f6fa1b6b2e1eaea0abb47bbd7b3eec75e816ac7d8d28ab611",
+   "status": "already_present"
+  },
+  {
+   "file": "StudyF/F_20/SE002/Test/DynBigram/F_20_SE002_DynBigram_Test01.edf",
+   "bytes": 2048022,
+   "sha256": "4d7cf8471cbe3d3442adb6e677153039e53f83658cf1635272ff2e73a1dcf633",
+   "status": "already_present"
+  },
+  {
+   "file": "StudyF/F_20/SE002/Test/DynBigram/F_20_SE002_DynBigram_Test02.edf",
+   "bytes": 2421014,
+   "sha256": "42fa16eb183188ef627ee3c0b083848fda072cef9b22bb3d4fe3862b987f222b",
+   "status": "already_present"
+  },
+  {
+   "file": "StudyF/F_20/SE002/Test/Static/F_20_SE002_Static_Test01.edf",
+   "bytes": 6936598,
+   "sha256": "133d288376cd9986f006bc26a7cc14ba38cc1b313b5d69d106e29fe9e4981cc5",
+   "status": "already_present"
+  },
+  {
+   "file": "StudyF/F_20/SE002/Test/Static/F_20_SE002_Static_Test02.edf",
+   "bytes": 6936598,
+   "sha256": "f6346c5d936d5062272017a681e28b57442c6f05f424fc642368d4b543b6a7ac",
+   "status": "already_present"
+  },
+  {
+   "file": "StudyF/F_20/SE002/Train/CBCol/F_20_SE002_CBCol_Train01.edf",
+   "bytes": 6793750,
+   "sha256": "3b0a439eb40d5ccd283b887b136a04baf2fd054433f9d94088ddcfc037f5eb0a",
+   "status": "already_present"
+  },
+  {
+   "file": "StudyF/F_20/SE002/Train/CBCol/F_20_SE002_CBCol_Train02.edf",
+   "bytes": 6936598,
+   "sha256": "218d0d97e75f0626d39b1a4808599d919560a1a58db30a75c4cc765b548229a4",
+   "status": "already_present"
+  },
+  {
+   "file": "StudyF/F_20/SE002/Train/CBCol/F_20_SE002_CBCol_Train03.edf",
+   "bytes": 6936598,
+   "sha256": "3581065189c94d5d42a47204304bf4369d414ef6b040530cb2dbb58d4ce76f95",
+   "status": "already_present"
+  },
+  {
+   "file": "StudyF/F_20/SE003/Test/Dyn/F_20_SE003_Dyn_Test01.edf",
+   "bytes": 2365462,
+   "sha256": "a16caa97ea883bb0f62a22e0641caa1c95985b5b71de83de3701a7f7b60f84a3",
+   "status": "already_present"
+  },
+  {
+   "file": "StudyF/F_20/SE003/Test/Dyn/F_20_SE003_Dyn_Test02.edf",
+   "bytes": 2603542,
+   "sha256": "958e926177edd0f32ee470ee68ce913c229e3675d84085f1ae9728c8380accf4",
+   "status": "already_present"
+  },
+  {
+   "file": "StudyF/F_20/SE003/Test/DynBigram/F_20_SE003_DynBigram_Test01.edf",
+   "bytes": 2063894,
+   "sha256": "3218c0b462ce8199905b3231928eadab908763a98d3685d194d0d3caceeeb9f9",
+   "status": "already_present"
+  },
+  {
+   "file": "StudyF/F_20/SE003/Test/DynBigram/F_20_SE003_DynBigram_Test02.edf",
+   "bytes": 2920982,
+   "sha256": "b50732e8b631b1020b78f90f4ab389c539a349ee87c44cb40c4dcb40a59fdd16",
+   "status": "already_present"
+  },
+  {
+   "file": "StudyF/F_20/SE003/Test/Static/F_20_SE003_Static_Test01.edf",
+   "bytes": 6936598,
+   "sha256": "89d329b37a061691acee9eff5a10e0676abcce1bb875dfb422f456de9b7ce8e6",
+   "status": "already_present"
+  },
+  {
+   "file": "StudyF/F_20/SE003/Test/Static/F_20_SE003_Static_Test02.edf",
+   "bytes": 6936598,
+   "sha256": "d30ba714f999a1d6027a9e76cbc58d4906a067846a9ab88bfccb018053666d32",
+   "status": "already_present"
+  },
+  {
+   "file": "StudyF/F_20/SE003/Train/CBCol/F_20_SE003_CBCol_Train01.edf",
+   "bytes": 6936598,
+   "sha256": "7f45244388b3adc8055451047634fef143ccbd6c60c84939e5d27d642ebdcad6",
+   "status": "already_present"
+  },
+  {
+   "file": "StudyF/F_20/SE003/Train/CBCol/F_20_SE003_CBCol_Train02.edf",
+   "bytes": 6936598,
+   "sha256": "1a215f0a5f267c60b5060c6dd87ce8f458498c42c0ee9d9c3023222bed9dea04",
+   "status": "already_present"
+  },
+  {
+   "file": "StudyF/F_20/SE003/Train/CBCol/F_20_SE003_CBCol_Train03.edf",
+   "bytes": 6936598,
+   "sha256": "274c39280baa229d07f62cd080c63f7eb75d95c8bcda3326eeb82a4eaa3a839e",
+   "status": "already_present"
+  }
+ ]
+}

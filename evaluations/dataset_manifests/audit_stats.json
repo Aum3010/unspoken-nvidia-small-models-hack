@@ -1,21 +1,21 @@
 {
  "bigp3bci": {
-  "files": 27,
+  "files": 270,
   "protocol_max_flashes": 126,
   "flash_gap_samples": [
    [
     64,
-    13189
+    151583
    ]
   ],
   "flash_duration_samples": [
    [
     8,
-    13351
+    153202
    ]
   ],
   "n_char_channels": {
-   "36": 27
+   "36": 270
   }
  },
  "bnci2014_008": {
