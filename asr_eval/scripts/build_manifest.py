@@ -135,7 +135,13 @@ def nonspeech_public(cfg, rng) -> tuple[list[dict], list[Path]]:
         esc_cat = {f: c for f, c in zip(df["filename"], df["category"]) if c in set(m["esc50_categories"])}
         esc = [meta.parent.parent / "audio" / f for f in sorted(esc_cat)]
     n = m["nonspeech_public_n"]
-    quotas = [("musan", musan_neg, int(n * 0.5)), ("speech_commands", sc, int(n * 0.15)), ("esc50", esc, n - int(n * 0.5) - int(n * 0.15))]
+    # shares 50/15/35, renormalised over the sources actually present (e.g. MUSAN still downloading)
+    present = [(src, files, w) for src, files, w in (("musan", musan_neg, 0.5), ("speech_commands", sc, 0.15), ("esc50", esc, 0.35)) if files]
+    total_w = sum(w for _, _, w in present) or 1.0
+    quotas = [(src, files, round(n * w / total_w)) for src, files, w in present]
+    missing = {"musan", "speech_commands", "esc50"} - {q[0] for q in quotas}
+    if missing:
+        print(f"  non-speech sources missing (quota redistributed): {sorted(missing)}")
     rows = []
     for src, files, quota in quotas:
         if not files:
