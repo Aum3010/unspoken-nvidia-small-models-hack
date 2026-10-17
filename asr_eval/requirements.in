@@ -1,0 +1,19 @@
+# Top-level dependencies. setup_brev.sh installs torch from the CUDA 12.8 index first
+# (needed for Blackwell, works on Hopper), then these, then writes requirements.lock (pip freeze).
+transformers>=4.57          # ParakeetForCTC
+nemo_toolkit[asr]
+faster-whisper
+silero-vad
+librosa
+soundfile
+rapidfuzz
+pronouncing
+jiwer
+pandas
+matplotlib
+pyyaml
+psutil
+scipy
+kokoro
+sounddevice                 # scripts/record.py (laptop)
+sherpa-onnx                 # optional keyword spotter

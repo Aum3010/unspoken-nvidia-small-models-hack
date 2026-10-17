@@ -1,0 +1,116 @@
+# Audio-only ASR evaluation for Unspoken. Every setting that affects a number lives here.
+# Reproduce: python run_eval.py --config configs/eval.yaml
+seed: 7
+sample_rate: 16000
+paths:
+  data: data          # on Brev this is a symlink to /workspace/asr_eval_data (setup_brev.sh)
+  results: results
+
+# Fixed request phrases (phrase_id: text). The agent outputs one id, `unknown`, or `no_speech`.
+phrases:
+  water: I need water
+  pain: I'm in pain
+  nurse: Call the nurse
+  breathe: I can't breathe
+  suction: I need suction
+  reposition: Please reposition me
+  cold: I'm cold
+  hot: I'm too hot
+  bathroom: I need the bathroom
+  light: Turn off the light
+  family: Where is my family
+  time: What time is it
+  sick: I feel sick
+  scared: I'm scared
+  tired: I'm tired
+  pillow: Fix my pillow
+  "yes": "Yes"
+  "no": "No"
+  help: Help me
+  stop: Stop
+
+# Must map to `unknown`. Ids double as the `neg_{id}` names in own recordings.
+hard_negatives:
+  hn_dont_need_water: I don't need water
+  hn_not_in_pain: I'm not in pain
+  hn_dont_call_nurse: don't call the nurse
+  hn_can_breathe: I can breathe fine
+  hn_water_plants: water the plants
+  hn_call_family_later: call my family later
+  hn_time_close: what time does it close
+
+# Own recordings: data/own/{speaker}_{condition}_{phraseid}_{take}.wav ; negatives use phraseid=neg_{name}
+own:
+  conditions: [normal, soft, whisper, slow, muffled, noisy]
+  negatives:          # neg_{name} -> label_type (hard negatives are added automatically)
+    silence: silence
+    breathing: non_speech
+    cough: non_speech
+    unrelated: unknown_speech
+
+manifest:
+  calib_fraction: 0.4          # share of speakers per source used for threshold tuning
+  calib_speakers: {}           # optional explicit lists per source, e.g. {own: [alice]}
+  generated_nonspeech: 60      # digital silence + low-level mic-like noise clips (1-6 s)
+  librispeech_n: 200
+  nonspeech_public_n: 300      # MUSAN + Speech Commands background + ESC-50 cuts
+  esc50_categories: [breathing, coughing, clock_tick, mouse_click, keyboard_typing, door_wood_knock, footsteps, snoring, sneezing, clapping, drinking_sipping, brushing_teeth]
+  torgo_vocab_size: 15
+
+degrade:
+  sources: [own, torgo]        # positives only, one effect at a time (never stacked)
+  gain_db: [-12, -24, -36]
+  snr_db: [20, 10, 5, 0]       # MUSAN noise; falls back to pink noise only if MUSAN is absent (condition says which)
+  bandpass_hz: [300, 3400]
+  lowpass_hz: 1500
+  tempo: [0.7, 0.85]
+  rt60_s: [0.3, 0.6]
+
+vad:
+  thresholds: [0.2, 0.3, 0.4, 0.5, 0.6]
+  min_speech_ms: 100           # low so single-word "yes"/"no" survive
+
+models:
+  - name: parakeet-ctc-0.6b
+    kind: hf_ctc
+    checkpoint: nvidia/parakeet-ctc-0.6b
+    revision: null             # null = resolve current commit and log it
+    enabled: true
+  - name: parakeet-tdt-0.6b-v2
+    kind: nemo_transducer
+    checkpoint: nvidia/parakeet-tdt-0.6b-v2
+    enabled: false             # milestone 2
+  - name: nemotron-streaming-0.6b
+    kind: nemo_transducer
+    checkpoint: nvidia/nemotron-speech-streaming-en-0.6b
+    enabled: false             # milestone 2
+  - name: whisper-large-v3-turbo
+    kind: faster_whisper
+    checkpoint: large-v3-turbo
+    enabled: false             # milestone 2
+  - name: whisper-large-v2
+    kind: faster_whisper
+    checkpoint: large-v2
+    enabled: false
+  - name: whisper-small
+    kind: faster_whisper
+    checkpoint: small
+    enabled: false
+  - name: parakeet-ctc-0.6b-sapc1
+    kind: hf_ctc
+    checkpoint: dys-asr/parakeet-ctc-0.6b-sapc1
+    enabled: false             # optional; licence terms must be checked first
+
+decision:
+  methods: [text, ctc_sum, ctc_norm, ctc_llr]   # ctc_* only for CTC models
+  far_target: 0.01
+  far_constraint: max_per_type   # every negative type must be <= far_target on calib (stricter than pooled)
+  tune_origins: [human, generated]   # TTS never tunes headline thresholds
+  tune_include_degraded: true
+  abs_grid_quantiles: 41
+  margin_grid_quantiles: 21
+  negation_words: [not, no, never]
+
+latency:
+  warmup_runs: 5
+  dtype_cuda: bfloat16

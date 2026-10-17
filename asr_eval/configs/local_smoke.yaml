@@ -1,0 +1,11 @@
+# Laptop plumbing test (CPU, no recordings yet). Not for reported numbers.
+extends: [eval.yaml]
+paths:
+  data: data_local
+  results: results_local
+manifest:
+  generated_nonspeech: 12
+degrade:
+  sources: [own, torgo, tts]   # exercise the degradation path on the only speech available locally
+decision:
+  tune_origins: [human, generated, tts]   # flagged in the summary: TTS-tuned thresholds are not valid numbers
