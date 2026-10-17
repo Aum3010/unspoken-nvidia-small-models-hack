@@ -15,6 +15,7 @@ export interface FaceFrame {
   blinkR: number
   yaw: number            // rough left/right head turn, -1..1
   pose: number[] | null  // 4x4 facial transformation matrix (flattened), head rotation + translation
+  source: HTMLVideoElement  // the frame these landmarks belong to (used for the face crop in lib/appearance.ts)
   t: number
 }
 
@@ -79,7 +80,7 @@ export function trackVideo(video: HTMLVideoElement): () => void {
         yaw = ((nose.x - l.x) / Math.max(1e-3, r.x - l.x) - 0.5) * 2
       }
       const frame: FaceFrame = {
-        present: !!lm, landmarks: lm, mouthBox, yaw, pose: res.facialTransformationMatrixes?.[0]?.data ?? null,
+        present: !!lm, landmarks: lm, mouthBox, yaw, pose: res.facialTransformationMatrixes?.[0]?.data ?? null, source: video,
         mouthOpen: shapes.jawOpen ?? 0, blinkL: shapes.eyeBlinkLeft ?? 0, blinkR: shapes.eyeBlinkRight ?? 0, t,
       }
       detectBlink(frame)

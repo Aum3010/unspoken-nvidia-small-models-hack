@@ -1,9 +1,15 @@
 // Webcam gaze from the MediaPipe Face Landmarker we already run (lib/face.ts):
-// iris position inside each eye + head pose -> screen point, via a ridge regression
-// fitted on the calibration dots. No second face model, no extra camera stream.
+// iris position inside each eye + head pose, plus the gaze direction MobileGaze reads from the
+// face image (lib/appearance.ts) -> screen point, via a ridge regression fitted on the calibration
+// dots. No second face model, no extra camera stream.
+//
+// Positioning: the gaze puts the cursor near the target (fast, ~2 cm accurate); once the gaze settles,
+// small head movements fine-tune the cursor from there (slow, precise), as in gaze + head pointing
+// (Kyto et al., CHI 2018). A real eye jump re-anchors the cursor at the new gaze point.
 // It is an *estimate*, not clinical eye tracking, so callers use dwell, hysteresis
 // and a separate confirmation.
 
+import { appearanceState, currentAppearance, loadAppearance, updateAppearance } from './appearance'
 import { onFace, trackCameraInBackground, type FaceFrame } from './face'
 import { fitRidge, predictRidge, type RidgeModel } from './ridge'
 
@@ -23,7 +29,21 @@ export const gazeState = {
   accuracyPx: null as number | null,
   running: false,
   savedAt: null as number | null,   // when the restored calibration was made
+  appearance: false,                // calibration includes the MobileGaze features
+  calibrating: false,               // pure gaze while calibrating/measuring (no head fine-tune)
 }
+
+// Head fine-tune settings (saved per device)
+export const headAssist = (() => {
+  const d = { enabled: true, sensitivity: 3 }
+  try { return { ...d, ...JSON.parse(localStorage.getItem('unspoken.gaze.head') ?? '{}') } } catch { return d }
+})() as { enabled: boolean; sensitivity: number }
+export function setHeadAssist(p: Partial<typeof headAssist>) {
+  Object.assign(headAssist, p)
+  try { localStorage.setItem('unspoken.gaze.head', JSON.stringify(headAssist)) } catch { /* ignore */ }
+  anchor = null
+}
+export function setCalibrating(on: boolean) { gazeState.calibrating = on; anchor = null }
 
 let stopTracking: (() => void) | null = null
 let offFace: (() => void) | null = null
@@ -57,12 +77,12 @@ const fx = new OneEuro(), fy = new OneEuro()
 
 // The fitted calibration is kept on this device (a few dozen numbers, no images) so it can be
 // reused after a reload. It is only valid for the same window size and camera position.
-const STORE = 'unspoken.gaze.v4'
-interface Saved { model: RidgeModel; accuracyPx: number; w: number; h: number; savedAt: number }
+const STORE = 'unspoken.gaze.v5'
+interface Saved { model: RidgeModel; appearance: boolean; accuracyPx: number; w: number; h: number; savedAt: number }
 
 export function saveCalibration() {
   if (!model || gazeState.accuracyPx == null || !gazeState.calibrated) return
-  const s: Saved = { model, accuracyPx: gazeState.accuracyPx, w: window.innerWidth, h: window.innerHeight, savedAt: Date.now() }
+  const s: Saved = { model, appearance: gazeState.appearance, accuracyPx: gazeState.accuracyPx, w: window.innerWidth, h: window.innerHeight, savedAt: Date.now() }
   try { localStorage.setItem(STORE, JSON.stringify(s)) } catch { /* storage unavailable */ }
   gazeState.savedAt = s.savedAt
 }
@@ -72,6 +92,7 @@ function restoreCalibration() {
     const s: Saved | null = JSON.parse(localStorage.getItem(STORE) ?? 'null')
     if (!s || Math.abs(s.w - window.innerWidth) > 40 || Math.abs(s.h - window.innerHeight) > 40) return
     model = s.model
+    gazeState.appearance = s.appearance
     gazeState.accuracyPx = s.accuracyPx
     gazeState.calibrated = s.accuracyPx < 220
     gazeState.savedAt = s.savedAt
@@ -99,6 +120,10 @@ function eye(lm: P[], e: typeof R): [number, number, number] {
 function features(f: FaceFrame): number[] | null {
   const lm = f.landmarks
   if (!lm || lm.length < 478 || !f.pose) return null
+  // appearance features: required when the calibration was made with them, so samples and
+  // predictions always have the same layout
+  const app = gazeState.appearance ? currentAppearance() : null
+  if (gazeState.appearance && !app) return null
   const [hR, vR, oR] = eye(lm, R)
   const [hL, vL, oL] = eye(lm, L)
   const p = f.pose
@@ -106,10 +131,40 @@ function features(f: FaceFrame): number[] | null {
   // head rotation (forward axis) + translation, taken for either matrix layout (row- or column-major;
   // the unused entries are constant and drop out), plus quadratic eye terms for screen edges
   const pose = [p[2], p[6], p[8], p[9], p[3], p[7], p[11], p[12], p[13], p[14]]
-  return [hR, vR, oR, hL, vL, oL, ...pose, hm * hm, vm * vm, hm * vm]
+  const geo = [hR, vR, oR, hL, vL, oL, ...pose, hm * hm, vm * vm, hm * vm]
+  return app ? [...geo, app.yaw, app.pitch] : geo
+}
+
+// Head direction from 2D landmarks, in image units with known signs (no matrix-layout ambiguity):
+// yaw grows when the nose moves toward image-right, pitch grows when it moves down.
+function headDir(lm: P[]): [number, number] {
+  const nose = lm[1], l = lm[234], r = lm[454], top = lm[10], chin = lm[152]
+  const w = Math.hypot(r.x - l.x, r.y - l.y) || 1e-6, h = Math.hypot(chin.x - top.x, chin.y - top.y) || 1e-6
+  return [(nose.x - (l.x + r.x) / 2) / w, (nose.y - (top.y + chin.y) / 2) / h]
+}
+
+// cursor = gaze anchor + head offset since the anchor was set
+const JUMP_MS = 120          // a gaze shift must persist this long to count as a real eye jump
+let anchor: { gx: number; gy: number; hx: number; hy: number; away: number | null } | null = null
+const hfx = new OneEuro(1.0, 0.02), hfy = new OneEuro(1.0, 0.02)
+
+function position(gx: number, gy: number, lm: P[], t: number): [number, number] {
+  if (!headAssist.enabled || gazeState.calibrating || !gazeState.calibrated) { anchor = null; return [gx, gy] }
+  const [rx, ry] = headDir(lm)
+  const hx = hfx.filter(rx, t), hy = hfy.filter(ry, t)
+  const jump = Math.max(120, (gazeState.accuracyPx ?? 80) * 1.6)   // beyond normal gaze error = a new target
+  if (!anchor) anchor = { gx, gy, hx, hy, away: null }
+  if (Math.hypot(gx - anchor.gx, gy - anchor.gy) > jump) {
+    anchor.away ??= t
+    if (t - anchor.away > JUMP_MS) anchor = { gx, gy, hx, hy, away: null }
+  } else anchor.away = null
+  // turning to the user's right moves the nose toward image-left (camera is not mirrored) -> cursor right
+  const k = headAssist.sensitivity * window.innerWidth
+  return [anchor.gx - k * (hx - anchor.hx), anchor.gy + k * (hy - anchor.hy) * 0.8]
 }
 
 function onFrame(f: FaceFrame) {
+  if (f.present && f.landmarks && appearanceState.ready) void updateAppearance(f.source, f.landmarks)
   const feat = f.present ? features(f) : null
   if (!feat) {
     recent = []
@@ -126,8 +181,8 @@ function onFrame(f: FaceFrame) {
   history = [...history.filter((h) => f.t - h.t < 4000), current]
   if (!gazeState.running || !model) return
   const [px, py] = predictRidge(model, avg)
-  const x = Math.min(window.innerWidth, Math.max(0, px)), y = Math.min(window.innerHeight, Math.max(0, py))
-  emit({ x: fx.filter(x, f.t), y: fy.filter(y, f.t), t: f.t })
+  const [cx, cy] = position(fx.filter(px, f.t), fy.filter(py, f.t), f.landmarks!, f.t)
+  emit({ x: Math.min(window.innerWidth, Math.max(0, cx)), y: Math.min(window.innerHeight, Math.max(0, cy)), t: f.t })
 }
 
 /** Drop each calibration dot's outlying samples (glances away, landmark glitches), then fit. */
@@ -153,6 +208,7 @@ function refit() {
 }
 
 export async function startGaze(): Promise<void> {
+  await loadAppearance()   // MobileGaze; if it cannot load, gaze uses iris geometry only
   if (!stopTracking) {
     stopTracking = await trackCameraInBackground()  // keeps face tracking alive on every page
     offFace = onFace(onFrame)
@@ -177,6 +233,8 @@ export function clearCalibration() {
   samples.length = 0
   implicit.length = 0
   model = null
+  anchor = null
+  gazeState.appearance = appearanceState.ready   // new calibrations use the eye-image features when available
   fx.reset(); fy.reset()
   gazeState.calibrated = false
   gazeState.accuracyPx = null

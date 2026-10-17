@@ -3,7 +3,8 @@ import { Eye, Loader2, RotateCcw, ScanEye } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { getCamera } from '../lib/capture'
 import { blinkConfig, onBlink, trackVideo } from '../lib/face'
-import { calibrationSampleCount, clearCalibration, forgetCalibration, gazeState, measureAccuracy, onGaze, recordCalibrationPoint, saveCalibration, startGaze } from '../lib/gaze'
+import { appearanceState } from '../lib/appearance'
+import { calibrationSampleCount, clearCalibration, forgetCalibration, gazeState, headAssist, measureAccuracy, onGaze, recordCalibrationPoint, saveCalibration, setCalibrating, setHeadAssist, startGaze } from '../lib/gaze'
 import { useSelection } from '../lib/selection'
 import './calibrate.css'
 
@@ -25,6 +26,7 @@ export function Calibrate({ onDone }: { onDone: () => void }) {
   const [idx, setIdx] = useState(0)
   const [acc, setAcc] = useState<number | null>(gazeState.accuracyPx)
   const [blinks, setBlinks] = useState(0)
+  const [assist, setAssist] = useState({ ...headAssist })
   const [gaze, setGaze] = useState<{ x: number; y: number } | null>(null)
   const video = useRef<HTMLVideoElement>(null)
 
@@ -43,11 +45,13 @@ export function Calibrate({ onDone }: { onDone: () => void }) {
   const begin = async () => {
     setPhase('starting')
     try {
+      setCalibrating(true)   // pure gaze while calibrating and measuring: no head fine-tune
+      await startGaze()      // loads MobileGaze first, so the new calibration can use it
       clearCalibration()
-      await startGaze()
       setIdx(0)
       setPhase('points')
     } catch {
+      setCalibrating(false)
       setPhase('error')
     }
   }
@@ -62,7 +66,7 @@ export function Calibrate({ onDone }: { onDone: () => void }) {
     const next = window.setTimeout(() => {
       window.clearInterval(iv)
       if (idx + 1 < SEQUENCE.length) setIdx(idx + 1)
-      else if (calibrationSampleCount() < SEQUENCE.length * 5) { setAcc(null); setPhase('noface') }  // eyes were not seen
+      else if (calibrationSampleCount() < SEQUENCE.length * 5) { setCalibrating(false); setAcc(null); setPhase('noface') }  // eyes were not seen
       else { setIdx(0); setPhase('measure') }
     }, SETTLE_MS + RECORD_MS)
     return () => { window.clearTimeout(settle); window.clearInterval(iv); window.clearTimeout(next) }
@@ -85,6 +89,7 @@ export function Calibrate({ onDone }: { onDone: () => void }) {
         gazeState.calibrated = a != null && a < 220
         saveCalibration()  // reused next time (same window size and camera position)
         setAcc(a)
+        setCalibrating(false)
         setPhase('done')
       })
     }, SETTLE_MS)
@@ -148,6 +153,21 @@ export function Calibrate({ onDone }: { onDone: () => void }) {
           )}
           {phase === 'error' && <div className="calib-result poor"><b>Could not start gaze tracking.</b> Check camera permission.</div>}
           {phase === 'noface' && <div className="calib-result poor"><b>Your eyes were not visible enough.</b> Face the camera with light on your face, then try again.</div>}
+          <div className="panel-title" style={{ marginBottom: 0 }}>Fine-tune with the head</div>
+          <label className="row" style={{ gap: 10, alignItems: 'center' }}>
+            <input type="checkbox" checked={assist.enabled} onChange={(e) => { setHeadAssist({ enabled: e.target.checked }); setAssist({ ...headAssist }) }} />
+            <span className="muted">Look near the target, then nudge the pointer onto it with a small head movement</span>
+          </label>
+          {assist.enabled && (
+            <label className="slider" style={{ marginTop: 0 }}>
+              <span>Head sensitivity <b>{assist.sensitivity.toFixed(1)}</b></span>
+              <input type="range" min={1} max={6} step={0.5} value={assist.sensitivity}
+                onChange={(e) => { setHeadAssist({ sensitivity: +e.target.value }); setAssist({ ...headAssist }) }} />
+            </label>
+          )}
+          <div className="faint" style={{ fontSize: '.8rem' }}>
+            Eye-image model (MobileGaze): {appearanceState.ready ? `on · ${appearanceState.provider}${appearanceState.ms ? ` · ${appearanceState.ms} ms` : ''}` : 'loads when calibration starts'}
+          </div>
           <div className="panel-title" style={{ marginBottom: 0 }}>How to choose with the eyes</div>
           <div className="seg" role="radiogroup" aria-label="Gaze selection">
             <button aria-pressed={sel.gazeSelect === 'dwell'} onClick={() => sel.setSettings({ gazeSelect: 'dwell' })}>Look and hold (dwell)</button>
