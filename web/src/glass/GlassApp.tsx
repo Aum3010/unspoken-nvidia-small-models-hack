@@ -318,12 +318,23 @@ export function GlassApp() {
 
   /* ---------- session state -> ink, bubbles, caption ---------- */
   const lastSpoken = useRef<string | null>(null)
+  // finished text (spoken, nurse notified) stays 5 s, then dissolves; readings waiting for Yes/No stay put
+  const inkDone = useRef<{ key: string; timer: number } | null>(null)
+  const writeDone = (key: string, ws: string[]) => {
+    if (inkDone.current?.key === key) return
+    if (inkDone.current) window.clearTimeout(inkDone.current.timer)
+    E.setTranscript(ws, [])
+    inkDone.current = { key, timer: window.setTimeout(() => { E.setTranscript([], []); E.caption('') }, 5000) }
+  }
+  const holdInk = () => { if (inkDone.current) { window.clearTimeout(inkDone.current.timer); inkDone.current = null } }
+  useEffect(() => () => holdInk(), [])
   useEffect(() => {
     if (!state || calibrating) return
     if (state.checkin?.status === 'open') { E.caption(state.checkin.question, 'Yes, blink or nod · No or shake'); return }
     if (state.checkin?.status === 'answered' && state.checkin.answered_ts && Date.now() - state.checkin.answered_ts < 8000) {
       // written in ink like a reading, addressed by name; a note to the person, not a message: nothing is spoken
-      E.setTranscript(words(`${patientName ? `${patientName}, your` : 'Your'} nurse has been notified`), [])
+      if (inkDone.current?.key === `checkin:${state.checkin.answered_ts}`) return
+      writeDone(`checkin:${state.checkin.answered_ts}`, words(`${patientName ? `${patientName}, your` : 'Your'} nurse has been notified`))
       E.caption(`You answered ${(state.checkin.answer ?? '').toUpperCase()}`, 'sent to your nurse · nothing was spoken')
       return
     }
@@ -333,11 +344,13 @@ export function GlassApp() {
     if (m.status === 'selected') {
       const c = m.candidates.find((x) => x.id === m.selected_candidate_id)
       if (c) {
+        holdInk()
         E.setTranscript([], words(c.text))
         E.caption(`Will say exactly “${c.text}”`, 'look at Yes, blink, or nod to say it · No or shake to change it')
       }
     } else if (PENDING.includes(m.status) && shown.length) {
       // only the best reading, written in ink; Yes/blink/nod chooses it, No/shake rejects it
+      holdInk()
       E.setTranscript(words(shown[0].text), [])
       const read = shown[0].origin === 'correction' ? shown[1]?.text : null
       const from = read ? `corrected from “${read}” · ` : ''
@@ -350,7 +363,7 @@ export function GlassApp() {
         lastSpoken.current = sp.message_id
         // auto-spoken by the gateway: this page did not start it, so it plays it now
         if (sp.method === 'demo_auto_spoken' && Date.now() - sp.ts < 15000) play(`/api/${SESSION_ID}/audio/${sp.message_id}`, sp.text, sp.phrase_audio_id)
-        E.setTranscript(words(sp.text), [])
+        writeDone(`spoken:${sp.message_id}`, words(sp.text))
         E.caption(`Spoken · confirmed by ${METHOD_TEXT[sp.method] ?? sp.method}`)
       }
     } else if (m.status === 'rejected') {
