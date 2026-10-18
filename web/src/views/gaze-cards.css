@@ -1,0 +1,24 @@
+/* full window, fixed: cards are positioned in px from the same geometry the calibration uses */
+.gazecards { position: fixed; inset: 0; z-index: 120; background: var(--bg); overflow: hidden; }
+.gazecards .gc-card {
+  position: fixed; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+  padding: 16px; text-align: center; border-radius: 26px; border: 2px solid var(--hairline-strong); background: var(--surface-2);
+  font-size: clamp(1.2rem, 2.2vw, 2rem); font-weight: 600; line-height: 1.2; transition: border-color .15s, background .15s;
+}
+.gc-card:disabled { opacity: .4; }
+.gc-sub { font-size: .55em; font-weight: 500; color: var(--text-3); }
+.gc-card.group { background: color-mix(in srgb, var(--board) 10%, var(--surface-2)); }
+.gc-card.phrase { background: color-mix(in srgb, var(--lip) 8%, var(--surface-2)); }
+.gc-card.yes { background: color-mix(in srgb, var(--voice) 14%, var(--surface-2)); }
+.gc-card.no { background: color-mix(in srgb, var(--danger) 12%, var(--surface-2)); }
+.gc-card.speak { background: color-mix(in srgb, var(--voice) 18%, var(--surface-2)); border-color: color-mix(in srgb, var(--voice) 50%, transparent); }
+.gc-card.warn { color: var(--warn); }
+.gc-card.gaze-hover, .gc-card.scan-focus { border-color: var(--gaze) !important; background: color-mix(in srgb, var(--gaze) 14%, var(--surface-2)); }
+
+/* caregiver controls and notices live in the gaps (corners / between rows), never over a card */
+.gc-controls { position: fixed; top: 33.3vh; right: 12px; transform: translateY(-50%); display: flex; align-items: center; gap: 8px; z-index: 2; }
+.gc-result { font-size: .85rem; color: var(--text-2); background: var(--surface); border: 1px solid var(--hairline); padding: 4px 10px; border-radius: 10px; }
+.gc-attention {
+  position: fixed; left: 50%; top: 66.7vh; transform: translate(-50%, -50%); display: flex; gap: 8px; align-items: center;
+  padding: 6px 14px; border-radius: 12px; color: var(--warn); background: color-mix(in srgb, var(--warn) 16%, var(--bg)); font-weight: 600;
+}

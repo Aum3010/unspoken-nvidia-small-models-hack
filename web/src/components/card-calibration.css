@@ -1,0 +1,18 @@
+/* spotlight over the real card layout; clicks pass through nothing (calibration is look-only) */
+.cardcal { position: fixed; inset: 0; z-index: 180; pointer-events: auto; }
+.cardcal-spot {
+  position: fixed; border-radius: 26px; border: 3px solid var(--gaze);
+  box-shadow: 0 0 0 9999px color-mix(in srgb, var(--bg) 72%, transparent), 0 0 40px var(--gaze);
+  transition: left .35s var(--ease), top .35s var(--ease), width .35s var(--ease), height .35s var(--ease);
+}
+.cardcal-dot {
+  position: absolute; width: 16px; height: 16px; margin: -8px 0 0 -8px; border-radius: 50%;
+  background: var(--gaze); box-shadow: 0 0 18px var(--gaze); animation: cardcal-pulse 1s ease-in-out infinite;
+}
+@keyframes cardcal-pulse { 50% { transform: scale(1.6); opacity: .6; } }
+/* sits in the gap between card rows (rows are centred at 1/6, 1/2, 5/6 of the height), away from the spotlit card */
+.cardcal-label {
+  position: fixed; left: 50%; top: 66.7vh; transform: translate(-50%, -50%); padding: 8px 16px; border-radius: 14px;
+  background: var(--surface-2); border: 1px solid var(--hairline-strong); font-size: 1rem; white-space: nowrap; z-index: 1;
+}
+.cardcal-label.top { top: 33.3vh; }
