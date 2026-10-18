@@ -152,7 +152,7 @@ The UI runs on the laptop (`cd web && npm run dev` → http://localhost:8800). E
 | audio :8102 | mlx-whisper base | faster-whisper base, float16 (`UNSPOKEN_ASR_BACKEND`) |
 | tts :8104 | mlx-audio Kokoro-82M | `kokoro` KPipeline on CUDA (`UNSPOKEN_TTS_BACKEND`) |
 | vsr :8101 | torch MPS | torch CUDA (`pick_device`, `UNSPOKEN_VSR_DEVICE`) |
-| coordinator :8105 | Ollama | vLLM on 127.0.0.1:8001 serving `nvidia/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-NVFP4` (`--gpu-memory-utilization 0.55`, so the agents and the asr_eval bench fit beside it) |
+| coordinator :8105 | Ollama | vLLM 0.31 on 127.0.0.1:8001 serving `nvidia/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-NVFP4` (`--gpu-memory-utilization 0.55`, so the agents and the asr_eval bench fit beside it). On this RTX PRO 6000 (sm_120) vLLM picks Marlin weight-only FP4 for the GEMMs/MoE, Triton attention and the PyTorch sampler (see §5) |
 
 ```bash
 # laptop: commit first, then ship services/shared/scripts to ~/unspoken
@@ -168,12 +168,16 @@ bash scripts/brev/connect.sh marginal-sapphire-whale
 
 - **Privacy:** mouth video and voice clips now leave the laptop for the instance (over SSH). The gateway reports `host: "NVIDIA Brev"` and the UI's camera chip says *clips to NVIDIA Brev*. Clips are processed in memory and not stored.
 - **Ports:** the asr_eval bench also uses 8800 on the instance. The app's UI uses the laptop's 8800, so don't forward the bench to 8800 while the app UI is open.
+- Measured 2026-10-18: Nemotron loads 17.8 GiB of weights; the whole stack uses about 63 GB of the 96 GB (with the asr_eval bench). Whisper base on Brev: 89 ms per clip at the gateway; the coordinator's tool call (`ask_confirmation`, by the LLM): 272 ms.
 - Logs: `~/unspoken/.run/logs/<service>.log`; pinned versions: `~/unspoken/.run/requirements-cuda.lock`, `requirements-vllm.lock`.
 
 ## 5. Problems we hit, and the fixes
 
 | Symptom | Cause | Fix |
 |---|---|---|
+| vLLM: `Could not find nvcc and default cuda_home='/usr/local/cuda' doesn't exist` | FlashInfer JIT-compiles its attention and sampling kernels on first use; the image has no CUDA toolkit (and the driver is CUDA 13.0) | `--attention-backend TRITON_ATTN` and `VLLM_USE_FLASHINFER_SAMPLER=0` (both in `start_app.sh`); no compiler needed |
+| `brev port-forward` returns but `localhost:8000` refuses for a while | The forward rides brev's long-lived SSH control master and appears late; it then outlives the command | Wait, or use `scripts/brev/connect.sh` (dedicated SSH, up at once, Ctrl-C closes it) |
+| `mne==1.13.2` vs `numpy==1.26.4` unsatisfiable | New mne needs numpy ≥ 2.1; mediapipe 0.10.21 and pyriemann 0.7 need numpy < 2 | `mne==1.11.0` in `requirements-cuda.txt` |
 | `brew: command not found` on Windows | Brev has no Windows build | Install the Linux binary in WSL (`install_cli_wsl.sh`) |
 | `syntax error near unexpected token` from `brev exec` | Quotes are re-parsed by PowerShell/Git Bash → WSL → SSH | Put logic in a script on the instance and `brev exec '<inst>' 'bash ~/script.sh'` |
 | Git Bash turns `/tmp/...` into `C:/...` when calling `wsl` | MSYS path conversion | Call `wsl` from PowerShell, or set `MSYS_NO_PATHCONV=1` |
