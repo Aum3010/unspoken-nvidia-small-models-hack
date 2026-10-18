@@ -5,7 +5,9 @@ of `ui-speedups` + four flag-gated phases): what runs where, every agent and its
 logic, the browser, how it is served on the NVIDIA Brev GPU, every measured number, and every known shortfall,
 bug and pending task (§10). Where a number or behaviour differs on `ui`, the text says so. Shorter docs: [README](../README.md), [ARCHITECTURE](ARCHITECTURE.md),
 [SERVING](SERVING.md), [BREV](BREV.md), [EVALUATION](EVALUATION.md), [web/README](../web/README.md). Bounty
-write-ups (Nemotron Lightning, NeMo Gym, vLLM): [BOUNTIES](BOUNTIES.md).
+write-ups (Nemotron Lightning, NeMo Gym, vLLM): [BOUNTIES](BOUNTIES.md). Every agent against its baseline
+(branch `eval-consolidation`): [RESULTS](RESULTS.md). vLLM serving experiments (concurrency, capacity,
+isolation + MTP): `evaluations/results/serving/SUMMARY.md`.
 
 ---
 

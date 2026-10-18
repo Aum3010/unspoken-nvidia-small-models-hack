@@ -9,9 +9,14 @@ Unspoken helps people who cannot speak to be heard. Several small specialist mod
 A coordinator decides **how to ask** about what was read, and code decides **what may be spoken**. Everything
 runs on one NVIDIA RTX PRO 6000 Blackwell (Brev), and the browser UI runs on the laptop.
 
-Every number below was measured in this repo on 2026-10-18 (branches `ui-speedups` / `demo-final`; the serving
-experiments of §3 on `serving-experiments`) and names its result file under `evaluations/results/`. Run-to-run spread is given wherever a number was measured more than once. Full system
-reference: [TECHNICAL_VERBOSE.md](TECHNICAL_VERBOSE.md).
+Every number below was measured in this repo on 2026-10-18 and names its result file under `evaluations/results/`.
+- `ui-speedups` / `demo-final`: the deployed system.
+- `serving-experiments`: the serving experiments of §3.
+- `eval-consolidation`: the `neuro_comm` training run of §2 and the trained coordinators of §1. All of that
+  branch's experiments, per agent, are in [RESULTS.md](RESULTS.md). They ran on a separate 2× H100 evaluation box.
+
+Run-to-run spread is given wherever a number was measured more than once. Full system reference:
+[TECHNICAL_VERBOSE.md](TECHNICAL_VERBOSE.md).
 
 ---
 
@@ -93,8 +98,15 @@ We chose accuracy over speed every time the two disagreed.
   held-out set, not fixed by any rule yet. It never acted on the injection: 0 unsafe.
 - **Speed:** 272 ms per decision. That is why it is kept off the path of accepted readings. The two faster options
   measured (MTP 229 ms, compact 84 ms) were not adopted, for stability and accuracy respectively.
-- **No fine-tuning.** Every improvement is in how the model is used (prompt, tools, validation, fallback), not in
-  its weights.
+- **The deployed coordinator is not fine-tuned.** Every deployed improvement is in how the model is used (prompt,
+  tools, validation, fallback).
+  - Trained variants were measured on `eval-consolidation`, in the voice → lips → EEG chain
+    ([RESULTS.md](RESULTS.md) §9).
+  - **Nemotron 30B with a LoRA:** agreement with the rule rises from 90.6% to 95.6%, and wrong phrases fall from
+    59 to 53 of 1,400. The rule makes 44.
+  - **Nemotron Nano 4B trained as coordinator:** 93.1% right at 42 ms per call, but it speaks 26 more wrong phrases
+    than the rule.
+  - Neither matches the rule's safety, so neither is deployed.
 
 ---
 
@@ -224,10 +236,45 @@ The 6 runs are today's Brev runs of the default prompt, including the MTP and ca
 **Caveat:** the deterministic policy was written to the same specification as the scorer, so its 1.0 is a
 ceiling, not an independent baseline.
 
+### A second improvement: training a Nemotron on the `neuro_comm` environment
+
+From branch `eval-consolidation`; full method, tables and caveats in [RESULTS.md](RESULTS.md) §7–8.
+
+**The environment:** `evaluations/nemo_gym/neuro_comm/`, the EEG stopping decision for ALS patients.
+- Each episode replays one recorded bigP3BCI Study F selection, repetition by repetition.
+- At each step the agent calls `request_more_eeg`, `commit_character` or `abstain`.
+- Reward: +1 correct, −1 wrong, −0.2 abstain, −0.01 per second of EEG.
+- Test set: session 3, 120 selections, 10 ALS participants; nothing from session 3 was used in training.
+
+**The untrained Nemotron 30B fails here.** It never abstains and waits too long: reward 0.118 vs Bayes 0.253, with
+32 wrong characters and 28 s of EEG per selection. It made 0 invalid calls in 2,521, so the failure is judgment,
+not format (`neuro_comm_brev/`).
+
+**The improvement:** Nemotron Nano 4B with a LoRA (rank 16, 2 epochs), trained only on Gym-reward labels from
+600 calibration selections (sessions 1–2). Each label is the action with the highest expected reward
+(`neuro_comm_student/`):
+
+| Policy (120 held-out selections) | Mean reward [95% CI] | Correct | Wrong | Abstain | EEG time |
+|---|---:|---:|---:|---:|---:|
+| Nano 4B, base | −0.518 [−0.75, −0.27] | 25.8% | 89 | 0 | 3.0 s |
+| **Nano 4B, trained on Gym-reward labels** | **0.392** [0.10, 0.67] | 63.3% | **5** | 39 | **11.1 s** |
+| Bayes, commit at 0.99 | 0.253 [−0.22, 0.66] | 75.8% | 29 | 0 | 21.6 s |
+| Nemotron 30B, untrained | 0.118 [−0.34, 0.50] | 73.3% | 32 | 0 | 28.1 s |
+
+**What it shows:** compared with Bayes, wrong characters fall 29 → 5 and EEG time per selection halves; the price is
+fewer correct commits (75.8% → 63.3%) and 39 abstentions.
+
+Caveats (RESULTS §8):
+- The per-participant gain over Bayes has a paired 95% CI that crosses zero (−0.05 to 0.39).
+- Correct characters per minute are about the same (3.22 → 3.39).
+- The 4B reproduces its 7-feature labeller; it does not beat it.
+- The final labelling was designed after seeing the first attempt's held-out score.
+- Not deployed: the EEG commit decision stays with the calibrated Bayesian rule.
+
 ### Limits
 
-- **No model weights were trained.** The gains come from an environment-driven validator and fallback around the
-  same model.
+- **In `unspoken_communication`, no model weights were trained.** The coordinator's gain comes from an
+  environment-driven validator and fallback around the same model. The training run is on `neuro_comm` (above).
 - **The held-out set comes from the same task generator** with another seed. 28 of its 72 tasks duplicated eval
   tasks and were removed, leaving 44 tasks in 10 categories, with no `no_speech` or `repeated_failure`.
 - **Run-to-run spread** of the same configuration is about ±0.01 (Nemotron alone 0.912–0.931 on eval). Single

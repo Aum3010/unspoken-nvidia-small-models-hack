@@ -117,12 +117,18 @@ asr_eval/               audio-only ASR benchmark for the voice agent (Brev GPU o
 scripts/                setup, run, evals, weights ledger, vLLM/MLX serving, smoke test
 scripts/brev/           whole backend on a Brev GPU: setup_app, start_app, sync_app, connect, bench_latency
 docs/                   TECHNICAL_VERBOSE.md (everything in one place), architecture, model cards & licences,
-                        datasets & consent, evaluation, BREV.md, SERVING.md
+                        datasets & consent, evaluation, BREV.md, SERVING.md, BOUNTIES.md;
+                        RESULTS.md (every agent vs its baseline) + EXPERIMENT_PLAN.md and the EEG/lips/neuro_comm
+                        write-ups it links
+scripts/brev/serving/   vLLM serving experiments: concurrency, max capacity, isolation + MTP, serving card
+                        (results and SUMMARY.md in evaluations/results/serving/)
 ```
 
 ## Status and open issues
 
 The current branch is `demo-final` (local; pushed branches: `ui`, `ui-speedups`, `serving-mps`).
+`serving-experiments` adds the vLLM serving experiments and merges `eval-consolidation`, which holds the
+evaluation evidence ([docs/RESULTS.md](docs/RESULTS.md)).
 - **Where to look:** what is on each branch, how to run it, and every open bug, shortfall and pending decision
   are in [HANDOFF.md](HANDOFF.md); the full technical list is in
   [docs/TECHNICAL_VERBOSE.md](docs/TECHNICAL_VERBOSE.md) §10.

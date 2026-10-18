@@ -140,6 +140,12 @@ validator's history rule switches to spelling. Nemotron still makes 86% of the d
 verifier's specification, so their 1.000 is a ceiling, not an independent baseline. Earlier, on a Mac through Ollama,
 the same model took 4.6 s per decision; on vLLM it takes 278 ms.
 
+Under load (branch `serving-experiments`, `evaluations/results/serving/SUMMARY.md`), the same coordinator requests
+on vLLM:
+- 0 errors up to 64 concurrent requests, peak 16 req/s;
+- p95 < 500 ms up to 2 concurrent requests;
+- no tool call that was valid alone became invalid under load.
+
 Files: `evaluations/results/coordinator_heldout_brev.json`, `coordinator_brev.json`, `docs/BOUNTIES.md` §2.
 Reproduce: `python evaluations/nemo_gym/run_local.py --seed 2026 --distinct-from 7 --out coordinator_heldout.json`.
 
