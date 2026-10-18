@@ -99,6 +99,7 @@ python run_eval.py --config configs/local_smoke.yaml --limit 6         # CPU plu
 
 - Setup, the CLI on Windows (WSL), costs and the sync/run/fetch loop: [docs/BREV.md](docs/BREV.md).
 - Models and licences: [docs/MODEL_CARDS_AND_LICENSES.md](docs/MODEL_CARDS_AND_LICENSES.md#asr-candidates-evaluated-asr_eval).
+- Data we made (synthetic sets, our recordings) and attribution for the open datasets used: [docs/DATA_RELEASE.md](docs/DATA_RELEASE.md), published at [AumPandya01/unspoken-data](https://huggingface.co/datasets/AumPandya01/unspoken-data).
 
 ## Repository
 

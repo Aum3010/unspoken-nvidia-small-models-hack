@@ -58,7 +58,9 @@ For the ASR evaluation there are two recorders:
   - on the Brev instance in `/workspace/asr_eval_data/own/`;
   - a laptop backup in `asr_eval/data/own/`, gitignored;
   - never in the repository.
-- **Deletion:** both copies are to be deleted after the hackathon. Deleting the instance removes its copy.
+- **Published (2026-10-18):** all three speakers are team members and agreed to open publication under CC BY 4.0,
+  replacing the earlier delete-after-the-hackathon terms: https://huggingface.co/datasets/AumPandya01/unspoken-data
+  ([DATA_RELEASE.md](DATA_RELEASE.md)).
 
 `record.py` does the following:
 - It shows the consent text and stores the agreement in `data/own/consent.csv`.
@@ -72,23 +74,9 @@ For the ASR evaluation there are two recorders:
 - **What they are:** the lip agent's personal phrases. For 22 phrases there are 90 recordings, each stored as
   Auto-AVSR encoder features (`NNN.npy`, frames × 768, float16) with `phrase.txt`. There is no video, but the
   features are derived from one real person's mouth recordings.
-- **Status: committed to git.** They were force-added past the `/data/` gitignore rule. `services/vsr/enroll.py`
-  says they "are not uploaded", and the rules above keep personal recordings out of git.
-- **Status on `demo-final`: pending the person's written consent decision.** Git history has **not** been
-  rewritten. Until that decision, do not copy `data/enroll/` anywhere new.
-- **If the person does not consent to a shared repository**, remove the features from the tip of every branch
-  that has them, keep them only on the GPU instance, and then decide with the team whether to purge history:
-
-  ```bash
-  # 1. stop tracking (the files stay on disk; .gitignore already ignores /data/)
-  git rm -r --cached data/enroll
-  git commit -m "data: stop tracking lip enrollment features (consent)"
-  # 2. ship them to the instance the way it runs today (docs/BREV.md §4b), from a copy kept outside git
-  tar -czf /tmp/enroll.tgz -C data enroll && brev copy /tmp/enroll.tgz marginal-sapphire-whale:/home/shadeform/enroll.tgz
-  # 3. only with the team's agreement (rewrites history; every clone must re-clone; needs git-filter-repo):
-  #    git filter-repo --path data/enroll --invert-paths && git push --force --all
-  ```
-  Step 1 does not remove them from history: anyone with a clone or the remote still has them until step 3.
+- **Status: committed to git and published (2026-10-18).** The person is a team member and agreed to keep them
+  in the repository and publish them under CC BY 4.0: https://huggingface.co/datasets/AumPandya01/unspoken-data
+  ([DATA_RELEASE.md](DATA_RELEASE.md)).
 
 ## Vision preview: MIMIC-IV Clinical Database Demo v2.2 (`data/vision/`, flag `UNSPOKEN_CHECKIN`)
 
