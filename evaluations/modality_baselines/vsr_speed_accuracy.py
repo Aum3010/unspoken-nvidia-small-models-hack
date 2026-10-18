@@ -3,7 +3,8 @@
     cd ~/unspoken && PYTHONPATH=. /workspace/venv-app/bin/python evaluations/modality_baselines/vsr_speed_accuracy.py
 
 Loads the lip model exactly as services/vsr does, then decodes a fixed set of GRID clips (4 per speaker, every
-speaker on disk, unseen by the LRS3-trained model) under: beam 12 / beam 6 x fp32 / bf16 autocast. Face detection
+speaker on disk, unseen by the LRS3-trained model) under: beam 12 / beam 6 x fp32 / fp16 autocast (bf16 is not usable: Chaplin's ESPnet attention asks numpy
+for the dtype's limits, and numpy has no bfloat16). Face detection
 and the mouth crop are done once per clip and shared, so the settings see identical inputs. Reports WER, best-of-5
 WER, CER and per-stage time. A setting is only acceptable if no accuracy number gets worse.
 Writes evaluations/results/vsr_speed_accuracy.json.
@@ -60,7 +61,7 @@ def main():
             beams[b] = AVSR("video", str(models / "models/LRS3_V_WER19.1/model.pth"), str(models / "models/LRS3_V_WER19.1/model.json"),
                             str(models / "language_models/lm_en_subword/model.pth"), str(models / "language_models/lm_en_subword/model.json"),
                             penalty=0.0, ctc_weight=0.1, lm_weight=0.3, beam_size=b, device=m["avsr"].device)
-    settings = [(b, dt) for b in sorted(beams, reverse=True) for dt in ("fp32", "bf16")]
+    settings = [(b, dt) for b in sorted(beams, reverse=True) for dt in ("fp32", "fp16")]
     rows = {f"beam{b}_{dt}": [] for b, dt in settings}
     prep_ms = []
     cl = clips()
@@ -80,7 +81,7 @@ def main():
         prep_ms.append((time.perf_counter() - t0) * 1000)
         for b, dt in settings:
             avsr = beams[b]
-            ctx = torch.autocast("cuda", dtype=torch.bfloat16) if dt == "bf16" else torch.autocast("cuda", enabled=False)
+            ctx = torch.autocast("cuda", dtype=torch.float16) if dt == "fp16" else torch.autocast("cuda", enabled=False)
             sync(); t1 = time.perf_counter()
             with torch.no_grad(), ctx:
                 enc = avsr.model.encode(x.to(avsr.device))
