@@ -14,6 +14,7 @@ they apply to, not in a footnote.
 | [Lips, personal](#2-lips-specialise-the-decoder) | Top-1 phrase: **72.0% → 96.1%** (phrase list → own recordings) | MIRACL-VC1, 15 speakers | MIRACL-VC1 is licensed for research use only |
 | [EEG, ALS patients](#3-eeg-alone-als-patients-study-f) | Wrong characters: **24 → 1** per 120, same decoder; throughput not lower (2.51 → 3.13 correct/min) | bigP3BCI Study F, 10 ALS participants, session 3 | Yields on 36% of selections; 4 of 10 participants cannot be served reliably by EEG; throughput CIs overlap |
 | [EEG + gaze](#4-eeg--gaze-study-h) | Correct within 3 s at ~1% wrong: **2.9% → 29.1%** (+26.1 points, 95% CI 18.2 to 35.3) | bigP3BCI Study H, 16 participants, held-out runs | Participants do not have ALS: supports the mechanism, not ALS speed |
+| [Lips + voice](#6-lips--voice-on-the-same-utterances) | Babble at 0 dB, correct commits: voice **8.0%**, lips **53.5%**, together **76.0%**; at every noise level together beats both. Latency = the slower agent (348 ms p50), not the sum | GRID s1+s2, 200 utterances, real paired audio and video, neither speaker trained on | Fixed 51-word grammar; candidates differ in one word; wrong commits 2.9% overall vs a 2% target |
 | [Coordinator](#5-coordinator-nemo-gym-unspoken_communication) | Right action **82% → 95%**, unsafe 0% → 0%, 278 ms p50 (Nemotron alone → Nemotron + validator) | NeMo Gym `unspoken_communication`, 44 held-out tasks | The gain is validator code, not a retrained model |
 
 ---
@@ -140,10 +141,58 @@ the same model took 4.6 s per decision; on vLLM it takes 278 ms.
 Files: `evaluations/results/coordinator_heldout_brev.json`, `coordinator_brev.json`, `docs/BOUNTIES.md` §2.
 Reproduce: `python evaluations/nemo_gym/run_local.py --seed 2026 --distinct-from 7 --out coordinator_heldout.json`.
 
-## 6. EEG decisions in NeMo Gym (`neuro_comm`)
+## 6. Lips + voice on the same utterances
 
-_Pending: first Nemotron run on held-out Study F session 3._
+**Question.** The ICU is loud. When noise defeats the voice agent, does adding the lip agent, which hears nothing,
+rescue the decision, and does running both cost latency?
 
-## 7. Model improvement with NeMo Gym
+**Method** (`scripts/benchmark/av_fusion_grid.py`).
+- **Data.** GRID speakers s1 and s2: 100 utterances each, with real synchronised audio and video. Neither speaker was
+  used to train either model.
+- **Task.** Pick the true sentence among 10 that differ from it in exactly one word ("bin blue at **f** two now" vs
+  "bin blue at **x** two now").
+- **Agents, unchanged from the app.**
+  - voice: Nemotron Speech Streaming en 0.6B, forced transducer score of each candidate (H100);
+  - lips: the deployed Auto-AVSR checkpoint (not the GRID fine-tune), teacher-forced score (Mac, MPS).
+- **Noise.** Only the audio is degraded: white noise, or babble (three utterances of the other speaker), at 10, 0 and
+  -5 dB SNR. The video is never touched.
+- **Fusion.** The two scores are treated as independent evidence (sum of tempered log-softmaxes).
+- **Calibration.** Temperatures and one commit threshold per policy are fitted on the other speaker, pooled over all
+  noise conditions (the system does not know the noise level), at a 2% wrong-commit target. Below the threshold the
+  agent abstains. Both folds are reported together.
 
-_Pending._
+**Correct commits / wrong commits, of 200** (`fusion_pooled.json`):
+
+| Audio | Voice alone | Lips alone | **Lips + voice** |
+|---|---:|---:|---:|
+| clean | 93.5% / 0 | 53.5% / 6 | **97.0% / 1** |
+| white noise, 10 dB | 83.0% / 2 | 53.5% / 6 | **93.0% / 3** |
+| white noise, 0 dB | 43.0% / 0 | 53.5% / 6 | **88.5% / 6** |
+| white noise, -5 dB | 19.5% / 2 | 53.5% / 6 | **84.5% / 8** |
+| babble, 10 dB | 73.5% / 2 | 53.5% / 6 | **93.0% / 2** |
+| babble, 0 dB | 8.0% / 12 | 53.5% / 6 | **76.0% / 9** |
+| babble, -5 dB | 0.0% / 21 | 53.5% / 6 | **65.0% / 12** |
+
+- **Together beats both agents at every noise level**, and the gap widens as noise rises.
+- **It is also safer than voice alone where it matters:** in loud babble, voice commits wrong words (21 at -5 dB);
+  together, 12.
+- **Ranking accuracy before any abstention** (top-1): clean 99.5% voice / 88.5% lips / 98.0% together; babble 0 dB
+  46.0% / 88.5% / 89.5%. In clean audio, adding lips costs 1.5 points of top-1 but gains 3.5 points of correct commits,
+  because agreement makes the system confident sooner.
+- **Latency.** Voice 57 ms p50 (H100), lips 348 ms p50 (Mac). They run in parallel, so together is 348 ms p50, 366 ms
+  p95: the slower agent, not the sum.
+- **Caveats.** Wrong commits total 2.9% across all conditions (41 of 1,400) against the 2% target: the threshold fitted on
+  one speaker does not fully hold on the other. GRID is a fixed 51-word grammar. Per-condition calibration (knowing the
+  noise level, `fusion.json`) gives voice higher numbers but the same picture.
+
+Reproduce: `av_fusion_grid.py cands`, `lips` (app venv), `voice` (NeMo venv), `fuse --pooled`.
+
+## 7. EEG decisions in NeMo Gym (`neuro_comm`)
+
+_Running: first Nemotron run on held-out Study F session 3._
+
+## 8. Model improvement with NeMo Gym
+
+Not claimed. No model weights were trained with NeMo Gym. The coordinator's gain (section 5) is validator code. The
+coordinator task set's inputs also repeat across seeds (49 of 60 eval tasks had exact copies in a re-seeded set), so an
+honest training split needs held-out phrases or categories, which did not fit the time.

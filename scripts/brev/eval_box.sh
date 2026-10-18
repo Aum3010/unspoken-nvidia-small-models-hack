@@ -32,7 +32,9 @@ print(s('$BIG'))"
   echo "setup done"
   ;;
 serve)
-  CUDA_VISIBLE_DEVICES=0 nohup "$W/venv-vllm/bin/vllm" serve $BIG --port 8001 --served-model-name big \
+  # no nvcc on the image: FlashInfer would JIT-compile, so Triton attention and the PyTorch sampler (docs/BREV.md)
+  CUDA_VISIBLE_DEVICES=0 VLLM_USE_FLASHINFER_SAMPLER=0 nohup "$W/venv-vllm/bin/vllm" serve $BIG --port 8001 --served-model-name big \
+    --attention-backend TRITON_ATTN \
     --max-model-len 16384 --max-num-seqs 64 --gpu-memory-utilization 0.92 --trust-remote-code \
     --enable-auto-tool-choice --tool-call-parser qwen3_coder --reasoning-parser nemotron_v3 \
     > .run/logs/vllm_big.log 2>&1 < /dev/null &
