@@ -109,7 +109,9 @@ class Bench:
                 f"for this language; translations are {self.languages[language].get('review_status', 'unreviewed')}.")
             self.th = self.thresholds.get(self.th_key(model_name, method, self.point))
 
-    def recognize(self, wav: np.ndarray) -> dict:
+    def recognize(self, wav: np.ndarray, assume_speech: bool = False) -> dict:
+        """assume_speech: another sensor (the lips moving) already shows the person is speaking, so the VAD gate
+        is passed. Silero VAD reads a whisper as no speech (no voicing); every other gate still applies."""
         t0 = time.perf_counter()
         probs = self.vad.probs(wav)
         vad_ms = (time.perf_counter() - t0) * 1000
@@ -121,6 +123,10 @@ class Bench:
         row = {"path": "live", "eval_task": "phrases20", "transcript": tr["text"], "phrase_logp": ph, "free_logp": free,
                "label_type": "live", "phrase_id": "", **vs}
         f = features(pd.DataFrame([row]), self.vocab, self.method, self.negation_words(), self.lang)
+        vad_passed_by_lips = False
+        if assume_speech and self.th and not f[f"vad_speech_s@{self.th['vad_t']}"].iloc[0] > 0:
+            f[f"vad_speech_s@{self.th['vad_t']}"] = 1e-3
+            vad_passed_by_lips = True
         r = f.iloc[0].to_dict()
         if self.th:
             decision = str(decide_arrays(f, self.th["vad_t"], self.th["abs_t"], self.th["margin_t"])[0])
@@ -142,7 +148,7 @@ class Bench:
             "top3": [{"id": p, "text": self.cfg.phrases[p], "native": native(p), "score": round(float(s), 4)} for p, s in ranked[:3]],
             "language": self.lang, "phrase_native": native(decision) if decision in voc else None,
             "margin": None if not np.isfinite(r.get("margin", np.nan)) else round(float(min(r["margin"], 1e6)), 4),
-            "negation_mismatch": bool(r.get("neg_mismatch")), "transcript": tr["text"],
+            "negation_mismatch": bool(r.get("neg_mismatch")), "transcript": tr["text"], "vad_passed_by_lips": vad_passed_by_lips,
             "signals": {k: v for k, v in tr.items() if k not in ("text", "nbest")}, "vad": vs,
             "duration_s": round(len(wav) / audio.SR, 2),
             "timings_ms": {"vad": round(vad_ms, 1), "asr": round(asr_ms, 1), "score": round(score_ms, 1) if score_ms else None,

@@ -1,0 +1,76 @@
+{
+  "takes": 83,
+  "phrases": 20,
+  "folds": 5,
+  "epochs": 12,
+  "rescale": 9.0,
+  "results": {
+    "dtw": {
+      "top1": 0.735,
+      "top3": 0.831
+    },
+    "cls": {
+      "top1": 0.639,
+      "top3": 0.759
+    },
+    "phr": {
+      "top1": 0.06,
+      "top3": 0.169
+    },
+    "ft": {
+      "top1": 0.542,
+      "top3": 0.735
+    },
+    "dtw+cls": {
+      "top1": 0.723,
+      "top3": 0.831
+    },
+    "dtw+phr": {
+      "top1": 0.566,
+      "top3": 0.747
+    },
+    "dtw+ft": {
+      "top1": 0.759,
+      "top3": 0.831
+    },
+    "cls+phr": {
+      "top1": 0.506,
+      "top3": 0.735
+    },
+    "cls+ft": {
+      "top1": 0.723,
+      "top3": 0.819
+    },
+    "phr+ft": {
+      "top1": 0.241,
+      "top3": 0.422
+    },
+    "dtw+cls+phr": {
+      "top1": 0.675,
+      "top3": 0.819
+    },
+    "dtw+cls+ft": {
+      "top1": 0.759,
+      "top3": 0.819
+    },
+    "dtw+phr+ft": {
+      "top1": 0.614,
+      "top3": 0.735
+    },
+    "cls+phr+ft": {
+      "top1": 0.59,
+      "top3": 0.771
+    },
+    "dtw+cls+phr+ft": {
+      "top1": 0.699,
+      "top3": 0.807
+    }
+  },
+  "median_ms": {
+    "dtw": 192.8,
+    "cls": 1.0,
+    "phr": 67.8,
+    "ft": 91.7
+  },
+  "device": "mps"
+}
