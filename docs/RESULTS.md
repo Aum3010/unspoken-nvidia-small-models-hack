@@ -208,7 +208,7 @@ rows reproduce the earlier benchmark exactly (parity check passes).
 **Finding: on this numeric decision, Nemotron does not help, and we report that.** Alone it waits for more EEG than
 needed (28 vs 22 s) and still commits wrong characters; it **never abstains**, even though the reward makes abstaining
 better than a near-chance commit. As the hybrid's escalation step it adds model time without changing outcomes. Zero
-invalid tool calls in 2,000+ calls, so the failure is judgment, not format.
+invalid tool calls in 2,521 model calls, so the failure is judgment, not format.
 
 **What it means for the design.** The EEG stopping decision stays with the calibrated Bayesian rule (section 3), and
 Nemotron is used where language judgment matters: misreads, noise, history (section 5). This environment, with its
