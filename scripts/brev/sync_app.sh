@@ -5,7 +5,7 @@ set -euo pipefail
 INST=${1:?usage: sync_app.sh <instance>}
 cd "$(dirname "$0")/../.."
 tmp=$(mktemp -d)
-git archive --format=tar.gz -o "$tmp/unspoken.tgz" HEAD services shared scripts evaluations requirements-cuda.txt requirements.txt pytest.ini
+git -c core.autocrlf=false archive --format=tar.gz -o "$tmp/unspoken.tgz" HEAD services shared scripts evaluations requirements-cuda.txt requirements.txt pytest.ini
 brev copy "$tmp/unspoken.tgz" "$INST:/home/shadeform/unspoken.tgz"
 brev exec "$INST" 'mkdir -p ~/unspoken && tar -xzf ~/unspoken.tgz -C ~/unspoken && rm ~/unspoken.tgz && echo synced $(ls ~/unspoken | tr "\n" " ")'
 rm -rf "$tmp"
