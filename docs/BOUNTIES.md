@@ -9,8 +9,8 @@ Unspoken helps people who cannot speak to be heard. Several small specialist mod
 A coordinator decides **how to ask** about what was read, and code decides **what may be spoken**. Everything
 runs on one NVIDIA RTX PRO 6000 Blackwell (Brev), and the browser UI runs on the laptop.
 
-Every number below was measured in this repo on 2026-10-18 (branches `ui-speedups` / `demo-final`) and names
-its result file under `evaluations/results/`. Run-to-run spread is given wherever a number was measured more than once. Full system
+Every number below was measured in this repo on 2026-10-18 (branches `ui-speedups` / `demo-final`; the serving
+experiments of §3 on `serving-experiments`) and names its result file under `evaluations/results/`. Run-to-run spread is given wherever a number was measured more than once. Full system
 reference: [TECHNICAL_VERBOSE.md](TECHNICAL_VERBOSE.md).
 
 ---
@@ -80,7 +80,7 @@ Nemotron makes these calls. Code then checks every call, outside the model.
 | **Run Nemotron only where judgment is needed.** When the specialists already agree (the voice agent accepted the reading, or lips and voice agree), rules ask exactly what Nemotron would be asked, and Nemotron is not called | accepted voice message, clip → spoken: **413 → 105 ms** p50 right after the change, 71–73 ms in later runs (ad-hoc voice-only bench on the box, printed; TECHNICAL_VERBOSE §7); Nemotron ran for 2 of 40 messages, the ambiguous ones | yes |
 | **Never make the person wait for it.** The rules' plan shows options at once; Nemotron refines them in the background, and its plan is dropped if the person already acted | the question appears without waiting the 272 ms | yes |
 | **Thinking off, temperature 0, one tool call** (`chat_template_kwargs: {enable_thinking: false}`) | about 65 output tokens per decision | yes |
-| **MTP speculative decoding** with the checkpoint's own next-token layer | 272 → **229 ms** p50, 88% of drafts accepted, NeMo Gym within noise (`coordinator_mtp_brev.json`) | **no**: one unexplained CUDA fault under full load (§3) |
+| **MTP speculative decoding** with the checkpoint's own next-token layer | 272 → **229 ms** p50, 88% of drafts accepted, NeMo Gym within noise (`coordinator_mtp_brev.json`). Re-run with vLLM outside MPS: 340 → 262 ms with every agent busy, 89.8% accepted, held-out 0.970 vs 0.985 (within one task; `serving/isolation.json`) | **no**: one unexplained CUDA fault under full load (§3) |
 | **Compact schema-constrained JSON** with numbered candidates | 272 → **84 ms** p50, 65 → 15 output tokens (`coordinator_compact_brev.json`) | **no**: held-out deployed reward 0.985 → 0.955, worse on ambiguous readings (`coordinator_heldout_compact_brev.json`) |
 
 We chose accuracy over speed every time the two disagreed.
@@ -288,11 +288,11 @@ browser ── WebSocket/REST ──► gateway :8000 ──► coordinator clie
 |---|---|
 | NVFP4 checkpoint; on sm_120 vLLM picks **Marlin weight-only FP4** | 17.8 GB of weights. Native FP4 (4-bit activations) is deferred until NeMo Gym confirms tool calls are unchanged |
 | `--gpu-memory-utilization 0.55` | leaves room for the voice, lip and TTS models on the same card; peak for everything is 63,439 MiB of 96 GB (`latency_brev_final2.json`) |
-| `--max-model-len 16384`, `--max-num-seqs 8` | the prompt is about 1.7k tokens; a few concurrent sessions |
+| `--max-model-len 16384`, `--max-num-seqs 8` | the prompt is about 1.7k tokens; a few concurrent sessions. Throughput stops at 9.4 req/s at 8 concurrent requests with this cap; raising it to 64 reaches 16 req/s, but only by queueing (below) |
 | `--enable-auto-tool-choice --tool-call-parser qwen3_coder --reasoning-parser nemotron_v3` | typed tool calls, thinking separated |
 | `--attention-backend TRITON_ATTN`, `VLLM_USE_FLASHINFER_SAMPLER=0` | the image has no `nvcc`; FlashInfer would JIT-compile |
 | **NVIDIA MPS** for all GPU processes | lets vLLM and the small models share the GPU without time-slicing |
-| `/metrics` | how we measured prefix-cache hits, output tokens and MTP acceptance |
+| `/metrics` | how we measured prefix-cache hits, output tokens and MTP acceptance. With `UNSPOKEN_SERVING_PANEL=1` (off by default) the gateway serves `/api/serving_metrics` from it (running/waiting, TTFT p50, KV use, prefix-cache hits, MTP acceptance; 300 ms timeout, 1 s cache) and the page shows a "Serving · vLLM" card; flag off = 404, card hidden; vLLM down = `unavailable` (`serving/panel_check.json`) |
 
 ### What we got out of it, measured on Brev
 
@@ -305,6 +305,40 @@ browser ── WebSocket/REST ──► gateway :8000 ──► coordinator clie
 | NeMo Gym, one call at a time (72 tasks) | 272 ms p50 | `coordinator_brev.json` |
 | Concurrency (MTP build): 8 concurrent requests × 30 rounds | 240/240 succeeded | stress test, §6 of TECHNICAL_VERBOSE |
 
+**Under concurrency** (real coordinator requests: the coordinator's own prompt, tools and validator on the NeMo Gym
+eval tasks, production parameters, streamed; client on the box; `serving/concurrency.json`, `serving/max_capacity.json`):
+
+| Concurrent requests | p50 / p95 latency | p50 TTFT | req/s | output tok/s |
+|---:|---:|---:|---:|---:|
+| 1 | 281 / 310 ms | 90 ms | 3.6 | 249 |
+| 2 | 372 / 417 ms | 97 ms | 5.4 | 366 |
+| 4 | 542 / 628 ms | 160 ms | 7.5 | 512 |
+| 8 | 856 / 921 ms | 398 ms | 9.4 | 636 |
+| 16 (cap 8: queues) | 1,291 / 1,781 ms | 954 ms | 9.4 | 644 |
+| 16 (cap 64) | 1,266 / 1,556 ms | 805 ms | 12.4 | 816 |
+| 32 (cap 64) | 2,065 / 3,202 ms | 1,524 ms | 14.3 | 937 |
+| 64 (cap 64) | 3,725 / 6,377 ms | 1,763 ms | **16.3** | **1,065** |
+
+- 1, 4, 8, 16 are on the live server (`--max-num-seqs 8`, every agent loaded); 2 and cap 64 come from the max-capacity
+  ramp, which restarted only vLLM.
+- 0 errors and 0 timeouts at every level. The ramp stopped at 64 concurrent requests on its p95 > 5 s limit
+  (6.4 s), so 128 did not run.
+- **p95 stays under 500 ms up to 2 concurrent requests** (5.4 req/s).
+- **Same result on a dedicated GPU:** agents stopped, `--max-num-seqs 128 --gpu-memory-utilization 0.85`: 16.2 req/s
+  peak, p95 < 500 ms up to 2. KV memory is not the limit (64 × ~1.9k tokens against a 3.76M-token KV cache already
+  at 0.55); latency grows with the batch.
+- **Load does not change the answers:**
+  - 0 tool calls that are valid alone became invalid under load;
+  - 90–100% of answers are identical to concurrency 1;
+  - 85–92% pass the validator at every level, the same rate as those tasks sent one at a time. The rest fall back
+    to rules in the app.
+- **Peak GPU** at 64 concurrent requests: 63 GiB (shared) / 82.6 GiB (dedicated), 64 °C, 502 W.
+- **Rooms per GPU, an estimate for the coordinator only** (`serving/SUMMARY.md`; assumptions are flags of
+  `build_summary.py`):
+  - assumptions: 20 messages per patient-hour, 2 of 40 messages needing Nemotron, capacity at p95 < 500 ms;
+  - **about 19,000 rooms**, or **about 970** if every message needed Nemotron;
+  - the voice and lip agents (one replica each, no batching) were not load-tested and limit a GPU far sooner.
+
 **Sharing the GPU (NVIDIA MPS):**
 - With every agent busy, the voice agent's latency drops from 244 to 75 ms p50, and Kokoro's from 79 to 30 ms.
 - vLLM's own latency barely changes (352 → 336 ms) (`latency_brev_ui_mps{0,1}.json`).
@@ -316,6 +350,8 @@ browser ── WebSocket/REST ──► gateway :8000 ──► coordinator clie
 | **MTP speculative decoding** (`--speculative-config '{"method":"mtp","num_speculative_tokens":1}'`) | 272 → **229 ms** p50, 88% of drafts accepted, NeMo Gym unchanged within noise | **off by default** (`LLM_MTP=1` turns it on): once, under full load with all models, vLLM hit a CUDA fault that under MPS took every GPU process down; MTP alone passed 240/240 concurrent requests. Also fails with `--mamba-cache-mode all` (HTTP 500) |
 | **Structured outputs** (`response_format: json_schema`) for a compact answer | 272 → **84 ms**, 65 → 15 tokens, always schema-valid | off: less accurate on held-out tasks (0.955 vs 0.985) |
 | **Prefix caching** on the hybrid Mamba model | **0 hits, even for identical requests** | understood, not fixable here (see below) |
+| **vLLM in its own CUDA context** (outside MPS; the small models stay MPS clients) **+ MTP** | a `kill -9` of vLLM's EngineCore left voice, lips and TTS ready; an accepted clip was still auto-spoken and an ambiguous one still got the rules' question, 0.45 s after the kill. Coordinator 340 → 262 ms p50 with every agent busy; but voice 78 → 104 ms (p95 106 → 266) and Kokoro 32 → 53 ms, because vLLM now time-slices with them (`serving/isolation.json`) | **keep all-MPS**: isolation only with a second GPU or MIG. A process kill is not the CUDA fault MTP once hit |
+| **`--max-num-seqs 64`**, then a dedicated GPU (`128`, util 0.85) | 9.4 → 16.2 req/s peak, the same in both modes; p95 < 500 ms only up to 2 concurrent requests (`serving/max_capacity.json`) | default stays 8: one room sends a few requests a minute |
 
 **Why prefix caching cannot hit:**
 - vLLM sets this model's cache block to **4,224 tokens** ("Setting attention block size to 4224 tokens to ensure
@@ -326,6 +362,11 @@ browser ── WebSocket/REST ──► gateway :8000 ──► coordinator clie
 **Reliability:**
 - If vLLM is slow, down, or returns an invalid call, the coordinator falls back to rules. The person always gets a
   valid next step.
+- **Measured with vLLM killed:**
+  - setup: vLLM outside MPS, and its EngineCore killed with `kill -9`;
+  - the voice, lip and TTS agents stayed ready;
+  - an accepted voice clip was still spoken, and an ambiguous one still got a question from the rules
+    (`serving/isolation.json`).
 - The gateway reports each service's health.
 
 ### Limits
@@ -334,11 +375,14 @@ browser ── WebSocket/REST ──► gateway :8000 ──► coordinator clie
   FP4 needs a CUDA toolkit on the image and a NeMo Gym re-run first.
 - **Prefix caching cannot help** at this prompt size on this hybrid model (4,224-token cache blocks).
 - **MTP was not stable** under full load in one run (a CUDA fault that took every GPU process down under MPS), so
-  it is off.
-- **One GPU, one replica.** vLLM shares the card (0.55 of its memory) with four other models. There is no
-  multi-replica serving or GPU isolation yet, and under MPS one fault reaches every process.
-- **Concurrency:** tested up to 8 concurrent requests (240/240 succeeded, MTP build). Many users at once were
-  not measured.
+  it is off. Outside MPS it ran a full benchmark without a fault, but that is one run, not a soak.
+- **One GPU, one replica.** vLLM shares the card (0.55 of its memory) with four other models. Under MPS one fault
+  reaches every process; moving vLLM out of MPS contains a vLLM crash but slows the voice and TTS agents, so real
+  isolation needs a second GPU or MIG.
+- **Concurrency:**
+  - measured up to 64 concurrent coordinator requests: 16 req/s, 0 errors;
+  - p95 < 500 ms only up to 2 concurrent requests;
+  - the lip and voice agents were not load-tested.
 
 ### Reproduce
 
@@ -347,4 +391,11 @@ bash scripts/brev/start_app.sh                    # vLLM + all agents, MPS on, M
 LLM_MTP=1 bash scripts/brev/start_app.sh          # with MTP
 LLM_EXTRA='--mamba-cache-mode all' bash scripts/brev/start_app.sh
 curl -s http://127.0.0.1:8001/metrics | grep -E "prefix_cache|spec_decode|generation_tokens"
+
+# serving experiments (scripts/brev/serving/, results in evaluations/results/serving/, overview SUMMARY.md)
+PYTHONPATH=. python scripts/brev/serving/bench_concurrency.py --levels 1 4 8 16   # concurrency on the live vLLM (read-only)
+bash scripts/brev/serving/panel_live_check.sh      # serving card: flag on/off, vLLM down, smoke (test gateways 8010-8012)
+bash scripts/brev/serving/isolation_experiment.sh  # vLLM outside MPS + MTP, fault test; waits for 10 idle min, restores
+bash scripts/brev/serving/max_capacity.sh          # ramp to the limit, shared and dedicated; waits, restores
+bash scripts/brev/serving/final_check.sh           # defaults back, all ready, safety tests, smoke
 ```
