@@ -21,7 +21,7 @@ export function VisionPreview() {
   return (
     <section className="vision glass" aria-label="Vision preview">
       {/* the dataset stays named (MIMIC-IV demo, ODbL); the footer says the profile is synthetic */}
-      <header><div>Vision preview</div><span className="mono">MIMIC-IV demo</span></header>
+      <header><div>Vision preview</div><span className="mono">Recorded ICU data (MIMIC-IV)</span></header>
       <div className="vgreet">Good morning, {data?.profile?.preferred_name ?? 'Raj'}</div>
       {ev ? (
         <div className="vrows">
