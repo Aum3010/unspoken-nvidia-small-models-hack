@@ -79,7 +79,10 @@ Bounty write-ups for Nemotron Lightning, NeMo Gym and Red Hat vLLM, every number
 ## Data sources
 
 Every public dataset we trained or tested on, as the repo's own docs and fetch scripts record it.
-- **None of the data is re-hosted.** `data/` is gitignored, and the fetch scripts download from the sources below.
+- **No public dataset is re-hosted.** `data/` is gitignored, and the fetch scripts download from the sources below.
+- **Data we made is published:** synthetic Gym tasks, training labels and our own recordings are on Hugging Face,
+  [AumPandya01/unspoken-data](https://huggingface.co/datasets/AumPandya01/unspoken-data) (CC BY 4.0); method,
+  consent and attribution in [docs/DATA_RELEASE.md](docs/DATA_RELEASE.md).
 - **Details and consent rules:** [docs/DATASETS_AND_CONSENT.md](docs/DATASETS_AND_CONSENT.md),
   [docs/EEG_DATASET_AUDIT.md](docs/EEG_DATASET_AUDIT.md), [docs/LIP_READING.md](docs/LIP_READING.md).
 
@@ -177,12 +180,13 @@ brev exec marginal-sapphire-whale 'tail -n 5 ~/unspoken/.run/setup.log ~/asr_eva
 
 Long jobs always run under `nohup … < /dev/null &`, so they survive the SSH session closing.
 
-### 3. Personal data (optional; not in git)
+### 3. Personal data (optional; not in git, published on Hugging Face)
 
 - **Lip enrollment** (`data/enroll/`) is the person's own recorded phrases, stored as encoder features.
-  - It is **not tracked in git**, pending the person's consent ([docs/DATASETS_AND_CONSENT.md](docs/DATASETS_AND_CONSENT.md)).
+  - It is **not tracked in git**. The person agreed to publish it: `lip_enrollment/` in
+    [AumPandya01/unspoken-data](https://huggingface.co/datasets/AumPandya01/unspoken-data) ([docs/DATA_RELEASE.md](docs/DATA_RELEASE.md)).
   - Without it, the lip agent has no enrolled phrases.
-  - If you hold a copy and the person agreed, ship it like this:
+  - To ship a local copy to the instance:
 
     ```bash
     tar -czf /tmp/enroll.tgz -C data enroll && brev copy /tmp/enroll.tgz marginal-sapphire-whale:/home/shadeform/enroll.tgz
@@ -350,7 +354,7 @@ docs/                   see below
 | [docs/BREV.md](docs/BREV.md) | the Brev CLI, instances, the sync/run/fetch loop, problems and fixes |
 | [docs/SERVING.md](docs/SERVING.md) | latency with every model running, and what made it faster |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/EVALUATION.md](docs/EVALUATION.md) | design; evaluation method and gaps |
-| [docs/MODEL_CARDS_AND_LICENSES.md](docs/MODEL_CARDS_AND_LICENSES.md), [docs/DATASETS_AND_CONSENT.md](docs/DATASETS_AND_CONSENT.md) | models, licences, data and consent |
+| [docs/MODEL_CARDS_AND_LICENSES.md](docs/MODEL_CARDS_AND_LICENSES.md), [docs/DATASETS_AND_CONSENT.md](docs/DATASETS_AND_CONSENT.md), [docs/DATA_RELEASE.md](docs/DATA_RELEASE.md) | models, licences, data and consent; the data we published |
 | [docs/EXPERIMENT_PLAN.md](docs/EXPERIMENT_PLAN.md), [docs/LIP_READING.md](docs/LIP_READING.md), [docs/EEG_*](docs/), [docs/NEUROCOMM_GYM_EXPERIMENT.md](docs/NEUROCOMM_GYM_EXPERIMENT.md) | the evaluation experiments behind RESULTS.md |
 | [HANDOFF.md](HANDOFF.md) | branches, how to run, open bugs and pending decisions |
 
