@@ -17,7 +17,7 @@ from fastapi.responses import Response
 from pydantic import BaseModel
 
 from services.gateway.state import Session, TransitionError
-from shared.confirmation import PolicyViolation, authorize_speech
+from shared.confirmation import PolicyViolation, authorize_speech, phrase_preload_token, sign
 from shared.provenance import MODEL_LEDGER, ROOT, service_url
 from shared.schemas import ALLOWED_CONFIRMATION_METHODS, Candidate, Evidence, ToolCall
 from shared.service import make_app
@@ -498,22 +498,94 @@ async def _speak(s: Session, ev, demo_auto: bool = False) -> dict:
             else f"exact confirmed text · {m.confirmation_method.replace('_', ' ')}")
     await push(s)
     latency = None
-    try:
-        async with httpx.AsyncClient(timeout=60) as client:
-            r = await client.post(f"{service_url('tts')}/speak", json={
-                "message_id": m.id, "text": m.confirmed_text, "token": token,
-                "voice": s.settings["voice"], "speed": s.settings["speech_rate"]})
-        r.raise_for_status()
-        s.audio[m.id] = r.content
-        latency = int(r.headers.get("X-Latency-Ms", 0))
-        s.trace("tts", "Spoke automatically" if demo_auto else "Spoke confirmed message", f"“{m.confirmed_text}”", latency_ms=latency)
-    except Exception as exc:
-        s.trace("tts", "TTS unavailable — browser voice used", type(exc).__name__, level="warn")
+    pre = _phrase_audio.get((m.confirmed_text, s.settings["voice"], s.settings["speech_rate"]))
+    if pre:
+        # the exact confirmed text is a pre-rendered phrase: the browser already holds this audio
+        s.audio[m.id] = pre[1]
+        s.trace("tts", "Spoke automatically" if demo_auto else "Spoke confirmed message",
+                f"“{m.confirmed_text}” · pre-rendered phrase audio", latency_ms=0)
+    else:
+        try:
+            async with httpx.AsyncClient(timeout=60) as client:
+                r = await client.post(f"{service_url('tts')}/speak", json={
+                    "message_id": m.id, "text": m.confirmed_text, "token": token,
+                    "voice": s.settings["voice"], "speed": s.settings["speech_rate"]})
+            r.raise_for_status()
+            s.audio[m.id] = r.content
+            latency = int(r.headers.get("X-Latency-Ms", 0))
+            s.trace("tts", "Spoke automatically" if demo_auto else "Spoke confirmed message", f"“{m.confirmed_text}”", latency_ms=latency)
+        except Exception as exc:
+            s.trace("tts", "TTS unavailable — browser voice used", type(exc).__name__, level="warn")
     s.mark_spoken(latency)
+    if pre:
+        s.spoken[-1]["phrase_audio_id"] = pre[0]
     msg_id = m.id
     await push(s)
     return {"message_id": msg_id, "audio_url": f"/api/{sid}/audio/{msg_id}" if msg_id in s.audio else None,
-            "text": s.spoken[-1]["text"], "state": s.snapshot()}
+            "phrase_audio_id": pre[0] if pre else None, "text": s.spoken[-1]["text"], "state": s.snapshot()}
+
+
+# ---- pre-rendered phrase audio ------------------------------------------------
+# The fixed phrases (the voice agent's list, the person's recorded lip phrases, the board and Help) are rendered
+# once and preloaded by the browser, so speaking one of them skips Kokoro and the audio download. Rendering is
+# not speaking: the browser plays a phrase only when the gateway reports it spoken, which happens only after
+# authorize_speech passed for exactly that text. Anything else (edited, spelled, corrected) still goes to Kokoro.
+_phrase_audio: dict[tuple[str, str, float], tuple[str, bytes]] = {}
+_phrase_audio_by_id: dict[str, bytes] = {}
+_phrase_lock = asyncio.Lock()
+PRELOAD_MAX, PRELOAD_TEXT_MAX = 64, 80
+
+
+async def _fixed_phrases(client: httpx.AsyncClient) -> list[str]:
+    texts = []
+    try:
+        import yaml
+        texts += list(yaml.safe_load((ROOT / "asr_eval" / "configs" / "eval.yaml").read_text())["phrases"].values())
+    except Exception:
+        pass
+    try:
+        r = await client.get(f"{service_url('vsr')}/enroll", timeout=3)
+        texts += [p["phrase"] for p in r.json().get("phrases", []) if not p["phrase"].startswith("[unknown]")]
+    except Exception:
+        pass
+    return texts
+
+
+class PreloadRequest(BaseModel):
+    texts: list[str] = []
+
+
+@app.post("/api/{sid}/phrase_audio")
+async def phrase_audio_manifest(sid: str, req: PreloadRequest):
+    """Render the fixed phrases for this session's voice and rate; returns their ids for the browser to fetch."""
+    s = get_session(sid)
+    voice, speed = s.settings["voice"], s.settings["speech_rate"]
+    out = []
+    async with _phrase_lock, httpx.AsyncClient(timeout=30) as client:
+        texts = await _fixed_phrases(client) + [t for t in req.texts if len(t) <= PRELOAD_TEXT_MAX]
+        for text in list(dict.fromkeys(" ".join(t.split()) for t in texts if t.strip()))[:PRELOAD_MAX]:
+            key = (text, voice, speed)
+            if key not in _phrase_audio:
+                pid = sign("phrase-audio", f"{text}|{voice}|{speed}")[:16]
+                try:
+                    r = await client.post(f"{service_url('tts')}/speak", json={
+                        "message_id": f"preload-{pid}", "text": text, "token": phrase_preload_token(pid, text),
+                        "voice": voice, "speed": speed})
+                    r.raise_for_status()
+                except Exception:
+                    continue
+                _phrase_audio[key] = (pid, r.content)
+                _phrase_audio_by_id[pid] = r.content
+            out.append({"id": _phrase_audio[key][0], "text": text})
+    s.log("gateway", "phrase_audio_preloaded", {"count": len(out), "voice": voice, "speed": speed})
+    return {"phrases": out}
+
+
+@app.get("/api/phrase_audio/{pid}")
+async def phrase_audio(pid: str):
+    if pid not in _phrase_audio_by_id:
+        raise HTTPException(404)
+    return Response(_phrase_audio_by_id[pid], media_type="audio/wav", headers={"Cache-Control": "private, max-age=86400"})
 
 
 @app.get("/api/{sid}/audio/{message_id}")

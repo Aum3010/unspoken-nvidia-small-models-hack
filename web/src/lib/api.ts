@@ -54,7 +54,9 @@ export const api = {
   select: (candidate_id: string, method: string) => post<SessionState>(`${base}/select`, { candidate_id, method }),
   edit: (candidate_id: string, text: string) => post<SessionState>(`${base}/edit`, { candidate_id, text }),
   confirm: (method: ConfirmationMethod) =>
-    post<{ message_id: string; audio_url: string | null; text: string; state: SessionState }>(`${base}/confirm`, { method }),
+    post<{ message_id: string; audio_url: string | null; phrase_audio_id?: string | null; text: string; state: SessionState }>(`${base}/confirm`, { method }),
+  /** The fixed phrases, rendered once for this session's voice; the page preloads them (see services/gateway). */
+  phraseAudio: (texts: string[]) => post<{ phrases: { id: string; text: string }[] }>(`${base}/phrase_audio`, { texts }),
   reject: () => post<SessionState>(`${base}/reject`),
   undo: () => post<SessionState>(`${base}/undo`),
   newMessage: () => post<SessionState>(`${base}/new`),

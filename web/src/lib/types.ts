@@ -86,6 +86,7 @@ export interface SpokenItem {
   source_mode: SourceMode
   supporting_modalities: Modality[]
   tts_latency_ms?: number | null
+  phrase_audio_id?: string | null
   raw: { modality: Modality; hypotheses: string[] }[]
 }
 

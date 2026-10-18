@@ -44,6 +44,13 @@ def sign(message_id: str, text: str, key: str | None = None) -> str:
     return hmac.new((key or _SECRET).encode(), payload, hashlib.sha256).hexdigest()
 
 
+def phrase_preload_token(preload_id: str, text: str) -> str:
+    """A TTS token to pre-render one of the fixed phrases (message id `preload-…`). Rendering is not speaking:
+    the audio is played only when the gateway marks a message spoken, after authorize_speech passed for
+    exactly that text."""
+    return sign(f"preload-{preload_id}", text)
+
+
 def verify_token(message_id: str, text: str, token: str, key: str | None = None) -> bool:
     return hmac.compare_digest(sign(message_id, text, key), token)
 
