@@ -5,6 +5,9 @@ set -euo pipefail
 cd "$(dirname "$0")/../.."
 W=${W:-$HOME/work}
 export HF_HOME=$W/hf
+# Scaleway H100 driver is CUDA 12.8; current torch/vLLM wheels are CUDA 13. The forward-compat libcuda (extracted, no
+# sudo) lets the 12.8 driver run them: compat=$W/compat from cuda-compat-13-0_*.deb via dpkg -x
+export LD_LIBRARY_PATH=$W/compat/usr/local/cuda-13.0/compat${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 mkdir -p "$W" .run/logs
 UV=$(command -v uv || echo "$HOME/.local/bin/uv")
 BIG=nvidia/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-BF16
@@ -30,7 +33,7 @@ print(s('$BIG'))"
   ;;
 serve)
   CUDA_VISIBLE_DEVICES=0 nohup "$W/venv-vllm/bin/vllm" serve $BIG --port 8001 --served-model-name big \
-    --max-model-len 16384 --gpu-memory-utilization 0.92 --trust-remote-code \
+    --max-model-len 16384 --max-num-seqs 64 --gpu-memory-utilization 0.92 --trust-remote-code \
     --enable-auto-tool-choice --tool-call-parser qwen3_coder --reasoning-parser nemotron_v3 \
     > .run/logs/vllm_big.log 2>&1 < /dev/null &
   echo "serving: big :8001 (GPU 0); GPU 1 is free for the voice agent (E1); log .run/logs/vllm_big.log"

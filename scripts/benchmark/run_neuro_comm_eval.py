@@ -113,6 +113,7 @@ def main() -> int:
     ap.add_argument("--limit", type=int); ap.add_argument("--workers", type=int, default=4)
     ap.add_argument("--reward-config", help="JSON file or string of RewardConfig overrides")
     ap.add_argument("--tag", default="")
+    ap.add_argument("--thinking", action="store_true", help="let Nemotron reason before each tool call (off in the app)")
     a = ap.parse_args()
     evd, out = Path(a.evidence), Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
@@ -149,7 +150,9 @@ def main() -> int:
             if not a.base_url or not a.model:
                 print(f"skipping {name}: needs --base-url and --model (OpenAI-compatible Nemotron endpoint); no results fabricated")
                 continue
-            llm = pol.OpenAICompatClient(a.base_url, a.model, a.api_key)
+            # thinking off, as the deployed coordinator serves Nemotron (one short tool call per turn)
+            llm = pol.OpenAICompatClient(a.base_url, a.model, a.api_key,
+                                         extra_body={} if a.thinking else {"chat_template_kwargs": {"enable_thinking": False}})
             if name == "nemotron":
                 mk = lambda: pol.NemotronAgent(llm, cfg, name="nemotron_only")
             elif name == "hybrid":

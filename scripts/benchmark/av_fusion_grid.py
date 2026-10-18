@@ -196,7 +196,7 @@ def _tau(logp: np.ndarray, y: np.ndarray, risk: float) -> float:
     return 1.01
 
 
-def fuse(risk: float):
+def fuse(risk: float, pooled: bool):
     cand = {c["id"]: c for c in load("cands")["clips"]}
     lip = {r["id"]: r for r in load("lips")["rows"]}
     vo = load("voice")
@@ -206,18 +206,30 @@ def fuse(risk: float):
     spk = np.array([cand[i]["speaker"] for i in ids])
     L = np.array([lip[i]["scores"] for i in ids])
     res = {"n_clips": len(ids), "lip_no_face": sum(1 for i in cand if not lip.get(i, {}).get("scores")), "risk_target": risk,
-           "n_candidates": L.shape[1], "conditions": {}}
+           "n_candidates": L.shape[1], "calibration": "pooled over all noise conditions" if pooled else "per condition",
+           "conditions": {}}
     speakers = sorted(set(spk))
+    VA = {c: np.array([voi[i]["scores"][c] for i in ids]) for c in vo["conditions"]}
+    taus: dict = {}
+    if pooled:  # one temperature pair and one threshold per policy, fitted on every condition of the other speaker
+        for test in speakers:
+            cal = spk != test
+            Vc = np.concatenate([VA[c][cal] for c in vo["conditions"]])
+            Lc, yc = np.concatenate([L[cal]] * len(vo["conditions"])), np.concatenate([y[cal]] * len(vo["conditions"]))
+            tv, tl = _fit_t(Vc, yc), _fit_t(L[cal], y[cal])
+            fused_c = _logsm(_logsm(Vc / tv) + _logsm(Lc / tl))
+            taus[test] = (tv, tl, {"voice": _tau(_logsm(Vc / tv), yc, risk), "lips": _tau(_logsm(L[cal] / tl), y[cal], risk),
+                                   "fused": _tau(fused_c, yc, risk)})
     for cond in vo["conditions"]:
-        V = np.array([voi[i]["scores"][cond] for i in ids])
+        V = VA[cond]
         agg = {k: {"correct": 0, "wrong": 0, "abstain": 0, "top1": 0} for k in ("voice", "lips", "fused")}
         for test in speakers:  # calibrate on the other speaker, test on this one
             cal, tst = spk != test, spk == test
-            tv, tl = _fit_t(V[cal], y[cal]), _fit_t(L[cal], y[cal])
+            tv, tl = taus[test][:2] if pooled else (_fit_t(V[cal], y[cal]), _fit_t(L[cal], y[cal]))
             lp = {"voice": lambda m: _logsm(V[m] / tv), "lips": lambda m: _logsm(L[m] / tl),
                   "fused": lambda m: _logsm(_logsm(V[m] / tv) + _logsm(L[m] / tl))}
             for k, f in lp.items():
-                tau = _tau(f(cal), y[cal], risk)
+                tau = taus[test][2][k] if pooled else _tau(f(cal), y[cal], risk)
                 p = f(tst)
                 commit, ok = np.exp(p.max(axis=1)) >= tau, p.argmax(axis=1) == y[tst]
                 agg[k]["correct"] += int((commit & ok).sum())
@@ -233,7 +245,7 @@ def fuse(risk: float):
     q = lambda xs: {"p50": round(float(np.percentile(xs, 50)), 1), "p95": round(float(np.percentile(xs, 95)), 1)}
     res["latency_ms"] = {"voice": q(voice_ms), "lips": q(lip_ms), "fused_parallel": q(both),
                          "devices": {"voice": vo["device"], "lips": load("lips")["device"]}}
-    save("fusion", res)
+    save("fusion_pooled" if pooled else "fusion", res)
     print(f"\n{'condition':<11} {'':>6}" + "".join(f"{k:>24}" for k in ("voice", "lips", "fused")))
     for cond, r in res["conditions"].items():
         print(f"{cond:<11} correct" + "".join(f"{r[k]['correct_rate']:>17.1%} ({r[k]['wrong']:>2}w)" for k in ("voice", "lips", "fused")))
@@ -253,6 +265,7 @@ if __name__ == "__main__":
     v.add_argument("--checkpoint", default="nvidia/nemotron-speech-streaming-en-0.6b")
     f = sub.add_parser("fuse")
     f.add_argument("--risk", type=float, default=0.02)
+    f.add_argument("--pooled", action="store_true", help="one calibration for all noise conditions (the system does not know the SNR)")
     a = ap.parse_args()
     if a.stage == "cands":
         cands(a.speakers, a.per_speaker, a.n, a.seed)
@@ -261,4 +274,4 @@ if __name__ == "__main__":
     elif a.stage == "voice":
         voice(a.checkpoint)
     else:
-        fuse(a.risk)
+        fuse(a.risk, a.pooled)
