@@ -50,10 +50,22 @@ async def push(s: Session):
 
 # ---- health ---------------------------------------------------------------
 
+_last_ready: dict[str, tuple[float, dict]] = {}
+BUSY_GRACE_S = 120   # a ready service that is slow to answer is busy with a clip (the lip model can take ~30 s), not offline
+
+
 async def _probe(client: httpx.AsyncClient, name: str) -> dict:
     try:
         r = await client.get(f"{service_url(name)}/health", timeout=1.5)
-        return r.json()
+        h = r.json()
+        if h.get("state") == "ready":
+            _last_ready[name] = (time.time(), h)
+        return h
+    except httpx.TimeoutException:
+        seen = _last_ready.get(name)
+        if seen and time.time() - seen[0] < BUSY_GRACE_S:
+            return {**seen[1], "busy": True}
+        return {"service": name, "state": "unavailable", "error": "Timeout"}
     except Exception as exc:
         return {"service": name, "state": "unavailable", "error": type(exc).__name__}
 
