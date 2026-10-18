@@ -80,7 +80,6 @@ export function GlassApp() {
   const [eyes, setEyes] = useState(() => gazeState.calibrated)
   const [cam, setCam] = useState<'starting' | 'on' | 'off'>('starting')
   const [mic, setMic] = useState<'starting' | 'on' | 'off'>('starting')
-  const [hearing, setHearing] = useState(false)
   const [alarm, setAlarm] = useState(0)
   const camRef = useRef<HTMLVideoElement>(null)
   const histRef = useRef<HTMLDivElement>(null)
@@ -104,7 +103,7 @@ export function GlassApp() {
     offSince.current ||= performance.now()
     if (performance.now() - offSince.current > 2500) {
       offSince.current = performance.now() + 8000   // repeat the hint at most every ~10 s
-      E.caption('Your eyes are off the calibration', 'sit as you did when calibrating, or calibrate again (Eyes chip, or the E key)')
+      E.caption('Your eyes are off the calibration', 'sit as you did when calibrating, or press E to calibrate again')
     }
   }), [])
   useEffect(() => {
@@ -230,7 +229,7 @@ export function GlassApp() {
     let early: Promise<string | null> | null = null
     startVoice({
       canCapture: () => canCapture('audio'),
-      onSpeech: (on) => { setHearing(on); if (on) E.fire('voice', .7, 'HEARING') },
+      onSpeech: (on) => { if (on) E.fire('voice', .7, 'HEARING') },
       onEarly: (b) => { early = api.captureAudioEarly(b).then((r) => r.early_id).catch(() => null) },
       onEarlyCancel: () => { const p = early; early = null; p?.then((id) => { if (id) api.discardAudio(id).catch(() => undefined) }) },
       onClip: (b, _ms, wasEarly) => {
@@ -477,12 +476,7 @@ export function GlassApp() {
       <canvas className="layer" id="ink" />
       {alarm > 0 && <div key={alarm} className="alarm" />}
 
-      <div className="brand">
-        <div className="name"><span className="logo" /><span>unspoken<i>.</i></span></div>
-        <button className={`chip glass mono ${cam === 'on' ? 'live' : ''}`} data-a="camera"><b /><span>{cam === 'on' ? (remoteHost ? `Camera · clips to ${remoteHost}` : 'Camera · on device') : cam === 'off' ? 'Camera off · allow & reload' : 'Camera · starting'}</span></button>
-        <span className={`chip glass mono ${mic === 'on' ? (hearing ? 'live' : 'ok') : ''}`}><b /><span>{mic === 'on' ? (health?.audio?.state !== 'ready' ? 'Mic · voice agent offline' : hearing ? 'Mic · hearing you' : 'Mic · listening') : mic === 'off' ? 'Mic off' : 'Mic · starting'}</span></span>
-        <button className={`chip glass mono ${eyes ? 'ok' : 'warn'}`} data-a="calibrate"><b /><span>{eyes ? `Eyes · ≈${Math.round(gazeState.accuracyPx ?? 0)} px` : 'Eyes · pointer · calibrate'}</span></button>
-      </div>
+      <div className="brand glass"><span className="logo" /><span className="name">unspoken<i>.</i></span></div>
       {!connected && <div className="offline mono">Gateway offline · reconnecting</div>}
 
       <div className="side">
