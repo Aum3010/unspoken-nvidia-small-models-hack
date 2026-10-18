@@ -46,6 +46,8 @@ class Session:
     settings: dict = field(default_factory=lambda: {
         "available_inputs": ["button", "keyboard"],
         "gaze_calibrated": False,
+        # what the browser sees the person doing right now ("mouthing", "voice"): their eyes are unreliable then
+        "person_activity": [],
         "use_llm": True,
         "voice": "af_heart",
         "speech_rate": 1.0,

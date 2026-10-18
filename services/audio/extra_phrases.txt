@@ -1,0 +1,4 @@
+# Extra request phrases for the voice agent, on top of the 20 in asr_eval/configs/eval.yaml (which stay the
+# evaluation set). One phrase per line; '#' lines are ignored. Word a phrase exactly as its lip recording
+# (data/enroll), so a lip and a voice reading of it fuse into one candidate. Thresholds were tuned on the 20.
+i hope to recover and go home soon

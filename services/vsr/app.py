@@ -38,6 +38,9 @@ BEAM = int(os.environ.get("UNSPOKEN_VSR_BEAM", 12))
 # Mean absolute frame-to-frame change of the 88x88 mouth crop below which we
 # flag "low_mouth_motion" (a still face makes Auto-AVSR hallucinate fluent text).
 MOTION_THRESHOLD = float(os.environ.get("UNSPOKEN_VSR_MOTION_THRESHOLD", 2.2))
+# The pixel measure above is fooled by light (a flickering lamp read as 10.6, speech is 2.1-3.2), so the browser
+# also sends how long the lips moved, measured on the lip landmarks; under this the clip is a still mouth.
+MIN_MOVING_MS = int(os.environ.get("UNSPOKEN_VSR_MIN_MOVING_MS", 450))
 # Optional closed phrase list: its best matches are added as candidates (see services/vsr/phrases.py).
 PHRASES_PATH = os.environ.get("UNSPOKEN_VSR_PHRASES", "")
 PHRASE_TOP = 3
@@ -49,9 +52,11 @@ DECODER_PATH = os.environ.get("UNSPOKEN_VSR_DECODER", "")
 # clip behind it under always-on capture.
 FREE_TEXT = os.environ.get("UNSPOKEN_VSR_FREE_TEXT", "0") != "0"
 # Personal enrollment: a clip farther than this (length-normalised DTW over cosine distance) from every
-# recording is not one of the person's phrases. On the first 10 recordings, a held-out take of the same
-# phrase was 0.13-0.28 from its others, another recorded phrase >= 0.22, an unrelated GRID clip ~0.33.
-ENROLL_MAX_DIST = float(os.environ.get("UNSPOKEN_ENROLL_MAX_DIST", 0.30))
+# recording is not one of the person's phrases. More takes bring chance matches closer, so this is re-checked
+# as recordings grow. With 213 takes (20 phrases x 8-12, plus negatives), a held-out take was within 0.24 of
+# its own phrase for 159/171 takes (0.26: 162), and 39 GRID clips of 8 other people were all farther than
+# 0.24 (0.26 accepted 2; nearest 0.247).
+ENROLL_MAX_DIST = float(os.environ.get("UNSPOKEN_ENROLL_MAX_DIST", 0.24))
 # Enrollment scores are -100 x distance, so the shared margin rules apply: the closest phrase is offered
 # alone when it beats the next by > 3 (0.03 distance; held-out takes beat other phrases by >= 0.048).
 ENROLL_SCALE = 100.0
@@ -99,9 +104,12 @@ def _load():
         lines = [l.strip() for l in open(PHRASES_PATH) if l.strip() and not l.lstrip().startswith("#")]
         phrases = [(l, tokenize(l, piece_to_id)) for l in lines]
     n_params = sum(p.numel() for p in avsr.model.parameters())
-    # warm-up so the first real request is not 2x slower
+    # warm-up so the first real request is not 2x slower (and the compiled DTW is built now, not on a clip)
     with torch.no_grad():
         avsr.beam_search(avsr.model.encode(torch.zeros(1, 12, 88, 88).to(dev)))
+    from services.vsr.phrases import dtw_many
+    dtw_many(np.ones((3, 4), np.float32), [np.ones((2, 4), np.float32)])
+    enrolled.phrases()  # read the recordings from disk now, not on the first clip
     return {
         "avsr": avsr,
         "detector": LandmarksDetector(),
@@ -210,12 +218,14 @@ def _encode_frames(m, frames: np.ndarray, duration: float, landmarks: list | Non
 
 
 @app.post("/infer")
-def infer(video: UploadFile = File(...), session_id: str = Form("demo-session"), source_ref: str = Form("")):
+def infer(video: UploadFile = File(...), session_id: str = Form("demo-session"), source_ref: str = Form(""),
+          moving_ms: int | None = Form(None)):
     data = video.file.read()
-    return _read_clip(lambda m, flags, quality: _encode(m, data, flags, quality), session_id, source_ref)
+    return _read_clip(lambda m, flags, quality: _encode(m, data, flags, quality), session_id, source_ref, moving_ms=moving_ms)
 
 
-def _read_clip(encode, session_id: str, source_ref: str, quality: dict | None = None) -> Evidence:
+def _read_clip(encode, session_id: str, source_ref: str, quality: dict | None = None, moving_ms: int | None = None) -> Evidence:
+    """moving_ms: how long the lips moved, measured by the browser on the lip landmarks (None: not sent)."""
     t0 = time.time()
     m = model.get()
     flags: list[str] = []
@@ -225,10 +235,20 @@ def _read_clip(encode, session_id: str, source_ref: str, quality: dict | None = 
         preprocess="pyav-25fps -> mediapipe face det -> mean-face similarity warp -> 96px mouth ROI -> centercrop 88",
     )
 
+    if moving_ms is not None:
+        quality.update(lip_moving_ms=moving_ms, lip_min_moving_ms=MIN_MOVING_MS)
+        if moving_ms < MIN_MOVING_MS:
+            flags.append("low_mouth_motion")
     with model.lock:
         enc, crops = encode(m, flags, quality)
         if enc is None:
             return _evidence(session_id, source_ref, [], flags, quality, prov, t0)
+        if {"low_mouth_motion", "no_face"} & set(flags):
+            # a still mouth matches still parts of the recordings closely (0.09-0.11 on test clips, closer than
+            # real takes) and makes free text hallucinate: no reading at all
+            quality["mode"] = "still"
+            quality["mouth_thumbs"] = _thumbs(crops)
+            return _evidence(session_id, source_ref, [], sorted(set(flags)), quality, prov, t0)
 
         # 1. the person's own recordings (fast: DTW over the encoder features)
         personal = []
@@ -245,6 +265,8 @@ def _read_clip(encode, session_id: str, source_ref: str, quality: dict | None = 
                 quality["mouth_thumbs"] = _thumbs(crops)
                 return _evidence(session_id, source_ref, [], flags, quality, prov, t0)
             matches = [(p, d) for p, d in matches if not p.startswith(NEG_PREFIX)][:PHRASE_TOP]
+            if len(matches) >= 2:
+                quality["enroll_gap"] = round(matches[1][1] - matches[0][1], 4)   # how clearly the best phrase wins
             for phrase, dist in matches:
                 if dist <= ENROLL_MAX_DIST:
                     personal.append(Hypothesis(text=phrase, score=round(-ENROLL_SCALE * dist, 2),
@@ -280,6 +302,8 @@ def _read_clip(encode, session_id: str, source_ref: str, quality: dict | None = 
     if len(hypotheses) >= 2:
         quality["top2_margin"] = round(hypotheses[0].score - hypotheses[1].score, 3)
     quality["mouth_thumbs"] = _thumbs(crops)
+    print(f"[lips] mode={quality.get('mode')} best={quality.get('enroll_best_dist')} gap={quality.get('enroll_gap')} "
+          f"moving_ms={moving_ms} -> {[h.text for h in hypotheses[:3]]}", flush=True)
     return _evidence(session_id, source_ref, hypotheses, flags, quality, prov, t0)
 
 
@@ -401,7 +425,8 @@ async def stream_chunk(stream_id: str, request: Request, mime: str = "video/webm
 
 
 @app.post("/stream/{stream_id}/finish")
-def stream_finish(stream_id: str, session_id: str = Form("demo-session"), source_ref: str = Form("")):
+def stream_finish(stream_id: str, session_id: str = Form("demo-session"), source_ref: str = Form(""),
+                  moving_ms: int | None = Form(None)):
     st = _streams.pop(stream_id, None)
     if st is None:
         raise HTTPException(404, "unknown stream")
@@ -409,7 +434,7 @@ def stream_finish(stream_id: str, session_id: str = Form("demo-session"), source
     st.feed.close()
     st.done.wait(30)
     quality = {"streamed": True, "stream_chunks": st.chunks, "stream_tail_ms": int((time.time() - t0) * 1000)}
-    return _read_clip(st.encode, session_id, source_ref, quality)
+    return _read_clip(st.encode, session_id, source_ref, quality, moving_ms=moving_ms)
 
 
 @app.post("/stream/{stream_id}/discard")
@@ -452,7 +477,7 @@ def enroll_remove(phrase: str):
 def _evidence(session_id, source_ref, hyps, flags, quality, prov, t0) -> Evidence:
     prov.latency_ms = int((time.time() - t0) * 1000)
     status = "proposed" if hyps and not {"no_face", "low_mouth_motion"} & set(flags) else "unknown"
-    if hyps and len(hyps) > 1 and quality.get("top2_margin", 99) < 1.5:
+    if status == "proposed" and len(hyps) > 1 and quality.get("top2_margin", 99) < 1.5:
         status = "ambiguous"
     return Evidence(
         session_id=session_id, modality="lip", source_mode="live", source_ref=source_ref or "browser-camera-clip",
