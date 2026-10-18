@@ -69,6 +69,10 @@ For the ASR evaluation there are two recorders:
 
 ## Cloud processing
 
-**The app runs locally by default.** If the coordinator is moved to vLLM on Brev (`scripts/serve_vllm_brev.sh`), only the structured evidence summary leaves the machine: candidate text, scores and quality flags. Camera frames, audio and EEG never do. Disclose this to the person, and require their opt-in, before turning it on.
+**On a Mac, the app runs locally.** If only the coordinator is moved to vLLM on Brev (`scripts/serve_vllm_brev.sh`), only the structured evidence summary leaves the machine: candidate text, scores and quality flags. Camera frames, audio and EEG never do.
+
+**With the whole backend on Brev** (`scripts/brev/start_app.sh`), the browser still processes the camera itself (face, gaze, blink and head never leave it), but the **mouth video clips and voice clips** it cuts are sent through the SSH tunnel to the instance. They are decoded in memory and not stored; the decision, transcript and audit trail stay in the gateway's session memory on the instance. The UI's camera chip says "clips to NVIDIA Brev" whenever the gateway reports a remote host.
+
+In both cases, disclose this to the person, and require their opt-in, before turning it on.
 
 **The ASR evaluation is different.** It uploads audio clips, including consented volunteer recordings, to a Brev GPU instance under `/workspace`. That is covered by the recording consent above. Deleting the instance deletes the disk. See [BREV.md](BREV.md) §6.

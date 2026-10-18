@@ -736,7 +736,10 @@ function dwellTick(now: number, dt = 16.7) {
     // confirm targets need a longer look than select targets
     const need = hot.dataset.confirm != null ? DWELL * 1.5 : DWELL
     p = Math.min(1, (now - hotT0) / need)
-    if (p >= 1) { hotDone = true; dwelledAt = now; select(hot, source === 'eyes' ? 'eyes' : 'pointer'); p = 0 }
+    if (p >= 1) {
+      hotDone = true; dwelledAt = now   // the controller learns the calibration from eye selections
+      select(hot, source === 'eyes' ? 'eyes' : 'pointer'); p = 0
+    }
   }
   gazeEl.style.setProperty('--p', String(p))
 }

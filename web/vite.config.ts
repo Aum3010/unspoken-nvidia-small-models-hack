@@ -3,7 +3,7 @@ import { defineConfig } from 'vite'
 
 export default defineConfig({
   plugins: [react()],
-  // ONNX Runtime Web loads its own .wasm/.mjs runtime at run time (from /ort/); pre-bundling it breaks that
+  // ONNX Runtime Web loads its own .wasm/.mjs runtime at run time; pre-bundling it breaks that
   optimizeDeps: { exclude: ['onnxruntime-web'] },
   server: {
     port: 8800,

@@ -1,0 +1,33 @@
+# Unspoken backend on Linux + NVIDIA CUDA (Brev). Python 3.12.
+# torch/torchvision/torchaudio come first from the cu128 index (Blackwell needs CUDA 12.8+),
+# then this file is installed constrained to them: see scripts/brev/setup_app.sh.
+# The coordinator model is served by vLLM from its own venv (conflicting pins).
+fastapi==0.143.3
+uvicorn[standard]==0.54.0
+pydantic==2.14.1
+httpx==0.28.1
+python-multipart==0.0.32
+websockets==17.2
+numpy==1.26.4            # mediapipe 0.10.21 needs numpy<2
+scipy==1.17.1
+scikit-learn==1.9.1
+scikit-image==0.26.0
+joblib==1.6.0
+soundfile==0.14.0
+av==19.0.1
+opencv-python-headless==4.11.0.86
+# visual speech (Chaplin / Auto-AVSR on CUDA)
+mediapipe==0.10.21
+six==1.17.0
+# audio: the voice agent (Nemotron Speech + Silero VAD) runs in asr_eval's NeMo venv; see scripts/brev/start_app.sh
+# speech output: Kokoro-82M in PyTorch (replaces mlx-audio)
+kokoro==0.9.4
+misaki[en]==0.9.4
+en_core_web_sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl
+# EEG replay
+mne==1.11.0             # newer mne needs numpy>=2, which mediapipe 0.10.21 and pyriemann 0.7 cannot take
+pyriemann==0.7
+pypdf
+# evaluation
+jiwer==4.0.0
+pytest==9.1.1

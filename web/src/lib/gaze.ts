@@ -141,9 +141,15 @@ function eye(lm: P[], e: typeof R): [number, number, number] {
   return [h, v, open]
 }
 
+// Why frames were used or dropped since the last reset: the calibration screen shows it, so a failing
+// calibration says what is missing (face, head pose, the eye-image model) instead of "eyes not seen".
+export const gazeDebug = { frames: 0, ok: 0, noFace: 0, noIris: 0, noPose: 0, noAppearance: 0, blink: 0, samples: 0, stale: 0, lastFeatureAt: 0 }
+export function resetGazeDebug() { for (const k of Object.keys(gazeDebug) as (keyof typeof gazeDebug)[]) gazeDebug[k] = 0 }
+
 function features(f: FaceFrame): number[] | null {
   const lm = f.landmarks
-  if (!lm || lm.length < 478 || !f.pose) return null
+  if (!lm || lm.length < 478) { gazeDebug.noIris++; return null }
+  if (!f.pose) { gazeDebug.noPose++; return null }
   // appearance features: required when the calibration was made with them, so samples and
   // predictions always have the same layout. A result counts as current for two model runs,
   // so a slower backend (WebAssembly instead of WebGPU) still yields usable frames.
@@ -161,7 +167,7 @@ function features(f: FaceFrame): number[] | null {
     diag.push({ t: Math.round(f.t), phase: label.phase, tx: Math.round(label.x), ty: Math.round(label.y), geo: geo.map((v) => +v.toFixed(6)),
       app: a ? [+a.yaw.toFixed(5), +a.pitch.toFixed(5)] : null, pred: null })
   }
-  if (gazeState.appearance && !app) return null
+  if (gazeState.appearance && !app) { gazeDebug.noAppearance++; return null }
   // The model leaves out the head-pose terms: on recorded sessions they fit one sitting well (~70 px)
   // but a calibration reused minutes later, after a small posture change, jumped to 180-220 px.
   // Eye-in-head features (+ the eye-image angles) stayed at 63-86 px. Head movement is handled by
@@ -211,6 +217,8 @@ function position(gx: number, gy: number, lm: P[], t: number): [number, number] 
 
 function onFrame(f: FaceFrame) {
   if (f.present && f.landmarks && appearanceState.ready) void updateAppearance(f.source, f.landmarks)
+  gazeDebug.frames++
+  if (!f.present) gazeDebug.noFace++
   const feat = f.present ? features(f) : null
   if (!feat) {
     recent = []
@@ -224,7 +232,9 @@ function onFrame(f: FaceFrame) {
   if (lidHistory.length > BLINK_BASE_FRAMES) lidHistory.shift()
   const rest = [...lidHistory].sort((a, b) => a - b)[Math.floor(lidHistory.length / 2)]
   blinking = lid > Math.max(BLINK, rest + BLINK_RISE)
-  if (blinking) return
+  if (blinking) { gazeDebug.blink++; return }
+  gazeDebug.ok++
+  gazeDebug.lastFeatureAt = f.t
   recent = [...recent.slice(-(FEAT_FRAMES - 1)), feat]
   const avg = feat.map((_, j) => recent.reduce((a, r) => a + r[j], 0) / recent.length)
   current = { f: avg, t: f.t }
@@ -297,8 +307,9 @@ export function clearCalibration() {
 /** Feed one explicit calibration sample: the person is looking at (x, y) right now. */
 export function recordCalibrationPoint(x: number, y: number) {
   label = { phase: 'calib', x, y, until: performance.now() + 120 }
-  if (blinking || !current || performance.now() - current.t > 200) return  // blink or no fresh face frame
+  if (blinking || !current || performance.now() - current.t > 200) { gazeDebug.stale++; return }  // blink or no fresh face frame
   samples.push({ f: current.f, x, y })
+  gazeDebug.samples++
   refit()
 }
 
@@ -362,3 +373,6 @@ export function measureAccuracy(target: { x: number; y: number }, ms = 2500): Pr
     }, ms)
   })
 }
+
+// dev builds: inspect a live calibration from the console or an automated browser
+if (import.meta.env.DEV) Object.assign(window, { __gaze: { gazeDebug, gazeState, appearanceState, calibrationSampleCount } })

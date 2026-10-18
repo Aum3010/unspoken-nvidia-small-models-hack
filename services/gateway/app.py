@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
 import time
 
 import httpx
@@ -15,7 +16,7 @@ from fastapi import File, Form, HTTPException, UploadFile, WebSocket, WebSocketD
 from fastapi.responses import Response
 from pydantic import BaseModel
 
-from services.gateway.state import Session, TransitionError, norm
+from services.gateway.state import Session, TransitionError
 from shared.confirmation import PolicyViolation, authorize_speech
 from shared.provenance import MODEL_LEDGER, ROOT, service_url
 from shared.schemas import ALLOWED_CONFIRMATION_METHODS, Evidence, ToolCall
@@ -63,7 +64,8 @@ async def health():
         async with httpx.AsyncClient() as client:
             results = await asyncio.gather(*[_probe(client, n) for n in SPECIALISTS])
         _health_cache.update(ts=time.time(), data={n: r for n, r in zip(SPECIALISTS, results)})
-    return {"gateway": {"state": "ready"}, **_health_cache["data"]}
+    # where the agents run; the UI must say so when clips leave the person's device
+    return {"gateway": {"state": "ready", "host": os.environ.get("UNSPOKEN_HOST_LABEL", "this device")}, **_health_cache["data"]}
 
 
 @app.get("/api/ledger")
@@ -182,18 +184,14 @@ def apply_plan(s: Session, call: ToolCall, quiet: bool = False):
 
 # ---- captures ---------------------------------------------------------------
 
-# Capture is always on, so most clips are not messages. Evidence the specialists themselves mark unusable,
-# or speech below Whisper's own confidence cut-off, is kept in the audit log but never becomes a candidate
-# and never prompts the person. A rule in code, not a model judgement.
+# Capture is always on, so most clips are not messages. Evidence the specialists themselves mark unusable
+# (the voice agent's VAD and frozen thresholds, the lip agent's face/motion checks) is kept in the audit log
+# but never becomes a candidate and never prompts the person. A rule in code, not a model judgement.
 UNUSABLE_FLAGS = {"no_face", "low_mouth_motion", "too_short", "no_speech_detected"}
-WHISPER_MIN_LOGPROB = -1.0   # Whisper's logprob_threshold: below it a segment is treated as unreliable
-SILENCE_FILLERS = {"you", "thank you", "thanks", "thanks for watching", "thank you for watching", "bye", "so", "okay",
-                   "uh", "um", "hmm", "oh", "the", "i"}   # what Whisper invents on near-silence
-LOW_SPEECH_RATIO = 0.25
 
 
 def screen_evidence(ev: Evidence) -> str | None:
-    """Why this evidence should be ignored, or None to let it through (possibly with fewer hypotheses)."""
+    """Why this evidence should be ignored, or None to let it through."""
     if ev.modality not in ("lip", "audio"):
         return None
     bad = UNUSABLE_FLAGS & set(ev.quality_flags)
@@ -201,14 +199,8 @@ def screen_evidence(ev: Evidence) -> str | None:
         return ", ".join(sorted(f.replace("_", " ") for f in bad))
     if ev.status == "unknown" or not ev.hypotheses:
         return "no usable reading"
-    if ev.modality == "audio":
-        ev.hypotheses = [h for h in ev.hypotheses if h.score is None or h.score >= WHISPER_MIN_LOGPROB]
-        if not ev.hypotheses:
-            return "speech too unclear to transcribe reliably"
-        if (ev.quality.get("speech_ratio") or 0) < LOW_SPEECH_RATIO and all(
-                norm(h.text).strip(" .!?,") in SILENCE_FILLERS for h in ev.hypotheses):
-            return "mostly silence; a filler word Whisper invents on quiet input"
     return None
+
 
 async def _forward_capture(s: Session, service: str, field: str, upload: UploadFile, label: str, extra: dict | None = None):
     data = await upload.read()

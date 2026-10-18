@@ -1,7 +1,6 @@
 // MediaPipe Face Landmarker (runs locally in the browser, wasm + GPU delegate).
-// Used for: mouth ROI overlay/crop preview, face-quality hints before a lip
-// capture, deliberate-blink detection, and the iris + head-pose features used for gaze
-// (lib/gaze.ts). Landmarks do not decode words.
+// Used for: mouth-motion clips for the lip agent, deliberate-blink detection, head nod/shake,
+// and the iris + head-pose features used for gaze (lib/gaze.ts). Landmarks do not decode words.
 
 import { FaceLandmarker, FilesetResolver } from '@mediapipe/tasks-vision'
 import { getCamera } from './capture'
@@ -58,57 +57,79 @@ export function initFace(): Promise<FaceLandmarker> {
 export function onFace(l: FrameListener) { frameListeners.add(l); return () => { frameListeners.delete(l) } }
 export function onBlink(l: BlinkListener) { blinkListeners.add(l); return () => { blinkListeners.delete(l) } }
 
-let liveTrackers = 0   // tracking loops running on any video (every frame listener gets all of them)
-
 /** Run the landmarker on every new video frame until the returned stop() is called. */
+// One tracking loop for the whole page, whoever registers a video (the room camera, gaze's background
+// video): the landmarker runs once per camera frame and a blink is never counted twice.
+const tracked: HTMLVideoElement[] = []
+let looping = false
+let lastVideo: HTMLVideoElement | null = null
+let lastTs = -1
+
 export function trackVideo(video: HTMLVideoElement): () => void {
-  let stopped = false
-  liveTrackers++
-  let lastTs = -1
-  const step = () => {
-    if (stopped) return
-    if (landmarker && video.readyState >= 2 && video.currentTime !== lastTs) {
-      lastTs = video.currentTime
-      const t = performance.now()
-      const res = landmarker.detectForVideo(video, t)
-      const lm = res.faceLandmarks?.[0] ?? null
-      const shapes = Object.fromEntries((res.faceBlendshapes?.[0]?.categories ?? []).map((c) => [c.categoryName, c.score]))
-      let mouthBox = null
-      let yaw = 0
-      if (lm) {
-        const pts = LIPS_OUTER.map((i) => lm[i])
-        const xs = pts.map((p) => p.x), ys = pts.map((p) => p.y)
-        const cx = (Math.min(...xs) + Math.max(...xs)) / 2, cy = (Math.min(...ys) + Math.max(...ys)) / 2
-        const w = (Math.max(...xs) - Math.min(...xs)) * 1.7
-        mouthBox = { x: cx - w / 2, y: cy - w / 2 * (video.videoWidth / Math.max(1, video.videoHeight)), w, h: w * (video.videoWidth / Math.max(1, video.videoHeight)) }
-        const nose = lm[1], l = lm[234], r = lm[454]
-        yaw = ((nose.x - l.x) / Math.max(1e-3, r.x - l.x) - 0.5) * 2
-      }
-      // column-major 4x4; ZYX Euler angles from its rotation part
-      const M = res.facialTransformationMatrixes?.[0]?.data
-      const headPitch = M ? Math.atan2(M[6], M[10]) * 180 / Math.PI : 0
-      const headYaw = M ? Math.asin(Math.max(-1, Math.min(1, -M[2]))) * 180 / Math.PI : 0
-      const frame: FaceFrame = {
-        present: !!lm, landmarks: lm, mouthBox, yaw, headPitch, headYaw, pose: M ?? null, source: video,
-        mouthOpen: shapes.jawOpen ?? 0, blinkL: shapes.eyeBlinkLeft ?? 0, blinkR: shapes.eyeBlinkRight ?? 0, t,
-      }
-      detectBlink(frame)
-      frameListeners.forEach((f) => f(frame))
-    }
-    if ('requestVideoFrameCallback' in video) (video as any).requestVideoFrameCallback(step)
-    else requestAnimationFrame(step)
+  tracked.push(video)
+  if (!looping) {
+    looping = true
+    initFace().then(loop).catch((e) => { looping = false; console.warn('face landmarker unavailable', e) })
   }
-  initFace().then(step).catch((e) => console.warn('face landmarker unavailable', e))
-  return () => { if (!stopped) liveTrackers--; stopped = true }
+  let stopped = false
+  return () => {
+    if (stopped) return
+    stopped = true
+    const i = tracked.indexOf(video)
+    if (i >= 0) tracked.splice(i, 1)
+  }
 }
 
-// Background tracking for pages with no visible camera (gaze, blink scanning on the boards).
-// Reference-counted: one off-screen video and one tracking loop, however many users.
+function loop() {
+  if (!tracked.length) { looping = false; lastVideo = null; return }
+  // the first registered video that has frames (they all show the same camera stream)
+  const video = tracked.find((v) => v.readyState >= 2)
+  if (video && landmarker) {
+    if (video !== lastVideo) { lastVideo = video; lastTs = -1 }
+    if (video.currentTime !== lastTs) {
+      lastTs = video.currentTime
+      process(video)
+    }
+  }
+  requestAnimationFrame(loop)
+}
+
+function process(video: HTMLVideoElement) {
+  const lm_ = landmarker!
+  const t = performance.now()
+  const res = lm_.detectForVideo(video, t)
+  const lm = res.faceLandmarks?.[0] ?? null
+  const shapes = Object.fromEntries((res.faceBlendshapes?.[0]?.categories ?? []).map((c) => [c.categoryName, c.score]))
+  let mouthBox = null
+  let yaw = 0
+  if (lm) {
+    const pts = LIPS_OUTER.map((i) => lm[i])
+    const xs = pts.map((p) => p.x), ys = pts.map((p) => p.y)
+    const cx = (Math.min(...xs) + Math.max(...xs)) / 2, cy = (Math.min(...ys) + Math.max(...ys)) / 2
+    const w = (Math.max(...xs) - Math.min(...xs)) * 1.7
+    mouthBox = { x: cx - w / 2, y: cy - w / 2 * (video.videoWidth / Math.max(1, video.videoHeight)), w, h: w * (video.videoWidth / Math.max(1, video.videoHeight)) }
+    const nose = lm[1], l = lm[234], r = lm[454]
+    yaw = ((nose.x - l.x) / Math.max(1e-3, r.x - l.x) - 0.5) * 2
+  }
+  // column-major 4x4; ZYX Euler angles from its rotation part
+  const M = res.facialTransformationMatrixes?.[0]?.data
+  const headPitch = M ? Math.atan2(M[6], M[10]) * 180 / Math.PI : 0
+  const headYaw = M ? Math.asin(Math.max(-1, Math.min(1, -M[2]))) * 180 / Math.PI : 0
+  const frame: FaceFrame = {
+    present: !!lm, landmarks: lm, mouthBox, yaw, headPitch, headYaw, pose: M ? [...M] : null, source: video,
+    mouthOpen: shapes.jawOpen ?? 0, blinkL: shapes.eyeBlinkLeft ?? 0, blinkR: shapes.eyeBlinkRight ?? 0, t,
+  }
+  detectBlink(frame)
+  frameListeners.forEach((f) => f(frame))
+}
+
+// Background tracking for when no page video is tracked yet (gaze needs face frames).
+// Reference-counted: one off-screen video and one tracking loop, however many users. If a visible
+// video is already tracked (the room camera), its frames are used instead of a second tracker.
 let bg: { video: HTMLVideoElement; stop: () => void } | null = null
 let bgUsers = 0
 export async function trackCameraInBackground(): Promise<() => void> {
-  // a page already tracking the camera feeds every listener: a second loop would analyse each frame twice
-  if (!bg && liveTrackers > 0) return () => {}
+  if (tracked.length > 0 && !bg) return () => {}
   bgUsers++
   if (!bg) {
     const video = document.createElement('video')

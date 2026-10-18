@@ -54,6 +54,20 @@ class Readiness:
         return {"state": self.state, "error": self.error, "load_seconds": self.loaded_s}
 
 
+def pick_device(override_env: str | None = None) -> str:
+    """cuda > mps > cpu. `override_env` (per service) or UNSPOKEN_DEVICE forces one."""
+    import os
+
+    forced = (override_env and os.environ.get(override_env)) or os.environ.get("UNSPOKEN_DEVICE")
+    if forced:
+        return forced
+    import torch
+
+    if torch.cuda.is_available():
+        return "cuda"
+    return "mps" if torch.backends.mps.is_available() else "cpu"
+
+
 def make_app(title: str) -> FastAPI:
     app = FastAPI(title=title)
     app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])

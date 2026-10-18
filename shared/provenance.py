@@ -27,8 +27,8 @@ def service_url(name: str) -> str:
 MODEL_LEDGER = [
     {
         "component": "Coordinator",
-        "model": "NVIDIA Nemotron 3.5 Lightning 30B-A3B (MoE, total params counted)",
-        "params_b": None,
+        "model": "NVIDIA Nemotron 3.5 Lightning 30B-A3B (MoE, counted at the nominal 30B)",
+        "params_b": 30.0,
         "source": "ollama nemotron-3.5-lightning:30b-a3b / mlx-community/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-4bit",
     },
     {
@@ -43,10 +43,10 @@ MODEL_LEDGER = [
         "params_b": None,
         "source": "huggingface.co/Amanvir/lm_en_subword",
     },
-    {"component": "Audio ASR", "model": "Whisper base (MLX)", "params_b": 0.074, "source": "mlx-community/whisper-base-mlx"},
-    {"component": "Audio enhancement", "model": "RNNoise (xiph)", "params_b": 0.00009, "source": "pyrnnoise"},
+    {"component": "Audio ASR", "model": "NVIDIA Nemotron Speech Streaming en 0.6B", "params_b": 0.618, "source": "nvidia/nemotron-speech-streaming-en-0.6b"},
+    {"component": "Voice activity gate", "model": "Silero VAD 6.2.3", "params_b": 0.00046, "source": "silero-vad"},
     {"component": "TTS", "model": "Kokoro-82M (MLX bf16)", "params_b": 0.082, "source": "mlx-community/Kokoro-82M-bf16"},
     {"component": "Face / blink (browser)", "model": "MediaPipe Face Landmarker", "params_b": 0.0013, "source": "face_landmarker.task float16"},
-    {"component": "Gaze (browser)", "model": "WebGazer.js (TF.js facemesh + ridge regression)", "params_b": 0.0012, "source": "webgazer 3.5.3"},
+    {"component": "Gaze (browser)", "model": "MobileGaze MobileOne-S0 + iris/head-pose ridge calibration", "params_b": 0.00124, "source": "yakhyo/gaze-estimation mobileone_s0_gaze.onnx"},
     {"component": "P300 decoder", "model": "xDAWN covariances + tangent space + logistic regression", "params_b": 0.0000002, "source": "pyriemann, trained per participant"},
 ]

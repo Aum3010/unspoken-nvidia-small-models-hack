@@ -3,16 +3,16 @@
 > **A voice for those who cannot speak.**
 > Small specialist models across lips, weak voice, eyes and recorded EEG, coordinated by NVIDIA Nemotron 3.5 Lightning to *ask*, never to assume. Nothing is spoken until the person confirms it.
 
-Unspoken is an assistive-communication **research prototype** that runs entirely on an Apple-Silicon Mac (Metal via MPS + MLX), with an optional vLLM coordinator on NVIDIA Brev. It is not a medical device, not a nurse-call system, and not a mind reader.
+Unspoken is an assistive-communication **research prototype**. The web UI runs in the browser; the agents run either on an Apple-Silicon Mac (Metal via MPS + MLX) or on an NVIDIA GPU on Brev (CUDA, with the coordinator on vLLM), reached through an SSH tunnel. It is not a medical device, not a nurse-call system, and not a mind reader.
 
 ```
 lips ─┐                                    ┌─ you select ─┐
 voice ┼─► specialists propose ─► coordinator asks ─►      ├─► you confirm ─► policy gate ─► voice
-eyes ─┤   raw n-best + quality    (Nemotron, typed tools) └─ or correct ─┘    (exact text only)
+eyes ─┤   n-best / phrases + quality (Nemotron, typed tools) └─ or correct ─┘ (exact text only)
 EEG* ─┘   *recorded replay only
 ```
 
-**The core multi-agent behaviour is active uncertainty resolution.** When lip reading is unsure, or lips and voice disagree, the coordinator picks the smallest useful question and another modality (gaze dwell, blink scan, board) lets the person answer. The person, never a model, decides what is said.
+**The core multi-agent behaviour is active uncertainty resolution.** When lip reading is unsure, or lips and voice disagree, the coordinator picks the smallest useful question and another modality (gaze dwell, blink, nod, the phrase board) lets the person answer. The person, never a model, decides what is said.
 
 ## Quick start (macOS, Apple Silicon)
 
@@ -23,7 +23,19 @@ EEG* ─┘   *recorded replay only
 ./scripts/run_evals.sh        # every benchmark → evaluations/results/summary.json (also served at /api/evals)
 ```
 
-Requirements: Python 3.12 via `uv`, Node 20+, Ollama with `nemotron-3.5-lightning:30b-a3b`, and about 25 GB of free unified memory. Chrome is recommended (MediaRecorder webm, WebGL).
+Requirements: Python 3.12 via `uv`, Node 20+, Ollama with `nemotron-3.5-lightning:30b-a3b`, and about 25 GB of free unified memory. Chrome is recommended (MediaRecorder webm, WebGPU/WebGL). The voice agent (Nemotron Speech) needs NeMo: on a Mac, install `asr_eval/requirements.in` into the backend venv.
+
+## Quick start (backend on an NVIDIA Brev GPU, UI on your laptop)
+
+```bash
+bash scripts/brev/sync_app.sh <instance>                                   # ship the committed backend to ~/unspoken
+brev exec <instance> 'cd ~/unspoken && nohup bash scripts/brev/setup_app.sh > .run/setup.log 2>&1 < /dev/null &'   # once
+brev exec <instance> 'bash ~/unspoken/scripts/brev/start_app.sh'           # vLLM + 6 services on 127.0.0.1 (status | stop)
+bash scripts/brev/connect.sh <instance>                                    # tunnel the gateway to localhost:8000
+cd web && npm install && npm run dev                                       # UI → http://localhost:8800
+```
+
+Step by step, including the CUDA port and the problems already solved: [docs/BREV.md](docs/BREV.md) §4b. Latency with every model running, and how to serve it faster: [docs/SERVING.md](docs/SERVING.md).
 
 ## What's in the app
 
@@ -31,8 +43,8 @@ One liquid-glass page (`web/src/glass/`) at **http://localhost:8800**, over the 
 
 | Part | What it does |
 |---|---|
-| **Eye calibration** | Shown when the app opens (and from the *Eyes* chip): 9 hands-free dots, then a measured error in pixels. Gaze is used only when it is good enough; otherwise the pointer stands in for the eyes |
-| **Every input at once** | No mode switching. Voice: always-on VAD cuts 16 kHz clips for the voice agent. Lips: mouth-movement detection cuts webm clips for the lip agent. Blink (deliberate, MediaPipe) selects what you look at; head nod = yes, shake = no. Capture pauses while a message waits for confirmation or speech is playing |
+| **Eye calibration** | Its own plain black screen, shown when the app opens (and from the *Eyes* chip): 18 hands-free dots in two passes, then the error measured on 5 dots it was not fitted on. Live status (camera, face, eye model) and, on failure, the measured reason. A good calibration is saved and offered next time. Gaze is used only when it is good enough; otherwise the pointer stands in for the eyes |
+| **Every input at once** | No mode switching. Voice: always-on VAD cuts 16 kHz clips for the voice agent. Lips: mouth-movement detection cuts webm clips for the lip agent. Gaze: MediaPipe iris + MobileGaze eye-image model, calibrated per person; dwell tolerates misses in proportion to the measured error and learns from each gaze selection. Blink (deliberate, MediaPipe) selects what you look at; head nod = yes, shake = no. Capture pauses while a message waits for confirmation or speech is playing |
 | **Writing in light** | A reading or chosen phrase appears as faint, trembling pencil. It is drawn in by the pen only after you confirm it (Speak, Yes, a blink or a nod) and the policy gate authorizes the exact text |
 | **Bubbles** | Phrases, and the coordinator's shortlist of readings with their source and raw score, bloom as glass bubbles to choose by dwell, blink or click |
 | **Rail** | Phrases · Yes · No · Speak · Clear · Help; tiles swell under the gaze |
@@ -43,11 +55,11 @@ Every target works by click, keyboard, **gaze or pointer dwell** (confirm target
 
 ## Hackathon tracks
 
-- **Track 2: Multi-Agent Systems.** These are heterogeneous agents: a visual-speech transformer, ASR plus an enhancer, a browser gaze/blink estimator, a Riemannian P300 decoder, an LLM coordinator, and a TTS renderer. They exchange typed `Evidence` and `ToolCall` messages (`shared/schemas.py`). Disagreement is preserved, and another modality resolves it.
+- **Track 2: Multi-Agent Systems.** These are heterogeneous agents: a visual-speech transformer, a streaming ASR that scores fixed phrases, a browser gaze/blink/head estimator, a Riemannian P300 decoder, an LLM coordinator, and a TTS renderer. They exchange typed `Evidence` and `ToolCall` messages (`shared/schemas.py`). Disagreement is preserved, and another modality resolves it.
 - **NVIDIA Nemotron 3.5 Lightning** is the coordinator and tool caller: one model, shared by all logical roles. It runs through Ollama/MLX on Metal locally, or vLLM (NVFP4) on Brev.
 - **NeMo Gym bounty:** `evaluations/nemo_gym/unspoken_communication/` is a resources server with decoupled `valid / action / safety` rewards across 10 task categories. These cover ambiguity, cross-modal conflict, capture failure, repeated failure, "none of these", uncalibrated gaze, prompt injection and pressure to speak. `run_local.py` scores policies without a Gym install.
-- **Red Hat vLLM bounty:** `scripts/serve_vllm_brev.sh` serves Nemotron with `--enable-auto-tool-choice --tool-call-parser qwen3_coder --reasoning-parser nemotron_v3` and prefix caching. The coordinator speaks OpenAI-compatible tools (`UNSPOKEN_LLM_BACKEND=openai`). Only structured summaries leave the device.
-- **Budget ≤ 33B:** 32.04B distinct deployed parameters, counted from disk (`scripts/verify_weights.py`).
+- **Red Hat vLLM bounty:** `scripts/serve_vllm_brev.sh` serves Nemotron with `--enable-auto-tool-choice --tool-call-parser qwen3_coder --reasoning-parser nemotron_v3` and prefix caching. The coordinator speaks OpenAI-compatible tools (`UNSPOKEN_LLM_BACKEND=openai`). With only the coordinator on Brev, just structured summaries leave the device; with the whole backend there (`scripts/brev/start_app.sh`), mouth and voice clips go too, and the UI says so.
+- **Budget ≤ 33B:** 31.01B distinct deployed parameters with the coordinator counted at its nominal 30B (32.59B with its weight-file count, still within budget; `scripts/verify_weights.py`).
 
 ## Results (held-out; see `docs/EVALUATION.md`)
 
@@ -55,16 +67,17 @@ Every target works by click, keyboard, **gaze or pointer dwell** (confirm target
 |---|---|
 | EEG replay, 8 ALS participants, held-out runs | flash AUC **0.850**, letter accuracy **94%** at 10 repetitions (chance 2.8%) |
 | Lip reading, unseen GRID speakers | top-1 WER **79.6%** (best-of-5 71%). Readings are therefore candidates only. Still face flagged **8/8** |
-| Weak speech | raw ≤8% WER down to −5 dB SNR; **enhancement hurt in heavy noise** (8→18%, 49→65%), so both transcripts are always shown. Noise-only declined 10/10 |
+| Weak speech | Nemotron Speech 0.6B + forced phrase scoring, 3 speakers, leave-one-speaker-out: right phrase accepted **71.5%**, wrong **0.4%**, **90.2%** resolved within one gaze question, 0/45 near-miss false accepts, 43 ms per clip (`asr_eval/results/loso.md`) |
 | Coordinator (NeMo Gym, 60 tasks) | Nemotron raw 0.933 / **0% unsafe**; deployed (Nemotron + validator + fallback) **1.000**, 80% of decisions by Nemotron |
 | Safety | **25/25** gate tests and attacks pass; spoken = confirmed string **10/10**; unconfirmed text reaching TTS **0** |
-| Model budget | **32.04B** of 33B, counted from weight files |
+| Model budget | **31.01B** of 33B (coordinator at its nominal 30B; 32.59B with its weight-file count) |
+| Latency, every model on one RTX PRO 6000 | one message end to end (voice + lip clip → coordinator → confirm → speech) **1.03 s** p50, 1.10 s p95; voice agent 55 ms alone, 304 ms with everything running (`docs/SERVING.md`) |
 
 Run `./scripts/run_evals.sh` to reproduce. Details and known gaps are in `docs/EVALUATION.md`.
 
-## Choosing the voice model on Brev (in progress)
+## Choosing the voice model on Brev (done: Nemotron Speech is the voice agent)
 
-`asr_eval/` is an audio-only benchmark that picks the voice agent's next ASR. Candidates:
+`asr_eval/` is the audio-only benchmark that picked the voice agent's ASR. Candidates:
 - Parakeet-CTC/TDT
 - Nemotron Speech Streaming
 - Whisper (several sizes)
@@ -77,31 +90,32 @@ python run_eval.py --config configs/local_smoke.yaml --limit 6         # CPU plu
 ```
 
 **Outcome (2026-10-17):**
-- **Model:** Nemotron Speech Streaming en 0.6B with forced RNNT phrase scoring.
+- **Model:** Nemotron Speech Streaming en 0.6B with forced RNNT phrase scoring, now the app's voice agent (`services/audio/` imports the same decision code and frozen thresholds, so it decides exactly as evaluated).
 - **Tested:** on 3 recorded speakers (leave-one-speaker-out).
 - **Results:** it accepted the right phrase 71.5% of the time with 0.4% wrong, resolved 90.2% within one gaze question, and had 0/45 near-miss false accepts, at 43 ms per clip.
 - **Not adopted:** the multilingual Nemotron 3.5 was less accurate and slower on English. Its language selector and draft translations are kept.
 - Details: [asr_eval/README.md](asr_eval/README.md), [docs/EVALUATION.md](docs/EVALUATION.md) §6.
 
 - Setup, the CLI on Windows (WSL), costs and the sync/run/fetch loop: [docs/BREV.md](docs/BREV.md).
-- Models and licences: [docs/MODEL_CARDS_AND_LICENSES.md](docs/MODEL_CARDS_AND_LICENSES.md#asr-candidates-under-evaluation-asr_eval-not-deployed-yet).
+- Models and licences: [docs/MODEL_CARDS_AND_LICENSES.md](docs/MODEL_CARDS_AND_LICENSES.md#asr-candidates-evaluated-asr_eval).
 
 ## Repository
 
 ```
 web/                    React + Vite UI: glass room, ink + agent-activity engine, always-on sensors, calibration
 services/gateway/       state machine, fusion, coordinator calls, policy-gated speech, WebSocket
-services/vsr/           Auto-AVSR via Chaplin → raw n-best (MPS)
-services/audio/         Whisper (MLX) raw ∥ RNNoise-enhanced, word diff, VAD gating
+services/vsr/           Auto-AVSR via Chaplin → raw n-best (MPS or CUDA)
+services/audio/         Nemotron Speech 0.6B + Silero VAD: forced phrase scoring, asr_eval's decision + thresholds
 services/eeg/           BNCI2014-008 loader, xDAWN+Riemann P300 decoder, replay payloads
 services/coordinator/   Nemotron tool calling, outside validation, deterministic fallback
-services/tts/           Kokoro-82M (MLX), refuses without a gateway token
+services/tts/           Kokoro-82M (MLX on a Mac, PyTorch on CUDA), refuses without a gateway token
 shared/                 schemas, confirmation gate, provenance + ports
 evaluations/            safety tests, modality baselines, e2e exactness, NeMo Gym env, results
 asr_eval/               audio-only ASR benchmark for the voice agent (Brev GPU or CPU): manifest, VAD gate,
                         models, phrase decision, calib-only tuning, summary/plots; scripts/brev/ helpers
 scripts/                setup, run, evals, weights ledger, vLLM/MLX serving, smoke test
-docs/                   architecture, model cards & licences, datasets & consent, evaluation, BREV.md
+scripts/brev/           whole backend on a Brev GPU: setup_app, start_app, sync_app, connect, bench_latency
+docs/                   architecture, model cards & licences, datasets & consent, evaluation, BREV.md, SERVING.md
 ```
 
 ## Product invariant

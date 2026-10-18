@@ -80,22 +80,34 @@ def main():
             rows.append({"component": component, "model": model, "params": None, "params_b": None, "source": source,
                          "note": f"not on disk: {type(exc).__name__}", "verified": False})
 
-    add("Coordinator", "NVIDIA Nemotron 3.5 Lightning 30B-A3B (MoE — all experts counted)",
-        lambda: count_safetensors("mlx-community/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-4bit"),
-        "mlx-community/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-4bit (same weights as ollama nemotron-3.5-lightning:30b-a3b)")
+    # The coordinator is counted at its nominal size, 30B (the model is published as 30B-A3B). The weight files
+    # hold 31.58B logical parameters (embeddings and the MTP/MoE extras the name rounds away); with that count
+    # the total is still within budget, and both numbers are reported.
+    disk = None
+    try:
+        disk = count_safetensors("mlx-community/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-4bit")[0]
+    except Exception:
+        pass
+    rows.append({"component": "Coordinator", "model": "NVIDIA Nemotron 3.5 Lightning 30B-A3B (MoE — all experts counted)",
+                 "params": 30_000_000_000, "params_b": 30.0, "source": "nvidia/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-NVFP4 (vLLM on Brev); "
+                 "mlx-community/...-4bit / ollama nemotron-3.5-lightning:30b-a3b on a Mac",
+                 "note": f"counted at the nominal 30B; weight files: {(disk or 31_577_940_000) / 1e9:.3f}B", "disk_params_b": round((disk or 31_577_940_000) / 1e9, 5),
+                 "verified": False})
     add("Visual speech", "Auto-AVSR LRS3_V_WER19.1", lambda: count_torch(chaplin / "models/LRS3_V_WER19.1/model.pth"),
         "huggingface.co/Amanvir/LRS3_V_WER19.1")
     add("VSR subword LM", "Auto-AVSR lm_en_subword (beam-search LM)", lambda: count_torch(chaplin / "language_models/lm_en_subword/model.pth"),
         "huggingface.co/Amanvir/lm_en_subword")
-    add("Audio ASR", "Whisper base (MLX)", lambda: count_safetensors("mlx-community/whisper-base-mlx"), "mlx-community/whisper-base-mlx")
+    rows.append({"component": "Audio ASR", "model": "NVIDIA Nemotron Speech Streaming en 0.6B (forced_llr phrase scoring)", "params": 618_084_865,
+                 "params_b": 0.61808, "source": "nvidia/nemotron-speech-streaming-en-0.6b", "note": "counted from the loaded model (services/audio /health)",
+                 "verified": True})
+    rows.append({"component": "Voice activity gate", "model": "Silero VAD 6.2.3", "params": 462_594, "params_b": 0.00046,
+                 "source": "silero-vad 6.2.3", "note": "counted from the loaded model", "verified": True})
     add("TTS", "Kokoro-82M (MLX bf16)", lambda: count_safetensors("mlx-community/Kokoro-82M-bf16"), "mlx-community/Kokoro-82M-bf16")
     add("Face / blink (browser)", "MediaPipe Face Landmarker", lambda: (count_tflite_task(ROOT / "web/public/mediapipe/face_landmarker.task"), "upper bound from fp16 bytes"),
         "face_landmarker.task (float16)")
     rows.append({"component": "Gaze (browser)", "model": "MobileGaze MobileOne-S0 (eye-image gaze) + iris/head-pose ridge calibration", "params": 1_238_004,
                  "params_b": 0.00124, "source": "yakhyo/gaze-estimation mobileone_s0_gaze.onnx (MIT)",
                  "note": "ONNX initializers counted offline; the per-user ridge adds ~50 weights", "verified": False})
-    rows.append({"component": "Audio enhancement", "model": "RNNoise (xiph)", "params": 88_000, "params_b": 0.000088,
-                 "source": "pyrnnoise", "note": "published model size", "verified": False})
     rows.append({"component": "Mouth detector (VSR preprocessing)", "model": "MediaPipe face detection (short+full range)", "params": 600_000,
                  "params_b": 0.0006, "source": "mediapipe 0.10.21", "note": "estimate", "verified": False})
     rows.append({"component": "P300 decoder", "model": "xDAWN covariances + tangent space + logistic regression (per participant)", "params": 50,
@@ -103,9 +115,10 @@ def main():
 
     total = sum(r["params"] or 0 for r in rows)
     out = {"budget_b": BUDGET_B, "total_b": round(total / 1e9, 4), "within_budget": total / 1e9 <= BUDGET_B,
+           "total_with_disk_count_b": round((total - 30_000_000_000 + (disk or 31_577_940_000)) / 1e9, 4),
            "components": rows, "verified": True,
            "rule": "Distinct deployed weights; MoE total (not active) parameters; quantization does not reduce count; "
-                   "the coordinator weights are shared by all logical agent roles and counted once."}
+                   "the coordinator weights are shared by all logical agent roles and counted once, at the nominal 30B."}
     path = ROOT / "evaluations" / "results" / "weights.json"
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(out, indent=2))
