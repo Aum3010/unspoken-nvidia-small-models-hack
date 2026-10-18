@@ -76,12 +76,24 @@ Across six Brev runs of the default prompt (including the MTP and cache-mode ser
 | **Deployed: Nemotron + outside validator + fallback** | **1.000** | 100% | 100% | **0%** | 80% | 2.9 s |
 | Deterministic rules (reference) | 1.000 | 100% | 100% | 0% | 0% | 0 ms |
 
-Both raw models fail on the same thing: history. After two failed retakes they ask for a third, and after "none of these" they re-ask instead of switching to spelling. Those product rules now live in the validator, so a rejected model call falls back to rules. The deterministic policy was written to the same specification as the verifier, so its 1.0 is a ceiling, not an independent baseline. The environment's own tests pass inside the real NeMo Gym package (5/5).
+Both raw models fail on the same thing: history. After two failed retakes they ask for a third, and after "none of these" they re-ask instead of switching to spelling. Those product rules now live in the validator, so a rejected model call falls back to rules. The deterministic policy was written to the same specification as the verifier, so its 1.0 is a ceiling, not an independent baseline. The environment's own tests pass inside the real NeMo Gym package (5/5); re-run 2026-10-18 on Brev with the current 72-task environment (NVIDIA-NeMo/Gym `b3103ea`, nemo-gym 0.7.0rc0, Python 3.13.16): 5/5.
 
 ## 5. Confirmation safety and end-to-end exactness
 
-- 18 unit tests on the policy gate and state machine, plus 7 live attacks: unconfirmed probes ×5, a forged TTS token, and a non-explicit confirmation method. **25/25 pass.**
-- In the end-to-end test, 10 phrases were selected → confirmed → spoken by Kokoro → re-transcribed by Whisper. **10/10 matched the confirmed string exactly.**
+- **Unit tests** (`pytest evaluations/safety_tests`): **28 pass** (2026-10-18, `demo-final`):
+  - 18 in `test_confirmation.py`: policy gate and state machine;
+  - 7 in `test_auto_speak.py`: auto-speak only for accepted readings;
+  - 3 in `test_vsr_phrase_scoring.py`: an impossible phrase-list alignment never ranks first.
+- **Live attacks** (`evaluations/test_cases/e2e_exactness.py`, against the running stack): **7/7 blocked**:
+  5 unconfirmed-speech probes, a forged TTS token, and a non-explicit confirmation method (`e2e.json`).
+- **Exactness** (same script): 10 phrases are put on the board → confirmed → spoken by Kokoro → re-transcribed by
+  the voice agent.
+  - 2026-10-17, with the earlier Whisper voice agent: **10/10** matched the confirmed string exactly (`e2e.json`).
+  - 2026-10-18, `demo-final` on Brev (`e2e_demo_final.json`): the text the gateway sent to TTS equalled the
+    confirmed string **10/10**, but only **3/10** re-transcriptions matched.
+  - That check no longer works: today's voice agent only maps audio onto its 20 fixed phrases, so it cannot
+    transcribe free text. The 3 matches are the 3 phrases on its list; "Thank you" came back as "I can't
+    breathe". An independent free-text ASR is needed to repeat it.
 - **Unconfirmed or contradicted text reaching TTS: 0**, enforced by construction (HMAC token over the exact text) and tested.
 
 ## 6. Voice agent model selection: 20-phrase task (`asr_eval/`; adopted in the app)
@@ -128,9 +140,22 @@ Both raw models fail on the same thing: history. After two failed retakes they a
 
 ## 7. Latency with every model running (Brev, 2026-10-18)
 
-Full method, tables and serving advice: [SERVING.md](SERVING.md); raw numbers: `evaluations/results/latency_brev.json`.
+Full method, tables and serving advice: [SERVING.md](SERVING.md) and [TECHNICAL_VERBOSE.md](TECHNICAL_VERBOSE.md) §7.
 
-Current branch `ui` (`latency_brev_ui_mps{0,1}.json`):
+**Now** (MPS on, MTP off, after the speedups; `latency_brev_final2.json` unless noted):
+
+| Measurement | p50 / p95 |
+|---|---:|
+| One message end to end on the box (voice + lip clip → spoken) | **309 / 322 ms** |
+| Accepted voice message, clip → spoken, on the box (ad-hoc bench, same run, printed) | **71 / 89 ms** |
+| Streamed lip clip: reading after the clip ends, on the box / from the laptop | **104 ms** / **407 ms** (whole clip: 477 / 898 ms) |
+| Voice result after the 700 ms pause, early decode, on the box / from the laptop | 2 ms / 64 ms |
+
+What a person waits for (added up from the measured parts, not one end-to-end measurement): **0.85–0.9 s** for
+an accepted voice message (0.7 s of it is the deliberate pause), **about 1.3 s** to the question for a lip message
+(0.9 s of it is the pause).
+
+**Earlier: branch `ui` before the speedups** (`latency_brev_ui_mps{0,1}.json`):
 
 - **One message end to end** (voice + lip clip → evidence → coordinator → auto-speak): 0.43 s p50, 0.47 s p95, with or without MPS. The lip agent (≈0.4 s) sets it; the coordinator runs alongside it.
 - **With every agent busy:** MPS cuts the voice agent from 244 to 75 ms p50 and Kokoro from 79 to 30 ms.

@@ -109,7 +109,7 @@ For someone who cannot speak, being asked the same wrong question again is the f
 | Tools the agent can call | the coordinator's 6 tools (§1), as Responses-API function tools |
 | Scoring code | `scoring.py`: `valid` + `action` + `safety`, each 0/1 |
 | Config | `configs/unspoken_communication.yaml` (resources server + `simple_agent`) |
-| Tests | `tests/test_app.py` (5/5 passed inside the NeMo Gym package on the earlier 60-task version; not re-run since the two new tools were added) |
+| Tests | `tests/test_app.py`: **5/5 pass inside a NeMo Gym checkout** (NVIDIA-NeMo/Gym `b3103ea`, nemo-gym 0.7.0rc0, Python 3.13.16, on Brev, 2026-10-18) with the current 72-task environment |
 
 **What the scorer checks:**
 - **`valid`:** a known tool, its arguments present, candidate ids that exist, an available input method.

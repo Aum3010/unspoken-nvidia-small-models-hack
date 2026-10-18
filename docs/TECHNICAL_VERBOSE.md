@@ -68,6 +68,23 @@ mic ──── voice detector → wav clip ─┘─────────�
   (asr venv), Python 3.12 via `uv` (the asr venv is the box's Python 3.10).
   - Pinned lists: `~/unspoken/.run/requirements-cuda.lock` and `requirements-vllm.lock`.
 
+**Flags** (environment variables; the defaults are what runs today):
+
+| Flag | Default | Read by | What it does |
+|---|---|---|---|
+| `UNSPOKEN_AUTO_SPEAK` | `1` | gateway (`state.py`) | demo auto-speak of **accepted** readings; `0` = nothing is spoken until the person confirms |
+| `UNSPOKEN_LLM_FOR_ACCEPTED` | `0` | gateway | `1` = call Nemotron for accepted readings too (no rules-only fast path) |
+| `UNSPOKEN_HOST_LABEL` | `this device` (`NVIDIA Brev` from `start_app.sh`) | gateway `/api/health` | where clips are processed; any value other than `this device` makes the page say clips go there |
+| `UNSPOKEN_COORD_COMPACT` | `0` | coordinator | `1` = schema-constrained short JSON answers (faster, less accurate; §3.3) |
+| `UNSPOKEN_LLM_BACKEND`, `_BASE_URL`, `_MODEL`, `_TIMEOUT` | `ollama`, `http://127.0.0.1:11434`, `nemotron-3.5-lightning:30b-a3b`, `20` | coordinator | the model server; `start_app.sh` sets `openai` + vLLM on :8001 |
+| `UNSPOKEN_VSR_PHRASES` | empty | lip agent | optional closed phrase list (off) |
+| `UNSPOKEN_VSR_FREE_TEXT` | `0` | lip agent | `1` = free-text beam search when no recorded phrase matches |
+| `UNSPOKEN_ENROLL_MAX_DIST` | `0.30` | lip agent | enrollment match threshold (DTW distance) |
+| `UNSPOKEN_MPS` | `1` | `start_app.sh` | NVIDIA MPS daemon on/off |
+| `LLM_MTP` | `0` | `start_app.sh` | MTP speculative decoding for vLLM (§6) |
+| `LLM_EXTRA` | empty | `start_app.sh` | extra vLLM flags, for experiments |
+| `LLM_MEM`, `LLM_ATTN` | `0.55`, `TRITON_ATTN` | `start_app.sh` | vLLM memory share and attention backend |
+
 ---
 
 ## 3. The agents
@@ -268,8 +285,9 @@ stitched to it. A lip and a voice clip pair into one message when they are withi
 - When the message's only candidate comes from evidence that is all `proposed`, and the voice agent supports it, the
   rules' plan (ask about that one reading) is applied at once and Nemotron is not called.
 - Nemotron runs for ambiguous, unknown and disagreeing readings only.
-- Measured on Brev: accepted voice message → spoken **413 → 105 ms** p50. Nemotron ran for 2 of 40 messages (the
-  ambiguous ones).
+- Measured on Brev: accepted voice message → spoken **413 → 105 ms** p50 from this change alone, and **71 ms**
+  once phrase audio was also pre-rendered (§7). Nemotron ran for 2 of 40 messages (the ambiguous ones).
+  - Source: Measured with an ad-hoc voice-only bench on the box (40 Kokoro-rendered phrase clips, 38 accepted), printed, not saved to a file: 413 / 459 ms before the change (Nemotron planned every message); 106 / 120 ms with accepted readings decided by rules (commit `51df483`); 105 / 115 ms after auto-speak was limited to accepted readings (`09c44c1`); **71 / 89 ms** in the final run, once fixed phrases were pre-rendered so Kokoro is skipped (same run as `latency_brev_final2.json`).
 
 **Auto-speak** (default on): only for an `ask_confirmation` of exactly the accepted reading. `_auto_speak` is
 scheduled at once; it auto-confirms the reading as `system` and speaks it through the same policy gate with
@@ -390,7 +408,7 @@ All of these run at once.
   - `web/public/mediapipe/face_landmarker.task` and `mediapipe/wasm/`;
   - `web/public/models/mobileone_s0_gaze.onnx`.
 - **Known UI issues on `ui`:**
-  - **Privacy text:** the camera chip always says "Camera · on device", even when clips go to Brev.
+  - **Privacy text:** fixed on `demo-final`; the chip and calibration screen name the remote host.
   - **Camera opening:** the shared camera-open promise and the single face-tracking loop were reverted
     (`3d3e95c`), so slow USB cameras can stall on parallel `getUserMedia` calls.
   - **Unused dependency:** `webgazer` is listed but unused.
@@ -491,10 +509,12 @@ The "Now" column is MPS on, MTP off, after the speedups below (`latency_brev_fin
 | Lips (whole clip), every agent busy | 436 / 468 | 404 / 464 | **332 / 349** |
 | Alone: voice / lips / coordinator / Kokoro | 60 / 409 / 314 / 23 | 61 / 391 / 330 / 22 | 59 / **265** / 333 / 23 |
 | One message end to end (voice + lip clip) | 434 / 469 | 435 / 474 | **309 / 322** |
-| Accepted voice message: clip → spoken | — | 413 / 459 | **71 / 89** |
+| Accepted voice message: clip → spoken (¹) | — | 413 / 459 | **71 / 89** |
 | Lip reading after the clip ends: whole clip / **streamed** | — | — | 477 / **104** |
 | Voice result after the 700 ms pause, sent then (old) | 337 / 377 | 109 / 119 | 70 / 77 |
 | Voice result after the 700 ms pause, **early decode** | 3 / 22 | 2 / 2 | 2 / 3 |
+
+(¹) Measured with an ad-hoc voice-only bench on the box (40 Kokoro-rendered phrase clips, 38 accepted), printed, not saved to a file: 413 / 459 ms before the change (Nemotron planned every message); 106 / 120 ms with accepted readings decided by rules (commit `51df483`); 105 / 115 ms after auto-speak was limited to accepted readings (`09c44c1`); **71 / 89 ms** in the final run, once fixed phrases were pre-rendered so Kokoro is skipped (same run as `latency_brev_final2.json`). The streamed-lip row is from `stream_equiv.py` in the same run (12 GRID clips, printed).
 
 ### From the laptop through the tunnel
 
@@ -508,6 +528,8 @@ The "Now" column is MPS on, MTP off, after the speedups below (`latency_brev_fin
 | Voice result after the pause, early decode | **64 ms** p50 |
 | Lip reading after the clip ends, whole clip uploaded | 898 ms p50 |
 | Lip reading after the clip ends, **streamed** while mouthing | **407 ms** p50 (8/8 same reading) |
+| Accepted voice message: clip sent → spoken (2026-10-18, `demo-final` baseline, 10 clips) | **252 ms** p50, 393 ms p95 |
+| Lip reading after the clip ends, streamed (same baseline, 8 clips) | 415 ms p50 (whole clip 922 ms) |
 
 ### What a person waits for
 
@@ -584,7 +606,8 @@ The lip enrollment adds stored features, not parameters.
 
 | What | Command | Result file |
 |---|---|---|
-| Safety tests (policy gate, auto-speak) | `pytest evaluations/safety_tests` (25 pass) | — |
+| Safety tests (policy gate, auto-speak, phrase scoring) | `pytest evaluations/safety_tests`: **28 tests** = 18 in `test_confirmation.py` + 7 in `test_auto_speak.py` + 3 in `test_vsr_phrase_scoring.py` | — |
+| Live attacks + exactness (needs the running stack) | `python evaluations/test_cases/e2e_exactness.py`: 7 attacks (5 unconfirmed-speech probes, a forged TTS token, a non-explicit method): 7/7 blocked on `demo-final`. Its exactness half (10 phrases spoken and re-transcribed) needs a free-text ASR; today's phrase-only voice agent cannot do it (EVALUATION §5) | `e2e.json` (2026-10-17, Whisper), `e2e_demo_final.json` |
 | Coordinator (NeMo Gym, 72 tasks; held-out 44) | `run_local.py --policies raw:<model> guarded deterministic` (held-out: `--seed 2026 --distinct-from 7 --out <file>`; `UNSPOKEN_COORD_COMPACT=1` for compact mode) | `coordinator_brev.json` (Brev); `coordinator_heldout_brev.json`, `coordinator_heldout_compact_brev.json` (held-out); `coordinator_mtp_brev.json`, `coordinator_compact_brev.json`, `coordinator_compact_mtp_brev.json` (A/B); `coordinator.json` (Mac, 60 tasks, older prompt) |
 | Lip speed vs accuracy | `evaluations/modality_baselines/vsr_speed_accuracy.py` | `vsr_speed_accuracy.json` |
 | Early-decode accuracy check | `asr_eval/scripts/trailing_silence_check.py` | `trailing_silence_check.json` |
@@ -606,13 +629,16 @@ The NeMo Gym data files (`data/*.jsonl`) embed the coordinator's prompt and tool
 2. **Coordinator overuses `ignore_input`.** A person who failed twice, a genuine request next to an injection,
    and clear negated readings get dropped as noise (§3.3). The validator allows it.
 3. **The correction validator does not check negations.** It accepts "I don't need water" → "I need water".
-4. **Personal lip data in git.** `data/enroll/` holds encoder features of a real person's recordings, force-added
-   past the `/data/` gitignore rule, while `enroll.py` says they "are not uploaded".
-5. **Disclosure missing.** The UI no longer tells the person that clips go to Brev.
+4. **Personal lip data in git, pending a consent decision.** `data/enroll/` holds encoder features of a real
+   person's recordings, force-added past the `/data/` gitignore rule, while `enroll.py` says they "are not
+   uploaded". History is not rewritten; the note and the removal commands are in
+   [DATASETS_AND_CONSENT.md](DATASETS_AND_CONSENT.md).
+5. **Disclosure: fixed on `demo-final`.** With a remote gateway the camera chip says "Camera · clips to NVIDIA
+   Brev" and calibration says clips are processed on that GPU server, not stored; local mode keeps "on device".
 6. **Enrollment threshold barely measured.** It was set from 10 recordings, and strangers matched in about 12%
    of GRID clips.
-7. **`zero_infinity=True`** in `services/vsr/phrases.py` gives impossible alignments a perfect CTC score (only
-   with `UNSPOKEN_VSR_PHRASES` set).
+7. **`zero_infinity=True`: fixed on `demo-final`.** Impossible CTC alignments in the phrase-list path now score
+   `IMPOSSIBLE` (−1e6, asr_eval's convention) and never rank first (`test_vsr_phrase_scoring.py`).
 8. **Camera stalls.** The camera-open sharing and single tracking loop were reverted (slow USB cameras can
    stall).
 9. **`sync_app.sh` does not ship `data/enroll/`.** It must be copied separately (§6).

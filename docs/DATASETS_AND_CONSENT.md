@@ -74,8 +74,21 @@ For the ASR evaluation there are two recorders:
   features are derived from one real person's mouth recordings.
 - **Status: committed to git.** They were force-added past the `/data/` gitignore rule. `services/vsr/enroll.py`
   says they "are not uploaded", and the rules above keep personal recordings out of git.
-- **For the team:** confirm the person's consent covers a shared repository, or remove them from git history and
-  ship them to the instance separately, as `docs/BREV.md` §4b already does for running.
+- **Status on `demo-final`: pending the person's written consent decision.** Git history has **not** been
+  rewritten. Until that decision, do not copy `data/enroll/` anywhere new.
+- **If the person does not consent to a shared repository**, remove the features from the tip of every branch
+  that has them, keep them only on the GPU instance, and then decide with the team whether to purge history:
+
+  ```bash
+  # 1. stop tracking (the files stay on disk; .gitignore already ignores /data/)
+  git rm -r --cached data/enroll
+  git commit -m "data: stop tracking lip enrollment features (consent)"
+  # 2. ship them to the instance the way it runs today (docs/BREV.md §4b), from a copy kept outside git
+  tar -czf /tmp/enroll.tgz -C data enroll && brev copy /tmp/enroll.tgz marginal-sapphire-whale:/home/shadeform/enroll.tgz
+  # 3. only with the team's agreement (rewrites history; every clone must re-clone; needs git-filter-repo):
+  #    git filter-repo --path data/enroll --invert-paths && git push --force --all
+  ```
+  Step 1 does not remove them from history: anyone with a clone or the remote still has them until step 3.
 
 ## Cloud processing
 
@@ -83,6 +96,6 @@ For the ASR evaluation there are two recorders:
 
 **With the whole backend on Brev** (`scripts/brev/start_app.sh`), the browser still processes the camera itself (face, gaze, blink and head never leave it), but the **mouth video clips and voice clips** it cuts are sent through the SSH tunnel to the instance. They are decoded in memory and not stored; the decision, transcript and audit trail stay in the gateway's session memory on the instance. The UI's camera chip says "clips to NVIDIA Brev" whenever the gateway reports a remote host.
 
-In both cases, disclose this to the person, and require their opt-in, before turning it on. **On branch `ui` the UI no longer does this**: the camera chip always says "Camera · on device", and the calibration screen says the camera and microphone stay on this device. Tell the person yourself until it is restored.
+In both cases, disclose this to the person, and require their opt-in, before turning it on. On `demo-final` the UI says it: the camera chip reads "Camera · clips to NVIDIA Brev" and the calibration screen says mouth and voice clips are processed on that GPU server, not stored. **On branch `ui` it still says "on device"**: tell the person yourself there.
 
 **The ASR evaluation is different.** It uploads audio clips, including consented volunteer recordings, to a Brev GPU instance under `/workspace`. That is covered by the recording consent above. Deleting the instance deletes the disk. See [BREV.md](BREV.md) §6.

@@ -1,0 +1,77 @@
+{
+  "n": 10,
+  "exact": 3,
+  "exactness": 0.3,
+  "rows": [
+    {
+      "confirmed": "I need water",
+      "gateway_text": "I need water",
+      "asr_of_tts": "I need water",
+      "match": true
+    },
+    {
+      "confirmed": "Please call the nurse",
+      "gateway_text": "Please call the nurse",
+      "asr_of_tts": "Call the nurse",
+      "match": false
+    },
+    {
+      "confirmed": "I am too cold",
+      "gateway_text": "I am too cold",
+      "asr_of_tts": "I'm cold",
+      "match": false
+    },
+    {
+      "confirmed": "Please move my pillow",
+      "gateway_text": "Please move my pillow",
+      "asr_of_tts": "No",
+      "match": false
+    },
+    {
+      "confirmed": "Where is my family?",
+      "gateway_text": "Where is my family?",
+      "asr_of_tts": "Where is my family",
+      "match": true
+    },
+    {
+      "confirmed": "Thank you",
+      "gateway_text": "Thank you",
+      "asr_of_tts": "I can't breathe",
+      "match": false
+    },
+    {
+      "confirmed": "Turn off the light",
+      "gateway_text": "Turn off the light",
+      "asr_of_tts": "Turn off the light",
+      "match": true
+    },
+    {
+      "confirmed": "I want to sit up",
+      "gateway_text": "I want to sit up",
+      "asr_of_tts": "Stop",
+      "match": false
+    },
+    {
+      "confirmed": "Not now",
+      "gateway_text": "Not now",
+      "asr_of_tts": "No",
+      "match": false
+    },
+    {
+      "confirmed": "Please repeat that",
+      "gateway_text": "Please repeat that",
+      "asr_of_tts": "Yes",
+      "match": false
+    }
+  ],
+  "attacks": [
+    "blocked: message status is 'selected', not 'confirmed'",
+    "blocked: message status is 'selected', not 'confirmed'",
+    "blocked: message status is 'selected', not 'confirmed'",
+    "blocked: message status is 'selected', not 'confirmed'",
+    "blocked: message status is 'selected', not 'confirmed'",
+    "forged TTS token -> HTTP 403",
+    "non-explicit confirmation method -> HTTP 400"
+  ],
+  "unsafe_assertions": 0
+}

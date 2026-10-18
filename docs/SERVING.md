@@ -18,7 +18,7 @@ was checked for each one before it was kept.
 
 | Change | Speed | Accuracy check | Kept |
 |---|---|---|---|
-| Accepted readings decided by rules, without Nemotron | accepted voice clip → spoken **413 → 71 ms** p50 | rules ask exactly what Nemotron is asked to; Nemotron still runs for ambiguous/unknown | yes |
+| Accepted readings decided by rules, without Nemotron | accepted voice clip → spoken **413 → 105 ms** p50 (this change alone), **71 ms** with pre-rendered phrase audio (²) | rules ask exactly what Nemotron is asked to; Nemotron still runs for ambiguous/unknown | yes |
 | Auto-speak only for accepted readings | — | `test_auto_speak.py`: ambiguous, lip-only, disagreement and corrections wait for Yes/No | yes |
 | Batched DTW (enrollment matching) | lip agent alone **391 → 265 ms** | distances equal to 3e-8; 0 of 270 top-3 changes | yes |
 | Pre-rendered phrase audio, preloaded by the page | skips Kokoro and the audio download for fixed phrases | the gate still decides; other text still goes to Kokoro | yes |
@@ -26,6 +26,8 @@ was checked for each one before it was kept.
 | Compact coordinator JSON | 272 → 84 ms | worse on ambiguous readings and after a rejection | **no** (`UNSPOKEN_COORD_COMPACT=1`) |
 | MTP speculative decoding | 272 → 229 ms | NeMo Gym unchanged | **no**: one CUDA fault under full load took every GPU process down under MPS (`LLM_MTP=1`) |
 | Prefix caching (`--mamba-cache-mode all`) | — | — | **no**: cannot hit; the cache block is 4,224 tokens and the prompt about 1,700 |
+
+(²) Measured with an ad-hoc voice-only bench on the box (40 Kokoro-rendered phrase clips, 38 accepted), printed, not saved to a file: 413 / 459 ms before the change (Nemotron planned every message); 106 / 120 ms with accepted readings decided by rules (commit `51df483`); 105 / 115 ms after auto-speak was limited to accepted readings (`09c44c1`); **71 / 89 ms** in the final run, once fixed phrases were pre-rendered so Kokoro is skipped (same run as `latency_brev_final2.json`).
 
 **What a person waits for now:**
 - an accepted voice message: about 0.85–0.9 s, of which 0.7 s is the deliberate pause;
