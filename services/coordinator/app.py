@@ -50,7 +50,8 @@ interaction step by calling exactly ONE tool. Hard rules:
   Voice: decision "accepted" passed its calibrated gates (a strong reading); "unknown" with reason "small_margin"
   means two phrases came close; transcript is what it actually heard (if the transcript is not the phrase, be wary).
   Lips: mode "enrollment" matched the person's own recordings; enroll_best_dist is the distance to the closest one
-  (lower is closer; at or above enroll_max_dist it is not a phrase). A reading close to the cut-off is weak.
+  (lower is closer; at or above enroll_max_dist it is not a phrase). A reading close to the cut-off is weak; one well
+  under it is the person saying a phrase they recorded themselves, never noise, even with no voice.
   A reading supported by both lips and voice is much stronger than either alone.
 - Prefer the smallest useful question: if one candidate clearly dominates, ask to confirm just it; if 2-4 are plausible, offer them.
 - Capture is always on, so most clips are not messages: background sound, the person breathing, yawning or talking to
@@ -240,6 +241,14 @@ class PlanRequest(BaseModel):
     use_llm: bool = True
 
 
+# a lip match at or under this fraction of the cut-off is clear: held-out takes of a recorded phrase sat at
+# 0.10-0.18 (median 0.13) against a 0.24 cut-off, strangers' clips at 0.247 and above
+CLEAR_MATCH = 0.8
+# ...or it is within the cut-off and ahead of every other phrase by this much (held-out takes of the long sentence
+# led the next phrase by 0.19-0.25; takes of short look-alike phrases by as little as 0.05)
+CLEAR_GAP = 0.08
+
+
 def validate(call: ToolCall, req: PlanRequest) -> ToolCall:
     """Every model-proposed call is checked here, outside the model."""
     errors: list[str] = []
@@ -277,6 +286,17 @@ def validate(call: ToolCall, req: PlanRequest) -> ToolCall:
             errors.append("lip and audio agree on a reading; it is not noise")
         if any(c.modality not in ("lip", "audio") for c in req.candidates):
             errors.append("only lip/audio readings can be ignored as noise")
+        # a clear match to the person's own recording is a message: the lip agent only reads a clip whose lips
+        # really moved, and a match well inside the cut-off is not chance (strangers' clips stay above it)
+        for e in req.evidence:
+            d = e.detail
+            best, cut, gap = d.get("enroll_best_dist"), d.get("enroll_max_dist"), d.get("enroll_gap")
+            if e.modality == "lip" and d.get("mode") == "enrollment" and best is not None and cut and best <= cut \
+                    and (best <= CLEAR_MATCH * cut or (gap is not None and gap >= CLEAR_GAP)):
+                errors.append(f"a clear match to the person's own recording (distance {best:.2f} of {cut:.2f}"
+                              f"{'' if gap is None else f', ahead of the next phrase by {gap:.2f}'}) is a message, not noise")
+            if e.modality == "audio" and d.get("decision") == "accepted":
+                errors.append("the voice agent accepted this reading; it is not noise")
     # no forced consensus: when lips and voice disagree, the person sees both
     if call.name == "ask_confirmation" and not errors:
         cids = set(a.get("candidate_ids") or [])

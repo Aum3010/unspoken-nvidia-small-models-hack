@@ -38,6 +38,9 @@ const ONSET_BLOCKS = 3        // ≈130 ms above threshold to start
 const HANG_BLOCKS = 16        // ≈700 ms of quiet to end (unchanged: pauses inside a phrase must not split it)
 const EARLY_BLOCKS = 8        // ≈350 ms of quiet: start decoding early; the clip then keeps exactly this audio
 const MIN_VOICED_BLOCKS = 8   // ≈350 ms of voice, or the clip is dropped
+// after ≈1.5 s of voice the utterance is a long sentence: its end needs ≈1.1 s of quiet, so a pause inside it does
+// not cut it in two (short phrases keep the 700 ms end)
+const LONG_VOICED_BLOCKS = 35, LONG_HANG_BLOCKS = 24
 const MAX_MS = 10000
 
 export async function startVoice(o: VoiceOpts): Promise<() => void> {
@@ -92,7 +95,7 @@ export async function startVoice(o: VoiceOpts): Promise<() => void> {
       o.onEarly(early.wav)
     }
     if (clip.length * blockMs >= MAX_MS) { cancelEarly(); end(true) }
-    else if (quiet >= HANG_BLOCKS) end(true)
+    else if (quiet >= (voiced >= LONG_VOICED_BLOCKS ? LONG_HANG_BLOCKS : HANG_BLOCKS)) end(true)
   }
   return () => { end(false); tap.port.onmessage = null; src.disconnect(); ac.close() }
 }
@@ -134,6 +137,9 @@ interface LipOpts {
 const LIP_WINDOW_MS = 600
 const LIP_MOVING = 0.012      // std of lip gap / face height over the window
 const LIP_STILL_MS = 900
+// a long sentence has pauses inside it: once the lips have moved this long, the clip ends only after a longer
+// stillness, so it is not cut in two (short phrases keep the quick 0.9 s end)
+const LIP_LONG_MOVING_MS = 1500, LIP_LONG_STILL_MS = 1400
 const LIP_MIN_MS = 900
 const LIP_MAX_MS = 8000
 
@@ -189,7 +195,7 @@ export function startLips(o: LipOpts): () => void {
       movingSince = 0
       if (!stillSince) stillSince = now
       if (rec && !confirmed && now - stillSince > 300) stop(false)
-      if (rec && confirmed && now - stillSince > LIP_STILL_MS) stop(true)
+      if (rec && confirmed && now - stillSince > (movingMs > LIP_LONG_MOVING_MS ? LIP_LONG_STILL_MS : LIP_STILL_MS)) stop(true)
     }
     if (rec && performance.now() - recT0 > LIP_MAX_MS) stop(true)
   })

@@ -265,6 +265,8 @@ def _read_clip(encode, session_id: str, source_ref: str, quality: dict | None = 
                 quality["mouth_thumbs"] = _thumbs(crops)
                 return _evidence(session_id, source_ref, [], flags, quality, prov, t0)
             matches = [(p, d) for p, d in matches if not p.startswith(NEG_PREFIX)][:PHRASE_TOP]
+            if len(matches) >= 2:
+                quality["enroll_gap"] = round(matches[1][1] - matches[0][1], 4)   # how clearly the best phrase wins
             for phrase, dist in matches:
                 if dist <= ENROLL_MAX_DIST:
                     personal.append(Hypothesis(text=phrase, score=round(-ENROLL_SCALE * dist, 2),
@@ -300,6 +302,8 @@ def _read_clip(encode, session_id: str, source_ref: str, quality: dict | None = 
     if len(hypotheses) >= 2:
         quality["top2_margin"] = round(hypotheses[0].score - hypotheses[1].score, 3)
     quality["mouth_thumbs"] = _thumbs(crops)
+    print(f"[lips] mode={quality.get('mode')} best={quality.get('enroll_best_dist')} gap={quality.get('enroll_gap')} "
+          f"moving_ms={moving_ms} -> {[h.text for h in hypotheses[:3]]}", flush=True)
     return _evidence(session_id, source_ref, hypotheses, flags, quality, prov, t0)
 
 

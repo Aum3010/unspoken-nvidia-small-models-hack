@@ -69,6 +69,15 @@ export const api = {
   },
   commitAudio: (early_id: string) => post<{ event: any; state: SessionState }>(`${base}/capture/audio/commit`, { early_id }),
   discardAudio: (early_id: string) => post<{ discarded: boolean }>(`${base}/capture/audio/discard`, { early_id }),
+  enrollList: () => req<{ phrases: { phrase: string; count: number }[]; suggestions: string[]; negatives: string[]; negative_prefix: string }>('/api/enroll'),
+  enrollAdd: (blob: Blob, phrase: string) => {
+    const f = new FormData()
+    f.append('video', blob, blob.type.includes('mp4') ? 'clip.mp4' : 'clip.webm')
+    f.append('phrase', phrase)
+    return req<{ phrase: string; count: number; phrases: { phrase: string; count: number }[] }>('/api/enroll', { method: 'POST', body: f })
+  },
+  enrollRemove: (phrase: string) =>
+    req<{ phrases: { phrase: string; count: number }[] }>(`/api/enroll?phrase=${encodeURIComponent(phrase)}`, { method: 'DELETE' }),
   captureEeg: (subject: string, chars: number[]) => post<SessionState>(`${base}/capture/eeg`, { subject, chars }),
   board: (text: string, origin: 'board' | 'spelling') => post<SessionState>(`${base}/board`, { text, origin }),
   select: (candidate_id: string, method: string) => post<SessionState>(`${base}/select`, { candidate_id, method }),

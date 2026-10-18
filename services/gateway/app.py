@@ -100,7 +100,8 @@ async def evals():
 # ---- coordination -----------------------------------------------------------
 
 # what each agent decided, passed to the coordinator with its readings (voice: services/audio, lips: services/vsr)
-EVIDENCE_DETAIL = ("decision", "reason", "transcript", "margin", "mode", "enroll_best_dist", "enroll_max_dist", "enroll_negative")
+EVIDENCE_DETAIL = ("decision", "reason", "transcript", "margin", "vad_passed_by_lips", "mode", "enroll_best_dist",
+                   "enroll_max_dist", "enroll_gap", "enroll_negative")
 
 async def coordinate(s: Session):
     m = s.message
@@ -288,6 +289,8 @@ def screen_evidence(ev: Evidence) -> str | None:
 
 
 async def _infer(s: Session, service: str, field: str, filename: str, data: bytes, content_type: str, extra: dict | None = None) -> Evidence:
+    if service == "audio" and "mouthing" in s.settings.get("person_activity", []):
+        extra = {**(extra or {}), "lips_moving": "true"}   # the voice agent may then hear a whisper (no voicing)
     async with httpx.AsyncClient(timeout=120) as client:
         r = await client.post(f"{service_url(service)}/infer", files={field: (filename, data, content_type)},
                               data={"session_id": s.id, **(extra or {})})
@@ -434,6 +437,36 @@ async def capture_lip_stream(sid: str, req: LipStreamFinish):
     if r.status_code != 200:
         raise HTTPException(502, f"vsr error: {r.text[:200]}")
     return await _apply_evidence(s, "vsr", Evidence(**r.json()), "Mouth clip")
+
+
+# ---- personal enrollment (stored and matched by the vsr service) ----
+
+async def _vsr(method: str, path: str, **kw):
+    try:
+        async with httpx.AsyncClient(timeout=120) as client:
+            r = await client.request(method, f"{service_url('vsr')}{path}", **kw)
+    except Exception as exc:
+        raise HTTPException(503, f"lip reading unavailable ({type(exc).__name__})")
+    if r.status_code != 200:
+        raise HTTPException(r.status_code, r.json().get("detail", r.text[:200]) if r.headers.get("content-type", "").startswith("application/json") else r.text[:200])
+    return r.json()
+
+
+@app.get("/api/enroll")
+async def enroll_list():
+    return await _vsr("GET", "/enroll")
+
+
+@app.post("/api/enroll")
+async def enroll_add(video: UploadFile = File(...), phrase: str = Form(...)):
+    data = await video.read()
+    return await _vsr("POST", "/enroll", files={"video": (video.filename or "clip.webm", data, video.content_type or "video/webm")},
+                      data={"phrase": phrase})
+
+
+@app.delete("/api/enroll")
+async def enroll_remove(phrase: str):
+    return await _vsr("DELETE", "/enroll", params={"phrase": phrase})
 
 
 @app.post("/api/{sid}/capture/audio")

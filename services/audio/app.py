@@ -13,6 +13,8 @@ which the model heard no words (plan.md). The patient's confirmation stays the f
 from __future__ import annotations
 
 import os
+from pathlib import Path
+import re
 import sys
 import time
 
@@ -32,6 +34,7 @@ METHOD = os.environ.get("UNSPOKEN_ASR_METHOD", "forced_llr")
 # still confirmed by the person; strict (<=1%) is the headline operating point
 POINT = os.environ.get("UNSPOKEN_ASR_POINT", "balanced")
 MIN_S = 0.25
+EXTRA_PHRASES = Path(os.environ.get("UNSPOKEN_ASR_EXTRA_PHRASES", Path(__file__).with_name("extra_phrases.txt")))
 
 app = make_app("unspoken-audio")
 
@@ -40,7 +43,13 @@ def _load():
     from harness.config import load_config
     from harness.live import Bench
 
-    bench = Bench(load_config(ASR_EVAL / "configs" / "eval.yaml"), MODEL, METHOD, POINT)
+    cfg = load_config(ASR_EVAL / "configs" / "eval.yaml")
+    # extra phrases (services/audio/extra_phrases.txt) join the 20 evaluated ones for the live agent only
+    for line in EXTRA_PHRASES.read_text().splitlines() if EXTRA_PHRASES.exists() else []:
+        text = line.strip()
+        if text and not text.startswith("#"):
+            cfg.raw["phrases"]["x_" + "_".join(re.findall(r"[a-z0-9]+", text.lower()))[:40]] = text
+    bench = Bench(cfg, MODEL, METHOD, POINT)
     if not bench.th:
         raise RuntimeError(f"no frozen thresholds for {bench.th_key(MODEL, METHOD, POINT)} in asr_eval/results/thresholds.json")
     return bench
@@ -65,7 +74,8 @@ def health():
 
 
 @app.post("/infer")
-def infer(audio: UploadFile = File(...), session_id: str = Form("demo-session"), enhance: bool = Form(True)):
+def infer(audio: UploadFile = File(...), session_id: str = Form("demo-session"), enhance: bool = Form(True),
+          lips_moving: bool = Form(False)):
     # `enhance` is accepted for API compatibility; the evaluated pipeline scores the raw audio
     t0 = time.time()
     bench = model.get()
@@ -77,7 +87,17 @@ def infer(audio: UploadFile = File(...), session_id: str = Form("demo-session"),
     if len(wav) < MIN_S * SR:
         return _evidence(session_id, [], ["too_short"], "unknown", quality, prov, t0)
 
-    r = bench.recognize(wav)
+    # lips_moving: the browser saw the lips moving with this clip (sent by the gateway). A whisper has no voicing,
+    # so the VAD reads it as no speech; with the lips moving, only the VAD gate is passed (score, margin and
+    # negation gates still decide), so noise without mouth movement is still rejected.
+    r = bench.recognize(wav, assume_speech=lips_moving)
+    if r.get("vad_passed_by_lips"):
+        quality["vad_passed_by_lips"] = True
+    # one line per clip in .run/logs/audio.log: where a clip stops (no speech / low score / accepted) is visible
+    vad_s = r["vad"].get(f"vad_speech_s@{bench.th['vad_t']}")
+    top = [(p["text"], p["score"]) for p in r["top3"][:2]]
+    print(f"[voice] {len(wav) / SR:.2f}s rms={float((wav ** 2).mean() ** 0.5):.4f} decision={r['decision']} "
+          f"reason={r['reason']} vad_speech_s={vad_s} lips_moving={lips_moving} heard={r['transcript']!r} top={top}", flush=True)
     quality.update(decision=r["decision"], reason=r["reason"], transcript=r["transcript"], margin=r["margin"],
                    top3=r["top3"], vad_speech_s=r["vad"].get(f"vad_speech_s@{bench.th['vad_t']}"), timings_ms=r["timings_ms"])
     if r["decision"] == "no_speech":

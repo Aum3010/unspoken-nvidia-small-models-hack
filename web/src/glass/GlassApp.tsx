@@ -12,6 +12,7 @@ import { gazeState, learnFromSelection, onGaze, saveCalibration, startGaze } fro
 import type { Candidate, ConfirmationMethod, Modality, SessionState, TimelineItem } from '../lib/types'
 import { Calibration } from './Calibration'
 import * as E from './engine'
+import { MyPhrases } from './MyPhrases'
 import { startHead, startLips, startVoice, watchMouth } from './sensors'
 import './glass.css'
 
@@ -50,6 +51,8 @@ const PHRASES: [string, string, string, string][] = [
 ]
 const HELP_TEXT = 'I need help now.'
 const PENDING = ['proposed', 'ambiguous', 'clarifying']
+// /?record: the recording page (record takes of a phrase for lip reading) opens over the room
+const RECORD = new URLSearchParams(location.search).has('record')
 const words = (t: string) => t.split(/\s+/).filter(Boolean)
 
 function shownCandidates(s: SessionState): Candidate[] {
@@ -63,7 +66,8 @@ export function GlassApp() {
   const { state, connected } = useSession()
   const health = useHealth()
   // the calibration screen opens at every start; a saved calibration is one look away ("Keep saved calibration")
-  const [calibrating, setCalibrating] = useState(true)
+  const [calibrating, setCalibrating] = useState(!RECORD)
+  const [recording, setRecording] = useState(RECORD)
   const [focusMode, setFocusMode] = useState(false)
   const [eyes, setEyes] = useState(false)
   const [cam, setCam] = useState<'starting' | 'on' | 'off'>('starting')
@@ -73,14 +77,14 @@ export function GlassApp() {
   const camRef = useRef<HTMLVideoElement>(null)
   const histRef = useRef<HTMLDivElement>(null)
   // the latest render's values, for sensor and engine callbacks that outlive a render
-  const live = useRef({ state: null as SessionState | null, health, connected, calibrating })
-  useLayoutEffect(() => { live.current = { state, health, connected, calibrating } })
+  const live = useRef({ state: null as SessionState | null, health, connected, calibrating, recording })
+  useLayoutEffect(() => { live.current = { state, health, connected, calibrating, recording } })
   const speakingUntil = useRef(0)
   const calibAct = useRef<((a: string) => void) | null>(null)
   const actRef = useRef<(a: string, el: HTMLElement | null, how: E.How) => void>(() => {})
 
   useEffect(() => E.mount(), [])
-  useEffect(() => { E.setPaused(focusMode) }, [focusMode])
+  useEffect(() => { E.setPaused(focusMode || recording) }, [focusMode, recording])
   useEffect(() => { E.setGazeSource(eyes ? 'eyes' : 'pointer'); E.setGazeError(gazeState.accuracyPx) }, [eyes])
   // a calibration made in another sitting position can put the estimate off-screen: say so, instead of
   // leaving the person stuck on whatever sits at that edge
@@ -129,12 +133,14 @@ export function GlassApp() {
   // so a new reading does not replace the choices they are looking at
   const GUESS_GAP_MS = 2500
   const restUntil = useRef(0)
+  // a clip already being recorded is finished through the rest: the rest only stops a new clip from starting
+  const capturing = useRef<Record<string, boolean>>({})
   const inFlight = useRef<Record<string, boolean>>({})
   // mouth clips being streamed: the pieces' send chain, and whether every piece went out
   const lipStreams = useRef<Record<string, { chain: Promise<void>; ok: boolean }>>({})
   const canCapture = useCallback((svc: string) => {
-    const { state: s, health: h, connected: c, calibrating: cal } = live.current
-    return !!s && c && !cal && !inFlight.current[svc] && performance.now() > Math.max(speakingUntil.current, restUntil.current) &&
+    const { state: s, health: h, connected: c, calibrating: cal, recording: rec } = live.current
+    return !!s && c && !cal && !rec && !inFlight.current[svc] && performance.now() > speakingUntil.current && (capturing.current[svc] || performance.now() > restUntil.current) &&
       !['selected', 'confirmed'].includes(s.message.status) && h?.[svc]?.state === 'ready'
   }, [])
 
@@ -200,7 +206,7 @@ export function GlassApp() {
         stops.push(startLips({
           stream: s,
           canCapture: () => canCapture('vsr'),
-          onMouthing: (on) => { if (on) E.fire('lips', .6, 'WATCHING') },
+          onMouthing: (on) => { capturing.current.vsr = on; if (on) E.fire('lips', .6, 'WATCHING') },
           onPiece: (id, piece, seq, mime) => {
             // pieces are sent strictly in order: each waits for the one before it
             const st = lipStreams.current[id] ??= { chain: Promise.resolve(), ok: true }
@@ -247,7 +253,7 @@ export function GlassApp() {
     let early: Promise<string | null> | null = null
     startVoice({
       canCapture: () => canCapture('audio'),
-      onSpeech: (on) => { setHearing(on); if (on) E.fire('voice', .7, 'HEARING') },
+      onSpeech: (on) => { capturing.current.audio = on; setHearing(on); if (on) E.fire('voice', .7, 'HEARING') },
       // the room's own speech (the phrase being spoken back) is not the person's voice
       onLevel: (v) => { if (v && performance.now() > speakingUntil.current) voiceAt.current = performance.now() },
       onEarly: (b) => { early = api.captureAudioEarly(b).then((r) => r.early_id).catch(() => null) },
@@ -515,6 +521,7 @@ export function GlassApp() {
       <div className="gaze" id="gaze" />
 
       {calibrating && <Calibration bind={bindCalib} onFocusMode={setFocusMode} onDone={doneCalib} />}
+      {recording && <MyPhrases onClose={() => { setRecording(false); setCalibrating(true) }} />}
     </>
   )
 }
