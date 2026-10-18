@@ -41,6 +41,14 @@ export const api = {
     f.append('enhance', String(enhance))
     return req<{ event: any; state: SessionState }>(`${base}/capture/audio`, { method: 'POST', body: f })
   },
+  /** Early voice decode (see services/gateway): start decoding during the pause, then commit or discard. */
+  captureAudioEarly: (blob: Blob) => {
+    const f = new FormData()
+    f.append('audio', blob, 'clip.wav')
+    return req<{ early_id: string }>(`${base}/capture/audio/early`, { method: 'POST', body: f })
+  },
+  commitAudio: (early_id: string) => post<{ event: any; state: SessionState }>(`${base}/capture/audio/commit`, { early_id }),
+  discardAudio: (early_id: string) => post<{ discarded: boolean }>(`${base}/capture/audio/discard`, { early_id }),
   captureEeg: (subject: string, chars: number[]) => post<SessionState>(`${base}/capture/eeg`, { subject, chars }),
   board: (text: string, origin: 'board' | 'spelling') => post<SessionState>(`${base}/board`, { text, origin }),
   select: (candidate_id: string, method: string) => post<SessionState>(`${base}/select`, { candidate_id, method }),
