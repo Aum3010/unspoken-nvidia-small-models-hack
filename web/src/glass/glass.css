@@ -49,7 +49,7 @@ canvas.layer{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none
 
 /* ---------- top-left ---------- */
 /* the name, written in the sentence's clay tube, centred between Yes and No (.answers spans left:300px to right:450px) */
-.brand{position:fixed;top:40px;left:calc(50% - 75px);transform:translateX(-50%);z-index:6;pointer-events:none;
+.brand{position:fixed;top:28px;left:calc(50% - 75px);transform:translateX(-50%);z-index:6;pointer-events:none;
   filter:drop-shadow(0 4px 10px rgba(0,0,0,.35))}
 .chip{display:inline-flex;align-items:center;gap:8px;padding:7px 11px;border-radius:99px;font-size:9.5px;color:var(--dim)}
 .chip b{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.3)}

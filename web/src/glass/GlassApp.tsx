@@ -70,7 +70,7 @@ export function GlassApp() {
   const checkinOn = !!health?.gateway?.checkin
   // the name at the top, in the same clay tube as the written sentence
   const brandRef = useRef<HTMLCanvasElement>(null)
-  useEffect(() => { if (brandRef.current) E.drawStatic(brandRef.current, 'unspoken', 30) }, [])
+  useEffect(() => { if (brandRef.current) E.drawStatic(brandRef.current, 'Unspoken', 46) }, [])
   // the profile's preferred name, so the check-in addresses the person (synthetic profile in the preview)
   const [patientName, setPatientName] = useState<string | null>(null)
   useEffect(() => {

@@ -237,7 +237,7 @@ function strokeInk(ctx: CanvasRenderingContext2D, outer: Map<number, Path2D>) {
 export function drawStatic(c: HTMLCanvasElement, text: string, capPx: number) {
   const keepS = S
   S = capPx / 21
-  const geo = buildWord(text.toLowerCase(), 'static')
+  const geo = buildWord(text, 'static')   // case kept: the name starts with a capital
   const pad = S * 2.5
   let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity
   for (const s of geo.strokes) for (let i = 0; i < s.n; i++) {
