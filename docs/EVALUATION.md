@@ -120,13 +120,19 @@ Both raw models fail on the same thing: history. After two failed retakes they a
 
 ## 5. Confirmation safety and end-to-end exactness
 
-- **Unit tests** (`pytest evaluations/safety_tests`): **43 pass** (2026-10-18, `demo-final`):
+- **Unit tests** (`pytest evaluations/safety_tests`): **49 pass** (2026-10-18, `demo-final`):
   - 18 in `test_confirmation.py`: policy gate and state machine;
   - 7 in `test_auto_speak.py`: auto-speak only for accepted readings;
   - 4 in `test_auto_speak_delay.py`: with the countdown flag, No inside the window speaks nothing, no answer
     speaks once, and a Yes is not doubled;
   - 3 in `test_vsr_phrase_scoring.py`: an impossible phrase-list alignment never ranks first;
-  - 11 in `test_validator_flags.py`: the optional validator rules, both on and off.
+  - 11 in `test_validator_flags.py`: the optional validator rules, both on and off;
+  - 6 in `test_checkin.py`: the vision-preview check-in.
+    - It is absent when off.
+    - The nurse alert comes first.
+    - The answer never reaches the gate or TTS.
+    - It waits while a message is pending or speech plays.
+    - Nothing is auto-spoken over it.
 - **Live attacks** (`evaluations/test_cases/e2e_exactness.py`, against the running stack): **7/7 blocked**:
   5 unconfirmed-speech probes, a forged TTS token, and a non-explicit confirmation method (`e2e.json`).
 - **Exactness** (same script): 10 phrases are put on the board → confirmed → spoken by Kokoro → re-transcribed by
@@ -190,7 +196,7 @@ Full method, tables and serving advice: [SERVING.md](SERVING.md) and [TECHNICAL_
 | Measurement | p50 / p95 |
 |---|---:|
 | One message end to end on the box (voice + lip clip → spoken) | **309 / 322 ms** |
-| Accepted voice message, clip → spoken, on the box (ad-hoc bench, same run, printed) | **71 / 89 ms** |
+| Accepted voice message, clip → spoken, on the box (ad-hoc bench, same run, printed) | **71 / 89 ms** (73 / 84 cold phrase cache, 71 / 80 warm on `demo-final`) |
 | Streamed lip clip: reading after the clip ends, on the box / from the laptop | **104 ms** / **407 ms** (whole clip: 477 / 898 ms) |
 | Voice result after the 700 ms pause, early decode, on the box / from the laptop | 2 ms / 64 ms |
 

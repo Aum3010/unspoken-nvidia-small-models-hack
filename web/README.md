@@ -43,8 +43,11 @@ npx oxlint         # lint
 - **Demo auto-speak** (`UNSPOKEN_AUTO_SPEAK=1` on the gateway, the current default): accepted readings are spoken
   without a Yes ("Understanding you…"), and No or a shake stops them. Everything else asks "Did you mean this?".
   With `UNSPOKEN_AUTO_SPEAK=0`, nothing is spoken until the person confirms.
-- **Phrase audio** is preloaded when the session opens: a fixed phrase plays from the page as soon as the gateway
-  reports it spoken.
+- **Phrase audio** is meant to be preloaded when the session opens. The preload request currently fails (HTTP
+  500, `docs/TECHNICAL_VERBOSE.md` §10), so the page downloads each phrase's audio when it is spoken.
+- **Vision preview** (only with `UNSPOKEN_CHECKIN=1` on the gateway): a panel with recorded MIMIC-IV demo numbers
+  and a synthetic profile. V or its button starts a check-in question; Yes/blink/nod or No/shake answers it, and
+  nothing is spoken.
 - **One clip in flight per agent.** Capture pauses while:
   - a message waits for confirmation;
   - speech plays;

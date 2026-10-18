@@ -42,6 +42,7 @@ class Session:
     shown_candidate_ids: list[str] = field(default_factory=list)
     auto_speak_candidate_id: str | None = None  # set when demo auto-speak will say this candidate
     auto_speak_at: int | None = None  # when it will be said (epoch ms), only with UNSPOKEN_AUTO_SPEAK_DELAY_MS > 0
+    checkin: dict | None = None  # vision preview check-in (UNSPOKEN_CHECKIN=1 only; services/gateway/checkin.py)
     settings: dict = field(default_factory=lambda: {
         "available_inputs": ["button", "keyboard"],
         "gaze_calibrated": False,
@@ -249,4 +250,4 @@ class Session:
             "timeline": self.timeline[-60:],
             "settings": self.settings,
             "audit_count": len(self.audit),
-        }
+        } | ({"checkin": dict(self.checkin)} if self.checkin is not None else {})

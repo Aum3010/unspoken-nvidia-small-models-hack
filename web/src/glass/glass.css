@@ -201,3 +201,17 @@ canvas.layer{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none
   .caption{bottom:24px}
 }
 @media (prefers-reduced-motion:reduce){.ambient{animation:none}}
+
+/* ---------- vision preview (UNSPOKEN_CHECKIN only) ---------- */
+.vision{border-radius:24px;padding:12px 16px;flex:none;font-size:12px}
+.vision header{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:12px;font-weight:600}
+.vision header span{font-size:8.5px;font-weight:400;color:var(--dim);text-align:right}
+.vgreet{margin:8px 0 6px;font-size:14px}
+.vrows{display:flex;flex-direction:column;gap:5px;font-size:10px;color:var(--dim)}
+.vrows div{display:grid;grid-template-columns:1fr 120px 64px;align-items:center;gap:8px}
+.vrows div:first-child{grid-template-columns:1fr auto}
+.vrows b{color:#fff;font-weight:500;text-align:right}
+.vrows b.vlow{color:#ffb86c}
+.spark{width:120px;height:28px}
+.vfoot{display:flex;justify-content:space-between;align-items:center;margin-top:9px;font-size:8.5px;color:var(--faint)}
+.vision .cbtn{height:34px;padding:0 14px;font-size:12px}

@@ -13,6 +13,7 @@ import type { Candidate, ConfirmationMethod, Modality, SessionState, TimelineIte
 import { Calibration } from './Calibration'
 import * as E from './engine'
 import { startHead, startLips, startVoice } from './sensors'
+import { VisionPreview } from './VisionPreview'
 import './glass.css'
 
 const METHOD: Record<E.How, ConfirmationMethod> = {
@@ -65,6 +66,8 @@ export function GlassApp() {
   // clips leave this device when the gateway runs elsewhere (e.g. "NVIDIA Brev"); the page says so
   const host = health?.gateway?.host
   const remoteHost = host && host !== 'this device' ? host : null
+  // vision preview: only when the gateway runs with UNSPOKEN_CHECKIN=1
+  const checkinOn = !!health?.gateway?.checkin
   // a saved calibration (same window size) is used straight away: no recalibrating after a reload
   const [calibrating, setCalibrating] = useState(() => !gazeState.calibrated)
   const [focusMode, setFocusMode] = useState(false)
@@ -309,6 +312,11 @@ export function GlassApp() {
   const lastSpoken = useRef<string | null>(null)
   useEffect(() => {
     if (!state || calibrating) return
+    if (state.checkin?.status === 'open') { E.caption(state.checkin.question, 'Yes, blink or nod · No or shake'); return }
+    if (state.checkin?.status === 'answered' && state.checkin.answered_ts && Date.now() - state.checkin.answered_ts < 8000) {
+      E.caption(`Nurse notified: patient answered ${(state.checkin.answer ?? '').toUpperCase()}`, 'vision preview · nothing was spoken')
+      return
+    }
     const m = state.message
     const shown = shownCandidates(state)
 
@@ -370,6 +378,11 @@ export function GlassApp() {
     if (a === 'camera') { if (cam === 'off') location.reload(); return }
     const s = live.current.state
     if (!s) { E.caption('The gateway is offline', 'start it with ./scripts/run_all.sh'); return }
+    if (a === 'vision:checkin') { run(api.checkin()); return }
+    if (s.checkin?.status === 'open' && ['yes', 'blink', 'nod', 'no', 'shake'].includes(a)) {
+      run(api.checkinAnswer(a === 'no' || a === 'shake' ? 'no' : 'yes', METHOD[how]))
+      return
+    }
     const m = s.message
     // a phrase card is the person's own explicit choice (held with the eyes, or clicked), not a model's
     // reading, so choosing it is the confirmation: it is spoken straight away, through the same policy gate
@@ -425,6 +438,12 @@ export function GlassApp() {
     if (['yes', 'speak', 'blink', 'nod'].includes(a) && m.status === 'selected') E.caption(`Confirmed by ${HOW_TEXT[how]}`, 'policy gate checks the exact text')
   }
   useLayoutEffect(() => { actRef.current = act })
+  useEffect(() => {
+    if (!checkinOn) return
+    const onV = (e: KeyboardEvent) => { if (e.key.toLowerCase() === 'v' && !e.repeat && !(e.target instanceof HTMLInputElement)) actRef.current('vision:checkin', null, 'keyboard') }
+    addEventListener('keydown', onV)
+    return () => removeEventListener('keydown', onV)
+  }, [checkinOn])
   useEffect(() => E.onAction((a, el, how) => actRef.current(a, el, how)), [])
 
   const bindCalib = useCallback((fn: ((a: string) => void) | null) => { calibAct.current = fn }, [])
@@ -464,6 +483,7 @@ export function GlassApp() {
           <canvas id="twin" />
           <Feed timeline={state?.timeline ?? []} />
         </section>
+        {checkinOn && <VisionPreview />}
         <section className="chat glass" aria-label="What you said">
           <header><div>History</div><span className="mono">{state?.spoken.length ? `${state.spoken.length} spoken` : 'today'}</span></header>
           <div className="history" ref={histRef}>

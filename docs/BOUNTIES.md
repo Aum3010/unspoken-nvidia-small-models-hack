@@ -77,7 +77,7 @@ Nemotron makes these calls. Code then checks every call, outside the model.
 
 | Optimization | Result | Kept |
 |---|---|---|
-| **Run Nemotron only where judgment is needed.** When the specialists already agree (the voice agent accepted the reading, or lips and voice agree), rules ask exactly what Nemotron would be asked, and Nemotron is not called | accepted voice message, clip → spoken: **413 → 71 ms** p50 (`latency_brev_final2.json`); Nemotron ran for 2 of 40 messages, the ambiguous ones | yes |
+| **Run Nemotron only where judgment is needed.** When the specialists already agree (the voice agent accepted the reading, or lips and voice agree), rules ask exactly what Nemotron would be asked, and Nemotron is not called | accepted voice message, clip → spoken: **413 → 105 ms** p50 right after the change, 71–73 ms in later runs (ad-hoc voice-only bench on the box, printed; TECHNICAL_VERBOSE §7); Nemotron ran for 2 of 40 messages, the ambiguous ones | yes |
 | **Never make the person wait for it.** The rules' plan shows options at once; Nemotron refines them in the background, and its plan is dropped if the person already acted | the question appears without waiting the 272 ms | yes |
 | **Thinking off, temperature 0, one tool call** (`chat_template_kwargs: {enable_thinking: false}`) | about 65 output tokens per decision | yes |
 | **MTP speculative decoding** with the checkpoint's own next-token layer | 272 → **229 ms** p50, 88% of drafts accepted, NeMo Gym within noise (`coordinator_mtp_brev.json`) | **no**: one unexplained CUDA fault under full load (§3) |

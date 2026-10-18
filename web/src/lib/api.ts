@@ -14,6 +14,19 @@ export const SESSION_ID = (() => {
 
 let liveWs: WebSocket | null = null
 
+/** Vision preview (gateway flag UNSPOKEN_CHECKIN): recorded MIMIC-IV demo numbers and a synthetic profile. */
+export interface VisionData {
+  label: string
+  event?: {
+    source: { dataset: string; version: string; license: string; attribution: string }
+    glucose: { label: string; value: number; unit: string; charttime: string }
+    window_hours: number
+    heart_rate: { unit: string; points: { t_min: number; value: number }[] }
+    spo2: { unit: string; points: { t_min: number; value: number }[] }
+  }
+  profile?: { synthetic?: boolean; label?: string; preferred_name?: string; family_member?: { name: string } }
+}
+
 /** Send one piece of a streamed mouth clip over the session WebSocket, in order. False if it cannot be sent. */
 export function sendLipPiece(header: { id: string; seq?: number; mime?: string; discard?: boolean }, piece?: ArrayBuffer): boolean {
   if (!liveWs || liveWs.readyState !== WebSocket.OPEN) return false
@@ -83,6 +96,10 @@ export const api = {
   audit: () => req<any[]>(`${base}/audit`),
   eeg: <T = any,>(path: string) => req<T>(`/api/eeg/${path}`),
   evals: () => req<any>('/api/evals'),
+  visionData: () => req<VisionData>('/api/vision/data'),
+  checkin: () => post<{ checkin: any; state: SessionState }>(`${base}/vision/checkin`),
+  checkinAnswer: (answer: 'yes' | 'no', method: string) =>
+    post<{ checkin: any; state: SessionState }>(`${base}/vision/checkin/answer`, { answer, method }),
 }
 
 /** Live session state over WebSocket, with automatic reconnect. */

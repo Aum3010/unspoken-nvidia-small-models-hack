@@ -90,6 +90,24 @@ For the ASR evaluation there are two recorders:
   ```
   Step 1 does not remove them from history: anyone with a clone or the remote still has them until step 3.
 
+## Vision preview: MIMIC-IV Clinical Database Demo v2.2 (`data/vision/`, flag `UNSPOKEN_CHECKIN`)
+
+- **What it is:** one charted low-glucose event and the 6 h of heart rate and SpO2 before it, numbers only.
+  `scripts/vision/fetch_mimic_event.py` downloads only `icu/d_items`, `icu/icustays` and `icu/chartevents` of the
+  open demo, finds the items by name, and keeps no free text.
+- **Licence and attribution:** Open Data Commons Open Database License v1.0 (ODbL). The attribution is written to
+  `data/vision/ATTRIBUTION.txt` and shown in the panel's label:
+
+  > MIMIC-IV Clinical Database Demo v2.2 (Johnson A, Bulgarelli L, Pollard T, Horng S, Celi LA, Mark R),
+  > PhysioNet, https://doi.org/10.13026/dp1f-ex47.
+
+- **De-identified:** the ids and shifted dates are the dataset's own. Never attempt re-identification.
+- **Not in git:** `data/` is gitignored; regenerate with the script, and copy it to the instance like
+  `data/enroll/`.
+- **The profile is SYNTHETIC:** `data/vision/profile.yaml` (from `scripts/vision/profile.example.yaml`): "Raj",
+  family member "Priya". It is not a real person and not linked to the MIMIC record.
+- **Labels:** the panel says "Recorded ICU data (MIMIC-IV demo) · synthetic profile · vision preview".
+
 ## Cloud processing
 
 **On a Mac, the app runs locally.** If only the coordinator is moved to vLLM on Brev (`scripts/serve_vllm_brev.sh`), only the structured evidence summary leaves the machine: candidate text, scores and quality flags. Camera frames, audio and EEG never do.

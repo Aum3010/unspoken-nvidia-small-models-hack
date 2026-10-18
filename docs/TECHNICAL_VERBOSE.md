@@ -79,6 +79,7 @@ mic ──── voice detector → wav clip ─┘─────────�
 | `UNSPOKEN_VALIDATOR_NEGATION` | `0` | coordinator | `1` = reject a correction that adds or removes a negation (§3.3) |
 | `UNSPOKEN_VALIDATOR_IGNORE_HISTORY` | `0` | coordinator | `1` = reject `ignore_input` after two failed tries, a recent "none of these", or on an accepted clean reading (§3.3) |
 | `UNSPOKEN_AUTO_SPEAK_DELAY_MS` | `0` | gateway | > 0 = a countdown before an accepted reading is auto-spoken; No or a shake cancels it (§4) |
+| `UNSPOKEN_CHECKIN` | `0` | gateway + page | `1` = vision preview: proactive check-in routes and panel (§4); `0` = none of it exists (routes 404) |
 | `UNSPOKEN_LLM_BACKEND`, `_BASE_URL`, `_MODEL`, `_TIMEOUT` | `ollama`, `http://127.0.0.1:11434`, `nemotron-3.5-lightning:30b-a3b`, `20` | coordinator | the model server; `start_app.sh` sets `openai` + vLLM on :8001 |
 | `UNSPOKEN_VSR_PHRASES` | empty | lip agent | optional closed phrase list (off) |
 | `UNSPOKEN_VSR_FREE_TEXT` | `0` | lip agent | `1` = free-text beam search when no recorded phrase matches |
@@ -296,9 +297,10 @@ stitched to it. A lip and a voice clip pair into one message when they are withi
 - When the message's only candidate comes from evidence that is all `proposed`, and the voice agent supports it, the
   rules' plan (ask about that one reading) is applied at once and Nemotron is not called.
 - Nemotron runs for ambiguous, unknown and disagreeing readings only.
-- Measured on Brev: accepted voice message → spoken **413 → 105 ms** p50 from this change alone, and **71 ms**
-  once phrase audio was also pre-rendered (§7). Nemotron ran for 2 of 40 messages (the ambiguous ones).
-  - Source: Measured with an ad-hoc voice-only bench on the box (40 Kokoro-rendered phrase clips, 38 accepted), printed, not saved to a file: 413 / 459 ms before the change (Nemotron planned every message); 106 / 120 ms with accepted readings decided by rules (commit `51df483`); 105 / 115 ms after auto-speak was limited to accepted readings (`09c44c1`); **71 / 89 ms** in the final run, once fixed phrases were pre-rendered so Kokoro is skipped (same run as `latency_brev_final2.json`).
+- Measured on Brev: accepted voice message → spoken **413 → 105 ms** p50 in the run right after this change, and
+  71–73 ms in later runs (§7; not from phrase audio, cause not isolated). Nemotron ran for 2 of 40 messages (the
+  ambiguous ones).
+  - Source: Measured with an ad-hoc voice-only bench on the box (40 Kokoro-rendered phrase clips), printed, not saved to a file: 413 / 459 ms before the change (Nemotron planned every message); 106 / 120 ms with accepted readings decided by rules (commit `51df483`); 105 / 115 ms after auto-speak was limited to accepted readings (`09c44c1`); 71 / 89 ms in the final run (same run as `latency_brev_final2.json`); on `demo-final`, 73 / 84 ms with the gateway's phrase cache cold and 71 / 80 ms warm. So the later 105 → 71 ms drop is **not** from pre-rendered phrase audio (worth about 2 ms), and its cause was not isolated.
 
 **Auto-speak** (default on): only for an `ask_confirmation` of exactly the accepted reading. `_auto_speak` is
 scheduled at once; it auto-confirms the reading as `system` and speaks it through the same policy gate with
@@ -314,7 +316,8 @@ you…" or "Did you mean this?"). Tests: `evaluations/safety_tests/test_auto_spe
   person.
 - Tests: `test_auto_speak_delay.py`.
 
-**Pre-rendered phrase audio** (`POST /api/{sid}/phrase_audio`, `GET /api/phrase_audio/{id}`):
+**Pre-rendered phrase audio** (`POST /api/{sid}/phrase_audio`, `GET /api/phrase_audio/{id}`). **Known bug:** the
+manifest request returns HTTP 500, so the page never preloads; the gateway-side cache still fills (§10):
 - The fixed phrases are rendered once per voice and rate and preloaded by the page: the voice agent's 20, the
   recorded lip phrases, the board and Help.
 - The TTS token for pre-rendering comes from `phrase_preload_token` (message id `preload-…`).
@@ -326,6 +329,27 @@ you…" or "Did you mean this?"). Tests: `evaluations/safety_tests/test_auto_spe
 `{id, seq, mime}` or `{id, discard}`, then the bytes). They are forwarded in order to the lip agent.
 `POST /api/{sid}/capture/lip/stream {stream_id, chunks}` waits up to 5 s for all pieces, then asks for the reading.
 A broken stream answers 409 and the page uploads the whole clip.
+
+**Vision preview check-in** (`UNSPOKEN_CHECKIN=1`, off by default; `services/gateway/checkin.py`):
+- **When it is off:** no route exists (`/api/{sid}/vision/checkin` answers 404), the snapshot has no `checkin`
+  key, and the page shows nothing.
+- **When it is on:** `POST /api/{sid}/vision/checkin` (or V, or the panel button):
+  1. traces "🔔 Nurse alerted (vision preview)" and pushes it;
+  2. then shows the fixed question "Your nurse is coming to check on you. Do you feel shaky?" with the usual
+     Yes/No (no model).
+- **Answering:** Yes, a blink or a nod answers YES; No or a shake answers NO
+  (`POST /api/{sid}/vision/checkin/answer`). The answer is logged as `checkin_response` and shown as "Nurse
+  notified: patient answered YES/NO".
+- **Not speech:** it never goes through `authorize_speech` or TTS, and it creates no candidate or message.
+- **Queueing:** while a message is pending (proposed / ambiguous / clarifying / selected / confirmed), or within 3 s
+  of speech, the check-in waits and opens once the session is idle.
+- **No talking over it:** while it is open, auto-speak is paused.
+- **Data:** `data/vision/mimic_event.json` from `scripts/vision/fetch_mimic_event.py`. It holds one charted
+  glucose below 70 mg/dL from the MIMIC-IV demo (stay 30757476: serum glucose 64 mg/dL) and its 6 h of heart rate
+  and SpO2.
+- **Profile:** `data/vision/profile.yaml`, SYNTHETIC ("Raj", family member "Priya"). Both are gitignored.
+- **Panel label:** "Recorded ICU data (MIMIC-IV demo) · synthetic profile · vision preview".
+- **Tests:** `test_checkin.py`.
 
 **Policy gate:** `shared/confirmation.py:authorize_speech`.
 - In confirm mode it requires:
@@ -534,7 +558,7 @@ The "Now" column is MPS on, MTP off, after the speedups below (`latency_brev_fin
 | Voice result after the 700 ms pause, sent then (old) | 337 / 377 | 109 / 119 | 70 / 77 |
 | Voice result after the 700 ms pause, **early decode** | 3 / 22 | 2 / 2 | 2 / 3 |
 
-(¹) Measured with an ad-hoc voice-only bench on the box (40 Kokoro-rendered phrase clips, 38 accepted), printed, not saved to a file: 413 / 459 ms before the change (Nemotron planned every message); 106 / 120 ms with accepted readings decided by rules (commit `51df483`); 105 / 115 ms after auto-speak was limited to accepted readings (`09c44c1`); **71 / 89 ms** in the final run, once fixed phrases were pre-rendered so Kokoro is skipped (same run as `latency_brev_final2.json`). The streamed-lip row is from `stream_equiv.py` in the same run (12 GRID clips, printed).
+(¹) Measured with an ad-hoc voice-only bench on the box (40 Kokoro-rendered phrase clips), printed, not saved to a file: 413 / 459 ms before the change (Nemotron planned every message); 106 / 120 ms with accepted readings decided by rules (commit `51df483`); 105 / 115 ms after auto-speak was limited to accepted readings (`09c44c1`); 71 / 89 ms in the final run (same run as `latency_brev_final2.json`); on `demo-final`, 73 / 84 ms with the gateway's phrase cache cold and 71 / 80 ms warm. So the later 105 → 71 ms drop is **not** from pre-rendered phrase audio (worth about 2 ms), and its cause was not isolated. The streamed-lip row is from `stream_equiv.py` in the same run (12 GRID clips, printed).
 
 ### From the laptop through the tunnel
 
@@ -576,9 +600,11 @@ A lip-only reading is never auto-spoken; it waits for the person's answer.
 - **Native FP4 for the coordinator deferred:** less accurate (4-bit activations); do it only after giving vLLM
   its own GPU, and only if NeMo Gym holds.
 
-- **Accepted readings skip Nemotron:** the rules already ask exactly what Nemotron is asked to; 413 → 71 ms.
+- **Accepted readings skip Nemotron:** the rules already ask exactly what Nemotron is asked to; 413 → 105 ms
+  (71–73 ms in later runs).
 - **Batched DTW:** same distances (to 3e-8), 0 of 270 top-3 changes; the lip agent alone 391 → 265 ms.
 - **Pre-rendered phrase audio:** the gate still decides in the gateway; edited text still goes to Kokoro.
+  Measured worth about 2 ms on the box (cold 73 vs warm 71 ms); the page's preload request fails (§10).
 - **Streamed lip clips:** identical readings (12/12 on the box, 8/8 from the laptop); 898 → 407 ms from the
   laptop.
 - **Compact coordinator not adopted:** 3× faster, but worse on ambiguous readings (§3.3).
@@ -626,7 +652,7 @@ The lip enrollment adds stored features, not parameters.
 
 | What | Command | Result file |
 |---|---|---|
-| Safety tests (policy gate, auto-speak, phrase scoring, validator flags) | `pytest evaluations/safety_tests`: **43 tests** = 18 `test_confirmation.py` + 7 `test_auto_speak.py` + 4 `test_auto_speak_delay.py` + 3 `test_vsr_phrase_scoring.py` + 11 `test_validator_flags.py` | — |
+| Safety tests (policy gate, auto-speak, phrase scoring, validator flags, check-in) | `pytest evaluations/safety_tests`: **49 tests** = 18 `test_confirmation.py` + 7 `test_auto_speak.py` + 4 `test_auto_speak_delay.py` + 3 `test_vsr_phrase_scoring.py` + 11 `test_validator_flags.py` + 6 `test_checkin.py` | — |
 | Validator flags, paired A/B | `evaluations/nemo_gym/validator_ab.py [--seed 2026 --distinct-from 7] --out <file>` | `coordinator_validator_v2_paired_{eval,heldout}.json`; unpaired: `coordinator_validator_v2_{eval,heldout}_{off,on}.json` |
 | Live attacks + exactness (needs the running stack) | `python evaluations/test_cases/e2e_exactness.py`: 7 attacks (5 unconfirmed-speech probes, a forged TTS token, a non-explicit method): 7/7 blocked on `demo-final`. Its exactness half (10 phrases spoken and re-transcribed) needs a free-text ASR; today's phrase-only voice agent cannot do it (EVALUATION §5) | `e2e.json` (2026-10-17, Whisper), `e2e_demo_final.json` |
 | Coordinator (NeMo Gym, 72 tasks; held-out 44) | `run_local.py --policies raw:<model> guarded deterministic` (held-out: `--seed 2026 --distinct-from 7 --out <file>`; `UNSPOKEN_COORD_COMPACT=1` for compact mode) | `coordinator_brev.json` (Brev); `coordinator_heldout_brev.json`, `coordinator_heldout_compact_brev.json` (held-out); `coordinator_mtp_brev.json`, `coordinator_compact_brev.json`, `coordinator_compact_mtp_brev.json` (A/B); `coordinator.json` (Mac, 60 tasks, older prompt) |
@@ -667,8 +693,14 @@ The NeMo Gym data files (`data/*.jsonl`) embed the coordinator's prompt and tool
    `IMPOSSIBLE` (−1e6, asr_eval's convention) and never rank first (`test_vsr_phrase_scoring.py`).
 8. **Camera stalls.** The camera-open sharing and single tracking loop were reverted (slow USB cameras can
    stall).
-9. **`sync_app.sh` does not ship `data/enroll/`.** It must be copied separately (§6).
+9. **`sync_app.sh` does not ship `data/enroll/`** (nor `data/vision/`). They must be copied separately (§6).
 10. **Smaller items:**
     - the Mac path needs NeMo for the voice agent;
     - `web/README.md` was reset to the Vite template on `ui` (restored by this doc update);
     - 8 lint warnings.
+11. **Phrase-audio preload request fails** (found on `demo-final`, not fixed: the preload is frozen for this
+    branch).
+    - `POST /api/{sid}/phrase_audio` renders and caches the phrases, then logs with `actor="gateway"`, which
+      `AuditEvent` rejects, so it answers HTTP 500.
+    - The page never gets the list and downloads each phrase's audio when spoken. The gateway-side cache works.
+    - The fix is one word (`actor="system"`) and needs approval.

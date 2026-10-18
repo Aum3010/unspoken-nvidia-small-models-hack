@@ -99,6 +99,8 @@ export interface SessionState {
   shown_candidate_ids: string[]
   auto_speak_candidate_id?: string | null
   auto_speak_in_ms?: number | null
+  /** vision preview check-in; present only with UNSPOKEN_CHECKIN=1 on the gateway */
+  checkin?: { id: string; status: 'queued' | 'open' | 'answered'; question: string; answer: 'yes' | 'no' | null; answered_ts?: number }
   spoken: SpokenItem[]
   timeline: TimelineItem[]
   settings: {
