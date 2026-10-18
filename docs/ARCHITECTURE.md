@@ -1,10 +1,10 @@
 # Architecture
 
 ```text
- Browser (web/, React + Vite)                         ── all camera/mic frames stay on this Mac ──
+ Browser (web/, React + Vite)                  ── camera/mic frames stay in the browser; clips go to the gateway ──
  ┌───────────────────────────────────────────────────────────────────────────────────────────────┐
  │ MediaPipe Face Landmarker (wasm/GPU): mouth ROI overlay, face-quality hints, deliberate blink  │
- │ WebGazer.js: calibrated gaze estimate → dwell engine (hysteresis, cooldown, longer confirm)    │
+ │ Gaze: MediaPipe iris + MobileGaze (ONNX) → per-user ridge → dwell (error-scaled slack, confirm) │
  │ Selection engine: click · keyboard · hover dwell · gaze dwell · blink scan → audited method    │
  │ MediaRecorder: silent mouth clip (webm) · voice clip (webm/opus)                               │
  └──────────────┬─────────────────────────────────────────────────────────────▲──────────────────┘
@@ -20,10 +20,10 @@
  └───┬──────────────┬──────────────┬──────────────┬──────────────────────┬──────────────────────┘
      ▼              ▼              ▼              ▼                      ▼
   vsr :8101     audio :8102     eeg :8103     coordinator :8105       tts :8104
-  Auto-AVSR     Whisper-base    P300 replay   Nemotron 3.5 Lightning  Kokoro-82M
-  (Chaplin)     + RNNoise       xDAWN+Riemann (Ollama/MLX/vLLM)       (MLX)
-  torch MPS     MLX Metal       BNCI2014-008  typed tools + validator verifies token
-  n-best raw    raw ∥ enhanced  recorded only deterministic fallback  before speaking
+  Auto-AVSR     Nemotron Speech P300 replay   Nemotron 3.5 Lightning  Kokoro-82M
+  (Chaplin)     0.6B + Silero   xDAWN+Riemann (Ollama/MLX/vLLM)       (MLX/torch)
+  torch MPS/    forced_llr over BNCI2014-008  typed tools + validator verifies token
+  CUDA, n-best  20 phrases      recorded only deterministic fallback  before speaking
 ```
 
 ## Agents and what each one is allowed to do
@@ -70,7 +70,7 @@ manifest.csv ─► Silero VAD ─► model (own process) ─► rankers ─► 
   - CTC alignments that can't exist keep an impossible score; `zero_infinity` would turn them into perfect ones.
 - **Decision** (`harness/decide.py`): the same three gates for every model (VAD, absolute score + margin, negation mismatch). The best configuration is chosen on calib.
 - **Where it runs:** on a Brev GPU via `run_eval.py` (see [BREV.md](BREV.md)), or on CPU with `configs/local_smoke.yaml`.
-- **What happens next:** the winning configuration will replace Whisper base + text candidates in `services/audio/`. It will still emit typed `Evidence`, so the gateway, coordinator and policy gate don't change. The patient's confirmation stays the final say.
+- **In the app:** the winning configuration (Nemotron en 0.6B + forced_llr, balanced point) is the voice agent. `services/audio/` imports `harness/live.py`, the same recognizer `serve.py` uses, so the app decides exactly as evaluated. It still emits typed `Evidence` (candidate → proposed; unknown → ambiguous with the top 3; no speech → unknown), so the gateway, coordinator and policy gate are unchanged. The patient's confirmation stays the final say.
 
 ## Ports & processes
 

@@ -4,17 +4,17 @@ Parameter counts below come from `scripts/verify_weights.py`, which reads the we
 
 | Role | Model / checkpoint | Params (counted) | Runtime | Licence |
 |---|---|---:|---|---|
-| Coordinator (all logical agent roles share it) | NVIDIA Nemotron 3.5 Lightning 30B-A3B — Ollama `nemotron-3.5-lightning:30b-a3b` / `mlx-community/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-4bit` | 31.578 B | Ollama (Metal) · MLX · vLLM on Brev (NVFP4) | OpenMDW-1.1 |
+| Coordinator (all logical agent roles share it) | NVIDIA Nemotron 3.5 Lightning 30B-A3B — Ollama `nemotron-3.5-lightning:30b-a3b` / `mlx-community/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-4bit` | 30 B (nominal; weight files 31.578 B) | Ollama (Metal) · MLX · vLLM on Brev (NVFP4) | OpenMDW-1.1 |
 | Visual speech | Auto-AVSR `LRS3_V_WER19.1` via Chaplin (`huggingface.co/Amanvir/LRS3_V_WER19.1`) | 0.250 B | PyTorch MPS | code Apache-2.0 / MIT (Chaplin); weights follow LRS3 terms |
 | VSR beam-search LM | Auto-AVSR `lm_en_subword` | 0.054 B | PyTorch MPS | as above |
-| ASR | Whisper base, `mlx-community/whisper-base-mlx` | 0.072 B | MLX | MIT |
-| Speech enhancement | RNNoise (xiph) via `pyrnnoise` | ≈0.0001 B | CPU | BSD-3 |
+| ASR | NVIDIA Nemotron Speech Streaming en 0.6B (`nvidia/nemotron-speech-streaming-en-0.6b`), forced_llr phrase scoring | 0.618 B | NeMo, CUDA (bf16 autocast) | NVIDIA Open Model License |
+| Voice activity gate | Silero VAD 6.2.3 | 0.0005 B | PyTorch CPU | MIT |
 | TTS | Kokoro-82M, `mlx-community/Kokoro-82M-bf16` | 0.082 B | MLX | Apache-2.0 (voices per model card) |
 | Face / blink (browser) | MediaPipe Face Landmarker float16 | ≤0.002 B | wasm/WebGL | Apache-2.0 |
-| Gaze (browser) | WebGazer.js 3.5.3 (TF.js facemesh + ridge) | ≈0.001 B (estimate) | browser | GPL-3.0-or-later |
+| Gaze (browser) | MobileGaze MobileOne-S0 eye-image model (`mobileone_s0_gaze.onnx`, trained on Gaze360) + per-user ridge calibration on MediaPipe iris/eyelid features | 0.00124 B (ONNX initializers) | ONNX Runtime Web (WebGPU / WebAssembly) | MIT |
 | Mouth detector (VSR preprocessing) | MediaPipe face detection 0.10.21 | ≈0.001 B (estimate) | CPU | Apache-2.0 |
 | P300 decoder | xDAWN covariances → tangent space → logistic regression, trained per participant | ~50 weights | scikit-learn / pyRiemann | BSD-3 |
-| **Total distinct deployed** | | **≈32.04 B ≤ 33 B** | | |
+| **Total distinct deployed** | | **31.01 B ≤ 33 B** (32.59 B with the coordinator's weight-file count) | | |
 
 Not deployed and not counted: LipVoicer and VoiceBridge, which are research references only (no verified checkpoint for VoiceBridge). `granite4.2:8b` appears in the coordinator evaluation only as a comparison policy.
 
@@ -47,10 +47,7 @@ Supporting components in the harness:
 | `pronouncing` + `cmudict` (CMU Pronouncing Dictionary) | Phonetic similarity for transcript → phrase matching | `pronouncing`: BSD-style (licence file); the `cmudict` Python package declares GPL-3.0-or-later. Evaluation-only dependency: keep it out of shipped app code, or swap in a permissive phonetic source before deployment |
 | DeepFilterNet | Enhancement ablation, off by default | MIT / Apache-2.0 |
 
-**Budget.** The deployed ledger is 32.04 B of 33 B, and Whisper base accounts for 0.07 B of it. Replacing Whisper base leaves about 1.03 B for the new ASR:
-- a 0.6 B Parakeet/Nemotron fits;
-- Whisper large-v3-turbo (0.81 B) fits;
-- Whisper large-v2 (1.55 B) does not, and two candidates together do not.
+**Budget.** Nemotron Speech Streaming en 0.6B (0.618 B) has replaced Whisper base (0.072 B) in the app, with Silero VAD as its gate. With the coordinator counted at its nominal 30 B the ledger is 31.01 B of 33 B; with its weight-file count (31.58 B) it is 32.59 B, still within budget. Two ASR models together would not fit.
 
 ## Pinned upstream code
 
@@ -63,7 +60,6 @@ Supporting components in the harness:
 ## Known model limitations
 
 - **Auto-AVSR** was trained on LRS3 broadcast speech. Its benchmark WER (~19–20%) is not webcam or patient accuracy; see EVALUATION.md for unseen-speaker GRID results. A still face makes it hallucinate fluent sentences, so mouth-motion gating is mandatory.
-- **Whisper** is not validated on dysarthric speech, and it hallucinates on silence. The voice agent returns no hypotheses when RNNoise finds no voice activity.
-- **RNNoise + gain** can make ASR *worse* in heavy noise (measured). Raw and enhanced transcripts are always shown side by side.
-- **WebGazer** gives an estimate of screen position with tens to hundreds of pixels of error. It is not clinical eye tracking.
+- **Nemotron Speech** proposes only the 20 fixed phrases (`asr_eval/configs/eval.yaml`), never free text. Validated on 3 speakers (leave-one-speaker-out: 71.5% accepted correctly, 0.4% wrong at the strict point); the app uses the balanced point because every candidate is confirmed. No hypotheses when Silero finds no speech or the model hears no words.
+- **Gaze** (MediaPipe iris + MobileGaze) gives an estimate of screen position with tens of pixels of error after calibration, measured on unseen dots. It is not clinical eye tracking.
 - **Nemotron** is used only to pick the next interaction step. Every call is validated by code, and it cannot produce message text.

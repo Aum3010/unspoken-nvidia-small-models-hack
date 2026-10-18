@@ -1,16 +1,17 @@
 {
   "budget_b": 33.0,
-  "total_b": 32.0394,
+  "total_b": 31.0082,
   "within_budget": true,
   "components": [
     {
       "component": "Coordinator",
       "model": "NVIDIA Nemotron 3.5 Lightning 30B-A3B (MoE \u2014 all experts counted)",
-      "params": 31577940288,
-      "params_b": 31.57794,
-      "source": "mlx-community/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-4bit (same weights as ollama nemotron-3.5-lightning:30b-a3b)",
-      "note": "rev 55ac8c8926 \u00b7 4-bit packed, counted unpacked",
-      "verified": true
+      "params": 30000000000,
+      "params_b": 30.0,
+      "source": "nvidia/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-NVFP4 (vLLM on Brev); mlx-community/...-4bit / ollama nemotron-3.5-lightning:30b-a3b on a Mac",
+      "note": "counted at the nominal 30B; weight files: 31.578B",
+      "disk_params_b": 31.57794,
+      "verified": false
     },
     {
       "component": "Visual speech",
@@ -32,11 +33,20 @@
     },
     {
       "component": "Audio ASR",
-      "model": "Whisper base (MLX)",
-      "params": 71825936,
-      "params_b": 0.07183,
-      "source": "mlx-community/whisper-base-mlx",
-      "note": "rev 1e3e249fb8",
+      "model": "NVIDIA Nemotron Speech Streaming en 0.6B (forced_llr phrase scoring)",
+      "params": 618084865,
+      "params_b": 0.61808,
+      "source": "nvidia/nemotron-speech-streaming-en-0.6b",
+      "note": "counted from the loaded model (services/audio /health)",
+      "verified": true
+    },
+    {
+      "component": "Voice activity gate",
+      "model": "Silero VAD 6.2.3",
+      "params": 462594,
+      "params_b": 0.00046,
+      "source": "silero-vad 6.2.3",
+      "note": "counted from the loaded model",
       "verified": true
     },
     {
@@ -59,20 +69,11 @@
     },
     {
       "component": "Gaze (browser)",
-      "model": "WebGazer.js \u2014 TF.js facemesh + ridge regression",
-      "params": 1200000,
-      "params_b": 0.0012,
-      "source": "webgazer 3.5.3",
-      "note": "estimate from bundled facemesh size",
-      "verified": false
-    },
-    {
-      "component": "Audio enhancement",
-      "model": "RNNoise (xiph)",
-      "params": 88000,
-      "params_b": 8.8e-05,
-      "source": "pyrnnoise",
-      "note": "published model size",
+      "model": "MobileGaze MobileOne-S0 (eye-image gaze) + iris/head-pose ridge calibration",
+      "params": 1238004,
+      "params_b": 0.00124,
+      "source": "yakhyo/gaze-estimation mobileone_s0_gaze.onnx (MIT)",
+      "note": "ONNX initializers counted offline; the per-user ridge adds ~50 weights",
       "verified": false
     },
     {
@@ -95,5 +96,6 @@
     }
   ],
   "verified": true,
-  "rule": "Distinct deployed weights; MoE total (not active) parameters; quantization does not reduce count; the coordinator weights are shared by all logical agent roles and counted once."
+  "rule": "Distinct deployed weights; MoE total (not active) parameters; quantization does not reduce count; the coordinator weights are shared by all logical agent roles and counted once, at the nominal 30B.",
+  "total_with_disk_count_b": 32.5861
 }

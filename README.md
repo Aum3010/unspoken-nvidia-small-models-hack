@@ -47,7 +47,7 @@ Every target works by click, keyboard, **gaze or pointer dwell** (confirm target
 - **NVIDIA Nemotron 3.5 Lightning** is the coordinator and tool caller: one model, shared by all logical roles. It runs through Ollama/MLX on Metal locally, or vLLM (NVFP4) on Brev.
 - **NeMo Gym bounty:** `evaluations/nemo_gym/unspoken_communication/` is a resources server with decoupled `valid / action / safety` rewards across 10 task categories. These cover ambiguity, cross-modal conflict, capture failure, repeated failure, "none of these", uncalibrated gaze, prompt injection and pressure to speak. `run_local.py` scores policies without a Gym install.
 - **Red Hat vLLM bounty:** `scripts/serve_vllm_brev.sh` serves Nemotron with `--enable-auto-tool-choice --tool-call-parser qwen3_coder --reasoning-parser nemotron_v3` and prefix caching. The coordinator speaks OpenAI-compatible tools (`UNSPOKEN_LLM_BACKEND=openai`). Only structured summaries leave the device.
-- **Budget ≤ 33B:** 32.04B distinct deployed parameters, counted from disk (`scripts/verify_weights.py`).
+- **Budget ≤ 33B:** 31.01B distinct deployed parameters with the coordinator counted at its nominal 30B (32.59B with its weight-file count, still within budget; `scripts/verify_weights.py`).
 
 ## Results (held-out; see `docs/EVALUATION.md`)
 
@@ -55,10 +55,10 @@ Every target works by click, keyboard, **gaze or pointer dwell** (confirm target
 |---|---|
 | EEG replay, 8 ALS participants, held-out runs | flash AUC **0.850**, letter accuracy **94%** at 10 repetitions (chance 2.8%) |
 | Lip reading, unseen GRID speakers | top-1 WER **79.6%** (best-of-5 71%). Readings are therefore candidates only. Still face flagged **8/8** |
-| Weak speech | raw ≤8% WER down to −5 dB SNR; **enhancement hurt in heavy noise** (8→18%, 49→65%), so both transcripts are always shown. Noise-only declined 10/10 |
+| Weak speech | Nemotron Speech 0.6B + forced phrase scoring, 3 speakers, leave-one-speaker-out: right phrase accepted **71.5%**, wrong **0.4%**, **90.2%** resolved within one gaze question, 0/45 near-miss false accepts, 43 ms per clip (`asr_eval/results/loso.md`) |
 | Coordinator (NeMo Gym, 60 tasks) | Nemotron raw 0.933 / **0% unsafe**; deployed (Nemotron + validator + fallback) **1.000**, 80% of decisions by Nemotron |
 | Safety | **25/25** gate tests and attacks pass; spoken = confirmed string **10/10**; unconfirmed text reaching TTS **0** |
-| Model budget | **32.04B** of 33B, counted from weight files |
+| Model budget | **31.01B** of 33B (coordinator at its nominal 30B; 32.59B with its weight-file count) |
 
 Run `./scripts/run_evals.sh` to reproduce. Details and known gaps are in `docs/EVALUATION.md`.
 
@@ -92,7 +92,7 @@ python run_eval.py --config configs/local_smoke.yaml --limit 6         # CPU plu
 web/                    React + Vite UI: glass room, ink + agent-activity engine, always-on sensors, calibration
 services/gateway/       state machine, fusion, coordinator calls, policy-gated speech, WebSocket
 services/vsr/           Auto-AVSR via Chaplin → raw n-best (MPS)
-services/audio/         Whisper (MLX) raw ∥ RNNoise-enhanced, word diff, VAD gating
+services/audio/         Nemotron Speech 0.6B + Silero VAD: forced phrase scoring, asr_eval's decision + thresholds
 services/eeg/           BNCI2014-008 loader, xDAWN+Riemann P300 decoder, replay payloads
 services/coordinator/   Nemotron tool calling, outside validation, deterministic fallback
 services/tts/           Kokoro-82M (MLX), refuses without a gateway token
