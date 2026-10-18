@@ -31,6 +31,7 @@ Requirements: Python 3.12 via `uv`, Node 20+, Ollama with `nemotron-3.5-lightnin
 |---|---|
 | **Communicate** | Live camera with a MediaPipe mouth overlay and the "model view" crop; silent-mouth and weak-voice capture; candidate cards with source badges, raw scores and low-confidence words; coordinator note with its exact tool call; separate **Speak it** confirm dock; phrase board and two-step spelling board; live agent graph and timeline; conversation history with audit trail; a button that tries to speak an unconfirmed guess so you can watch the policy gate block it |
 | **Gaze cards** | Full-screen page with 9 cards on a fixed 3×3 grid, built for gaze. It calibrates on the cards themselves (2 passes) and reports pixel error plus how often the gaze lands nearest the right card. The pointer snaps to the nearest card and locks once the gaze has rested on a card for 250 ms, so jitter, small drifts and blinks don't move it |
+| **My phrases** | Personal lip-reading enrollment: record each of your own phrases up to 3 times on the webcam (≤ 4 s each), or delete them. Only model features are kept, on this machine; no video is stored. Lip capture then matches new clips against your recordings, which measured 96–99% top-1 on MIRACL-VC1 against 66–72% for a fixed phrase list (`docs/LIP_READING.md`) |
 | **Eyes** | Webcam gaze from the MediaPipe iris landmarks plus the MobileGaze eye-image model (ONNX Runtime Web), fitted to the person with a hands-free calibration (2 rounds of 9 dots). The error is measured in pixels on 5 unseen dots, and gaze stays off if it is poor (≥ 220 px). Plus deliberate-blink tuning and a head fine-tune setting |
 | **Brain replay** | 8 ALS participants; the 6×6 matrix replays the recording's real flash sequence while row/column P300 evidence accumulates; scrolling EEG trace; ERP and accuracy-vs-repetitions charts; ground truth revealed only after inference; decoded letters can be routed into the communication panel, labelled `RECORDED EEG` |
 | **Evidence** | Parameter ledger counted from the weight files, per-modality held-out results, NeMo Gym coordinator scores, safety tests, saved failures, sources and licences |
@@ -51,6 +52,8 @@ Every target works by click, keyboard, **hover dwell** (head-mouse), **gaze dwel
 |---|---|
 | EEG replay, 8 ALS participants, held-out runs | flash AUC **0.850**, letter accuracy **94%** at 10 repetitions (chance 2.8%) |
 | Lip reading, unseen GRID speakers | top-1 WER **79.6%** (best-of-5 71%). Readings are therefore candidates only. Still face flagged **8/8** |
+| Lip reading, personal enrollment (MIRACL-VC1, 15 speakers) | top-1 **96–99%** with 1–3 recordings per phrase, vs 66–72% for a fixed phrase list. Same-session studio video, so webcam accuracy across days will be lower |
+| Voice, 20 phrases with abstention (3 recorded speakers, leave-one-speaker-out) | Nemotron Speech Streaming en 0.6B: right phrase **71.5%**, wrong 0.4%, **90.2%** resolved within one gaze question, near-miss false accepts **0/45**, 43 ms median. Selected, not yet wired into the app |
 | Weak speech | raw ≤8% WER down to −5 dB SNR; **enhancement hurt in heavy noise** (8→18%, 49→65%), so both transcripts are always shown. Noise-only declined 10/10 |
 | Coordinator (NeMo Gym, 60 tasks) | Nemotron raw 0.933 / **0% unsafe**; deployed (Nemotron + validator + fallback) **1.000**, 80% of decisions by Nemotron |
 | Safety | **25/25** gate tests and attacks pass; spoken = confirmed string **10/10**; unconfirmed text reaching TTS **0** |
@@ -59,9 +62,9 @@ Every target works by click, keyboard, **hover dwell** (head-mouse), **gaze dwel
 Run `./scripts/run_evals.sh` to reproduce. Details and known gaps are in `docs/EVALUATION.md`.
 Lip reading (pipeline, personal enrollment, training, accuracy and latency) is documented in `docs/LIP_READING.md`.
 
-## Choosing the voice model on Brev (in progress)
+## Voice model selection on Brev (`asr_eval/`)
 
-`asr_eval/` is an audio-only benchmark that picks the voice agent's next ASR. Candidates:
+`asr_eval/` is an audio-only benchmark that picked the voice agent's next ASR. Candidates:
 - Parakeet-CTC/TDT
 - Nemotron Speech Streaming
 - Whisper (several sizes)
@@ -78,6 +81,7 @@ python run_eval.py --config configs/local_smoke.yaml --limit 6         # CPU plu
 - **Tested:** on 3 recorded speakers (leave-one-speaker-out).
 - **Results:** it accepted the right phrase 71.5% of the time with 0.4% wrong, resolved 90.2% within one gaze question, and had 0/45 near-miss false accepts, at 43 ms per clip.
 - **Not adopted:** the multilingual Nemotron 3.5 was less accurate and slower on English. Its language selector and draft translations are kept.
+- **Not yet integrated:** the app's voice service still runs Whisper base. Integration steps, the shared phrase list it needs, and Brev details are in `HANDOFF.md` and `docs/BREV.md`.
 - Details: [asr_eval/README.md](asr_eval/README.md), [docs/EVALUATION.md](docs/EVALUATION.md) §6.
 
 - Setup, the CLI on Windows (WSL), costs and the sync/run/fetch loop: [docs/BREV.md](docs/BREV.md).

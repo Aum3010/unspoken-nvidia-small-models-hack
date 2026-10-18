@@ -16,7 +16,7 @@ Parameter counts below come from `scripts/verify_weights.py`, which reads the we
 | P300 decoder | xDAWN covariances → tangent space → logistic regression, trained per participant | ~50 weights | scikit-learn / pyRiemann | BSD-3 |
 | **Total distinct deployed** | | **≈32.04 B ≤ 33 B** | | |
 
-Not deployed and not counted: LipVoicer and VoiceBridge, which are research references only (no verified checkpoint for VoiceBridge). `granite4.2:8b` appears in the coordinator evaluation only as a comparison policy.
+Not deployed and not counted: LipVoicer and VoiceBridge, which are research references only (no verified checkpoint for VoiceBridge). The GRID-adapted VSR decoder from `scripts/finetune_vsr_grid.py` re-trains existing Auto-AVSR weights (no new parameters); it only knows GRID's 51 words, so it is a demo checkpoint loaded only through `UNSPOKEN_VSR_DECODER`. `granite4.2:8b` appears in the coordinator evaluation only as a comparison policy.
 
 ## ASR candidates under evaluation (`asr_eval/`, not deployed yet)
 

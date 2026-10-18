@@ -5,6 +5,8 @@
  ┌───────────────────────────────────────────────────────────────────────────────────────────────┐
  │ MediaPipe Face Landmarker (wasm/GPU): mouth ROI overlay, face-quality hints, deliberate blink  │
  │ Gaze: MediaPipe iris + MobileGaze (ONNX Web) → ridge calibration → dwell or look+blink         │
+ │ Gaze cards: fixed 3×3 cards, calibrated on the cards, snap to nearest + 250 ms gaze lock       │
+ │ My phrases: record own phrases for lip-reading enrollment (sent to /api/enroll)                │
  │ Selection engine: click · keyboard · hover dwell · gaze dwell · blink scan → audited method    │
  │ MediaRecorder: silent mouth clip (webm) · voice clip (webm/opus)                               │
  └──────────────┬─────────────────────────────────────────────────────────────▲──────────────────┘
@@ -17,6 +19,7 @@
  │   different text → separate candidates, status=ambiguous (never merged)                       │
  │ Policy gate (shared/confirmation.py): HMAC token only for exact confirmed text                │
  │ Audit log: raw hypotheses, tool calls, selections, edits, confirmations, speech               │
+ │ Enrollment proxy: /api/enroll GET/POST/DELETE → vsr /enroll (features only)                   │
  └───┬──────────────┬──────────────┬──────────────┬──────────────────────┬──────────────────────┘
      ▼              ▼              ▼              ▼                      ▼
   vsr :8101     audio :8102     eeg :8103     coordinator :8105       tts :8104
@@ -24,13 +27,15 @@
   (Chaplin)     + RNNoise       xDAWN+Riemann (Ollama/MLX/vLLM)       (MLX)
   torch MPS     MLX Metal       BNCI2014-008  typed tools + validator verifies token
   n-best raw    raw ∥ enhanced  recorded only deterministic fallback  before speaking
+  + enrollment
+  + phrase list
 ```
 
 ## Agents and what each one is allowed to do
 
 | Agent | Input | Output | May not |
 |---|---|---|---|
-| Lip-reading (vsr) | mouth video clip | n-best raw transcripts, beam scores, face/mouth-motion quality | rewrite or "correct" text (Chaplin's LLM correction is deliberately not used) |
+| Lip-reading (vsr) | mouth video clip; the person's enrolled phrase features, if any | one candidate list from three modes sharing one encoder pass: free-text n-best with beam scores, closest enrolled phrases (DTW distance), optional fixed phrase list (log-likelihood); face/mouth-motion quality | rewrite or "correct" text (Chaplin's LLM correction is deliberately not used); store video (enrollment keeps encoder features only, on this machine) |
 | Voice (audio) | microphone clip | raw-audio and enhanced-audio transcripts with word probabilities and a word diff | merge the two, or emit words when no voice activity is detected |
 | EEG replay (eeg) | recorded BNCI2014-008 trials | per-flash P300 scores, decoded row/column/letter | read ground-truth labels before predicting; claim live brain input |
 | Gaze / blink (browser) | webcam (MediaPipe iris + MobileGaze eye-image model, per-person ridge calibration) | selection events with method + dwell | count as confirmation unless the person dwells, or holds a look and blinks deliberately, on the separate confirm target |
@@ -52,6 +57,11 @@
 - Coordinator model down or slow → the deterministic policy is used. It is also the evaluation baseline.
 - TTS down → the browser's speech synthesis speaks the same confirmed string.
 - Gaze calibration poor (≥220 px mean error) → gaze selection stays off; click, hover-dwell and blink-scan remain available.
+- Nothing enrolled in **My phrases** → lip reading uses free text (and the phrase list, if configured) only.
+
+## Known integration gap: three phrase lists
+
+Voice (`asr_eval/configs/eval.yaml`, 20 phrases), the board and Gaze cards (`web/src/components/Board.tsx`) and lip reading (`services/vsr/patient_phrases.txt`, 44 phrases) each keep their own list, with different wording ("I'm in pain" vs "I am in pain"). Cross-modal fusion compares normalised text, so two modalities agreeing on the same request can be shown as a disagreement. The planned fix is one shared list keyed by phrase id ([HANDOFF.md](../HANDOFF.md), step 3).
 
 ## Offline evaluation harness: choosing the voice agent's ASR (`asr_eval/`)
 
@@ -61,16 +71,17 @@
 manifest.csv ─► Silero VAD ─► model (own process) ─► rankers ─► decide() ─► metrics ─► summary.md
  own / TORGO /   speech s @    transcript +           text (CMU       no_speech / unknown /
  LibriSpeech /   thr 0.2-0.6   forced phrase          phonetic),      candidate, thresholds
- noise / TTS /                 log-probs (CTC)        ctc_sum/norm/   tuned on calib only
- degradations                                         llr
+ noise / TTS /                 log-probs (CTC/RNNT)   forced_sum/     tuned on calib only
+ degradations                                         norm/llr
 ```
 
 - **Model interface** (`harness/models.py`): `load()`, `transcribe(wav)`, `score_phrases(wav, texts)`, `info()`.
-  - Forced scoring reuses the transcription's encoder pass.
+  - Forced scoring reuses the transcription's encoder pass: `ctc_loss` for CTC models, NeMo's pure-PyTorch RNNT loss for transducers.
   - CTC alignments that can't exist keep an impossible score; `zero_infinity` would turn them into perfect ones.
-- **Decision** (`harness/decide.py`): the same three gates for every model (VAD, absolute score + margin, negation mismatch). The best configuration is chosen on calib.
+- **Decision** (`harness/decide.py`): the same gates for every model (VAD, absolute score + margin, negation mismatch, empty transcript → `unknown`). The best configuration is chosen on calib.
 - **Where it runs:** on a Brev GPU via `run_eval.py` (see [BREV.md](BREV.md)), or on CPU with `configs/local_smoke.yaml`.
-- **What happens next:** the winning configuration will replace Whisper base + text candidates in `services/audio/`. It will still emit typed `Evidence`, so the gateway, coordinator and policy gate don't change. The patient's confirmation stays the final say.
+- **Result:** Nemotron Speech Streaming en 0.6B with `forced_llr` ([EVALUATION.md](EVALUATION.md) §6).
+- **What happens next:** it will replace Whisper base + text candidates in `services/audio/`. It will still emit typed `Evidence`, so the gateway, coordinator and policy gate don't change. The patient's confirmation stays the final say.
 
 ## Ports & processes
 

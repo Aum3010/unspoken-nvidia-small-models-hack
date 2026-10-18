@@ -1,6 +1,10 @@
 # Working with NVIDIA Brev
 
-Brev is where GPU work runs. Right now that is the **audio-only ASR evaluation** in `asr_eval/`. Nothing else in the app (coordinator, lip reading, EEG, TTS service) is started on Brev. This page covers the CLI, choosing an instance, the day-to-day loop, and the problems we already hit.
+Brev is where GPU work runs. Two sets of jobs use it:
+- the **audio-only ASR evaluation** in `asr_eval/`, which most of this page covers;
+- `scripts/brev_bench.sh` (`setup`, `coordinator`, `vsr`), which benchmarks the coordinator (Nemotron on vLLM → NeMo Gym tasks) and lip reading (GRID decoder fine-tuning) and writes to `evaluations/results/brev/`. See [LIP_READING.md](LIP_READING.md) §6–8.
+
+The running app itself (gateway, web UI, TTS, EEG) is not started on Brev. This page covers the CLI, choosing an instance, the day-to-day loop, and the problems we already hit.
 
 ## 1. Install the CLI
 

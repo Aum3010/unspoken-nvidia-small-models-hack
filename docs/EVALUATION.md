@@ -31,7 +31,7 @@ The Auto-AVSR LRS3 model has never seen these speakers or GRID's letter/digit gr
 | **Fine-tuned decoder, no LM** | **4.6%** | 1.1 s |
 | Fine-tuned decoder + LRS3 LM 0.3 | 6.4% | 1.5 s |
 
-**Closed phrase list.** Instead of free decoding, every phrase in a fixed list is scored against the video (teacher-forced decoder + CTC log-likelihood, one batched pass of about 0.1 s for 44 phrases). Each test clip's true sentence is mixed with N−1 other GRID sentences.
+**Closed phrase list.** Instead of free decoding, every phrase in a fixed list is scored against the video (teacher-forced decoder + CTC log-likelihood, one batched pass of about 0.1 s for 44 phrases). Each test clip's true sentence is mixed with N−1 other GRID sentences. Personal enrollment (matching against the user's own recordings) is measured on MIRACL-VC1 in [LIP_READING.md](LIP_READING.md) §7.3.
 
 | Distractors | N | Original top-1 / top-3 | Fine-tuned top-1 / top-3 |
 |---|---:|---:|---:|
@@ -74,7 +74,7 @@ Both raw models fail on the same thing: history. After two failed retakes they a
 - In the end-to-end test, 10 phrases were selected → confirmed → spoken by Kokoro → re-transcribed by Whisper. **10/10 matched the confirmed string exactly.**
 - **Unconfirmed or contradicted text reaching TTS: 0**, enforced by construction (HMAC token over the exact text) and tested.
 
-## 6. Voice agent model selection: 20-phrase task (in progress, `asr_eval/`)
+## 6. Voice agent model selection: 20-phrase task (`asr_eval/`)
 
 **Question.** Which open ASR model can map a weak or impaired utterance onto **one of 20 request phrases**, and refuse otherwise? The voice agent's output is a phrase candidate, `unknown`, or `no_speech`.
 - Proposing a phrase on silence, noise or unrelated speech is the worst failure.
@@ -94,8 +94,8 @@ Both raw models fail on the same thing: history. After two failed retakes they a
 - **Speech gate:** Silero VAD with a 100 ms minimum, so "yes" and "no" survive.
 - **Decision:**
   - Every model: phonetic matching of the transcript.
-  - CTC models only: forced phrase scoring.
-  - `unknown` on a low score, a small margin, or a negation mismatch.
+  - CTC and transducer models: forced phrase scoring (log P(phrase | audio)). Forced TDT scoring was too slow without libNVVM, so Parakeet-TDT uses text matching only.
+  - `unknown` on a low score, a small margin, a negation mismatch, or an empty transcript.
   - Thresholds are tuned on calib only. Objective: the most correct accepts with a false-accept rate ≤ 1% for every negative type.
 - **Reporting:** every rate comes with k/n and a Wilson interval, plus the rule-of-three bound when k = 0. TTS and degraded rows are kept apart from real recordings. The best configuration is selected on calib and reported on test.
 
@@ -107,15 +107,12 @@ Both raw models fail on the same thing: history. After two failed retakes they a
 - Remaining losses are noisy, muffled and whispered speech.
 - The multilingual Nemotron 3.5 was tested with an English prompt and was less accurate and slower, so it was not adopted.
 
-**Earlier status (2026-10-17).**
-- Milestone 1 (Silero + Parakeet-CTC 0.6B + manifest) passes end to end on CPU and is running on Brev (RTX PRO 6000).
-- The other models (Parakeet-TDT, Nemotron Speech Streaming, Whisper via faster-whisper) follow.
-- Results go to `asr_eval/results/summary.md` and replace this paragraph when measured.
-- Brev workflow: [BREV.md](BREV.md).
+**Status.** Selected but not yet wired into `services/audio/`, which still runs Whisper base (§3). Full tables: `asr_eval/results/summary.md` and `loso.md`. Brev workflow: [BREV.md](BREV.md).
 
 ## Not yet measured (honest gaps)
 
-- Live webcam lip reading on unfamiliar, consenting people. This needs local opt-in recordings.
+- Live webcam lip reading on unfamiliar, consenting people, including personal enrollment across days. This needs local opt-in recordings.
+- Voice in hard conditions across speakers. Only one of the three recorded speakers has noisy, muffled and whispered clips.
 - Gaze selection accuracy and false-selection rate across lighting and head motion. The calibration screen reports a per-session error, but no study has been done.
 - Clarification efficiency (selections per successful message) with real users.
 - EEG+gaze fusion. BNCI2014-008 has no synchronized eye tracking; bigP3BCI sessions with eye data would be needed.

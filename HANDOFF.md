@@ -1,6 +1,6 @@
 # Handoff: voice agent model selection on NVIDIA Brev
 
-Branch `asr-eval`, 2026-10-17. This covers the work to choose and validate the **voice (residual speech) agent's ASR**. The rest of Unspoken (gateway, coordinator, lips, gaze, EEG, TTS) is unchanged on this branch.
+Branch `yash-gaze-v2-local`, 2026-10-17. This covers the work to choose and validate the **voice (residual speech) agent's ASR**, built on `asr-eval`. The branch also carries the gaze v3 and lip-reading work, merged on top (see *Branch state*). Lip reading has its own guide in [docs/LIP_READING.md](docs/LIP_READING.md); the places where voice, lips and gaze meet are *Next steps* 2–4.
 
 ## TL;DR
 
@@ -26,6 +26,17 @@ Branch `asr-eval`, 2026-10-17. This covers the work to choose and validate the *
 | Docs | [docs/BREV.md](docs/BREV.md), [docs/EVALUATION.md](docs/EVALUATION.md) §6, [docs/MODEL_CARDS_AND_LICENSES.md](docs/MODEL_CARDS_AND_LICENSES.md), [docs/DATASETS_AND_CONSENT.md](docs/DATASETS_AND_CONSENT.md), [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | How to use Brev; protocol and results; model licences and status; datasets and recording consent; where the harness fits |
 | Porting skill | `.claude/skills/apple-silicon-to-cuda/SKILL.md` | How to move Apple Silicon (MPS/MLX) code to CUDA, with the pitfalls found here |
 
+## Branch state
+
+| Commit | What came in | Conflicts and how they were resolved |
+|---|---|---|
+| `b8ea7d7` | PR #2: `asr-eval` (this voice work) | none |
+| `ed1f142`, `6bd0a3b` | Docs describe the MediaPipe iris + MobileGaze gaze stack instead of WebGazer; unused `webgazer` dependency removed | — |
+| `f112b9b` | `yash-gaze-v3`: **Gaze cards** page, calibration on the card layout, gaze lock; Gaze cards reuse the board phrase list | none (no file changed on both sides) |
+| `947dcbd` | `yash-lipreading`: personal enrollment (**My phrases** page, `/api/enroll`), phrase-list scoring, GRID fine-tuning, `scripts/brev_bench.sh` | `web/src/App.tsx`: kept both new pages. `scripts/setup_models.sh`: kept the `WITH_WEB` switch and GRID changes with the MobileGaze setup; dropped the WebGazer and `face_mesh` copies |
+
+Checked after the last merge: `npm ci`, type-check, build and lint pass; Python compiles; the 18 safety tests pass; the gateway has 31 routes and no duplicates.
+
 ## Results and decisions (details in `asr_eval/results/`)
 
 | Question | Answer | Evidence |
@@ -44,7 +55,7 @@ Safety rules in `decide()`: VAD gate; minimum score and margin; negation mismatc
 
 | Item | Location |
 |---|---|
-| Code + committed results | branch `asr-eval` on `origin` |
+| Code + committed results | branch `yash-gaze-v2-local` on `origin` (the voice work alone: `asr-eval`) |
 | Recordings (3 speakers, 307 clips, 17 MB) | Brev `/workspace/asr_eval_data/own/`; laptop backup `asr_eval/data/own/` (gitignored, **never commit**) |
 | Per-clip outputs (contain transcripts) | Brev only, `~/asr_eval/results/raw/` (`fetch_results.sh --raw` to copy) |
 | Datasets, HF cache, venv | Brev `/workspace/asr_eval_data`, `/workspace/hf`, `/workspace/venv-asr` |

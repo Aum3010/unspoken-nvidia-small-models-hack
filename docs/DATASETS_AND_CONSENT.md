@@ -3,9 +3,11 @@
 | Dataset | Licence | Used for | Stored where | Redistributed? |
 |---|---|---|---|---|
 | BNCI2014-008 — P300 speller, 8 participants with ALS (Riccio et al. 2013) | CC BY-NC-ND 4.0 | EEG replay demo + held-out decoder evaluation | `data/bnci2014_008/` (downloaded by `setup_models.sh`) | **No.** Raw recordings are never committed or re-hosted; the UI shows derived scores and a downsampled trace locally |
-| GRID audiovisual corpus, speakers s1–s2 (Cooke et al.) | CC BY 4.0 | Unseen-speaker lip-reading benchmark | `data/grid/` | No (not needed); attribution in UI and docs |
+| GRID audiovisual corpus (Cooke et al.) | CC BY 4.0 | s1–s2: unseen-speaker lip-reading benchmark (always held out). s3–s8 (Mac) or s3–s34 minus s21 (Brev): decoder fine-tuning experiment | `data/grid/` | No (not needed); attribution in UI and docs |
+| MIRACL-VC1 (Rekik, Ben-Hamadou & Mahdi, 2016) | **Research use only** | Personal-enrollment evaluation (`scripts/eval_enrollment_miracl.py`) | `data/miracl/` (gitignored) | **No.** Evaluation only, never shipped in the product |
 | Kokoro-generated utterances | Apache-2.0 model output | Controlled weak/noisy speech benchmark with exact references | generated at evaluation time | n/a |
 | Live camera / microphone | Person's own, opt-in per capture | Live communication | **Not stored.** Clips go only to the local gateway and are discarded after inference; only text hypotheses and quality metadata are kept in the in-memory audit log | Never |
+| Lip enrollment (**My phrases** tab) | Person's own, recorded deliberately per phrase | Matching their later lip clips against their own phrases | **No video stored.** Auto-AVSR encoder features (float16 `.npy`) and the phrase text under `data/enroll/` (`UNSPOKEN_ENROLL_DIR`, gitignored) on this machine. Deletable per phrase in the tab; trains no model | Never uploaded |
 
 ## BNCI2014-008 facts used by the decoder (checked against the files)
 
