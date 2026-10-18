@@ -55,6 +55,7 @@ echo "== Web app + on-device browser models"
 mkdir -p web/public/mediapipe web/public/vendor
 cp -r web/node_modules/@mediapipe/tasks-vision/wasm web/public/mediapipe/
 cp web/node_modules/webgazer/dist/webgazer.js web/public/vendor/
+cp -r web/node_modules/webgazer/dist/mediapipe/face_mesh web/public/mediapipe/   # WebGazer loads its face mesh from /mediapipe/face_mesh/
 [[ -s web/public/mediapipe/face_landmarker.task ]] || curl -sSL -o web/public/mediapipe/face_landmarker.task \
   https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task
 
