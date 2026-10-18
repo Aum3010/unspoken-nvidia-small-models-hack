@@ -248,7 +248,8 @@ export function GlassApp() {
     startVoice({
       canCapture: () => canCapture('audio'),
       onSpeech: (on) => { setHearing(on); if (on) E.fire('voice', .7, 'HEARING') },
-      onLevel: (v) => { if (v) voiceAt.current = performance.now() },
+      // the room's own speech (the phrase being spoken back) is not the person's voice
+      onLevel: (v) => { if (v && performance.now() > speakingUntil.current) voiceAt.current = performance.now() },
       onEarly: (b) => { early = api.captureAudioEarly(b).then((r) => r.early_id).catch(() => null) },
       onEarlyCancel: () => { const p = early; early = null; p?.then((id) => { if (id) api.discardAudio(id).catch(() => undefined) }) },
       onClip: (b, _ms, wasEarly) => {

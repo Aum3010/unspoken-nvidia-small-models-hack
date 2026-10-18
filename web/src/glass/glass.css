@@ -203,4 +203,4 @@ canvas.layer{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none
 @media (prefers-reduced-motion:reduce){.ambient{animation:none}}
 
 /* gaze counts less while the person mouths or whispers (engine setGazeWeight) */
-.gaze.on.muted{opacity:.35}
+.gaze.on.muted{opacity:.55}

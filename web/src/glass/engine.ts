@@ -721,7 +721,10 @@ function dwellTick(now: number, dt = 16.7) {
     fx = ax; fy = ay
   }
   const kz = 1 - Math.pow(source === 'eyes' ? 0.94 : 0.72, dt / 16.7); sgx += (fx - sgx) * kz; sgy += (fy - sgy) * kz
-  const t = hasPointer && !paused ? (source === 'eyes' ? eyeTarget(sgx, sgy) : targetAt(sgx, sgy)) : null
+  // while gaze is muted (the person mouths or speaks) nothing is targeted: the lens follows the eyes freely
+  // instead of settling on a target it could never choose
+  const muted = source === 'eyes' && gazeWeight === 0
+  const t = hasPointer && !paused && !muted ? (source === 'eyes' ? eyeTarget(sgx, sgy) : targetAt(sgx, sgy)) : null
   if (t !== hot) {
     if (hot) hot.classList.remove('hot')
     hot = t; hotT0 = now; hotDone = !!hot && hot === clicked
@@ -751,7 +754,6 @@ function dwellTick(now: number, dt = 16.7) {
   if (hot && !hotDone) {
     // confirm targets need a longer look than select targets
     const need = (hot.dataset.confirm != null ? DWELL * 1.5 : DWELL) / (source === 'eyes' ? Math.max(gazeWeight, 1e-6) : 1)
-    if (source === 'eyes' && gazeWeight === 0) hotT0 = now   // the look does not count: the ring stays empty
     p = Math.min(1, (now - hotT0) / need)
     if (p >= 1) { hotDone = true; dwelledAt = now; select(hot, source === 'eyes' ? 'eyes' : 'pointer'); p = 0 }
   }
