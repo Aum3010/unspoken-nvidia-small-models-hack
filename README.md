@@ -43,11 +43,11 @@ One liquid-glass page (`web/src/glass/`) at **http://localhost:8800**, over the 
 
 | Part | What it does |
 |---|---|
-| **Eye calibration** | Its own plain black screen, shown when the app opens (and from the *Eyes* chip): 18 hands-free dots in two passes, then the error measured on 5 dots it was not fitted on. Live status (camera, face, eye model) and, on failure, the measured reason. A good calibration is saved and offered next time. Gaze is used only when it is good enough; otherwise the pointer stands in for the eyes |
-| **Every input at once** | No mode switching. Voice: always-on VAD cuts 16 kHz clips for the voice agent. Lips: mouth-movement detection cuts webm clips for the lip agent. Gaze: MediaPipe iris + MobileGaze eye-image model, calibrated per person; dwell tolerates misses in proportion to the measured error and learns from each gaze selection. Blink (deliberate, MediaPipe) selects what you look at; head nod = yes, shake = no. Capture pauses while a message waits for confirmation or speech is playing |
-| **Writing in light** | A reading or chosen phrase appears as faint, trembling pencil. It is drawn in by the pen only after you confirm it (Speak, Yes, a blink or a nod) and the policy gate authorizes the exact text |
-| **Bubbles** | Phrases, and the coordinator's shortlist of readings with their source and raw score, bloom as glass bubbles to choose by dwell, blink or click |
-| **Rail** | Phrases · Yes · No · Speak · Clear · Help; tiles swell under the gaze |
+| **Eye calibration** | Its own plain black screen: 11 hands-free dots placed on the real targets (Yes/No, rail tiles, phrase cards), then the error measured on 3 points it was not fitted on. A good calibration is saved and reused automatically on the same window size; each gaze selection refines it. Gaze is used only when it is good enough; otherwise the pointer stands in for the eyes |
+| **Every input at once** | No mode switching. Voice: always-on VAD cuts 16 kHz clips for the voice agent. Lips: mouth-movement detection cuts webm clips for the lip agent. Gaze: MediaPipe iris + MobileGaze eye-image model, calibrated per person, with zone targeting for the rail, the Yes/No band and the cards. Blink (deliberate, MediaPipe) selects what you look at; head nod = yes, shake = no. Capture pauses while a message waits for confirmation or speech is playing |
+| **Writing in light** | A reading appears as faint, trembling pencil, and is drawn in by the pen once spoken. In confirm mode that is after Yes, a blink or a nod; in **demo auto-speak mode** (`UNSPOKEN_AUTO_SPEAK=1`, the current default) the coordinator's top reading is spoken without a confirmation, audited as `demo_auto_spoken` by the system |
+| **Phrase cards** | Six phrase cards bloom from Phrases; choosing one (dwell, blink or click) speaks it at once, through the policy gate |
+| **Rail and answers** | Phrases · Clear · Help on the rail, and two big **Yes / No** targets at the top, far apart for webcam gaze |
 | **Agent activity** (top right) | The coordinator nucleus fed by six inputs (voice, lips, gaze, blink, brain replay, head); each pulses when its agent reports, with the latest gateway timeline below |
 | **History** | Every spoken message with the inputs and confirmation method behind it; click to hear it again |
 
@@ -57,8 +57,8 @@ Every target works by click, keyboard, **gaze or pointer dwell** (confirm target
 
 - **Track 2: Multi-Agent Systems.** These are heterogeneous agents: a visual-speech transformer, a streaming ASR that scores fixed phrases, a browser gaze/blink/head estimator, a Riemannian P300 decoder, an LLM coordinator, and a TTS renderer. They exchange typed `Evidence` and `ToolCall` messages (`shared/schemas.py`). Disagreement is preserved, and another modality resolves it.
 - **NVIDIA Nemotron 3.5 Lightning** is the coordinator and tool caller: one model, shared by all logical roles. It runs through Ollama/MLX on Metal locally, or vLLM (NVFP4) on Brev.
-- **NeMo Gym bounty:** `evaluations/nemo_gym/unspoken_communication/` is a resources server with decoupled `valid / action / safety` rewards across 10 task categories. These cover ambiguity, cross-modal conflict, capture failure, repeated failure, "none of these", uncalibrated gaze, prompt injection and pressure to speak. `run_local.py` scores policies without a Gym install.
-- **Red Hat vLLM bounty:** `scripts/serve_vllm_brev.sh` serves Nemotron with `--enable-auto-tool-choice --tool-call-parser qwen3_coder --reasoning-parser nemotron_v3` and prefix caching. The coordinator speaks OpenAI-compatible tools (`UNSPOKEN_LLM_BACKEND=openai`). With only the coordinator on Brev, just structured summaries leave the device; with the whole backend there (`scripts/brev/start_app.sh`), mouth and voice clips go too, and the UI says so.
+- **NeMo Gym bounty:** `evaluations/nemo_gym/unspoken_communication/` is a resources server with decoupled `valid / action / safety` rewards across 12 task categories. These cover ambiguity, cross-modal conflict, capture failure, repeated failure, "none of these", uncalibrated gaze, prompt injection, pressure to speak, misread words and negations that must survive a correction. `run_local.py` scores policies without a Gym install.
+- **Red Hat vLLM bounty:** `scripts/serve_vllm_brev.sh` serves Nemotron with `--enable-auto-tool-choice --tool-call-parser qwen3_coder --reasoning-parser nemotron_v3` and prefix caching. The coordinator speaks OpenAI-compatible tools (`UNSPOKEN_LLM_BACKEND=openai`). With only the coordinator on Brev, just structured summaries leave the device; with the whole backend there (`scripts/brev/start_app.sh`), mouth and voice clips go too (the UI on `ui` does not currently say so; see `docs/TECHNICAL_VERBOSE.md` §10).
 - **Budget ≤ 33B:** 31.01B distinct deployed parameters with the coordinator counted at its nominal 30B (32.59B with its weight-file count, still within budget; `scripts/verify_weights.py`).
 
 ## Results (held-out; see `docs/EVALUATION.md`)
@@ -68,10 +68,10 @@ Every target works by click, keyboard, **gaze or pointer dwell** (confirm target
 | EEG replay, 8 ALS participants, held-out runs | flash AUC **0.850**, letter accuracy **94%** at 10 repetitions (chance 2.8%) |
 | Lip reading, unseen GRID speakers | top-1 WER **79.6%** (best-of-5 71%). Readings are therefore candidates only. Still face flagged **8/8** |
 | Weak speech | Nemotron Speech 0.6B + forced phrase scoring, 3 speakers, leave-one-speaker-out: right phrase accepted **71.5%**, wrong **0.4%**, **90.2%** resolved within one gaze question, 0/45 near-miss false accepts, 43 ms per clip (`asr_eval/results/loso.md`) |
-| Coordinator (NeMo Gym, 60 tasks) | Nemotron raw 0.933 / **0% unsafe**; deployed (Nemotron + validator + fallback) **1.000**, 80% of decisions by Nemotron |
+| Coordinator (NeMo Gym, 72 tasks, Brev, current prompt) | Nemotron raw 0.926, deployed (Nemotron + validator + fallback) 0.931, **0% unsafe**; every wrong move is `ignore_input` on real input (e.g. a person who failed twice) — see `docs/TECHNICAL_VERBOSE.md` §3.3. (Mac, 60 tasks, earlier prompt: 0.933 / 1.000) |
 | Safety | **25/25** gate tests and attacks pass; spoken = confirmed string **10/10**; unconfirmed text reaching TTS **0** |
 | Model budget | **31.01B** of 33B (coordinator at its nominal 30B; 32.59B with its weight-file count) |
-| Latency, every model on one RTX PRO 6000 | one message end to end (voice + lip clip → coordinator → confirm → speech) **1.03 s** p50, 1.10 s p95; voice agent 55 ms alone, 304 ms with everything running (`docs/SERVING.md`) |
+| Latency, every model on one RTX PRO 6000 (NVIDIA MPS) | one message end to end (voice + lip clip → coordinator → auto-speak) **0.44 s** p50 on the GPU box; voice agent 75 ms with every model busy (244 ms without MPS); voice result 64 ms after the end-of-utterance pause from the laptop, thanks to early decode (`docs/SERVING.md`) |
 
 Run `./scripts/run_evals.sh` to reproduce. Details and known gaps are in `docs/EVALUATION.md`.
 
@@ -104,7 +104,7 @@ python run_eval.py --config configs/local_smoke.yaml --limit 6         # CPU plu
 ```
 web/                    React + Vite UI: glass room, ink + agent-activity engine, always-on sensors, calibration
 services/gateway/       state machine, fusion, coordinator calls, policy-gated speech, WebSocket
-services/vsr/           Auto-AVSR via Chaplin → raw n-best (MPS or CUDA)
+services/vsr/           Auto-AVSR via Chaplin: personal phrase enrollment (DTW over encoder features), optional free text
 services/audio/         Nemotron Speech 0.6B + Silero VAD: forced phrase scoring, asr_eval's decision + thresholds
 services/eeg/           BNCI2014-008 loader, xDAWN+Riemann P300 decoder, replay payloads
 services/coordinator/   Nemotron tool calling, outside validation, deterministic fallback
@@ -115,9 +115,12 @@ asr_eval/               audio-only ASR benchmark for the voice agent (Brev GPU o
                         models, phrase decision, calib-only tuning, summary/plots; scripts/brev/ helpers
 scripts/                setup, run, evals, weights ledger, vLLM/MLX serving, smoke test
 scripts/brev/           whole backend on a Brev GPU: setup_app, start_app, sync_app, connect, bench_latency
-docs/                   architecture, model cards & licences, datasets & consent, evaluation, BREV.md, SERVING.md
+docs/                   TECHNICAL_VERBOSE.md (everything in one place), architecture, model cards & licences,
+                        datasets & consent, evaluation, BREV.md, SERVING.md
 ```
 
 ## Product invariant
 
 **No unverified interpretation is ever spoken as the patient's intention.** This is enforced by code, not by prompting. See `shared/confirmation.py` and `evaluations/safety_tests/`.
+
+**Exception on branch `ui`: demo auto-speak.** With `UNSPOKEN_AUTO_SPEAK=1` (currently the default) the gateway speaks the coordinator's top reading without the person's confirmation. It is audited as `demo_auto_spoken` by the system, never as a user action, and the policy gate requires its own audited event for the exact text. The invariant above holds only with `UNSPOKEN_AUTO_SPEAK=0`. Risks are listed in `docs/TECHNICAL_VERBOSE.md` §10.

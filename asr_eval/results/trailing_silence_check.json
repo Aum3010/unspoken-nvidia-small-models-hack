@@ -1,0 +1,16 @@
+{
+ "clips": 304,
+ "cut700": {
+  "correct_accept": "169/234",
+  "wrong_accept": "1/234",
+  "false_accept_on_negatives": "1/70"
+ },
+ "cut350": {
+  "correct_accept": "169/234",
+  "wrong_accept": "1/234",
+  "false_accept_on_negatives": "1/70"
+ },
+ "decisions_changed": 0,
+ "changed": [],
+ "short_tail_clips": 266
+}

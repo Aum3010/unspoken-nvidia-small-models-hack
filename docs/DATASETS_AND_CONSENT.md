@@ -67,12 +67,22 @@ For the ASR evaluation there are two recorders:
 - The consent text says the clips are also stored on the project's evaluation GPU machine (Brev) and deleted after the hackathon.
 - Per-clip outputs that contain transcripts (`results/raw/`) are gitignored.
 
+## Lip enrollment recordings (`data/enroll/`, branch `ui`)
+
+- **What they are:** the lip agent's personal phrases. For 22 phrases there are 90 recordings, each stored as
+  Auto-AVSR encoder features (`NNN.npy`, frames × 768, float16) with `phrase.txt`. There is no video, but the
+  features are derived from one real person's mouth recordings.
+- **Status: committed to git.** They were force-added past the `/data/` gitignore rule. `services/vsr/enroll.py`
+  says they "are not uploaded", and the rules above keep personal recordings out of git.
+- **For the team:** confirm the person's consent covers a shared repository, or remove them from git history and
+  ship them to the instance separately, as `docs/BREV.md` §4b already does for running.
+
 ## Cloud processing
 
 **On a Mac, the app runs locally.** If only the coordinator is moved to vLLM on Brev (`scripts/serve_vllm_brev.sh`), only the structured evidence summary leaves the machine: candidate text, scores and quality flags. Camera frames, audio and EEG never do.
 
 **With the whole backend on Brev** (`scripts/brev/start_app.sh`), the browser still processes the camera itself (face, gaze, blink and head never leave it), but the **mouth video clips and voice clips** it cuts are sent through the SSH tunnel to the instance. They are decoded in memory and not stored; the decision, transcript and audit trail stay in the gateway's session memory on the instance. The UI's camera chip says "clips to NVIDIA Brev" whenever the gateway reports a remote host.
 
-In both cases, disclose this to the person, and require their opt-in, before turning it on.
+In both cases, disclose this to the person, and require their opt-in, before turning it on. **On branch `ui` the UI no longer does this**: the camera chip always says "Camera · on device", and the calibration screen says the camera and microphone stay on this device. Tell the person yourself until it is restored.
 
 **The ASR evaluation is different.** It uploads audio clips, including consented volunteer recordings, to a Brev GPU instance under `/workspace`. That is covered by the recording consent above. Deleting the instance deletes the disk. See [BREV.md](BREV.md) §6.

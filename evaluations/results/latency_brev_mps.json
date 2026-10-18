@@ -1,0 +1,121 @@
+{
+  "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition, 62833 MiB, 97887 MiB",
+  "n": 20,
+  "date": "2026-10-18",
+  "alone": {
+    "audio": {
+      "n": 20,
+      "p50": 60,
+      "p95": 69,
+      "max": 72,
+      "mean": 61
+    },
+    "vsr": {
+      "n": 20,
+      "p50": 535,
+      "p95": 600,
+      "max": 607,
+      "mean": 537
+    },
+    "coordinator": {
+      "n": 20,
+      "p50": 248,
+      "p95": 261,
+      "max": 264,
+      "mean": 248
+    },
+    "tts": {
+      "n": 20,
+      "p50": 23,
+      "p95": 25,
+      "max": 25,
+      "mean": 23
+    },
+    "eeg": {
+      "n": 20,
+      "p50": 114,
+      "p95": 117,
+      "max": 127,
+      "mean": 114
+    }
+  },
+  "together": {
+    "audio": {
+      "n": 20,
+      "p50": 70,
+      "p95": 103,
+      "max": 142,
+      "mean": 78
+    },
+    "vsr": {
+      "n": 20,
+      "p50": 570,
+      "p95": 725,
+      "max": 781,
+      "mean": 590
+    },
+    "coordinator": {
+      "n": 20,
+      "p50": 263,
+      "p95": 281,
+      "max": 305,
+      "mean": 262
+    },
+    "tts": {
+      "n": 20,
+      "p50": 32,
+      "p95": 49,
+      "max": 52,
+      "mean": 35
+    },
+    "eeg": {
+      "n": 20,
+      "p50": 115,
+      "p95": 131,
+      "max": 134,
+      "mean": 117
+    },
+    "_gpu": {
+      "util_mean_pct": 61,
+      "util_max_pct": 100,
+      "mem_max_mib": 63055,
+      "wall_s": 11.8
+    }
+  },
+  "end_to_end": {
+    "evidence": {
+      "n": 20,
+      "p50": 564,
+      "p95": 614,
+      "max": 684,
+      "mean": 570
+    },
+    "plan": {
+      "n": 20,
+      "p50": 365,
+      "p95": 475,
+      "max": 498,
+      "mean": 372
+    },
+    "speech": {
+      "n": 20,
+      "p50": 36,
+      "p95": 38,
+      "max": 70,
+      "mean": 38
+    },
+    "total": {
+      "n": 20,
+      "p50": 967,
+      "p95": 1086,
+      "max": 1166,
+      "mean": 980
+    }
+  },
+  "inputs": {
+    "voice": "Kokoro af_heart speaking the 20 phrases",
+    "lips": "12 GRID videos (3 s, 25 fps)",
+    "eeg": "BNCI A01, one letter",
+    "coordinator": "2 candidates, ambiguous audio + proposed lip"
+  }
+}

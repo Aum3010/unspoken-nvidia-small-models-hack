@@ -19,7 +19,11 @@ Chance is 2.8%. These are healthy-protocol research recordings, so they do not s
 |---:|---:|---:|---:|---:|
 | **79.6%** | 71.3% | 55.0% | **8/8** | **0%** |
 
-The Auto-AVSR LRS3 model has never seen these speakers or GRID's letter/digit grammar. Its paper LRS3 WER of about 19% does **not** transfer, which is why lip readings are only ever *candidates* for the person to confirm. The median latency of 7.9 s was measured while the coordinator benchmark shared the GPU, so it is a contended number. With a still face the model still produces fluent sentences (for example "THAT'S WHAT I'M GOING TO DO"); the mouth-motion gate flags every such clip.
+The Auto-AVSR LRS3 model has never seen these speakers or GRID's letter/digit grammar. Its paper LRS3 WER of about 19% does **not** transfer, which is why lip readings are only ever *candidates* for the person to confirm. The median latency of 7.9 s is **historical**: measured on the Mac while the coordinator benchmark shared the GPU. On Brev a clip takes about 0.4 s (§7). With a still face the model still produces fluent sentences (for example "THAT'S WHAT I'M GOING TO DO"); the mouth-motion gate flags every such clip.
+
+**Larger run on Brev (132 clips, 4 from each of 33 unseen GRID speakers, beam 12, `vsr_speed_accuracy.json`):** WER 69.4%, best-of-5 60.9%, CER 47.3%. Beam 6 is ≈50 ms faster but worse (71.1% / 64.5%), so beam 12 stays; fp16 gives identical answers and is not faster.
+
+**Personal enrollment (current default on `ui`).** The lip agent now matches clips against the person's own recordings (22 phrases, 90 recordings, DTW over encoder features, threshold 0.30) instead of free text. Measured only incidentally: 5 of 43 GRID clips from strangers matched an enrolled phrase within the threshold (≈12% false matches). The threshold was set from 10 recordings; a held-out evaluation is still needed.
 
 ## 3. Weak speech: raw vs RNNoise-enhanced Whisper-base (MLX), the previous voice agent
 
@@ -39,9 +43,21 @@ The test set is 10 synthetic Kokoro utterances (5 voices) with pink noise, so th
 
 **Finding:** in heavy noise, enhancement makes recognition *worse* and invents plausible words ("Please call my dog" → "Please call my daughter"). Both transcripts are therefore always shown, with a word diff, and are never merged.
 
-## 4. Coordinator: NeMo Gym environment `unspoken_communication` (60 tasks, 10 categories)
+## 4. Coordinator: NeMo Gym environment `unspoken_communication`
 
-| Policy | Reward | Valid | Correct action | Unsafe | Decided by model | p50 latency |
+**Current (Brev, vLLM, `ui` branch prompt with `propose_correction` and `ignore_input`, 72 tasks, 12 categories, 2026-10-18, `coordinator_brev.json`):**
+
+| Policy | Reward | Valid | Correct action | Unsafe | Decided by model | p50 latency (Brev) |
+|---|---:|---:|---:|---:|---:|---:|
+| Nemotron 3.5 Lightning, raw | 0.926 | 100% | 78% | **0%** | 100% | 278 ms |
+| **Deployed: Nemotron + outside validator + fallback** | 0.931 | 100% | 79% | **0%** | 90% | 273 ms |
+| Deterministic rules (reference) | 1.000 | 100% | 100% | 0% | 0% | 0 ms |
+
+Every wrong action of the deployed coordinator is `ignore_input` on real input: a person who failed twice (6/6; should switch input method), an injection next to a genuine request (3/6), uncalibrated gaze (2/6), a clear negated reading (3/6), one misread. Misreads were handled right in 5 of 6 tasks and no correction ever dropped a negation, although the validator would accept one. The validator's history rules (retake, none of these) do not apply to `ignore_input`, which is how the old failure mode comes back. The scorer now knows the two new tools; ignoring is accepted only for failed captures with no reading.
+
+**Earlier (Mac, Ollama, previous prompt without the two tools, 60 tasks, 10 categories, `coordinator.json`):**
+
+| Policy | Reward | Valid | Correct action | Unsafe | Decided by model | p50 latency (Mac/Ollama) |
 |---|---:|---:|---:|---:|---:|---:|
 | Nemotron 3.5 Lightning, raw (no guard) | 0.933 | 100% | 80% | **0%** | 100% | 4.6 s |
 | granite4.2:8b, raw (comparison) | 0.933 | 100% | 80% | 0% | 100% | 6.2 s |
@@ -102,8 +118,14 @@ Both raw models fail on the same thing: history. After two failed retakes they a
 
 Full method, tables and serving advice: [SERVING.md](SERVING.md); raw numbers: `evaluations/results/latency_brev.json`.
 
-- **One message end to end** (voice + lip clip → evidence → coordinator → confirm → speech): **1.03 s p50, 1.10 s p95**. Lip reading (≈0.5 s per 3 s clip) is the long pole.
-- **Interference:** with all agents busy at once, the voice agent goes from 55 to 304 ms p50 and Kokoro from 23 to 78 ms. The GPU is only 50% busy on average, so the cost is processes time-slicing the GPU, not missing compute.
+Current branch `ui` (`latency_brev_ui_mps{0,1}.json`):
+
+- **One message end to end** (voice + lip clip → evidence → coordinator → auto-speak): 0.43 s p50, 0.47 s p95, with or without MPS. The lip agent (≈0.4 s) sets it; the coordinator runs alongside it.
+- **With every agent busy:** MPS cuts the voice agent from 244 to 75 ms p50 and Kokoro from 79 to 30 ms.
+- **Early voice decode:** the voice result is in the session 2–3 ms after the 700 ms end-of-utterance pause (109–337 ms when sent at that moment); from the laptop through the tunnel, 64 ms instead of 211 ms. 0 of 304 real recordings changed decision (`trailing_silence_check.json`).
+- **From the laptop:** a 1.2 MB lip clip (2.5 Mbps webm) takes 0.68 s to upload through the tunnel; round trips cost ≈120 ms.
+
+Earlier runs (before the `ui` changes: free-text lip reading, confirm step): 1.03 s p50 end to end without MPS, 0.97 s with MPS (`latency_brev*.json`).
 
 ## Not yet measured (honest gaps)
 
