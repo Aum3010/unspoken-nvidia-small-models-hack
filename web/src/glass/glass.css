@@ -1,7 +1,7 @@
 /* Unspoken · Liquid Glass. Ported from unspoken_liquid_glass_3.html (dock removed: every input runs at once). */
 :root{
   color-scheme:dark;
-  --bg:#05070b; --text:#f1f5ff; --dim:rgba(232,240,255,.58); --faint:rgba(232,240,255,.32);
+  --bg:#05070b; --text:#f1f5ff; --dim:rgba(232,240,255,.72); --faint:rgba(232,240,255,.5);
   --rim:rgba(255,255,255,.22); --warm:#ffe6c4; --alert:#ff8f8f;
   --spring:cubic-bezier(.18,1.32,.36,1); --ease:cubic-bezier(.2,.9,.2,1);
 }
@@ -30,8 +30,9 @@ canvas.layer{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none
 #ghost{transition:opacity .5s}
 
 /* ---------- liquid glass ---------- */
-.glass{position:relative;isolation:isolate;
-  background:linear-gradient(150deg,rgba(255,255,255,.16),rgba(255,255,255,.035) 38%,rgba(255,255,255,.02) 62%,rgba(255,255,255,.09));
+/* smoked glass: a dark tint under the blur, rim and sheen, so text stays legible over a bright room */
+.glass{position:relative;isolation:isolate;text-shadow:0 1px 2px rgba(0,0,0,.45);
+  background:linear-gradient(150deg,rgba(10,14,22,.5),rgba(10,14,22,.36) 50%,rgba(10,14,22,.46));
   backdrop-filter:blur(16px) saturate(1.9) brightness(1.1);-webkit-backdrop-filter:blur(16px) saturate(1.9) brightness(1.1);
   border:1px solid rgba(255,255,255,.14);
   box-shadow:inset 0 1.5px 0 rgba(255,255,255,.5),inset 0 -1px 0 rgba(255,255,255,.1),inset 1px 0 0 rgba(255,255,255,.12),
@@ -61,7 +62,7 @@ canvas.layer{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none
 
 /* ---------- right column: agent activity + history ---------- */
 .side{position:fixed;z-index:6;top:18px;right:18px;width:410px;display:flex;flex-direction:column;gap:14px;max-height:calc(100vh - 36px)}
-.twin{border-radius:30px;padding:14px 16px 14px;background:linear-gradient(160deg,rgba(255,255,255,.13),rgba(255,255,255,.03) 45%,rgba(160,120,255,.07));flex:none}
+.twin{border-radius:30px;padding:14px 16px 14px;background:linear-gradient(160deg,rgba(10,14,22,.5),rgba(10,14,22,.36) 45%,rgba(34,22,58,.48));flex:none}
 .twin header,.chat header{display:flex;justify-content:space-between;align-items:baseline;font-size:12px;font-weight:600}
 .twin header span,.chat header span{font-size:9px;font-weight:400;color:var(--dim)}
 .twin canvas{display:block;width:100%;height:260px}
@@ -75,7 +76,7 @@ canvas.layer{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none
 @keyframes pulse{50%{opacity:.45}}
 .act-empty{font-size:12px;color:var(--faint);text-align:center;padding:6px 0}
 
-.chat{border-radius:30px;padding:14px 16px 14px;background:linear-gradient(160deg,rgba(255,255,255,.13),rgba(255,255,255,.03) 45%,rgba(120,200,255,.06));min-height:0;display:flex;flex-direction:column}
+.chat{border-radius:30px;padding:14px 16px 14px;background:linear-gradient(160deg,rgba(10,14,22,.5),rgba(10,14,22,.36) 45%,rgba(16,34,52,.48));min-height:0;display:flex;flex-direction:column}
 .history{margin-top:4px;max-height:230px;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:12px 2px 2px;
   -webkit-mask:linear-gradient(transparent,#000 18px);mask:linear-gradient(transparent,#000 18px);scrollbar-width:none}
 .hist-empty{font-size:12.5px;color:var(--faint);text-align:center;padding:10px 0}
@@ -148,7 +149,7 @@ canvas.layer{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none
 /* ---------- eye calibration (glass, over the live room) ---------- */
 .calib{position:fixed;inset:0;z-index:20;display:grid;place-items:center;background:rgba(3,5,9,.38);animation:fadeIn .5s var(--ease)}
 @keyframes fadeIn{from{opacity:0}}
-.calib-card{width:min(560px,calc(100vw - 32px));border-radius:34px;padding:28px 30px 26px;background:linear-gradient(160deg,rgba(94,234,212,.16),rgba(255,255,255,.03) 45%,rgba(94,234,212,.06))}
+.calib-card{width:min(560px,calc(100vw - 32px));border-radius:34px;padding:28px 30px 26px;background:linear-gradient(160deg,rgba(12,40,40,.55),rgba(10,14,22,.4) 45%,rgba(12,36,36,.5))}
 .calib-card h1{margin:0 0 6px;font-size:28px;font-weight:600;letter-spacing:-.03em;display:flex;align-items:center;gap:12px}
 .calib-card p{margin:0 0 14px;font-size:14px;line-height:1.6;color:rgba(240,244,255,.75)}
 .calib-card ol{margin:0 0 18px;padding-left:20px;font-size:13.5px;line-height:1.7;color:var(--dim)}
@@ -203,9 +204,7 @@ canvas.layer{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none
 @media (prefers-reduced-motion:reduce){.ambient{animation:none}}
 
 /* ---------- vision preview (UNSPOKEN_CHECKIN only) ---------- */
-/* smoked glass: the same blur, rim and sheen as .glass, with a darker tint so the small text reads on a bright room */
-.vision{border-radius:24px;padding:12px 16px;flex:none;font-size:12px;
-  background:linear-gradient(150deg,rgba(10,14,22,.5),rgba(10,14,22,.36) 50%,rgba(10,14,22,.46));text-shadow:0 1px 2px rgba(0,0,0,.45)}
+.vision{border-radius:24px;padding:12px 16px;flex:none;font-size:12px}
 .vision header{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:13px;font-weight:600}
 .vision header span{font-size:10px;font-weight:400;color:rgba(241,245,255,.72);text-align:right}
 .vgreet{margin:6px 0 6px;font-family:"Instrument Serif",Georgia,serif;font-style:italic;font-size:22px}
