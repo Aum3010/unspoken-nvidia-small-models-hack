@@ -23,8 +23,10 @@ what is on the branch, how to run it, and what is open.
   | EEG replay | P300 decoder |
   | Gaze | MediaPipe iris + MobileGaze |
 
-- **Speech:** **demo auto-speak is the default** (`UNSPOKEN_AUTO_SPEAK=1`): the top reading is spoken without the
-  person's Yes. It is audited as such. Set `UNSPOKEN_AUTO_SPEAK=0` to restore "nothing is spoken until confirmed".
+- **Speech:** **demo auto-speak is the default** (`UNSPOKEN_AUTO_SPEAK=1`). An accepted reading (the voice agent
+  accepted it, or lips and voice agree) is spoken without the person's Yes, and audited as such. Ambiguous readings,
+  lip-only matches and corrections wait for Yes/No. Set `UNSPOKEN_AUTO_SPEAK=0` to restore "nothing is spoken
+  until confirmed".
 - **Latency** (Brev, MPS on):
   - one message takes 0.44 s on the box;
   - the voice result is ready 64 ms after the end-of-utterance pause, seen from the laptop (early decode);
@@ -69,10 +71,9 @@ A fresh instance needs `scripts/brev/setup_app.sh` once. The voice agent also ne
 
 ## Open items (for the team)
 
-1. **Auto-speak by default.** It contradicts the README's product rule, and no safety test covers it.
+1. **Auto-speak by default.** It contradicts the README's product rule.
+   - It now covers accepted readings only (`evaluations/safety_tests/test_auto_speak.py`).
    - It is scheduled at once, so a No rarely lands in time.
-   - It can speak a reading the voice agent rejected (the top of an "unknown" top 3).
-   - With corrections, it can speak an edited sentence nobody confirmed.
 2. **`ignore_input` overuse.** It drops a person who failed twice, a genuine request next to an injection, and
    clear negated readings. **The validator is intentionally unchanged.**
 3. **The correction validator does not check negations.** It would accept "I don't need water" → "I need water".

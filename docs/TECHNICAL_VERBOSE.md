@@ -32,8 +32,15 @@ mic ──── voice detector → wav clip ─┘─────────�
 **Two delivery modes for speech** (see §6):
 - **Confirm mode** (`UNSPOKEN_AUTO_SPEAK=0`): nothing is spoken until the person confirms. This is the product rule
   in the README.
-- **Demo auto-speak** (`UNSPOKEN_AUTO_SPEAK=1`, **the current default on `ui`**): the coordinator's top reading is
-  spoken without a confirmation. It is audited as `demo_auto_spoken` by `system`, never as a user action.
+- **Demo auto-speak** (`UNSPOKEN_AUTO_SPEAK=1`, **the current default on `ui`**): an **accepted** reading is spoken
+  without a confirmation. Accepted means the voice agent accepted it, or lips and voice agree on it. Everything
+  else waits for Yes/No:
+  - ambiguous readings;
+  - lip-only matches;
+  - lip/voice disagreement;
+  - the coordinator's corrections.
+
+  It is audited as `demo_auto_spoken` by `system`, never as a user action.
 
 ---
 
@@ -106,7 +113,9 @@ mic ──── voice detector → wav clip ─┘─────────�
      - The person's own recordings are stored as encoder features in `data/enroll/<sha1>/NNN.npy` with
        `phrase.txt`: 22 phrases and 90 recordings on `ui`. These are derived from a real person's recordings and
        are committed; see §10.
-     - A clip is matched by length-normalised DTW over cosine distance.
+     - A clip is matched by length-normalised DTW over cosine distance. Every recording is compared in one
+       batched pass (`dtw_batch`): the recordings are zero-padded into one array and filled one anti-diagonal at a
+       time. On 270 test queries, distances match the per-recording loop to within 3e-8, with 0 top-3 changes.
      - A match needs distance ≤ `ENROLL_MAX_DIST` 0.30.
      - Up to 3 matches are offered, scored −100 × distance.
      - A clip closest to a recorded **negative** ("I don't need water", `negative_phrases.txt`, stored as
@@ -123,9 +132,16 @@ mic ──── voice detector → wav clip ─┘─────────�
   - `low_mouth_motion` (mean frame difference < 2.2).
 - **CPU threads:** `OPENBLAS_NUM_THREADS=1` is set before numpy loads. Multi-threaded OpenBLAS contended with
   the models and made enrollment matching 10–30 s per clip.
-- **Measured:**
-  - 391 ms per clip at the service: about 250 ms video decode + face detection + crop, encoder about 10 ms, DTW
-    127 ms;
+- **Streamed clips** (`/stream/{id}/chunk`, `/finish`, `/discard`):
+  - The browser sends 250 ms pieces while the person mouths. A thread per clip decodes them as they arrive (PyAV
+    reading a growing buffer) and runs face detection on each 25 fps grid frame once it is final.
+  - After the pause only cropping, the encoder and matching remain.
+  - The frames are exactly those of a whole-clip decode: 12/12 GRID clips (VP9 and VP8 live webm) gave identical
+    readings, scores, face ratio, mouth motion and enrollment distance.
+  - The whole-clip `/infer` stays as the fallback.
+- **Measured** (3 s 1280×720 clip, Brev):
+  - decode 188 ms, face detection 247 ms, crop 29 ms, encoder 20 ms, DTW 34 ms (batched; 127 ms before);
+  - whole clip `/infer` 492 ms p50, streamed **97 ms** after the end of the clip;
   - with beam search, decoding adds about 280 ms.
   - **Free-text accuracy** (beam 12, 132 GRID clips, 33 unseen speakers): WER 69.4%, best-of-5 60.9%.
   - **Enrollment matcher on strangers:** 5 of 43 GRID clips (unrelated people and sentences) matched an enrolled
@@ -202,11 +218,13 @@ mic ──── voice detector → wav clip ─┘─────────�
 
 | Route | What it does |
 |---|---|
-| `POST /api/{sid}/capture/lip` | upload → lip agent → evidence |
+| `POST /api/{sid}/capture/lip` | upload → lip agent → evidence (fallback for a broken stream) |
+| `WS /ws/{sid}` binary + `POST /api/{sid}/capture/lip/stream` | streamed lip clip: pieces while mouthing, then the reading |
 | `POST /api/{sid}/capture/audio` | upload → voice agent → evidence |
 | `POST /api/{sid}/capture/audio/early` | starts the voice decode **without touching the session**; returns `early_id` (at most 4 per session) |
 | `POST /api/{sid}/capture/audio/commit` | waits for that decode (usually already done) and applies it like a normal capture |
 | `POST /api/{sid}/capture/audio/discard` | cancels it |
+| `POST /api/{sid}/phrase_audio`, `GET /api/phrase_audio/{id}` | pre-rendered audio of the fixed phrases |
 
 **Noise screening (code):** evidence flagged `no_face`, `low_mouth_motion`, `too_short` or `no_speech_detected`,
 or with status `unknown` / no hypotheses, is logged as `evidence_ignored` and never becomes a candidate.
@@ -222,9 +240,30 @@ stitched to it. A lip and a voice clip pair into one message when they are withi
 2. Nemotron runs in the background (`_refine_with_model`).
 3. Its plan is dropped if the person acted meanwhile.
 
-**Auto-speak** (default on): when an `ask_confirmation` or `propose_correction` plan is applied,
-`_auto_speak` is scheduled at once (`asyncio.create_task`). It auto-confirms `shown_candidate_ids[0]` as `system`
-and speaks it through the same policy gate with `demo_auto=True`.
+**Accepted readings skip Nemotron** (`_accepted_reading`, `UNSPOKEN_LLM_FOR_ACCEPTED=0` by default):
+- When the message's only candidate comes from evidence that is all `proposed`, and the voice agent supports it, the
+  rules' plan (ask about that one reading) is applied at once and Nemotron is not called.
+- Nemotron runs for ambiguous, unknown and disagreeing readings only.
+- Measured on Brev: accepted voice message → spoken **413 → 105 ms** p50. Nemotron ran for 2 of 40 messages (the
+  ambiguous ones).
+
+**Auto-speak** (default on): only for an `ask_confirmation` of exactly the accepted reading. `_auto_speak` is
+scheduled at once; it auto-confirms the reading as `system` and speaks it through the same policy gate with
+`demo_auto=True`. The snapshot's `auto_speak_candidate_id` tells the page which caption to show ("Understanding
+you…" or "Did you mean this?"). Tests: `evaluations/safety_tests/test_auto_speak.py`.
+
+**Pre-rendered phrase audio** (`POST /api/{sid}/phrase_audio`, `GET /api/phrase_audio/{id}`):
+- The fixed phrases are rendered once per voice and rate and preloaded by the page: the voice agent's 20, the
+  recorded lip phrases, the board and Help.
+- The TTS token for pre-rendering comes from `phrase_preload_token` (message id `preload-…`).
+- When `authorize_speech` passes for exactly one of these texts, the gateway skips Kokoro. The spoken entry carries
+  `phrase_audio_id`, and the page plays its local copy, with no download.
+- Edited, spelled and corrected text still goes to Kokoro.
+
+**Streamed lip clips:** pieces arrive as binary WebSocket messages (2-byte header length, JSON header
+`{id, seq, mime}` or `{id, discard}`, then the bytes). They are forwarded in order to the lip agent.
+`POST /api/{sid}/capture/lip/stream {stream_id, chunks}` waits up to 5 s for all pieces, then asks for the reading.
+A broken stream answers 409 and the page uploads the whole clip.
 
 **Policy gate:** `shared/confirmation.py:authorize_speech`.
 - In confirm mode it requires:
@@ -270,7 +309,9 @@ All of these run at once.
 - The standard deviation of the lip gap divided by face height over 600 ms must exceed 0.012.
 - Recording starts at the first movement and counts after 200 ms. The clip is sent after 900 ms of stillness;
   minimum 0.9 s, maximum 8 s.
-- WebM VP9/VP8 at **2.5 Mbps** (about 1.2 MB for a 3–4 s clip).
+- WebM VP9/VP8 at **2.5 Mbps** (about 1.2 MB for a 3–4 s clip), recorded in 250 ms pieces that are **sent while
+  the person mouths**, in order, over the session WebSocket. At the stop, the page asks for the reading; if the
+  stream broke it uploads the whole clip.
 
 **Head:** a nod is pitch past 9° and back under 4° within 1 s. A shake is yaw past ±12° on each side within 1.2 s.
 
@@ -482,7 +523,7 @@ The lip enrollment adds stored features, not parameters.
 
 | What | Command | Result file |
 |---|---|---|
-| Safety tests (policy gate) | `pytest evaluations/safety_tests` (18 pass) | — |
+| Safety tests (policy gate, auto-speak) | `pytest evaluations/safety_tests` (25 pass) | — |
 | Coordinator (NeMo Gym, 72 tasks) | `run_local.py --policies raw:<model> guarded deterministic` | `coordinator_brev.json` (Brev); `coordinator.json` (Mac, 60 tasks, older prompt) |
 | Lip speed vs accuracy | `evaluations/modality_baselines/vsr_speed_accuracy.py` | `vsr_speed_accuracy.json` |
 | Early-decode accuracy check | `asr_eval/scripts/trailing_silence_check.py` | `trailing_silence_check.json` |
@@ -497,11 +538,10 @@ The NeMo Gym data files (`data/*.jsonl`) embed the coordinator's prompt and tool
 ## 10. Known issues on `ui` (for the team)
 
 1. **Auto-speak is on by default.**
-   - Speech happens without the person's Yes. It contradicts the README's product rule, and no safety test
-     covers it.
+   - Speech happens without the person's Yes, which contradicts the README's product rule.
+   - It now covers accepted readings only. Ambiguous readings, lip-only matches and corrections wait for Yes/No
+     (`test_auto_speak.py`).
    - It is scheduled immediately, so a No rarely arrives in time.
-   - It can speak a reading the voice agent did *not* accept: the top of an "unknown" top 3.
-   - With `propose_correction`, an edited sentence can be spoken unconfirmed.
 2. **Coordinator overuses `ignore_input`.** A person who failed twice, a genuine request next to an injection,
    and clear negated readings get dropped as noise (§3.3). The validator allows it.
 3. **The correction validator does not check negations.** It accepts "I don't need water" → "I need water".

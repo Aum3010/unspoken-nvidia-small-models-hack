@@ -24,7 +24,7 @@ npx oxlint         # lint
 |---|---|
 | `src/glass/GlassApp.tsx` | The page and its controller: gateway session (WebSocket) → ink, captions, phrase cards; rail and Yes/No actions; sensors; agent activity feed; history; auto-speak playback |
 | `src/glass/engine.ts` | Imperative canvas engine: handwriting ink (faint sketch, then drawn by the pen), the agent-activity nucleus, phrase cards, gaze dwell with zone targeting, blink selection |
-| `src/glass/sensors.ts` | Always-on capture: voice detector (early send at 350 ms of quiet, utterance end at 700 ms, 16 kHz WAV); mouth-motion clips (webm, 2.5 Mbps); head nod/shake |
+| `src/glass/sensors.ts` | Always-on capture: voice detector (early send at 350 ms of quiet, utterance end at 700 ms, 16 kHz WAV); mouth-motion clips (webm, 2.5 Mbps, streamed in 250 ms pieces over the session WebSocket while recording); head nod/shake |
 | `src/glass/Calibration.tsx` | Eye calibration on its own black screen: 11 dots on the real targets, accuracy on 3 unseen points, saved calibration reused on the same window size |
 | `src/glass/glass.css`, `glyphs.ts` | Styles, and the single-stroke Hershey cursive glyphs the ink is drawn with |
 | `src/lib/face.ts` | MediaPipe Face Landmarker: deliberate blink, head pose, mouth landmarks |
@@ -40,8 +40,11 @@ npx oxlint         # lint
 - **Clear:** start a new message.
 - **Help:** a red flash, then speaks "I need help now."
 - **Keys:** Space = blink, P = phrases, C = clear, E = calibrate, Esc = close.
-- **Demo auto-speak** (`UNSPOKEN_AUTO_SPEAK=1` on the gateway, the current default): readings are spoken without a
-  Yes, and No or a shake stops them. With `UNSPOKEN_AUTO_SPEAK=0`, nothing is spoken until the person confirms.
+- **Demo auto-speak** (`UNSPOKEN_AUTO_SPEAK=1` on the gateway, the current default): accepted readings are spoken
+  without a Yes ("Understanding you…"), and No or a shake stops them. Everything else asks "Did you mean this?".
+  With `UNSPOKEN_AUTO_SPEAK=0`, nothing is spoken until the person confirms.
+- **Phrase audio** is preloaded when the session opens: a fixed phrase plays from the page as soon as the gateway
+  reports it spoken.
 - **One clip in flight per agent.** Capture pauses while:
   - a message waits for confirmation;
   - speech plays;
