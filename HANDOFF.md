@@ -82,20 +82,26 @@ On a fresh instance, run `scripts/brev_prepare.sh` once first (about 20–40 min
    - **Emit `Evidence`** (shared/schemas.py) with the top-3 phrase hypotheses and their raw `forced_llr` scores (not probabilities).
    - **Map decisions to status:** candidate → `proposed`; unknown → `ambiguous`, so the coordinator offers the top 3 for gaze; no speech → `unknown` + `no_speech_detected` flag; empty transcript → `unknown`.
    - **Thresholds:** load them from `asr_eval/results/thresholds.json` (`nemotron-streaming-0.6b/forced_llr|phrases20`, strict or `|balanced`).
-   - **Phrase list:** the 20-phrase list lives in `asr_eval/configs/eval.yaml`. Unify it with the app's board (`web/src/components/Board.tsx`, 24 + yes/no) as one shared list.
-3. **GPU co-location with the coordinator.**
+   - **Phrase list:** the voice agent's 20 phrases live in `asr_eval/configs/eval.yaml`. Move them into the shared list from step 3.
+3. **One phrase list across voice, lips and board.** There are three today:
+   - voice: the 20 phrases in `asr_eval/configs/eval.yaml` ("I'm in pain");
+   - board: 24 + yes/no in `web/src/components/Board.tsx`, now also used by Gaze cards;
+   - lip reading: 44 phrases in `services/vsr/patient_phrases.txt` ("I am in pain"), merged from `yash-lipreading`.
+
+   Both voice and lips now score a closed phrase list, so this is a correctness issue, not just tidiness. The gateway (`services/gateway/state.py`) treats candidates as the same only when their normalised text matches. "I'm in pain" from voice and "I am in pain" from lips would therefore count as a disagreement, and the message would be marked ambiguous even when both modalities agree. Fix: one shared list with phrase ids, used by all three; agreement compared by phrase id.
+4. **GPU co-location with the coordinator.**
    - The voice model uses about 5–6 GB on the device.
-   - Lower vLLM's `--gpu-memory-utilization` in `scripts/serve_vllm_brev.sh` (currently 0.90) before sharing the GPU.
+   - Lower vLLM's memory share before sharing the GPU: `scripts/serve_vllm_brev.sh` now reads `GPU_MEM_UTIL` (default 0.90), e.g. `GPU_MEM_UTIL=0.45`.
    - Re-measure p95 latency under load.
-4. **Budget ledger.** Nemotron en (0.618B) replaces Whisper base (0.072B), for a total of about 32.59B of 33B.
+5. **Budget ledger.** Nemotron en (0.618B) replaces Whisper base (0.072B), for a total of about 32.59B of 33B.
    - Update `scripts/verify_weights.py`.
    - It must count NVFP4 packed weights as 2 per byte, or the coordinator gets undercounted by about 2×.
-5. **Multilingual, when needed.**
+6. **Multilingual, when needed.**
    - Native-speaker review of the drafts in `configs/eval.yaml` → `languages`.
    - Native recordings (the Record tab is English-only for now).
    - Run `scripts/multilingual_sanity.py`.
    - Deploy Nemotron 3.5 *instead of* the English model at sites that need it, since both together exceed the budget.
-6. **Optional:**
+7. **Optional:**
    - forced TDT scoring for Parakeet-TDT, which needs libNVVM for NeMo's Numba kernels;
    - real streaming endpointing (Nemotron's cache-aware chunks), which isn't built since capture is push-to-talk.
 
