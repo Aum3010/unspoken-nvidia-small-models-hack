@@ -1,0 +1,3407 @@
+{
+ "n": 10,
+ "distractors": "differ from the truth in exactly one word",
+ "seed": 0,
+ "clips": [
+  {
+   "id": "s1/bbaf2n",
+   "speaker": "s1",
+   "truth": "bin blue at f two now",
+   "cands": [
+    "bin blue at x two now",
+    "bin blue at j two now",
+    "bin blue at f two now",
+    "set blue at f two now",
+    "place blue at f two now",
+    "bin blue at p two now",
+    "bin blue at d two now",
+    "bin blue at q two now",
+    "bin blue at i two now",
+    "bin blue at v two now"
+   ]
+  },
+  {
+   "id": "s1/bbas3a",
+   "speaker": "s1",
+   "truth": "bin blue at s three again",
+   "cands": [
+    "bin blue at s three again",
+    "bin blue at f three again",
+    "bin blue at e three again",
+    "bin blue at y three again",
+    "bin blue at j three again",
+    "place blue at s three again",
+    "bin green at s three again",
+    "bin blue at r three again",
+    "bin blue by s three again",
+    "bin blue at s one again"
+   ]
+  },
+  {
+   "id": "s1/bbbm1s",
+   "speaker": "s1",
+   "truth": "bin blue by m one soon",
+   "cands": [
+    "bin blue by e one soon",
+    "bin blue by r one soon",
+    "bin blue by m zero soon",
+    "bin green by m one soon",
+    "bin blue by y one soon",
+    "bin blue with m one soon",
+    "bin blue by x one soon",
+    "bin blue by f one soon",
+    "bin blue by m one soon",
+    "bin blue by d one soon"
+   ]
+  },
+  {
+   "id": "s1/bbie8n",
+   "speaker": "s1",
+   "truth": "bin blue in e eight now",
+   "cands": [
+    "bin blue in b eight now",
+    "bin red in e eight now",
+    "bin blue in e eight soon",
+    "place blue in e eight now",
+    "bin blue in x eight now",
+    "bin blue in e two now",
+    "bin blue in e eight now",
+    "bin blue in i eight now",
+    "bin blue in d eight now",
+    "bin blue in e six now"
+   ]
+  },
+  {
+   "id": "s1/bbir8p",
+   "speaker": "s1",
+   "truth": "bin blue in r eight please",
+   "cands": [
+    "bin blue with r eight please",
+    "bin blue in r eight please",
+    "bin blue in i eight please",
+    "bin red in r eight please",
+    "bin blue in p eight please",
+    "bin green in r eight please",
+    "bin blue in r three please",
+    "bin blue in r six please",
+    "bin blue in r two please",
+    "set blue in r eight please"
+   ]
+  },
+  {
+   "id": "s1/bbwm4n",
+   "speaker": "s1",
+   "truth": "bin blue with m four now",
+   "cands": [
+    "bin blue with f four now",
+    "bin blue with y four now",
+    "bin blue with r four now",
+    "bin blue with k four now",
+    "bin blue with e four now",
+    "bin blue with z four now",
+    "bin blue with m four soon",
+    "bin blue with m four again",
+    "bin blue with m four now",
+    "bin blue with l four now"
+   ]
+  },
+  {
+   "id": "s1/bgaa8p",
+   "speaker": "s1",
+   "truth": "bin green at a eight please",
+   "cands": [
+    "bin green at a zero please",
+    "bin green at m eight please",
+    "bin green at a eight please",
+    "bin green at l eight please",
+    "bin green at z eight please",
+    "bin green at k eight please",
+    "bin green at s eight please",
+    "bin green at f eight please",
+    "bin green with a eight please",
+    "bin green at a three please"
+   ]
+  },
+  {
+   "id": "s1/bgat8n",
+   "speaker": "s1",
+   "truth": "bin green at t eight now",
+   "cands": [
+    "bin green at y eight now",
+    "bin green at g eight now",
+    "bin green at l eight now",
+    "bin green at t five now",
+    "bin green at t eight again",
+    "bin green at q eight now",
+    "bin green at t eight please",
+    "bin green at r eight now",
+    "bin green at z eight now",
+    "bin green at t eight now"
+   ]
+  },
+  {
+   "id": "s1/bgbh6p",
+   "speaker": "s1",
+   "truth": "bin green by h six please",
+   "cands": [
+    "bin green by y six please",
+    "bin green by g six please",
+    "bin green by h one please",
+    "bin green with h six please",
+    "bin green by l six please",
+    "place green by h six please",
+    "bin green by h four please",
+    "bin green by f six please",
+    "bin green by h six please",
+    "bin green by a six please"
+   ]
+  },
+  {
+   "id": "s1/bgia2n",
+   "speaker": "s1",
+   "truth": "bin green in a two now",
+   "cands": [
+    "bin green in a one now",
+    "bin green at a two now",
+    "bin green in d two now",
+    "bin green in t two now",
+    "bin green by a two now",
+    "bin green in a two now",
+    "place green in a two now",
+    "bin green in e two now",
+    "bin green in a two again",
+    "bin green in m two now"
+   ]
+  },
+  {
+   "id": "s1/bgin3a",
+   "speaker": "s1",
+   "truth": "bin green in n three again",
+   "cands": [
+    "bin green in m three again",
+    "bin green in q three again",
+    "bin green in t three again",
+    "bin green in e three again",
+    "bin green in g three again",
+    "bin green in n zero again",
+    "bin green in z three again",
+    "bin green in n two again",
+    "bin green in k three again",
+    "bin green in n three again"
+   ]
+  },
+  {
+   "id": "s1/bgwh8n",
+   "speaker": "s1",
+   "truth": "bin green with h eight now",
+   "cands": [
+    "bin green with l eight now",
+    "bin green with h one now",
+    "bin green with h eight please",
+    "bin green with a eight now",
+    "bin green with h eight now",
+    "bin green with n eight now",
+    "bin green with t eight now",
+    "bin green with k eight now",
+    "bin green with h two now",
+    "set green with h eight now"
+   ]
+  },
+  {
+   "id": "s1/bgwu8p",
+   "speaker": "s1",
+   "truth": "bin green with u eight please",
+   "cands": [
+    "bin green with t eight please",
+    "bin green with u eight again",
+    "bin green with u seven please",
+    "bin green with u eight please",
+    "bin green with n eight please",
+    "bin green with s eight please",
+    "bin green with u three please",
+    "bin green with r eight please",
+    "bin green with e eight please",
+    "bin green with h eight please"
+   ]
+  },
+  {
+   "id": "s1/bras6n",
+   "speaker": "s1",
+   "truth": "bin red at s six now",
+   "cands": [
+    "bin red at y six now",
+    "bin red at s four now",
+    "bin red at r six now",
+    "bin red at j six now",
+    "bin red at l six now",
+    "bin red with s six now",
+    "bin red at s six again",
+    "bin red at s two now",
+    "bin red at s six now",
+    "bin red at v six now"
+   ]
+  },
+  {
+   "id": "s1/brbm6n",
+   "speaker": "s1",
+   "truth": "bin red by m six now",
+   "cands": [
+    "bin red by m four now",
+    "bin red by k six now",
+    "place red by m six now",
+    "set red by m six now",
+    "bin red by z six now",
+    "bin red by m two now",
+    "bin red by e six now",
+    "bin red by m zero now",
+    "bin red by m six now",
+    "bin red by p six now"
+   ]
+  },
+  {
+   "id": "s1/brif6p",
+   "speaker": "s1",
+   "truth": "bin red in f six please",
+   "cands": [
+    "bin red in f five please",
+    "bin red in p six please",
+    "bin green in f six please",
+    "bin red by f six please",
+    "bin red in d six please",
+    "bin red in i six please",
+    "bin red in f zero please",
+    "bin red in v six please",
+    "bin red in f six please",
+    "bin red in z six please"
+   ]
+  },
+  {
+   "id": "s1/briz6n",
+   "speaker": "s1",
+   "truth": "bin red in z six now",
+   "cands": [
+    "bin red in k six now",
+    "bin red in c six now",
+    "bin red in l six now",
+    "bin red in y six now",
+    "bin red in e six now",
+    "bin red in i six now",
+    "bin red in z six please",
+    "bin red in z six now",
+    "bin red in z six again",
+    "bin red in z three now"
+   ]
+  },
+  {
+   "id": "s1/brwg8p",
+   "speaker": "s1",
+   "truth": "bin red with g eight please",
+   "cands": [
+    "bin red with g four please",
+    "bin red with f eight please",
+    "bin red with g eight again",
+    "bin red with g seven please",
+    "bin green with g eight please",
+    "bin white with g eight please",
+    "bin red with y eight please",
+    "bin red with g eight please",
+    "bin red with q eight please",
+    "bin red with d eight please"
+   ]
+  },
+  {
+   "id": "s1/bwaa1s",
+   "speaker": "s1",
+   "truth": "bin white at a one soon",
+   "cands": [
+    "set white at a one soon",
+    "bin white at d one soon",
+    "bin white at q one soon",
+    "bin white by a one soon",
+    "bin white at e one soon",
+    "bin white at f one soon",
+    "bin white at y one soon",
+    "bin white at l one soon",
+    "bin white at s one soon",
+    "bin white at a one soon"
+   ]
+  },
+  {
+   "id": "s1/bwan1a",
+   "speaker": "s1",
+   "truth": "bin white at n one again",
+   "cands": [
+    "bin white at k one again",
+    "bin white at n zero again",
+    "bin white at e one again",
+    "bin white at r one again",
+    "place white at n one again",
+    "bin white at n one again",
+    "bin white at q one again",
+    "bin white at a one again",
+    "bin white at g one again",
+    "bin white at z one again"
+   ]
+  },
+  {
+   "id": "s1/bwbg8n",
+   "speaker": "s1",
+   "truth": "bin white by g eight now",
+   "cands": [
+    "bin white by e eight now",
+    "bin white by g three now",
+    "bin white with g eight now",
+    "bin white by g eight now",
+    "bin white by g one now",
+    "bin white by k eight now",
+    "bin white by y eight now",
+    "bin white by g seven now",
+    "bin white by g two now",
+    "bin white by g eight please"
+   ]
+  },
+  {
+   "id": "s1/bwbt8p",
+   "speaker": "s1",
+   "truth": "bin white by t eight please",
+   "cands": [
+    "bin white by t seven please",
+    "bin white by t four please",
+    "bin white by d eight please",
+    "bin white by t eight please",
+    "bin white by s eight please",
+    "bin white by r eight please",
+    "bin white by g eight please",
+    "bin white by k eight please",
+    "bin white by t five please",
+    "bin white by z eight please"
+   ]
+  },
+  {
+   "id": "s1/bwis8n",
+   "speaker": "s1",
+   "truth": "bin white in s eight now",
+   "cands": [
+    "bin white in s five now",
+    "bin white in s eight now",
+    "bin white in s two now",
+    "bin white in l eight now",
+    "bin white in s one now",
+    "bin white in s eight soon",
+    "bin white in r eight now",
+    "bin white in c eight now",
+    "bin white in s eight please",
+    "bin white in s four now"
+   ]
+  },
+  {
+   "id": "s1/bwwh4p",
+   "speaker": "s1",
+   "truth": "bin white with h four please",
+   "cands": [
+    "bin white with e four please",
+    "bin green with h four please",
+    "bin white with k four please",
+    "bin white with t four please",
+    "bin white with h four please",
+    "place white with h four please",
+    "bin white with f four please",
+    "bin white with r four please",
+    "bin white with m four please",
+    "bin white with l four please"
+   ]
+  },
+  {
+   "id": "s1/lbad6n",
+   "speaker": "s1",
+   "truth": "lay blue at d six now",
+   "cands": [
+    "lay blue at d six now",
+    "lay blue at c six now",
+    "set blue at d six now",
+    "lay blue at d zero now",
+    "lay blue at h six now",
+    "lay blue at p six now",
+    "lay blue at d two now",
+    "lay blue at n six now",
+    "lay blue at d one now",
+    "lay blue at d five now"
+   ]
+  },
+  {
+   "id": "s1/lbaq6p",
+   "speaker": "s1",
+   "truth": "lay blue at q six please",
+   "cands": [
+    "lay blue at q zero please",
+    "lay blue at v six please",
+    "set blue at q six please",
+    "lay white at q six please",
+    "lay blue at j six please",
+    "lay blue at q three please",
+    "lay blue at i six please",
+    "lay blue at u six please",
+    "lay blue at x six please",
+    "lay blue at q six please"
+   ]
+  },
+  {
+   "id": "s1/lbbk4n",
+   "speaker": "s1",
+   "truth": "lay blue by k four now",
+   "cands": [
+    "lay blue by o four now",
+    "lay green by k four now",
+    "lay blue by b four now",
+    "lay blue by p four now",
+    "lay blue by c four now",
+    "lay blue by x four now",
+    "lay blue by k four now",
+    "lay blue by u four now",
+    "lay blue by k four soon",
+    "lay blue by k two now"
+   ]
+  },
+  {
+   "id": "s1/lbby4p",
+   "speaker": "s1",
+   "truth": "lay blue by y four please",
+   "cands": [
+    "lay blue by y four please",
+    "lay blue by u four please",
+    "lay blue by v four please",
+    "lay green by y four please",
+    "lay blue with y four please",
+    "lay blue by y four again",
+    "lay blue by y three please",
+    "lay blue by y two please",
+    "lay blue by h four please",
+    "lay blue by b four please"
+   ]
+  },
+  {
+   "id": "s1/lbiq1s",
+   "speaker": "s1",
+   "truth": "lay blue in q one soon",
+   "cands": [
+    "bin blue in q one soon",
+    "lay red in q one soon",
+    "lay blue in q zero soon",
+    "lay blue in j one soon",
+    "lay blue in p one soon",
+    "lay blue in x one soon",
+    "lay blue in q one soon",
+    "lay blue in h one soon",
+    "lay blue in v one soon",
+    "lay blue in c one soon"
+   ]
+  },
+  {
+   "id": "s1/lbwe6p",
+   "speaker": "s1",
+   "truth": "lay blue with e six please",
+   "cands": [
+    "lay blue with x six please",
+    "lay blue with e four please",
+    "lay blue with i six please",
+    "lay blue with e two please",
+    "lay blue with e five please",
+    "set blue with e six please",
+    "lay blue with b six please",
+    "lay blue with e six again",
+    "lay blue with e zero please",
+    "lay blue with e six please"
+   ]
+  },
+  {
+   "id": "s1/lbwy6n",
+   "speaker": "s1",
+   "truth": "lay blue with y six now",
+   "cands": [
+    "lay blue with y six soon",
+    "lay blue with x six now",
+    "lay blue with y two now",
+    "lay green with y six now",
+    "lay blue with b six now",
+    "lay blue with y five now",
+    "lay blue with y six now",
+    "lay blue with u six now",
+    "lay blue with v six now",
+    "lay white with y six now"
+   ]
+  },
+  {
+   "id": "s1/lgam1a",
+   "speaker": "s1",
+   "truth": "lay green at m one again",
+   "cands": [
+    "lay green at l one again",
+    "lay green at f one again",
+    "lay green at y one again",
+    "lay green at s one again",
+    "lay green by m one again",
+    "lay green at m one again",
+    "lay green at d one again",
+    "lay green at x one again",
+    "lay green at m zero again",
+    "bin green at m one again"
+   ]
+  },
+  {
+   "id": "s1/lgbf8n",
+   "speaker": "s1",
+   "truth": "lay green by f eight now",
+   "cands": [
+    "lay green by c eight now",
+    "lay green by z eight now",
+    "lay green by j eight now",
+    "lay green by r eight now",
+    "lay green by f eight now",
+    "lay green by f one now",
+    "lay green by f three now",
+    "lay green by x eight now",
+    "lay green by e eight now",
+    "lay green by f eight soon"
+   ]
+  },
+  {
+   "id": "s1/lgbs8p",
+   "speaker": "s1",
+   "truth": "lay green by s eight please",
+   "cands": [
+    "lay green by k eight please",
+    "lay green by s two please",
+    "lay green by s six please",
+    "lay green by p eight please",
+    "lay green by s eight please",
+    "bin green by s eight please",
+    "lay green by x eight please",
+    "lay green by y eight please",
+    "lay green by d eight please",
+    "lay green by l eight please"
+   ]
+  },
+  {
+   "id": "s1/lgir8n",
+   "speaker": "s1",
+   "truth": "lay green in r eight now",
+   "cands": [
+    "lay green with r eight now",
+    "set green in r eight now",
+    "bin green in r eight now",
+    "lay green in r eight again",
+    "lay green by r eight now",
+    "lay green in b eight now",
+    "lay green in r eight now",
+    "lay green in c eight now",
+    "lay green in y eight now",
+    "lay green in x eight now"
+   ]
+  },
+  {
+   "id": "s1/lgwg2n",
+   "speaker": "s1",
+   "truth": "lay green with g two now",
+   "cands": [
+    "bin green with g two now",
+    "lay green with l two now",
+    "set green with g two now",
+    "lay green with z two now",
+    "lay green with g two again",
+    "lay green with g two now",
+    "lay green with x two now",
+    "lay green with f two now",
+    "lay green with e two now",
+    "lay green with y two now"
+   ]
+  },
+  {
+   "id": "s1/lgwt3a",
+   "speaker": "s1",
+   "truth": "lay green with t three again",
+   "cands": [
+    "lay green with f three again",
+    "lay green with x three again",
+    "bin green with t three again",
+    "lay green with t three again",
+    "lay green with m three again",
+    "lay green with t one again",
+    "lay green with z three again",
+    "set green with t three again",
+    "lay green with e three again",
+    "lay green with r three again"
+   ]
+  },
+  {
+   "id": "s1/lrar1s",
+   "speaker": "s1",
+   "truth": "lay red at r one soon",
+   "cands": [
+    "lay red at e one soon",
+    "lay red at r one soon",
+    "set red at r one soon",
+    "lay green at r one soon",
+    "lay red at x one soon",
+    "lay red at p one soon",
+    "lay red at o one soon",
+    "lay red at u one soon",
+    "lay red with r one soon",
+    "lay red at b one soon"
+   ]
+  },
+  {
+   "id": "s1/lrbe8p",
+   "speaker": "s1",
+   "truth": "lay red by e eight please",
+   "cands": [
+    "lay red by e seven please",
+    "lay red by y eight please",
+    "lay red by e eight again",
+    "lay red by e four please",
+    "lay red by u eight please",
+    "lay red by e three please",
+    "lay green by e eight please",
+    "lay red by e zero please",
+    "lay red by e eight please",
+    "lay red by d eight please"
+   ]
+  },
+  {
+   "id": "s1/lrby8n",
+   "speaker": "s1",
+   "truth": "lay red by y eight now",
+   "cands": [
+    "lay red by y one now",
+    "lay white by y eight now",
+    "lay red by q eight now",
+    "lay red by y eight now",
+    "lay red by d eight now",
+    "lay red by v eight now",
+    "lay red by y five now",
+    "lay red by o eight now",
+    "lay red by y three now",
+    "lay red by y eight soon"
+   ]
+  },
+  {
+   "id": "s1/lrik4p",
+   "speaker": "s1",
+   "truth": "lay red in k four please",
+   "cands": [
+    "lay red in k one please",
+    "lay red in k four again",
+    "lay red at k four please",
+    "lay red in n four please",
+    "lay red in d four please",
+    "lay red in j four please",
+    "lay red in k four please",
+    "lay red in k zero please",
+    "bin red in k four please",
+    "lay red in k two please"
+   ]
+  },
+  {
+   "id": "s1/lrwf1s",
+   "speaker": "s1",
+   "truth": "lay red with f one soon",
+   "cands": [
+    "lay red with i one soon",
+    "lay red with p one soon",
+    "lay red with z one soon",
+    "lay red with q one soon",
+    "lay red with f one soon",
+    "lay red with f zero soon",
+    "lay red with x one soon",
+    "lay red with v one soon",
+    "lay white with f one soon",
+    "lay red with f one again"
+   ]
+  },
+  {
+   "id": "s1/lrws1a",
+   "speaker": "s1",
+   "truth": "lay red with s one again",
+   "cands": [
+    "lay red with v one again",
+    "bin red with s one again",
+    "set red with s one again",
+    "lay green with s one again",
+    "lay red with s one again",
+    "lay white with s one again",
+    "lay red with d one again",
+    "lay red with e one again",
+    "lay red with x one again",
+    "lay red with q one again"
+   ]
+  },
+  {
+   "id": "s1/lwal2n",
+   "speaker": "s1",
+   "truth": "lay white at l two now",
+   "cands": [
+    "bin white at l two now",
+    "lay white at j two now",
+    "lay white at l one now",
+    "lay white at d two now",
+    "lay white by l two now",
+    "set white at l two now",
+    "lay white at l two now",
+    "lay white with l two now",
+    "lay green at l two now",
+    "lay white at x two now"
+   ]
+  },
+  {
+   "id": "s1/lwaz3a",
+   "speaker": "s1",
+   "truth": "lay white at z three again",
+   "cands": [
+    "lay white with z three again",
+    "lay white at p three again",
+    "lay white at l three again",
+    "set white at z three again",
+    "lay white at z two again",
+    "lay white by z three again",
+    "lay white at z three again",
+    "lay white at c three again",
+    "lay green at z three again",
+    "lay white at i three again"
+   ]
+  },
+  {
+   "id": "s1/lwbs1s",
+   "speaker": "s1",
+   "truth": "lay white by s one soon",
+   "cands": [
+    "lay white by j one soon",
+    "lay white by s one please",
+    "lay white by s one soon",
+    "lay white by d one soon",
+    "lay white by z one soon",
+    "lay white by l one soon",
+    "lay white by x one soon",
+    "lay white by q one soon",
+    "set white by s one soon",
+    "lay white by y one soon"
+   ]
+  },
+  {
+   "id": "s1/lwie6p",
+   "speaker": "s1",
+   "truth": "lay white in e six please",
+   "cands": [
+    "lay white in i six please",
+    "lay white in e six please",
+    "lay white in e two please",
+    "set white in e six please",
+    "lay white in h six please",
+    "lay white in b six please",
+    "lay white in e three please",
+    "lay white in e one please",
+    "lay white in o six please",
+    "lay white in k six please"
+   ]
+  },
+  {
+   "id": "s1/lwiy6n",
+   "speaker": "s1",
+   "truth": "lay white in y six now",
+   "cands": [
+    "lay white in b six now",
+    "lay white in u six now",
+    "lay white in j six now",
+    "bin white in y six now",
+    "lay white in d six now",
+    "lay white in y three now",
+    "lay white in y six now",
+    "lay green in y six now",
+    "lay white in y one now",
+    "lay white in v six now"
+   ]
+  },
+  {
+   "id": "s1/lwwm3a",
+   "speaker": "s1",
+   "truth": "lay white with m three again",
+   "cands": [
+    "lay white with m two again",
+    "set white with m three again",
+    "lay white with m zero again",
+    "lay white with f three again",
+    "lay white with q three again",
+    "lay white with m three again",
+    "bin white with m three again",
+    "lay white with e three again",
+    "lay white with p three again",
+    "lay green with m three again"
+   ]
+  },
+  {
+   "id": "s1/pbac3a",
+   "speaker": "s1",
+   "truth": "place blue at c three again",
+   "cands": [
+    "place blue at c three again",
+    "place blue at o three again",
+    "place blue at c one again",
+    "place blue at g three again",
+    "place blue at v three again",
+    "place blue at s three again",
+    "place blue at n three again",
+    "place blue at i three again",
+    "place blue at c two again",
+    "place blue with c three again"
+   ]
+  },
+  {
+   "id": "s1/pbav2n",
+   "speaker": "s1",
+   "truth": "place blue at v two now",
+   "cands": [
+    "place blue at v one now",
+    "lay blue at v two now",
+    "place blue at h two now",
+    "place white at v two now",
+    "place red at v two now",
+    "place blue at v zero now",
+    "place blue with v two now",
+    "place blue at t two now",
+    "place blue at i two now",
+    "place blue at v two now"
+   ]
+  },
+  {
+   "id": "s1/pbbj1a",
+   "speaker": "s1",
+   "truth": "place blue by j one again",
+   "cands": [
+    "place white by j one again",
+    "place blue by i one again",
+    "place blue by g one again",
+    "place blue by m one again",
+    "place red by j one again",
+    "place blue by a one again",
+    "place blue with j one again",
+    "place blue by p one again",
+    "place blue by h one again",
+    "place blue by j one again"
+   ]
+  },
+  {
+   "id": "s1/pbib6n",
+   "speaker": "s1",
+   "truth": "place blue in b six now",
+   "cands": [
+    "bin blue in b six now",
+    "place blue in z six now",
+    "place blue in b five now",
+    "place blue with b six now",
+    "place blue in b four now",
+    "place blue in b six again",
+    "place blue in b three now",
+    "place blue in b six soon",
+    "place blue in b six now",
+    "lay blue in b six now"
+   ]
+  },
+  {
+   "id": "s1/pbio6p",
+   "speaker": "s1",
+   "truth": "place blue in o six please",
+   "cands": [
+    "place blue with o six please",
+    "place blue in o one please",
+    "place blue in m six please",
+    "place blue in s six please",
+    "place blue in r six please",
+    "place blue in o six please",
+    "place blue in f six please",
+    "place blue by o six please",
+    "place blue at o six please",
+    "place green in o six please"
+   ]
+  },
+  {
+   "id": "s1/pbwj2n",
+   "speaker": "s1",
+   "truth": "place blue with j two now",
+   "cands": [
+    "place red with j two now",
+    "place blue with c two now",
+    "place blue with j one now",
+    "place blue with j two now",
+    "place blue with a two now",
+    "place blue with h two now",
+    "place blue with p two now",
+    "place blue with j two soon",
+    "place blue with u two now",
+    "place blue with j two again"
+   ]
+  },
+  {
+   "id": "s1/pbwx3a",
+   "speaker": "s1",
+   "truth": "place blue with x three again",
+   "cands": [
+    "place blue with v three again",
+    "place red with x three again",
+    "lay blue with x three again",
+    "place blue with x one again",
+    "place blue with u three again",
+    "place blue with x three again",
+    "place blue with i three again",
+    "place blue with x zero again",
+    "place green with x three again",
+    "bin blue with x three again"
+   ]
+  },
+  {
+   "id": "s1/pgaq6n",
+   "speaker": "s1",
+   "truth": "place green at q six now",
+   "cands": [
+    "place green at d six now",
+    "place green at q two now",
+    "place green at q five now",
+    "place green at q six now",
+    "place green at q six again",
+    "lay green at q six now",
+    "place green at i six now",
+    "place green at q six soon",
+    "place green at a six now",
+    "place green at q four now"
+   ]
+  },
+  {
+   "id": "s1/pgbe4p",
+   "speaker": "s1",
+   "truth": "place green by e four please",
+   "cands": [
+    "place green by u four please",
+    "place green by x four please",
+    "place green by y four please",
+    "place green by o four please",
+    "place green by e two please",
+    "place green by q four please",
+    "place green by e four please",
+    "place green by e one please",
+    "place green by h four please",
+    "place green by e zero please"
+   ]
+  },
+  {
+   "id": "s1/pgby4n",
+   "speaker": "s1",
+   "truth": "place green by y four now",
+   "cands": [
+    "place green by y four now",
+    "place green by o four now",
+    "place green by y four again",
+    "place green by v four now",
+    "place green by i four now",
+    "lay green by y four now",
+    "place green by y four soon",
+    "place green by j four now",
+    "bin green by y four now",
+    "place green by y four please"
+   ]
+  },
+  {
+   "id": "s1/pgik1a",
+   "speaker": "s1",
+   "truth": "place green in k one again",
+   "cands": [
+    "place green at k one again",
+    "place green in k zero again",
+    "place green in c one again",
+    "place green in q one again",
+    "place green in p one again",
+    "place green in k one again",
+    "place green in h one again",
+    "place green with k one again",
+    "place green in j one again",
+    "place green by k one again"
+   ]
+  },
+  {
+   "id": "s1/pgwe6n",
+   "speaker": "s1",
+   "truth": "place green with e six now",
+   "cands": [
+    "place green with e two now",
+    "place green with e six now",
+    "place green with e five now",
+    "place green with v six now",
+    "place green with b six now",
+    "place green with d six now",
+    "place green with j six now",
+    "place green with e four now",
+    "place green with y six now",
+    "place green with i six now"
+   ]
+  },
+  {
+   "id": "s1/pgwr6p",
+   "speaker": "s1",
+   "truth": "place green with r six please",
+   "cands": [
+    "place green with x six please",
+    "place green with r three please",
+    "place green with r six again",
+    "place green with q six please",
+    "place green with v six please",
+    "bin green with r six please",
+    "place green with j six please",
+    "place green with c six please",
+    "place green with r six please",
+    "place green with u six please"
+   ]
+  },
+  {
+   "id": "s1/praj1s",
+   "speaker": "s1",
+   "truth": "place red at j one soon",
+   "cands": [
+    "place red at b one soon",
+    "place red at c one soon",
+    "place green at j one soon",
+    "place red at n one soon",
+    "place red at j one please",
+    "place red at g one soon",
+    "place red at u one soon",
+    "place red at j one soon",
+    "place red at m one soon",
+    "place red at i one soon"
+   ]
+  },
+  {
+   "id": "s1/prax1a",
+   "speaker": "s1",
+   "truth": "place red at x one again",
+   "cands": [
+    "place red at h one again",
+    "place red at v one again",
+    "place red at x zero again",
+    "place red at c one again",
+    "bin red at x one again",
+    "place red at o one again",
+    "place red with x one again",
+    "place red at j one again",
+    "place red at i one again",
+    "place red at x one again"
+   ]
+  },
+  {
+   "id": "s1/prbp8n",
+   "speaker": "s1",
+   "truth": "place red by p eight now",
+   "cands": [
+    "lay red by p eight now",
+    "place green by p eight now",
+    "place red by p eight now",
+    "place red by n eight now",
+    "place red by p eight please",
+    "bin red by p eight now",
+    "place red by p two now",
+    "place red by o eight now",
+    "place red by p three now",
+    "place red by h eight now"
+   ]
+  },
+  {
+   "id": "s1/pric4p",
+   "speaker": "s1",
+   "truth": "place red in c four please",
+   "cands": [
+    "place red in c one please",
+    "place red in f four please",
+    "place white in c four please",
+    "bin red in c four please",
+    "place red in h four please",
+    "place red in n four please",
+    "place red in g four please",
+    "place red in v four please",
+    "place red with c four please",
+    "place red in c four please"
+   ]
+  },
+  {
+   "id": "s1/priv4n",
+   "speaker": "s1",
+   "truth": "place red in v four now",
+   "cands": [
+    "place red in v four again",
+    "place red in v four now",
+    "place red in i four now",
+    "place red in v zero now",
+    "place red in f four now",
+    "place red in z four now",
+    "place red in a four now",
+    "place red in v one now",
+    "bin red in v four now",
+    "place green in v four now"
+   ]
+  },
+  {
+   "id": "s1/prwk1a",
+   "speaker": "s1",
+   "truth": "place red with k one again",
+   "cands": [
+    "place red with k one again",
+    "place red with p one again",
+    "place red with x one again",
+    "place red with u one again",
+    "lay red with k one again",
+    "place red with d one again",
+    "place red with j one again",
+    "place red with i one again",
+    "place red with n one again",
+    "bin red with k one again"
+   ]
+  },
+  {
+   "id": "s1/pwad2n",
+   "speaker": "s1",
+   "truth": "place white at d two now",
+   "cands": [
+    "place white at d zero now",
+    "place white at d two soon",
+    "place white at d two please",
+    "place white at o two now",
+    "place white at n two now",
+    "place white at x two now",
+    "bin white at d two now",
+    "place white at h two now",
+    "place white at t two now",
+    "place white at d two now"
+   ]
+  },
+  {
+   "id": "s1/pwaq3a",
+   "speaker": "s1",
+   "truth": "place white at q three again",
+   "cands": [
+    "place white at q three again",
+    "place white at v three again",
+    "place white at p three again",
+    "place white at o three again",
+    "bin white at q three again",
+    "place white at b three again",
+    "place white at i three again",
+    "place white at q zero again",
+    "lay white at q three again",
+    "place white at n three again"
+   ]
+  },
+  {
+   "id": "s1/pwbk1s",
+   "speaker": "s1",
+   "truth": "place white by k one soon",
+   "cands": [
+    "place white by p one soon",
+    "place white by k one please",
+    "place white by h one soon",
+    "place white by i one soon",
+    "place white by k zero soon",
+    "place green by k one soon",
+    "place white by o one soon",
+    "place white by b one soon",
+    "place white by d one soon",
+    "place white by k one soon"
+   ]
+  },
+  {
+   "id": "s1/pwby1a",
+   "speaker": "s1",
+   "truth": "place white by y one again",
+   "cands": [
+    "bin white by y one again",
+    "place green by y one again",
+    "place white by k one again",
+    "place white by q one again",
+    "place white by i one again",
+    "place white by d one again",
+    "place white by v one again",
+    "place white by y one again",
+    "place white with y one again",
+    "place white by u one again"
+   ]
+  },
+  {
+   "id": "s1/pwip6n",
+   "speaker": "s1",
+   "truth": "place white in p six now",
+   "cands": [
+    "place white in u six now",
+    "place white in p six now",
+    "place white in p three now",
+    "place white in p one now",
+    "place white in v six now",
+    "place white in a six now",
+    "place white in p two now",
+    "place green in p six now",
+    "place white in g six now",
+    "place white in s six now"
+   ]
+  },
+  {
+   "id": "s1/pwwe3a",
+   "speaker": "s1",
+   "truth": "place white with e three again",
+   "cands": [
+    "place white with j three again",
+    "place white with b three again",
+    "place white with o three again",
+    "place white with x three again",
+    "place white with u three again",
+    "place white with i three again",
+    "place white with d three again",
+    "place white with e one again",
+    "place white with e three again",
+    "place white with e zero again"
+   ]
+  },
+  {
+   "id": "s1/pwwy2n",
+   "speaker": "s1",
+   "truth": "place white with y two now",
+   "cands": [
+    "place white with y two again",
+    "place white with p two now",
+    "place white with o two now",
+    "place white with i two now",
+    "lay white with y two now",
+    "place green with y two now",
+    "place white with y two now",
+    "place white with j two now",
+    "bin white with y two now",
+    "place white with u two now"
+   ]
+  },
+  {
+   "id": "s1/sbah1a",
+   "speaker": "s1",
+   "truth": "set blue at h one again",
+   "cands": [
+    "set blue at k one again",
+    "set white at h one again",
+    "set blue at s one again",
+    "set blue at y one again",
+    "set blue with h one again",
+    "set blue at h one again",
+    "set blue at l one again",
+    "set blue at a one again",
+    "set green at h one again",
+    "set blue at t one again"
+   ]
+  },
+  {
+   "id": "s1/sbba8n",
+   "speaker": "s1",
+   "truth": "set blue by a eight now",
+   "cands": [
+    "set blue by a eight again",
+    "set blue by a two now",
+    "set green by a eight now",
+    "set blue by y eight now",
+    "set blue by d eight now",
+    "set red by a eight now",
+    "set blue by m eight now",
+    "set blue by a six now",
+    "set blue by a three now",
+    "set blue by a eight now"
+   ]
+  },
+  {
+   "id": "s1/sbbn8p",
+   "speaker": "s1",
+   "truth": "set blue by n eight please",
+   "cands": [
+    "set blue with n eight please",
+    "set blue by n six please",
+    "set blue by y eight please",
+    "place blue by n eight please",
+    "set red by n eight please",
+    "set blue by n eight please",
+    "set blue by q eight please",
+    "set blue by t eight please",
+    "set blue by s eight please",
+    "set blue by n one please"
+   ]
+  },
+  {
+   "id": "s1/sbig4n",
+   "speaker": "s1",
+   "truth": "set blue in g four now",
+   "cands": [
+    "set blue in g three now",
+    "place blue in g four now",
+    "set blue with g four now",
+    "set blue in q four now",
+    "lay blue in g four now",
+    "set blue by g four now",
+    "set blue at g four now",
+    "set blue in g four now",
+    "set red in g four now",
+    "set blue in f four now"
+   ]
+  },
+  {
+   "id": "s1/sbit4p",
+   "speaker": "s1",
+   "truth": "set blue in t four please",
+   "cands": [
+    "set blue in r four please",
+    "set blue in s four please",
+    "set blue in l four please",
+    "set blue in x four please",
+    "set blue in t four please",
+    "set green in t four please",
+    "set blue in d four please",
+    "set blue in t three please",
+    "place blue in t four please",
+    "set blue in z four please"
+   ]
+  },
+  {
+   "id": "s1/sbwo1s",
+   "speaker": "s1",
+   "truth": "set blue with o one soon",
+   "cands": [
+    "set blue with f one soon",
+    "set blue with g one soon",
+    "set blue with o one soon",
+    "set green with o one soon",
+    "set blue with r one soon",
+    "set blue with o one please",
+    "set white with o one soon",
+    "set blue with b one soon",
+    "set blue with z one soon",
+    "set blue with a one soon"
+   ]
+  },
+  {
+   "id": "s1/sgac4p",
+   "speaker": "s1",
+   "truth": "set green at c four please",
+   "cands": [
+    "set green at c four again",
+    "set green at c four please",
+    "set green at s four please",
+    "set green at n four please",
+    "set green at u four please",
+    "set green at v four please",
+    "set green at i four please",
+    "place green at c four please",
+    "set green at t four please",
+    "set green at c one please"
+   ]
+  },
+  {
+   "id": "s1/sgav4n",
+   "speaker": "s1",
+   "truth": "set green at v four now",
+   "cands": [
+    "set green with v four now",
+    "set green at v four please",
+    "place green at v four now",
+    "set green at v one now",
+    "set green at o four now",
+    "set green at f four now",
+    "set green at v zero now",
+    "set green at a four now",
+    "set green by v four now",
+    "set green at v four now"
+   ]
+  },
+  {
+   "id": "s1/sgbj3a",
+   "speaker": "s1",
+   "truth": "set green by j three again",
+   "cands": [
+    "set green by v three again",
+    "set green by c three again",
+    "set green by u three again",
+    "set green by m three again",
+    "lay green by j three again",
+    "set green by a three again",
+    "set green by n three again",
+    "set green by b three again",
+    "set green by g three again",
+    "set green by j three again"
+   ]
+  },
+  {
+   "id": "s1/sgib8n",
+   "speaker": "s1",
+   "truth": "set green in b eight now",
+   "cands": [
+    "set green in b seven now",
+    "set green in b eight now",
+    "set green in h eight now",
+    "set green in t eight now",
+    "place green in b eight now",
+    "set green in s eight now",
+    "set green in b three now",
+    "set green in n eight now",
+    "set green in b eight again",
+    "set green at b eight now"
+   ]
+  },
+  {
+   "id": "s1/sgio8p",
+   "speaker": "s1",
+   "truth": "set green in o eight please",
+   "cands": [
+    "set green by o eight please",
+    "set green in o four please",
+    "set green at o eight please",
+    "set green in n eight please",
+    "set green in f eight please",
+    "set green in h eight please",
+    "lay green in o eight please",
+    "set green in o two please",
+    "set green in o eight again",
+    "set green in o eight please"
+   ]
+  },
+  {
+   "id": "s1/sgwj4n",
+   "speaker": "s1",
+   "truth": "set green with j four now",
+   "cands": [
+    "set green with j four again",
+    "place green with j four now",
+    "set green with a four now",
+    "set green with u four now",
+    "set green with j four now",
+    "set green with j three now",
+    "set green with m four now",
+    "set green with j four soon",
+    "set green with o four now",
+    "lay green with j four now"
+   ]
+  },
+  {
+   "id": "s1/sgwx4p",
+   "speaker": "s1",
+   "truth": "set green with x four please",
+   "cands": [
+    "place green with x four please",
+    "lay green with x four please",
+    "set green with x four please",
+    "set green with a four please",
+    "set green with t four please",
+    "set green with x one please",
+    "set green with g four please",
+    "set green with j four please",
+    "set green with p four please",
+    "set green with n four please"
+   ]
+  },
+  {
+   "id": "s1/sran8n",
+   "speaker": "s1",
+   "truth": "set red at n eight now",
+   "cands": [
+    "set red at n eight now",
+    "set red at k eight now",
+    "set red at n eight soon",
+    "set red at t eight now",
+    "set red at m eight now",
+    "set red with n eight now",
+    "set white at n eight now",
+    "set red at q eight now",
+    "set red at n zero now",
+    "place red at n eight now"
+   ]
+  },
+  {
+   "id": "s1/srbb6p",
+   "speaker": "s1",
+   "truth": "set red by b six please",
+   "cands": [
+    "set red by r six please",
+    "lay red by b six please",
+    "set red by f six please",
+    "set red by b four please",
+    "set white by b six please",
+    "set red by t six please",
+    "set red by u six please",
+    "set red by b six please",
+    "set red by z six please",
+    "set red by b five please"
+   ]
+  },
+  {
+   "id": "s1/srbu6n",
+   "speaker": "s1",
+   "truth": "set red by u six now",
+   "cands": [
+    "set red by u six now",
+    "set red by s six now",
+    "lay red by u six now",
+    "set red by t six now",
+    "set red by u six soon",
+    "set red by a six now",
+    "set red by z six now",
+    "set red by u six please",
+    "set red by e six now",
+    "set red by u zero now"
+   ]
+  },
+  {
+   "id": "s1/srih3a",
+   "speaker": "s1",
+   "truth": "set red in h three again",
+   "cands": [
+    "set red in h zero again",
+    "set red in h three again",
+    "set red by h three again",
+    "set red in t three again",
+    "set red in r three again",
+    "set green in h three again",
+    "set red in s three again",
+    "set red in l three again",
+    "set red at h three again",
+    "set red in z three again"
+   ]
+  },
+  {
+   "id": "s1/srwb8n",
+   "speaker": "s1",
+   "truth": "set red with b eight now",
+   "cands": [
+    "set red with z eight now",
+    "set red with g eight now",
+    "set red with b six now",
+    "set red with l eight now",
+    "set red with b four now",
+    "set red with m eight now",
+    "set red with b eight now",
+    "set red with f eight now",
+    "set white with b eight now",
+    "lay red with b eight now"
+   ]
+  },
+  {
+   "id": "s1/srwo8p",
+   "speaker": "s1",
+   "truth": "set red with o eight please",
+   "cands": [
+    "set red with t eight please",
+    "set red with o eight please",
+    "set red with o five please",
+    "set red with b eight please",
+    "place red with o eight please",
+    "lay red with o eight please",
+    "set red with o zero please",
+    "set red with s eight please",
+    "set red with o four please",
+    "set red with o three please"
+   ]
+  },
+  {
+   "id": "s1/swai1s",
+   "speaker": "s1",
+   "truth": "set white at i one soon",
+   "cands": [
+    "set white at f one soon",
+    "set white at t one soon",
+    "set white at a one soon",
+    "set white at l one soon",
+    "set white with i one soon",
+    "set white at i one please",
+    "set white at z one soon",
+    "set white at i one soon",
+    "set white at i zero soon",
+    "set green at i one soon"
+   ]
+  },
+  {
+   "id": "s1/swav1a",
+   "speaker": "s1",
+   "truth": "set white at v one again",
+   "cands": [
+    "set white at a one again",
+    "set white at t one again",
+    "set white at g one again",
+    "place white at v one again",
+    "set white at b one again",
+    "set white with v one again",
+    "set white at v one again",
+    "set white at z one again",
+    "set white at m one again",
+    "set white at n one again"
+   ]
+  },
+  {
+   "id": "s1/swbo8n",
+   "speaker": "s1",
+   "truth": "set white by o eight now",
+   "cands": [
+    "set white by o five now",
+    "set white by o zero now",
+    "set white by o eight now",
+    "set green by o eight now",
+    "set white by o two now",
+    "set white by r eight now",
+    "set white by o six now",
+    "set white by o eight please",
+    "set white by o eight soon",
+    "set white by t eight now"
+   ]
+  },
+  {
+   "id": "s1/swib4p",
+   "speaker": "s1",
+   "truth": "set white in b four please",
+   "cands": [
+    "set white in b four please",
+    "set white in b two please",
+    "set white in l four please",
+    "set white in m four please",
+    "set white at b four please",
+    "set white in g four please",
+    "set white in b zero please",
+    "set white in s four please",
+    "set white by b four please",
+    "set white in e four please"
+   ]
+  },
+  {
+   "id": "s1/swiu4n",
+   "speaker": "s1",
+   "truth": "set white in u four now",
+   "cands": [
+    "set white in u four soon",
+    "set white in m four now",
+    "set white in h four now",
+    "set white in u four again",
+    "set white in t four now",
+    "set white in z four now",
+    "set white in u four now",
+    "set white in r four now",
+    "set white in n four now",
+    "set white in f four now"
+   ]
+  },
+  {
+   "id": "s1/swwj1a",
+   "speaker": "s1",
+   "truth": "set white with j one again",
+   "cands": [
+    "set white with n one again",
+    "set green with j one again",
+    "set white with g one again",
+    "set white with j zero again",
+    "set white with b one again",
+    "set white with p one again",
+    "set white with a one again",
+    "set white with v one again",
+    "place white with j one again",
+    "set white with j one again"
+   ]
+  },
+  {
+   "id": "s2/bbaf1n",
+   "speaker": "s2",
+   "truth": "bin blue at f one now",
+   "cands": [
+    "bin blue at f one now",
+    "bin blue at e one now",
+    "bin blue at c one now",
+    "bin blue at j one now",
+    "bin blue at p one now",
+    "bin blue at f zero now",
+    "bin blue at y one now",
+    "bin blue at f one soon",
+    "bin blue by f one now",
+    "bin green at f one now"
+   ]
+  },
+  {
+   "id": "s2/bbas2a",
+   "speaker": "s2",
+   "truth": "bin blue at s two again",
+   "cands": [
+    "bin blue at x two again",
+    "bin blue at s two please",
+    "bin blue at s two again",
+    "bin green at s two again",
+    "bin blue at j two again",
+    "bin blue at d two again",
+    "bin blue at c two again",
+    "bin blue at z two again",
+    "bin blue at q two again",
+    "bin blue at k two again"
+   ]
+  },
+  {
+   "id": "s2/bbbl9n",
+   "speaker": "s2",
+   "truth": "bin blue by l nine now",
+   "cands": [
+    "bin blue by p nine now",
+    "bin blue by l nine now",
+    "bin blue by v nine now",
+    "bin blue by l two now",
+    "bin blue by r nine now",
+    "bin blue by l seven now",
+    "bin green by l nine now",
+    "bin blue by l four now",
+    "bin blue by i nine now",
+    "bin blue by l zero now"
+   ]
+  },
+  {
+   "id": "s2/bbbz9p",
+   "speaker": "s2",
+   "truth": "bin blue by z nine please",
+   "cands": [
+    "bin white by z nine please",
+    "bin blue by z eight please",
+    "bin blue by z seven please",
+    "bin blue by z four please",
+    "bin blue by i nine please",
+    "bin blue by z nine please",
+    "bin blue by z six please",
+    "place blue by z nine please",
+    "bin blue by z five please",
+    "bin blue by z nine again"
+   ]
+  },
+  {
+   "id": "s2/bbir6s",
+   "speaker": "s2",
+   "truth": "bin blue in r six soon",
+   "cands": [
+    "bin blue in e six soon",
+    "bin blue in r six please",
+    "bin blue in v six soon",
+    "bin white in r six soon",
+    "bin blue in r three soon",
+    "place blue in r six soon",
+    "bin blue in b six soon",
+    "set blue in r six soon",
+    "bin blue in j six soon",
+    "bin blue in r six soon"
+   ]
+  },
+  {
+   "id": "s2/bbwgzs",
+   "speaker": "s2",
+   "truth": "bin blue with g zero soon",
+   "cands": [
+    "bin blue with g one soon",
+    "bin red with g zero soon",
+    "bin blue with x zero soon",
+    "bin white with g zero soon",
+    "bin blue with r zero soon",
+    "bin blue with g zero soon",
+    "bin green with g zero soon",
+    "set blue with g zero soon",
+    "bin blue with q zero soon",
+    "bin blue with d zero soon"
+   ]
+  },
+  {
+   "id": "s2/bgaa6s",
+   "speaker": "s2",
+   "truth": "bin green at a six soon",
+   "cands": [
+    "bin green at a three soon",
+    "bin green at a six soon",
+    "bin green at a one soon",
+    "bin green at g six soon",
+    "set green at a six soon",
+    "bin green at f six soon",
+    "bin green at k six soon",
+    "bin green at a six again",
+    "bin green at t six soon",
+    "bin green at a zero soon"
+   ]
+  },
+  {
+   "id": "s2/bgan6a",
+   "speaker": "s2",
+   "truth": "bin green at n six again",
+   "cands": [
+    "bin green at n six please",
+    "bin green at m six again",
+    "bin green at g six again",
+    "bin green at n six again",
+    "bin green at n three again",
+    "bin green at z six again",
+    "bin green by n six again",
+    "bin green at n five again",
+    "bin green at r six again",
+    "bin green at s six again"
+   ]
+  },
+  {
+   "id": "s2/bgbh4s",
+   "speaker": "s2",
+   "truth": "bin green by h four soon",
+   "cands": [
+    "bin green by h four soon",
+    "bin green by h four please",
+    "bin green by n four soon",
+    "set green by h four soon",
+    "bin green by h two soon",
+    "bin green by h zero soon",
+    "bin green by h five soon",
+    "bin green by y four soon",
+    "bin green by h four again",
+    "bin green by g four soon"
+   ]
+  },
+  {
+   "id": "s2/bgbu4a",
+   "speaker": "s2",
+   "truth": "bin green by u four again",
+   "cands": [
+    "bin green by t four again",
+    "bin green by e four again",
+    "bin green by f four again",
+    "bin green by r four again",
+    "bin green by u four again",
+    "bin green by u zero again",
+    "bin green by z four again",
+    "bin green by s four again",
+    "bin green by u five again",
+    "bin green with u four again"
+   ]
+  },
+  {
+   "id": "s2/bgin1p",
+   "speaker": "s2",
+   "truth": "bin green in n one please",
+   "cands": [
+    "bin green in n one again",
+    "bin green in l one please",
+    "bin green in f one please",
+    "bin green in e one please",
+    "bin green in k one please",
+    "bin green in n zero please",
+    "bin green in r one please",
+    "bin green in z one please",
+    "bin green in n two please",
+    "bin green in n one please"
+   ]
+  },
+  {
+   "id": "s2/bgwb6a",
+   "speaker": "s2",
+   "truth": "bin green with b six again",
+   "cands": [
+    "bin green with b six again",
+    "set green with b six again",
+    "bin green with b three again",
+    "bin green with a six again",
+    "bin green with r six again",
+    "bin green with m six again",
+    "bin green with b four again",
+    "place green with b six again",
+    "bin green with z six again",
+    "bin green with b zero again"
+   ]
+  },
+  {
+   "id": "s2/bgwu6s",
+   "speaker": "s2",
+   "truth": "bin green with u six soon",
+   "cands": [
+    "bin green with e six soon",
+    "bin green with f six soon",
+    "bin green with n six soon",
+    "bin green with u six soon",
+    "bin green with u six now",
+    "bin green with u seven soon",
+    "bin green with s six soon",
+    "place green with u six soon",
+    "bin green with t six soon",
+    "bin green with u one soon"
+   ]
+  },
+  {
+   "id": "s2/bram4a",
+   "speaker": "s2",
+   "truth": "bin red at m four again",
+   "cands": [
+    "bin red at m one again",
+    "bin red at f four again",
+    "bin red at m four please",
+    "bin red at m three again",
+    "bin red at m four again",
+    "bin red at l four again",
+    "bin red at j four again",
+    "bin red at m zero again",
+    "bin green at m four again",
+    "bin red by m four again"
+   ]
+  },
+  {
+   "id": "s2/brbg4a",
+   "speaker": "s2",
+   "truth": "bin red by g four again",
+   "cands": [
+    "bin red by g four please",
+    "bin red by g four again",
+    "bin red by r four again",
+    "bin red by k four again",
+    "bin red by y four again",
+    "bin red by e four again",
+    "bin red by g one again",
+    "bin red by f four again",
+    "bin white by g four again",
+    "bin red by x four again"
+   ]
+  },
+  {
+   "id": "s2/brif4s",
+   "speaker": "s2",
+   "truth": "bin red in f four soon",
+   "cands": [
+    "bin red in f zero soon",
+    "bin green in f four soon",
+    "bin red in f four soon",
+    "bin red in f two soon",
+    "bin red in k four soon",
+    "bin red in q four soon",
+    "bin red in l four soon",
+    "bin red in z four soon",
+    "bin red with f four soon",
+    "bin red in j four soon"
+   ]
+  },
+  {
+   "id": "s2/bris4a",
+   "speaker": "s2",
+   "truth": "bin red in s four again",
+   "cands": [
+    "bin red in j four again",
+    "bin red in z four again",
+    "bin red in y four again",
+    "bin red in e four again",
+    "bin red in r four again",
+    "bin red in s two again",
+    "bin red in s four again",
+    "bin red in p four again",
+    "bin red in c four again",
+    "bin red in s three again"
+   ]
+  },
+  {
+   "id": "s2/brwg6s",
+   "speaker": "s2",
+   "truth": "bin red with g six soon",
+   "cands": [
+    "bin red with y six soon",
+    "bin red with g two soon",
+    "bin red with k six soon",
+    "set red with g six soon",
+    "bin red with z six soon",
+    "bin red with l six soon",
+    "bin red with g four soon",
+    "bin red with g one soon",
+    "bin red with g six soon",
+    "bin red with g zero soon"
+   ]
+  },
+  {
+   "id": "s2/brwt6a",
+   "speaker": "s2",
+   "truth": "bin red with t six again",
+   "cands": [
+    "bin red with t one again",
+    "bin red with t six please",
+    "bin red with t zero again",
+    "bin red with t three again",
+    "bin red with y six again",
+    "bin red with t two again",
+    "bin red with k six again",
+    "bin red with t six again",
+    "bin red with g six again",
+    "bin red with l six again"
+   ]
+  },
+  {
+   "id": "s2/bwam9p",
+   "speaker": "s2",
+   "truth": "bin white at m nine please",
+   "cands": [
+    "bin white at m nine please",
+    "bin white at d nine please",
+    "bin white at m zero please",
+    "bin white at f nine please",
+    "bin green at m nine please",
+    "bin white at x nine please",
+    "place white at m nine please",
+    "bin white at m eight please",
+    "bin white at j nine please",
+    "bin white at m three please"
+   ]
+  },
+  {
+   "id": "s2/bwbg7n",
+   "speaker": "s2",
+   "truth": "bin white by g seven now",
+   "cands": [
+    "set white by g seven now",
+    "bin white by g seven now",
+    "bin white by y seven now",
+    "bin white by e seven now",
+    "place white by g seven now",
+    "bin white by g seven soon",
+    "bin white by g eight now",
+    "bin white by g zero now",
+    "bin white by z seven now",
+    "bin white by g three now"
+   ]
+  },
+  {
+   "id": "s2/bwbt7p",
+   "speaker": "s2",
+   "truth": "bin white by t seven please",
+   "cands": [
+    "bin white by t three please",
+    "bin white by y seven please",
+    "bin green by t seven please",
+    "bin white by t zero please",
+    "bin white by t six please",
+    "bin white by t four please",
+    "bin white by e seven please",
+    "bin white by t five please",
+    "bin white by t seven please",
+    "bin white by l seven please"
+   ]
+  },
+  {
+   "id": "s2/bwis7n",
+   "speaker": "s2",
+   "truth": "bin white in s seven now",
+   "cands": [
+    "bin white in x seven now",
+    "bin white in s five now",
+    "bin white in s six now",
+    "bin green in s seven now",
+    "bin white in j seven now",
+    "bin white in s seven now",
+    "place white in s seven now",
+    "bin white in c seven now",
+    "bin white in s one now",
+    "bin white in y seven now"
+   ]
+  },
+  {
+   "id": "s2/bwwh3p",
+   "speaker": "s2",
+   "truth": "bin white with h three please",
+   "cands": [
+    "bin white with h one please",
+    "bin white with n three please",
+    "bin white with h three soon",
+    "bin white with h three please",
+    "bin white with r three please",
+    "bin white with f three please",
+    "bin white with g three please",
+    "place white with h three please",
+    "bin white with y three please",
+    "set white with h three please"
+   ]
+  },
+  {
+   "id": "s2/lbad5n",
+   "speaker": "s2",
+   "truth": "lay blue at d five now",
+   "cands": [
+    "lay blue at h five now",
+    "lay blue at v five now",
+    "lay blue by d five now",
+    "lay blue at d three now",
+    "lay red at d five now",
+    "lay blue at t five now",
+    "lay blue at n five now",
+    "lay blue at d five now",
+    "lay blue at b five now",
+    "lay blue at j five now"
+   ]
+  },
+  {
+   "id": "s2/lbaq5p",
+   "speaker": "s2",
+   "truth": "lay blue at q five please",
+   "cands": [
+    "lay blue at v five please",
+    "lay blue at q four please",
+    "lay blue at x five please",
+    "lay blue at q five please",
+    "lay blue at q five soon",
+    "lay blue at n five please",
+    "lay blue by q five please",
+    "lay blue at j five please",
+    "lay blue at a five please",
+    "lay blue at c five please"
+   ]
+  },
+  {
+   "id": "s2/lbbk3n",
+   "speaker": "s2",
+   "truth": "lay blue by k three now",
+   "cands": [
+    "lay blue by i three now",
+    "bin blue by k three now",
+    "lay green by k three now",
+    "lay blue by k one now",
+    "lay blue by p three now",
+    "lay blue by k three now",
+    "lay blue by h three now",
+    "lay blue by k three please",
+    "lay blue by k three soon",
+    "lay blue by d three now"
+   ]
+  },
+  {
+   "id": "s2/lbby3p",
+   "speaker": "s2",
+   "truth": "lay blue by y three please",
+   "cands": [
+    "lay blue by y three soon",
+    "lay blue by v three please",
+    "lay blue by y three please",
+    "lay blue by k three please",
+    "lay blue by h three please",
+    "lay blue by b three please",
+    "lay blue by y zero please",
+    "lay blue by o three please",
+    "lay blue by y three again",
+    "lay blue by i three please"
+   ]
+  },
+  {
+   "id": "s2/lbip9n",
+   "speaker": "s2",
+   "truth": "lay blue in p nine now",
+   "cands": [
+    "lay blue with p nine now",
+    "lay blue in u nine now",
+    "lay blue in p eight now",
+    "lay blue in c nine now",
+    "lay white in p nine now",
+    "lay blue in h nine now",
+    "lay blue in p nine again",
+    "lay blue in p nine now",
+    "lay blue in o nine now",
+    "lay blue in p seven now"
+   ]
+  },
+  {
+   "id": "s2/lbwe5p",
+   "speaker": "s2",
+   "truth": "lay blue with e five please",
+   "cands": [
+    "bin blue with e five please",
+    "lay blue with b five please",
+    "lay blue with c five please",
+    "lay blue with e five soon",
+    "lay blue with e five please",
+    "lay blue with x five please",
+    "lay blue with d five please",
+    "lay blue with e three please",
+    "lay blue with e four please",
+    "lay blue with e six please"
+   ]
+  },
+  {
+   "id": "s2/lbwy5n",
+   "speaker": "s2",
+   "truth": "lay blue with y five now",
+   "cands": [
+    "lay blue with y six now",
+    "lay blue with h five now",
+    "lay blue with y five again",
+    "lay blue with u five now",
+    "lay blue with c five now",
+    "lay blue with q five now",
+    "lay blue with j five now",
+    "lay blue with o five now",
+    "lay blue with y five now",
+    "lay blue with y five please"
+   ]
+  },
+  {
+   "id": "s2/lgal9p",
+   "speaker": "s2",
+   "truth": "lay green at l nine please",
+   "cands": [
+    "lay green at i nine please",
+    "lay green at c nine please",
+    "lay green at l zero please",
+    "lay green at l nine again",
+    "lay green at l four please",
+    "lay green at p nine please",
+    "lay green at v nine please",
+    "lay green at l eight please",
+    "lay green at l nine please",
+    "lay green at l five please"
+   ]
+  },
+  {
+   "id": "s2/lgbf7n",
+   "speaker": "s2",
+   "truth": "lay green by f seven now",
+   "cands": [
+    "lay green by l seven now",
+    "lay green by f two now",
+    "lay green by f zero now",
+    "lay green by e seven now",
+    "set green by f seven now",
+    "lay green by k seven now",
+    "lay green by f five now",
+    "lay green by f six now",
+    "lay green by j seven now",
+    "lay green by f seven now"
+   ]
+  },
+  {
+   "id": "s2/lgbs7p",
+   "speaker": "s2",
+   "truth": "lay green by s seven please",
+   "cands": [
+    "lay green by j seven please",
+    "lay green by s seven please",
+    "lay green by s seven soon",
+    "lay green by e seven please",
+    "lay green by s eight please",
+    "lay green by s zero please",
+    "lay green by f seven please",
+    "bin green by s seven please",
+    "lay green by s four please",
+    "lay green by s one please"
+   ]
+  },
+  {
+   "id": "s2/lgil6a",
+   "speaker": "s2",
+   "truth": "lay green in l six again",
+   "cands": [
+    "lay green in k six again",
+    "lay green in l seven again",
+    "lay green in l four again",
+    "lay green in e six again",
+    "lay green in i six again",
+    "lay green in l six again",
+    "lay green in r six again",
+    "lay green in j six again",
+    "lay green in l six please",
+    "lay green in p six again"
+   ]
+  },
+  {
+   "id": "s2/lgwg1n",
+   "speaker": "s2",
+   "truth": "lay green with g one now",
+   "cands": [
+    "lay green with g two now",
+    "lay green with k one now",
+    "lay green with f one now",
+    "lay green with l one now",
+    "lay green with g one please",
+    "lay green with g one again",
+    "lay green with r one now",
+    "lay green with g one now",
+    "lay green with x one now",
+    "lay green with e one now"
+   ]
+  },
+  {
+   "id": "s2/lgwt2a",
+   "speaker": "s2",
+   "truth": "lay green with t two again",
+   "cands": [
+    "lay green with f two again",
+    "set green with t two again",
+    "lay green with d two again",
+    "lay green with m two again",
+    "lay green with l two again",
+    "lay green with y two again",
+    "lay green with q two again",
+    "lay green with t two again",
+    "lay green with t three again",
+    "lay green with z two again"
+   ]
+  },
+  {
+   "id": "s2/lraq9n",
+   "speaker": "s2",
+   "truth": "lay red at q nine now",
+   "cands": [
+    "lay red at q eight now",
+    "lay red at q four now",
+    "lay red at a nine now",
+    "lay red at q five now",
+    "lay red at p nine now",
+    "lay red at q nine now",
+    "lay white at q nine now",
+    "lay red by q nine now",
+    "lay red at j nine now",
+    "lay red at q two now"
+   ]
+  },
+  {
+   "id": "s2/lrbe7p",
+   "speaker": "s2",
+   "truth": "lay red by e seven please",
+   "cands": [
+    "lay red by e seven again",
+    "lay red by e four please",
+    "lay red by x seven please",
+    "lay red by v seven please",
+    "lay red by p seven please",
+    "lay red by j seven please",
+    "lay red by u seven please",
+    "lay red by d seven please",
+    "lay red by e zero please",
+    "lay red by e seven please"
+   ]
+  },
+  {
+   "id": "s2/lrby7n",
+   "speaker": "s2",
+   "truth": "lay red by y seven now",
+   "cands": [
+    "lay red by y seven now",
+    "lay red by h seven now",
+    "lay red by y seven please",
+    "lay red with y seven now",
+    "lay red by j seven now",
+    "lay red by q seven now",
+    "lay red by y five now",
+    "bin red by y seven now",
+    "lay red by v seven now",
+    "lay red by y two now"
+   ]
+  },
+  {
+   "id": "s2/lrik3p",
+   "speaker": "s2",
+   "truth": "lay red in k three please",
+   "cands": [
+    "lay red in k three please",
+    "lay red in h three please",
+    "lay red in k four please",
+    "set red in k three please",
+    "lay red in i three please",
+    "lay red in k three soon",
+    "lay red in b three please",
+    "lay red in u three please",
+    "lay red in k two please",
+    "lay red in p three please"
+   ]
+  },
+  {
+   "id": "s2/lrwe9n",
+   "speaker": "s2",
+   "truth": "lay red with e nine now",
+   "cands": [
+    "lay red with y nine now",
+    "lay green with e nine now",
+    "lay red with e five now",
+    "lay red with i nine now",
+    "lay red with e nine please",
+    "lay red with e nine again",
+    "lay red with p nine now",
+    "lay red with e two now",
+    "lay red with e nine now",
+    "lay red with e three now"
+   ]
+  },
+  {
+   "id": "s2/lrwr9p",
+   "speaker": "s2",
+   "truth": "lay red with r nine please",
+   "cands": [
+    "lay red with r nine please",
+    "set red with r nine please",
+    "lay red with r two please",
+    "bin red with r nine please",
+    "lay red with r zero please",
+    "lay red with r three please",
+    "lay red with k nine please",
+    "lay red with q nine please",
+    "lay red with e nine please",
+    "lay red with v nine please"
+   ]
+  },
+  {
+   "id": "s2/lwal1n",
+   "speaker": "s2",
+   "truth": "lay white at l one now",
+   "cands": [
+    "lay white at c one now",
+    "lay white at l one now",
+    "lay white at l one please",
+    "lay white at l zero now",
+    "lay white at p one now",
+    "lay white at l two now",
+    "lay white by l one now",
+    "bin white at l one now",
+    "lay white at d one now",
+    "lay white at r one now"
+   ]
+  },
+  {
+   "id": "s2/lwaz2a",
+   "speaker": "s2",
+   "truth": "lay white at z two again",
+   "cands": [
+    "lay white at i two again",
+    "lay white at z three again",
+    "lay white at z two please",
+    "lay white at r two again",
+    "lay white at j two again",
+    "lay white at d two again",
+    "lay white at y two again",
+    "bin white at z two again",
+    "lay white at q two again",
+    "lay white at z two again"
+   ]
+  },
+  {
+   "id": "s2/lwbr9n",
+   "speaker": "s2",
+   "truth": "lay white by r nine now",
+   "cands": [
+    "lay white by p nine now",
+    "lay white by r nine now",
+    "lay white by r zero now",
+    "lay white by d nine now",
+    "lay white by r three now",
+    "set white by r nine now",
+    "lay white with r nine now",
+    "lay green by r nine now",
+    "lay white by r six now",
+    "lay white by i nine now"
+   ]
+  },
+  {
+   "id": "s2/lwie5p",
+   "speaker": "s2",
+   "truth": "lay white in e five please",
+   "cands": [
+    "lay white in e two please",
+    "lay white in i five please",
+    "lay white in b five please",
+    "lay white in k five please",
+    "lay white in e five please",
+    "set white in e five please",
+    "lay white in e four please",
+    "lay white in e zero please",
+    "lay white in o five please",
+    "lay white in d five please"
+   ]
+  },
+  {
+   "id": "s2/lwiy5n",
+   "speaker": "s2",
+   "truth": "lay white in y five now",
+   "cands": [
+    "lay white in k five now",
+    "lay white in y three now",
+    "lay white in y zero now",
+    "lay white in y two now",
+    "lay white in b five now",
+    "lay white in v five now",
+    "lay white in y five now",
+    "lay white in o five now",
+    "lay white in y one now",
+    "lay white with y five now"
+   ]
+  },
+  {
+   "id": "s2/lwwm2a",
+   "speaker": "s2",
+   "truth": "lay white with m two again",
+   "cands": [
+    "bin white with m two again",
+    "lay green with m two again",
+    "lay white with q two again",
+    "lay white with s two again",
+    "lay white with m two please",
+    "lay white with d two again",
+    "lay white with r two again",
+    "lay white with m two again",
+    "lay white with x two again",
+    "lay white with j two again"
+   ]
+  },
+  {
+   "id": "s2/pbac1p",
+   "speaker": "s2",
+   "truth": "place blue at c one please",
+   "cands": [
+    "place blue at m one please",
+    "place blue at h one please",
+    "place blue at c one please",
+    "lay blue at c one please",
+    "place blue at s one please",
+    "place blue at c one again",
+    "place blue at n one please",
+    "place blue at c zero please",
+    "place blue by c one please",
+    "place red at c one please"
+   ]
+  },
+  {
+   "id": "s2/pbapza",
+   "speaker": "s2",
+   "truth": "place blue at p zero again",
+   "cands": [
+    "place red at p zero again",
+    "bin blue at p zero again",
+    "place blue at o zero again",
+    "place blue at h zero again",
+    "place blue at t zero again",
+    "place blue at m zero again",
+    "place blue at p zero please",
+    "place blue at p zero again",
+    "place blue at n zero again",
+    "place blue at u zero again"
+   ]
+  },
+  {
+   "id": "s2/pbbi8s",
+   "speaker": "s2",
+   "truth": "place blue by i eight soon",
+   "cands": [
+    "place blue by z eight soon",
+    "place blue by i eight soon",
+    "place blue by a eight soon",
+    "place blue by m eight soon",
+    "place blue by f eight soon",
+    "place blue with i eight soon",
+    "place blue by i five soon",
+    "bin blue by i eight soon",
+    "place red by i eight soon",
+    "place blue by b eight soon"
+   ]
+  },
+  {
+   "id": "s2/pbbv8a",
+   "speaker": "s2",
+   "truth": "place blue by v eight again",
+   "cands": [
+    "place blue by v one again",
+    "place blue by u eight again",
+    "place blue by v eight again",
+    "place blue by s eight again",
+    "place blue by v four again",
+    "place blue with v eight again",
+    "place blue by v eight please",
+    "place blue by v five again",
+    "place blue by a eight again",
+    "place blue by v three again"
+   ]
+  },
+  {
+   "id": "s2/pbio4s",
+   "speaker": "s2",
+   "truth": "place blue in o four soon",
+   "cands": [
+    "place blue in o four soon",
+    "place blue in b four soon",
+    "place white in o four soon",
+    "place blue at o four soon",
+    "lay blue in o four soon",
+    "place blue in o zero soon",
+    "place blue in a four soon",
+    "place blue in t four soon",
+    "place blue in o three soon",
+    "place blue in o four again"
+   ]
+  },
+  {
+   "id": "s2/pbwdza",
+   "speaker": "s2",
+   "truth": "place blue with d zero again",
+   "cands": [
+    "place green with d zero again",
+    "place blue with i zero again",
+    "place red with d zero again",
+    "place blue with o zero again",
+    "bin blue with d zero again",
+    "place blue with h zero again",
+    "place blue with v zero again",
+    "place blue with d zero again",
+    "place blue with d zero please",
+    "place blue with t zero again"
+   ]
+  },
+  {
+   "id": "s2/pbwx1p",
+   "speaker": "s2",
+   "truth": "place blue with x one please",
+   "cands": [
+    "place blue with o one please",
+    "place blue with h one please",
+    "place blue with v one please",
+    "place blue with x zero please",
+    "place blue with j one please",
+    "place blue with b one please",
+    "place blue with x two please",
+    "place red with x one please",
+    "bin blue with x one please",
+    "place blue with x one please"
+   ]
+  },
+  {
+   "id": "s2/pgak4a",
+   "speaker": "s2",
+   "truth": "place green at k four again",
+   "cands": [
+    "place green at k five again",
+    "place green by k four again",
+    "place green at k four again",
+    "place green at j four again",
+    "place green at k three again",
+    "place green at u four again",
+    "lay green at k four again",
+    "place green at h four again",
+    "place green at k two again",
+    "place green at p four again"
+   ]
+  },
+  {
+   "id": "s2/pgbe2s",
+   "speaker": "s2",
+   "truth": "place green by e two soon",
+   "cands": [
+    "place green by o two soon",
+    "place green by e two soon",
+    "place green by e zero soon",
+    "place green by e three soon",
+    "place green by j two soon",
+    "place green by y two soon",
+    "place green by e one soon",
+    "place green by u two soon",
+    "place green by e two please",
+    "place green with e two soon"
+   ]
+  },
+  {
+   "id": "s2/pgbrzs",
+   "speaker": "s2",
+   "truth": "place green by r zero soon",
+   "cands": [
+    "place green by o zero soon",
+    "place green by r zero soon",
+    "place green by e zero soon",
+    "place green by c zero soon",
+    "place green by q zero soon",
+    "place green by r zero again",
+    "place green by i zero soon",
+    "place green by j zero soon",
+    "place green by r zero now",
+    "place green by k zero soon"
+   ]
+  },
+  {
+   "id": "s2/pgij8s",
+   "speaker": "s2",
+   "truth": "place green in j eight soon",
+   "cands": [
+    "place green in j eight soon",
+    "place green in p eight soon",
+    "place green in c eight soon",
+    "place green in j nine soon",
+    "place green in j two soon",
+    "place green at j eight soon",
+    "place green in j one soon",
+    "place green in g eight soon",
+    "place green in j eight please",
+    "place green in h eight soon"
+   ]
+  },
+  {
+   "id": "s2/pgix8a",
+   "speaker": "s2",
+   "truth": "place green in x eight again",
+   "cands": [
+    "place green in x eight again",
+    "place green in v eight again",
+    "place green in g eight again",
+    "place green in x two again",
+    "place green in x seven again",
+    "bin green in x eight again",
+    "place green in h eight again",
+    "place green in x four again",
+    "lay green in x eight again",
+    "place green in o eight again"
+   ]
+  },
+  {
+   "id": "s2/pgwr4s",
+   "speaker": "s2",
+   "truth": "place green with r four soon",
+   "cands": [
+    "place green with r three soon",
+    "place green with y four soon",
+    "place green with c four soon",
+    "place green with p four soon",
+    "place green with r four soon",
+    "place green with o four soon",
+    "lay green with r four soon",
+    "place green with e four soon",
+    "place green with r four now",
+    "place green with k four soon"
+   ]
+  },
+  {
+   "id": "s2/prac8a",
+   "speaker": "s2",
+   "truth": "place red at c eight again",
+   "cands": [
+    "place white at c eight again",
+    "place red at c seven again",
+    "bin red at c eight again",
+    "place red at c four again",
+    "place red at u eight again",
+    "place red at a eight again",
+    "place red by c eight again",
+    "place red at n eight again",
+    "place red at i eight again",
+    "place red at c eight again"
+   ]
+  },
+  {
+   "id": "s2/prav8s",
+   "speaker": "s2",
+   "truth": "place red at v eight soon",
+   "cands": [
+    "place red at i eight soon",
+    "place red at g eight soon",
+    "place red at v eight soon",
+    "place red at n eight soon",
+    "place red at v one soon",
+    "place red at v four soon",
+    "place red at m eight soon",
+    "place red at v seven soon",
+    "place red at f eight soon",
+    "place red at v two soon"
+   ]
+  },
+  {
+   "id": "s2/prbj6a",
+   "speaker": "s2",
+   "truth": "place red by j six again",
+   "cands": [
+    "bin red by j six again",
+    "place red by j six again",
+    "place red by j six please",
+    "place red by j two again",
+    "place red by j one again",
+    "place red by o six again",
+    "place red by g six again",
+    "place red by b six again",
+    "place red by c six again",
+    "place red by u six again"
+   ]
+  },
+  {
+   "id": "s2/pric2s",
+   "speaker": "s2",
+   "truth": "place red in c two soon",
+   "cands": [
+    "place red in c three soon",
+    "place red in a two soon",
+    "place red in t two soon",
+    "place red in c one soon",
+    "place red in h two soon",
+    "place red with c two soon",
+    "bin red in c two soon",
+    "place white in c two soon",
+    "place red in c two soon",
+    "place red in n two soon"
+   ]
+  },
+  {
+   "id": "s2/pripzs",
+   "speaker": "s2",
+   "truth": "place red in p zero soon",
+   "cands": [
+    "place red in n zero soon",
+    "place red in g zero soon",
+    "place red at p zero soon",
+    "place red in p zero soon",
+    "place red in p zero now",
+    "place red in b zero soon",
+    "place red with p zero soon",
+    "place red in h zero soon",
+    "place red in c zero soon",
+    "place red in a zero soon"
+   ]
+  },
+  {
+   "id": "s2/prwj8s",
+   "speaker": "s2",
+   "truth": "place red with j eight soon",
+   "cands": [
+    "place red with j four soon",
+    "place red with j nine soon",
+    "place red with j seven soon",
+    "place red with j three soon",
+    "place red with j eight soon",
+    "place red with a eight soon",
+    "place red with b eight soon",
+    "place red with n eight soon",
+    "place red with t eight soon",
+    "place white with j eight soon"
+   ]
+  },
+  {
+   "id": "s2/prwx8a",
+   "speaker": "s2",
+   "truth": "place red with x eight again",
+   "cands": [
+    "place red with x five again",
+    "place red with x nine again",
+    "place white with x eight again",
+    "place red with t eight again",
+    "lay red with x eight again",
+    "place red with x seven again",
+    "place red with b eight again",
+    "place red with x four again",
+    "place red with p eight again",
+    "place red with x eight again"
+   ]
+  },
+  {
+   "id": "s2/pwaq1p",
+   "speaker": "s2",
+   "truth": "place white at q one please",
+   "cands": [
+    "place white at h one please",
+    "place white at u one please",
+    "place white by q one please",
+    "place white at i one please",
+    "place white at n one please",
+    "place white at v one please",
+    "place white at p one please",
+    "place white at a one please",
+    "place white at q one please",
+    "place green at q one please"
+   ]
+  },
+  {
+   "id": "s2/pwbd8a",
+   "speaker": "s2",
+   "truth": "place white by d eight again",
+   "cands": [
+    "place white by d eight again",
+    "place white by j eight again",
+    "place white by a eight again",
+    "place green by d eight again",
+    "place white by u eight again",
+    "place white by h eight again",
+    "place white by x eight again",
+    "place white by i eight again",
+    "place white by d eight please",
+    "place white by t eight again"
+   ]
+  },
+  {
+   "id": "s2/pwbx8s",
+   "speaker": "s2",
+   "truth": "place white by x eight soon",
+   "cands": [
+    "place white by p eight soon",
+    "place white by j eight soon",
+    "place white by x four soon",
+    "place white by x eight again",
+    "place white by x seven soon",
+    "bin white by x eight soon",
+    "place white by x nine soon",
+    "place white by x eight soon",
+    "place white by x one soon",
+    "place white with x eight soon"
+   ]
+  },
+  {
+   "id": "s2/pwij4a",
+   "speaker": "s2",
+   "truth": "place white in j four again",
+   "cands": [
+    "place white in j one again",
+    "place white in j four please",
+    "place white in h four again",
+    "place white in j four again",
+    "place white in j two again",
+    "place white in j zero again",
+    "place white in i four again",
+    "place white in b four again",
+    "place white in g four again",
+    "place green in j four again"
+   ]
+  },
+  {
+   "id": "s2/pwwe1p",
+   "speaker": "s2",
+   "truth": "place white with e one please",
+   "cands": [
+    "place white with i one please",
+    "bin white with e one please",
+    "place white with u one please",
+    "place green with e one please",
+    "place white with e one please",
+    "place white with e two please",
+    "place white with d one please",
+    "place white with c one please",
+    "place white with o one please",
+    "place white with e one soon"
+   ]
+  },
+  {
+   "id": "s2/pwwrza",
+   "speaker": "s2",
+   "truth": "place white with r zero again",
+   "cands": [
+    "place white with r zero again",
+    "place white with r one again",
+    "place white with v zero again",
+    "place white with o zero again",
+    "place white with q zero again",
+    "place white with p zero again",
+    "bin white with r zero again",
+    "place white with k zero again",
+    "place white with e zero again",
+    "place white with x zero again"
+   ]
+  },
+  {
+   "id": "s2/sbag8s",
+   "speaker": "s2",
+   "truth": "set blue at g eight soon",
+   "cands": [
+    "set blue at g eight now",
+    "set green at g eight soon",
+    "set blue at g eight soon",
+    "set blue at g one soon",
+    "set blue at m eight soon",
+    "set red at g eight soon",
+    "set blue at g six soon",
+    "set blue at g five soon",
+    "set blue at e eight soon",
+    "set blue at f eight soon"
+   ]
+  },
+  {
+   "id": "s2/sbat8a",
+   "speaker": "s2",
+   "truth": "set blue at t eight again",
+   "cands": [
+    "set blue at e eight again",
+    "set blue at t nine again",
+    "set green at t eight again",
+    "set blue at s eight again",
+    "set blue at d eight again",
+    "set blue at y eight again",
+    "set blue at t three again",
+    "set blue at t eight again",
+    "set blue at t six again",
+    "set blue at t two again"
+   ]
+  },
+  {
+   "id": "s2/sbbn6s",
+   "speaker": "s2",
+   "truth": "set blue by n six soon",
+   "cands": [
+    "set blue by y six soon",
+    "set blue by g six soon",
+    "set blue by n seven soon",
+    "set blue by n six soon",
+    "set blue by z six soon",
+    "set blue by n two soon",
+    "set blue by m six soon",
+    "set blue by n zero soon",
+    "set blue by l six soon",
+    "set blue by e six soon"
+   ]
+  },
+  {
+   "id": "s2/sbig3n",
+   "speaker": "s2",
+   "truth": "set blue in g three now",
+   "cands": [
+    "set blue in g three now",
+    "set blue in x three now",
+    "set blue in z three now",
+    "set white in g three now",
+    "set blue with g three now",
+    "set blue in f three now",
+    "set blue in y three now",
+    "set blue at g three now",
+    "set blue in e three now",
+    "set green in g three now"
+   ]
+  },
+  {
+   "id": "s2/sbit3p",
+   "speaker": "s2",
+   "truth": "set blue in t three please",
+   "cands": [
+    "set blue at t three please",
+    "set blue in q three please",
+    "set blue in r three please",
+    "set blue in e three please",
+    "place blue in t three please",
+    "set blue in t one please",
+    "set green in t three please",
+    "set blue in t three please",
+    "set blue in l three please",
+    "set white in t three please"
+   ]
+  },
+  {
+   "id": "s2/sbwn9n",
+   "speaker": "s2",
+   "truth": "set blue with n nine now",
+   "cands": [
+    "lay blue with n nine now",
+    "set blue with l nine now",
+    "set blue with n nine now",
+    "set blue with k nine now",
+    "set blue with n nine soon",
+    "set blue with m nine now",
+    "set blue with n five now",
+    "set blue with n six now",
+    "set blue with n two now",
+    "set blue with n nine please"
+   ]
+  },
+  {
+   "id": "s2/sgac3p",
+   "speaker": "s2",
+   "truth": "set green at c three please",
+   "cands": [
+    "set green at c three soon",
+    "set green at b three please",
+    "set green at c four please",
+    "set green at v three please",
+    "place green at c three please",
+    "set green at c two please",
+    "set green at c three please",
+    "set green at i three please",
+    "set green at n three please",
+    "set green at u three please"
+   ]
+  },
+  {
+   "id": "s2/sgav3n",
+   "speaker": "s2",
+   "truth": "set green at v three now",
+   "cands": [
+    "set green at v three now",
+    "set green at a three now",
+    "lay green at v three now",
+    "set green at v four now",
+    "set green at v two now",
+    "set green at v zero now",
+    "set green by v three now",
+    "set green at i three now",
+    "set green at v three please",
+    "set green at v one now"
+   ]
+  },
+  {
+   "id": "s2/sgbj2a",
+   "speaker": "s2",
+   "truth": "set green by j two again",
+   "cands": [
+    "lay green by j two again",
+    "set green by t two again",
+    "set green by a two again",
+    "set green by n two again",
+    "set green by c two again",
+    "set green by j two again",
+    "set green by b two again",
+    "set green by u two again",
+    "set green by j three again",
+    "set green by i two again"
+   ]
+  },
+  {
+   "id": "s2/sgib7n",
+   "speaker": "s2",
+   "truth": "set green in b seven now",
+   "cands": [
+    "set green in b seven soon",
+    "set green in b seven now",
+    "set green in r seven now",
+    "set green in b zero now",
+    "set green in f seven now",
+    "set green in b eight now",
+    "set green in b six now",
+    "set green in b one now",
+    "set green in a seven now",
+    "set green in b two now"
+   ]
+  },
+  {
+   "id": "s2/sgio7p",
+   "speaker": "s2",
+   "truth": "set green in o seven please",
+   "cands": [
+    "set green in a seven please",
+    "set green in b seven please",
+    "set green in o five please",
+    "set green in o seven soon",
+    "set green in o six please",
+    "set green in o seven please",
+    "set green in o seven again",
+    "set green at o seven please",
+    "lay green in o seven please",
+    "set green in o one please"
+   ]
+  },
+  {
+   "id": "s2/sgwj3n",
+   "speaker": "s2",
+   "truth": "set green with j three now",
+   "cands": [
+    "set green with g three now",
+    "set green with j three now",
+    "set green with a three now",
+    "place green with j three now",
+    "set green with j three again",
+    "set green with b three now",
+    "set green with o three now",
+    "set green with p three now",
+    "set green with n three now",
+    "lay green with j three now"
+   ]
+  },
+  {
+   "id": "s2/sgwx3p",
+   "speaker": "s2",
+   "truth": "set green with x three please",
+   "cands": [
+    "lay green with x three please",
+    "set green with h three please",
+    "set green with x three soon",
+    "place green with x three please",
+    "set green with x three please",
+    "set green with u three please",
+    "set green with x three again",
+    "set green with x four please",
+    "set green with t three please",
+    "set green with b three please"
+   ]
+  },
+  {
+   "id": "s2/sran7n",
+   "speaker": "s2",
+   "truth": "set red at n seven now",
+   "cands": [
+    "set red at f seven now",
+    "set red at t seven now",
+    "set red at n zero now",
+    "set red at n seven now",
+    "set red at s seven now",
+    "set red at r seven now",
+    "set red at k seven now",
+    "place red at n seven now",
+    "set red at a seven now",
+    "set red at n seven again"
+   ]
+  },
+  {
+   "id": "s2/srbb5p",
+   "speaker": "s2",
+   "truth": "set red by b five please",
+   "cands": [
+    "set red by f five please",
+    "set red by b three please",
+    "set red by a five please",
+    "set red by b six please",
+    "set red by b five please",
+    "set red by s five please",
+    "lay red by b five please",
+    "set green by b five please",
+    "set red by b four please",
+    "set red with b five please"
+   ]
+  },
+  {
+   "id": "s2/srbu5n",
+   "speaker": "s2",
+   "truth": "set red by u five now",
+   "cands": [
+    "set red by r five now",
+    "set red by u five please",
+    "set red by n five now",
+    "set red by u five soon",
+    "set red by u five now",
+    "set red with u five now",
+    "set red by m five now",
+    "set red by u four now",
+    "set red by u six now",
+    "set red by s five now"
+   ]
+  },
+  {
+   "id": "s2/srih2a",
+   "speaker": "s2",
+   "truth": "set red in h two again",
+   "cands": [
+    "set red in e two again",
+    "set red in z two again",
+    "set red in g two again",
+    "set red in n two again",
+    "set red in m two again",
+    "set red at h two again",
+    "set red in h two again",
+    "lay red in h two again",
+    "set red in s two again",
+    "set red in f two again"
+   ]
+  },
+  {
+   "id": "s2/srwb7n",
+   "speaker": "s2",
+   "truth": "set red with b seven now",
+   "cands": [
+    "set red with b eight now",
+    "set red with g seven now",
+    "set red with b four now",
+    "set green with b seven now",
+    "set red with l seven now",
+    "set red with b seven now",
+    "lay red with b seven now",
+    "set red with z seven now",
+    "set red with f seven now",
+    "set red with s seven now"
+   ]
+  },
+  {
+   "id": "s2/srwo7p",
+   "speaker": "s2",
+   "truth": "set red with o seven please",
+   "cands": [
+    "set red with g seven please",
+    "set red with m seven please",
+    "set red with o one please",
+    "set red with n seven please",
+    "set red with u seven please",
+    "set red with o two please",
+    "set red with o seven please",
+    "set red with t seven please",
+    "lay red with o seven please",
+    "set red with o four please"
+   ]
+  },
+  {
+   "id": "s2/swah9n",
+   "speaker": "s2",
+   "truth": "set white at h nine now",
+   "cands": [
+    "set white at h zero now",
+    "set white at h three now",
+    "set white at n nine now",
+    "set white by h nine now",
+    "set white at h nine soon",
+    "set white at s nine now",
+    "set white at h eight now",
+    "set white at z nine now",
+    "set white at h four now",
+    "set white at h nine now"
+   ]
+  },
+  {
+   "id": "s2/swau9p",
+   "speaker": "s2",
+   "truth": "set white at u nine please",
+   "cands": [
+    "set white at s nine please",
+    "set white at u three please",
+    "set white at t nine please",
+    "set white at u six please",
+    "set white at u nine soon",
+    "set white at u seven please",
+    "set white at u nine please",
+    "set white at n nine please",
+    "set white at u zero please",
+    "set white at u four please"
+   ]
+  },
+  {
+   "id": "s2/swbo7n",
+   "speaker": "s2",
+   "truth": "set white by o seven now",
+   "cands": [
+    "set white by z seven now",
+    "set white by b seven now",
+    "set white by n seven now",
+    "set white by o five now",
+    "set white by u seven now",
+    "set white by o seven now",
+    "lay white by o seven now",
+    "set white by o zero now",
+    "set white by o three now",
+    "set white by h seven now"
+   ]
+  },
+  {
+   "id": "s2/swib3p",
+   "speaker": "s2",
+   "truth": "set white in b three please",
+   "cands": [
+    "set white in b three again",
+    "set white in t three please",
+    "set white in z three please",
+    "set white in b two please",
+    "set white in b four please",
+    "set white in r three please",
+    "lay white in b three please",
+    "set white in b three please",
+    "set white in b one please",
+    "set white in h three please"
+   ]
+  },
+  {
+   "id": "s2/swiu3n",
+   "speaker": "s2",
+   "truth": "set white in u three now",
+   "cands": [
+    "set white in u three soon",
+    "set white in u zero now",
+    "set white in z three now",
+    "set white in n three now",
+    "set white in m three now",
+    "set white in s three now",
+    "place white in u three now",
+    "set white in u three now",
+    "set white in u one now",
+    "set white in l three now"
+   ]
+  },
+  {
+   "id": "s2/swwi9p",
+   "speaker": "s2",
+   "truth": "set white with i nine please",
+   "cands": [
+    "set white with i zero please",
+    "set white with g nine please",
+    "set white with i nine soon",
+    "set white with m nine please",
+    "set white with i seven please",
+    "place white with i nine please",
+    "set white with i nine again",
+    "set white with o nine please",
+    "set green with i nine please",
+    "set white with i nine please"
+   ]
+  }
+ ]
+}
