@@ -9,7 +9,10 @@ services/coordinator/app.py, not copied), built from the NeMo Gym eval tasks, wi
 (stream=True) so the client sees its time to first token. A tool call counts as valid when it parses and passes the
 coordinator's own validator (`validate`), with the validator flags at their defaults.
 
-Per level: 3 warm-up requests, then N measured requests dispatched through a pool of `level` workers.
+Every level sends the same task sequence (eval.jsonl shuffled with a fixed seed: the file is sorted by category, so
+an unshuffled slice would compare different task types). Per level: 3 warm-up requests, then N measured requests
+dispatched through a pool of `level` workers. `same_as_first` is the share of requests whose tool and arguments equal
+the first level's answer for the same task (batching changes numerics, temperature 0 does not make it invariant).
 `--measured auto` = max(20, 2 x level) (the max-capacity ramp). /metrics is scraped at the start and at the end.
 `--stop-file`: if that file appears (the max-capacity watchdog writes it), the level stops early and is marked.
 Writes <out>.json and <out>.md (and <out>.png unless --no-plot). Read-only: it never restarts anything.
@@ -21,6 +24,7 @@ import argparse
 import asyncio
 import json
 import os
+import random
 import statistics
 import sys
 import time
@@ -46,7 +50,12 @@ COUNTERS = ["prompt_tokens_total", "generation_tokens_total", "request_success_t
 
 
 def load_requests() -> list[coord.PlanRequest]:
-    return [coord.PlanRequest(**json.loads(line)["plan_request"]) for line in TASKS.read_text().splitlines() if line.strip()]
+    reqs = [coord.PlanRequest(**json.loads(line)["plan_request"]) for line in TASKS.read_text().splitlines() if line.strip()]
+    random.Random(2026).shuffle(reqs)
+    return reqs
+
+
+FIRST: dict[str, str] = {}   # task -> the first level's answer (tool + arguments), for same_as_first
 
 
 def body(req: coord.PlanRequest) -> dict:
@@ -95,7 +104,8 @@ async def one(c: httpx.AsyncClient, req: coord.PlanRequest) -> dict:
         return row | {"valid": False, "tool": fn["name"], "invalid_reason": "arguments do not parse"}
     rationale = str(args.pop("rationale", ""))
     call = coord.validate(ToolCall(name=fn["name"], arguments=args, rationale=rationale, by="llm"), req)
-    return row | {"valid": call.valid, "tool": fn["name"], "invalid_reason": "; ".join(call.validation_errors)[:160] or None}
+    return row | {"valid": call.valid, "tool": fn["name"], "answer": json.dumps([fn["name"], args], sort_keys=True),
+                  "invalid_reason": "; ".join(call.validation_errors)[:160] or None}
 
 
 def pct(xs: list[float], q: float) -> float | None:
@@ -122,10 +132,10 @@ def summarize(rows: list[dict]) -> dict:
     return out
 
 
-async def run_level(c: httpx.AsyncClient, reqs: list[coord.PlanRequest], level: int, n: int, offset: int,
+async def run_level(c: httpx.AsyncClient, reqs: list[coord.PlanRequest], level: int, n: int,
                     stop_file: Path | None = None) -> dict:
     stopped = lambda: stop_file is not None and stop_file.exists()  # noqa: E731
-    warm = [reqs[(offset + i) % len(reqs)] for i in range(3)]
+    warm = reqs[-3:]
     await asyncio.gather(*[one(c, r) for r in warm])
     queue = list(range(n))
     rows: list[dict | None] = [None] * n
@@ -133,14 +143,21 @@ async def run_level(c: httpx.AsyncClient, reqs: list[coord.PlanRequest], level: 
     async def worker():
         while queue and not stopped():
             i = queue.pop(0)
-            req = reqs[(offset + 3 + i) % len(reqs)]
+            req = reqs[i % len(reqs)]
             rows[i] = await one(c, req) | {"task": req.message_id}
 
     t0 = time.perf_counter()
     await asyncio.gather(*[worker() for _ in range(level)])
     wall = time.perf_counter() - t0
     done = [r for r in rows if r is not None]
+    compared = [r for r in done if r["ok"] and r.get("answer") and r["task"] in FIRST]
+    same = sum(FIRST[r["task"]] == r["answer"] for r in compared)
+    for r in done:
+        if r["ok"] and r.get("answer"):
+            FIRST.setdefault(r["task"], r["answer"])
     s = summarize(done)
+    s["same_as_first"] = round(same / len(compared), 4) if compared else None
+    s["same_as_first_n"] = len(compared)
     s |= {"level": level, "measured_requested": n, "wall_s": round(wall, 2),
           "req_per_s": round(len(done) / wall, 2) if wall else None,
           "out_tok_per_s": round(s["out_tokens_sum"] / wall, 1) if wall else None,
@@ -180,24 +197,32 @@ def delta(a: dict, b: dict) -> dict:
     return d
 
 
+def same_cell(lv: dict) -> str:
+    return "-" if lv["same_as_first"] is None else f"{100 * lv['same_as_first']:.0f}% of {lv['same_as_first_n']}"
+
+
 def markdown(res: dict) -> str:
     lines = [f"# vLLM coordinator under concurrency ({res['date']})", "",
              f"Server: `{res['server_args']}`. Requests: {res['n_tasks']} NeMo Gym eval tasks through the coordinator's own prompt, "
              f"tools and validator; temperature 0, thinking off, tool_choice auto, max_tokens {MAX_TOKENS}, streamed, {TIMEOUT_S:.0f} s timeout. "
              "Client on the box (no network).", "",
-             "| Concurrency | n | p50 / p95 / p99 latency ms | p50 / p95 TTFT ms | req/s | output tok/s | tokens/req | valid call | errors+timeouts |",
-             "|---:|---:|---:|---:|---:|---:|---:|---:|---:|"]
+             "| Concurrency | n | p50 / p95 / p99 latency ms | p50 / p95 TTFT ms | req/s | output tok/s | tokens/req | valid call | same as first level | errors+timeouts |",
+             "|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|"]
     for lv in res["levels"]:
         L, T = lv["latency_ms"], lv["ttft_ms"]
         lines.append(f"| {lv['level']} | {lv['n']}{' (stopped)' if lv['stopped_early'] else ''} | {L['p50']} / {L['p95']} / {L['p99']} | "
                      f"{T['p50']} / {T['p95']} | {lv['req_per_s']} | {lv['out_tok_per_s']} | {lv['out_tokens_mean']} | "
-                     f"{100 * (lv['valid_rate'] or 0):.0f}% | {lv['errors'] + lv['timeouts']} |")
+                     f"{100 * (lv['valid_rate'] or 0):.0f}% | {same_cell(lv)} | "
+                     f"{lv['errors'] + lv['timeouts']} |")
     m = res.get("metrics_delta") or {}
     lines += ["", f"/metrics over the whole run: {json.dumps(m)}", "",
               "- TTFT is measured by the client: the time to the first streamed token (text, reasoning or tool-call delta). "
               "The tool-call parser can hold tokens back, so it is an upper bound; `server_ttft_mean_ms` above is vLLM's own.",
               "- A valid call parses and passes `services/coordinator/app.py::validate` (flags at defaults). An invalid call is "
-              "not an error: in the app it falls back to the rules."]
+              "not an error: in the app it falls back to the rules. Every level sends the same tasks, so the first level's valid "
+              "rate is the reference: Nemotron alone fails the validator on some task types (e.g. it asks again after a "
+              "'none of these'; NeMo Gym: the deployed coordinator decides 86% of held-out tasks itself).",
+              "- `same as first level`: requests whose tool call (name + arguments) equals the first level's for the same task."]
     if res.get("max_num_seqs"):
         lines.append(f"- The server runs `--max-num-seqs {res['max_num_seqs']}`: levels above it queue in vLLM. That is this "
                      "server's cap, not the GPU's limit (see max_capacity.md).")
@@ -251,7 +276,6 @@ async def main():
         res["server_args"] = f"unknown ({exc})"
     async with httpx.AsyncClient(timeout=TIMEOUT_S + 5, limits=limits) as c:
         res["metrics_start"] = await scrape(c)
-        offset = 0
         for level in args.levels:
             if stop and stop.exists():
                 res["stopped_before"] = level
@@ -259,12 +283,11 @@ async def main():
             n = max(20, 2 * level) if args.measured == "auto" else int(args.measured)
             print(f"level {level}: 3 warm-up + {n} measured", flush=True)
             try:
-                lv = await run_level(c, reqs, level, n, offset, stop)
+                lv = await run_level(c, reqs, level, n, stop)
             except Exception as exc:  # keep partial results, never invent numbers
                 res.setdefault("failures", []).append({"level": level, "error": f"{type(exc).__name__}: {exc}"[:300]})
                 print(f"  level {level} failed: {exc}", flush=True)
                 break
-            offset += n + 3
             res["levels"].append(lv)
             print(f"  p50/p95 {lv['latency_ms']['p50']}/{lv['latency_ms']['p95']} ms  ttft p50 {lv['ttft_ms']['p50']}  "
                   f"{lv['req_per_s']} req/s  valid {lv['valid_rate']}  err {lv['error_rate']}", flush=True)
