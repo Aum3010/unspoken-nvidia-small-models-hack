@@ -96,6 +96,7 @@ export interface SessionState {
   agreement: { lip: string; audio: string; word_overlap: number } | null
   plan: ToolCall | null
   shown_candidate_ids: string[]
+  auto_speak_candidate_id?: string | null
   spoken: SpokenItem[]
   timeline: TimelineItem[]
   settings: {

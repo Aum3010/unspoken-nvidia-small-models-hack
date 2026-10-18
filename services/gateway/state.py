@@ -40,6 +40,7 @@ class Session:
     history: list[str] = field(default_factory=list)
     last_plan: ToolCall | None = None
     shown_candidate_ids: list[str] = field(default_factory=list)
+    auto_speak_candidate_id: str | None = None  # set when demo auto-speak will say this candidate
     settings: dict = field(default_factory=lambda: {
         "available_inputs": ["button", "keyboard"],
         "gaze_calibrated": False,
@@ -212,6 +213,7 @@ class Session:
     def new_message(self):
         self.message = Message(session_id=self.id)
         self.shown_candidate_ids = []
+        self.auto_speak_candidate_id = None
         self.last_plan = None
         self.history = []  # retake / rejection history is per message
 
@@ -238,6 +240,7 @@ class Session:
             "agreement": self.agreement(),
             "plan": self.last_plan.model_dump() if self.last_plan else None,
             "shown_candidate_ids": self.shown_candidate_ids,
+            "auto_speak_candidate_id": self.auto_speak_candidate_id,
             "spoken": self.spoken[-30:],
             "timeline": self.timeline[-60:],
             "settings": self.settings,

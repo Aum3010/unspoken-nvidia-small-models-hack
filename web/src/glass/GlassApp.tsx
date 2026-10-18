@@ -258,7 +258,8 @@ export function GlassApp() {
       E.setTranscript(words(shown[0].text), [])
       const read = shown[0].origin === 'correction' ? shown[1]?.text : null
       const from = read ? `corrected from “${read}” · ` : ''
-      if (state.settings.auto_speak) E.caption('Understanding you…', `${from}it will be spoken automatically · No or shake to stop it`)
+      // auto-speak covers accepted readings only; ambiguous readings and corrections wait for Yes/No
+      if (state.auto_speak_candidate_id === shown[0].id) E.caption('Understanding you…', `${from}it will be spoken automatically · No or shake to stop it`)
       else E.caption('Did you mean this?', `${from}Yes, blink or nod to choose it · No or shake if it is wrong`)
     } else if (m.status === 'spoken') {
       const sp = state.spoken[state.spoken.length - 1]

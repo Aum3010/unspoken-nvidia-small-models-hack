@@ -147,7 +147,7 @@ def _accepted_reading(s: Session):
     """The message's only candidate, if the specialists accepted it: every evidence event is `proposed` (no
     ambiguity, no lip/voice disagreement) and the voice agent supports it. A lip-only match still goes to the model."""
     m = s.message
-    if m.status != "proposed" or len(m.candidates) != 1:
+    if m.status not in ("proposed", "clarifying") or len(m.candidates) != 1:
         return None
     c = m.candidates[0]
     evs = [s.evidence[e] for e in m.evidence_ids]
@@ -205,6 +205,7 @@ async def _refine_with_model(s: Session, req: dict, plan_version: tuple):
 
 def apply_plan(s: Session, call: ToolCall, quiet: bool = False):
     m = s.message
+    accepted = _accepted_reading(s)
     s.last_plan = call
     who = "Nemotron coordinator" if call.by == "llm" else "Deterministic policy"
     rejected = (call.raw or {}).get("rejected_llm_call")
@@ -253,8 +254,11 @@ def apply_plan(s: Session, call: ToolCall, quiet: bool = False):
     elif call.name == "switch_input_method":
         s.trace("coordinator", f"{who}: switch_input_method → {call.arguments.get('method')}", call.rationale,
                 latency_ms=call.latency_ms, data={"call": call.model_dump()})
-    if call.name in ("ask_confirmation", "propose_correction") and s.settings["auto_speak"] and s.shown_candidate_ids:
-        _schedule(_auto_speak(s, m.id, s.shown_candidate_ids[0]))
+    # Demo auto-speak covers accepted readings only. Ambiguous readings, lip-only matches and corrections always wait
+    # for the person's Yes/No.
+    if call.name == "ask_confirmation" and s.settings["auto_speak"] and accepted and s.shown_candidate_ids == [accepted.id]:
+        s.auto_speak_candidate_id = accepted.id
+        _schedule(_auto_speak(s, m.id, accepted.id))
 
 
 # ---- captures ---------------------------------------------------------------
