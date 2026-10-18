@@ -215,3 +215,7 @@ canvas.layer{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none
 .spark{width:120px;height:28px}
 .vfoot{display:flex;justify-content:space-between;align-items:center;margin-top:9px;font-size:8.5px;color:var(--faint)}
 .vision .cbtn{height:34px;padding:0 14px;font-size:12px}
+
+/* ---------- serving card (UNSPOKEN_SERVING_PANEL only) ---------- */
+.serving .vrows{margin-top:8px}
+.serving .vrows div{grid-template-columns:1fr auto}

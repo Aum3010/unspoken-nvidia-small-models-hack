@@ -27,6 +27,18 @@ export interface VisionData {
   profile?: { synthetic?: boolean; label?: string; preferred_name?: string; family_member?: { name: string } }
 }
 
+/** Serving card (gateway flag UNSPOKEN_SERVING_PANEL): a few numbers from vLLM's /metrics. */
+export interface ServingMetrics {
+  state: 'ready' | 'unavailable'
+  running?: number
+  waiting?: number
+  ttft_p50_ms?: number | null
+  ttft_window?: string | null
+  kv_cache_usage_pct?: number | null
+  prefix_cache_hit_rate?: number | null
+  spec_decode_acceptance?: number | null
+}
+
 /** Send one piece of a streamed mouth clip over the session WebSocket, in order. False if it cannot be sent. */
 export function sendLipPiece(header: { id: string; seq?: number; mime?: string; discard?: boolean }, piece?: ArrayBuffer): boolean {
   if (!liveWs || liveWs.readyState !== WebSocket.OPEN) return false
@@ -97,6 +109,7 @@ export const api = {
   eeg: <T = any,>(path: string) => req<T>(`/api/eeg/${path}`),
   evals: () => req<any>('/api/evals'),
   visionData: () => req<VisionData>('/api/vision/data'),
+  servingMetrics: () => req<ServingMetrics>('/api/serving_metrics'),
   checkin: () => post<{ checkin: any; state: SessionState }>(`${base}/vision/checkin`),
   checkinAnswer: (answer: 'yes' | 'no', method: string) =>
     post<{ checkin: any; state: SessionState }>(`${base}/vision/checkin/answer`, { answer, method }),
