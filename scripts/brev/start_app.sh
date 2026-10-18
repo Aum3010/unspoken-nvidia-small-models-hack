@@ -17,6 +17,8 @@ LLM_MEM=${LLM_MEM:-0.55}
 # FlashInfer's attention JIT-compiles with nvcc on first use and the image has no CUDA toolkit;
 # Triton attention needs no compiler. Set LLM_ATTN=FLASHINFER once a toolkit matching the driver is installed.
 LLM_ATTN=${LLM_ATTN:-TRITON_ATTN}
+# extra vLLM flags for experiments, e.g. LLM_EXTRA='--mamba-cache-mode all'
+LLM_EXTRA=${LLM_EXTRA:-}
 LOGS=.run/logs
 mkdir -p "$LOGS" .run/pids
 
@@ -75,7 +77,7 @@ echo "Starting Unspoken backend on $(hostname)"
 launch vllm env VLLM_USE_FLASHINFER_SAMPLER=0 "$LLM" serve "$LLM_MODEL" --host 127.0.0.1 --port 8001 \
   --max-model-len 16384 --gpu-memory-utilization "$LLM_MEM" --attention-backend "$LLM_ATTN" \
   --enable-auto-tool-choice --tool-call-parser qwen3_coder --reasoning-parser nemotron_v3 \
-  --enable-prefix-caching --max-num-seqs 8
+  --enable-prefix-caching --max-num-seqs 8 $LLM_EXTRA
 
 export PYTHONPATH=$PWD TOKENIZERS_PARALLELISM=false
 export UNSPOKEN_HOST_LABEL="NVIDIA Brev"

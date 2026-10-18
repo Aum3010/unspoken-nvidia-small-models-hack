@@ -28,6 +28,11 @@ BACKEND = os.environ.get("UNSPOKEN_LLM_BACKEND", "ollama")
 BASE_URL = os.environ.get("UNSPOKEN_LLM_BASE_URL", "http://127.0.0.1:11434")
 MODEL = os.environ.get("UNSPOKEN_LLM_MODEL", "nemotron-3.5-lightning:30b-a3b")
 TIMEOUT_S = float(os.environ.get("UNSPOKEN_LLM_TIMEOUT", 20))
+# Compact mode (OpenAI-compatible backends): the model answers with one short JSON object constrained by a schema
+# ({"a":"ask","ids":[1],"m":"button"}) instead of a tool call with a rationale, and sees candidates numbered 1..n
+# instead of their ids. About 15 output tokens instead of ~80. Code maps the answer back onto the same tools and
+# ids before validation, and writes the note to the person from a template.
+COMPACT = os.environ.get("UNSPOKEN_COORD_COMPACT", "0") != "0"
 MAX_RATIONALE = 160
 
 app = make_app("unspoken-coordinator")
@@ -146,6 +151,53 @@ TOOLS = [
     },
 ]
 TOOL_NAMES = {t["function"]["name"] for t in TOOLS}
+
+COMPACT_PROMPT = """You are the coordination agent inside Unspoken, an assistive communication system for people who cannot speak.
+Specialist models (lip reading, weak-speech ASR, gaze, recorded-EEG replay) produced numbered candidate messages. You choose the
+next interaction step. Rules:
+- Lip reading and weak speech often get a word or two wrong ("i wore my family" for "i want my family", "i need wader"
+  for "i need water"). When the best reading is close to a short, sensible thing a patient would say, answer "fix" with that
+  sentence: keep the person's words, only fix the misread ones, never add new meaning. If the reading already makes sense,
+  do not fix it. The person still confirms before anything is spoken.
+- Otherwise only use candidate numbers that exist.
+- Prefer the smallest useful question: if one candidate clearly dominates, ask about just it; if 2-4 are plausible, offer them.
+- Capture is always on, so most clips are not messages: background sound, breathing, yawning or talking to someone else.
+  If the readings look like noise, answer "ignore"; staying silent is better than asking about noise. Signs of noise: a single
+  modality with weak scores, fragments or filler words, lip and audio readings that share no words and are both weak, or text
+  that is not something a person would say to be understood.
+- Only ask for a retake when the person clearly tried to say something and the capture failed.
+- If lip and audio candidates disagree, offer both so the person chooses; do not pick for them.
+- If the person rejected all candidates before ("none_of_these" in history), switch to spelling or the board.
+- Use an input method the person has (inputs). Gaze only if gaze_ok is true.
+Answer with one JSON object:
+{"a":"ask","ids":[1],"m":"button"}            show candidates (1-4) and ask; m: gaze|blink|button|keyboard
+{"a":"fix","ids":[1],"text":"...","m":"button"}  offer the corrected sentence of a misread candidate (max 12 words)
+{"a":"retake","mod":"lip","why":"no_face"}      mod: lip|audio; why: no_face|low_mouth_motion|too_short|no_speech_detected|low_signal|occlusion
+{"a":"switch","to":"spelling"}                  to: spelling|board|gaze|blink|button|lip|audio
+{"a":"ignore","why":"noise"}                    why: noise|not_speech|fragment|unclear"""
+
+_INPUTS = ["gaze", "blink", "button", "keyboard"]
+COMPACT_SCHEMA = {"anyOf": [
+    {"type": "object", "properties": {"a": {"enum": ["ask"]}, "ids": {"type": "array", "items": {"type": "integer"}, "minItems": 1, "maxItems": 4},
+                                      "m": {"enum": _INPUTS}}, "required": ["a", "ids", "m"], "additionalProperties": False},
+    {"type": "object", "properties": {"a": {"enum": ["fix"]}, "ids": {"type": "array", "items": {"type": "integer"}, "minItems": 1, "maxItems": 3},
+                                      "text": {"type": "string", "maxLength": 120}, "m": {"enum": _INPUTS}},
+     "required": ["a", "ids", "text", "m"], "additionalProperties": False},
+    {"type": "object", "properties": {"a": {"enum": ["retake"]}, "mod": {"enum": ["lip", "audio"]},
+                                      "why": {"enum": ["no_face", "low_mouth_motion", "too_short", "no_speech_detected", "low_signal", "occlusion"]}},
+     "required": ["a", "mod", "why"], "additionalProperties": False},
+    {"type": "object", "properties": {"a": {"enum": ["switch"]}, "to": {"enum": ["spelling", "board", "gaze", "blink", "button", "lip", "audio"]}},
+     "required": ["a", "to"], "additionalProperties": False},
+    {"type": "object", "properties": {"a": {"enum": ["ignore"]}, "why": {"enum": ["noise", "not_speech", "fragment", "unclear"]}},
+     "required": ["a", "why"], "additionalProperties": False},
+]}
+COMPACT_NOTES = {  # the note to the person, written by code in compact mode
+    "ask_confirmation": "Is this what you mean?",
+    "propose_correction": "That reading looked slightly off. Is this what you mean?",
+    "request_retake": "I could not read that. Please try once more.",
+    "switch_input_method": "Let's try another way.",
+    "ignore_input": "Looked like noise, not a message.",
+}
 
 
 class CandidateSummary(BaseModel):
@@ -312,7 +364,66 @@ def _user_payload(req: PlanRequest) -> str:
     })
 
 
+def _compact_payload(req: PlanRequest) -> str:
+    def cand(n: int, c: CandidateSummary) -> dict:
+        d = {"n": n, "text": c.text, "mod": c.modality}
+        if c.score is not None:
+            d["score"] = round(c.score, 2)
+        if [m for m in c.supporting_modalities if m != c.modality]:
+            d["also"] = [m for m in c.supporting_modalities if m != c.modality]
+        if c.origin != "evidence":
+            d["origin"] = c.origin
+        return d
+
+    def ev(e: EvidenceSummary) -> dict:
+        d = {"mod": e.modality, "status": e.status, "n": e.n_hypotheses}
+        if e.quality_flags:
+            d["flags"] = e.quality_flags
+        if e.top2_margin is not None:
+            d["margin"] = round(e.top2_margin, 2)
+        return d
+
+    return json.dumps({"cands": [cand(i + 1, c) for i, c in enumerate(req.candidates)], "evidence": [ev(e) for e in req.evidence],
+                       "inputs": req.available_inputs, "gaze_ok": req.gaze_calibrated, "history": req.history[-3:]},
+                      separators=(",", ":"))
+
+
+def _from_compact(o: dict, req: PlanRequest) -> tuple[str, dict]:
+    """The compact answer as the tool call it stands for; a number with no candidate stays visibly invalid."""
+    ids = [req.candidates[i - 1].id if isinstance(i, int) and 1 <= i <= len(req.candidates) else f"no_candidate_{i}"
+           for i in o.get("ids") or []]
+    a = o.get("a")
+    if a == "ask":
+        return "ask_confirmation", {"candidate_ids": ids, "input_method": o.get("m")}
+    if a == "fix":
+        return "propose_correction", {"source_candidate_ids": ids, "text": o.get("text", ""), "input_method": o.get("m")}
+    if a == "retake":
+        return "request_retake", {"modality": o.get("mod"), "reason": o.get("why")}
+    if a == "switch":
+        return "switch_input_method", {"method": o.get("to")}
+    if a == "ignore":
+        return "ignore_input", {"reason": o.get("why")}
+    return str(a), {}
+
+
+async def _call_compact(req: PlanRequest) -> tuple[str, dict, dict]:
+    messages = [{"role": "system", "content": COMPACT_PROMPT}, {"role": "user", "content": _compact_payload(req)}]
+    async with httpx.AsyncClient(timeout=TIMEOUT_S) as client:
+        r = await client.post(f"{BASE_URL}/v1/chat/completions", json={
+            "model": MODEL, "messages": messages, "temperature": 0, "max_tokens": 60,
+            "chat_template_kwargs": {"enable_thinking": False},
+            "response_format": {"type": "json_schema", "json_schema": {"name": "step", "schema": COMPACT_SCHEMA}},
+        })
+        r.raise_for_status()
+        body = r.json()
+    name, args = _from_compact(json.loads(body["choices"][0]["message"]["content"]), req)
+    args["rationale"] = COMPACT_NOTES.get(name, "")
+    return name, args, {"usage": body.get("usage"), "compact": True}
+
+
 async def _call_llm(req: PlanRequest) -> tuple[str, dict, dict]:
+    if COMPACT and BACKEND != "ollama":
+        return await _call_compact(req)
     messages = [{"role": "system", "content": SYSTEM_PROMPT}, {"role": "user", "content": _user_payload(req)}]
     async with httpx.AsyncClient(timeout=TIMEOUT_S) as client:
         if BACKEND == "ollama":
