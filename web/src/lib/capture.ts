@@ -7,7 +7,8 @@ let micStream: MediaStream | null = null
 export async function getCamera(): Promise<MediaStream> {
   if (cameraStream && cameraStream.getVideoTracks().some((t) => t.readyState === 'live')) return cameraStream
   cameraStream = await navigator.mediaDevices.getUserMedia({
-    video: { width: { ideal: 960 }, height: { ideal: 720 }, frameRate: { ideal: 30 }, facingMode: 'user' },
+    // 1280x720: more pixels across the eyes for gaze; lip clips are cropped and resampled anyway
+    video: { width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30 }, facingMode: 'user' },
     audio: false,
   })
   return cameraStream

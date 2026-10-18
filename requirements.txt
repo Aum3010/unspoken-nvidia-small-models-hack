@@ -29,7 +29,7 @@ en_core_web_sm @ https://github.com/explosion/spacy-models/releases/download/en_
 # optional: serve the coordinator with MLX instead of Ollama
 mlx-lm==0.32.2
 # EEG replay
-mne==1.13.2
+mne==1.12.1             # 1.13+ needs numpy>=2
 pyriemann==0.7           # 0.8+ needs numpy>=2
 pypdf
 # evaluation

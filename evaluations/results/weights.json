@@ -1,6 +1,6 @@
 {
   "budget_b": 33.0,
-  "total_b": 32.0394,
+  "total_b": 32.0395,
   "within_budget": true,
   "components": [
     {
@@ -59,11 +59,11 @@
     },
     {
       "component": "Gaze (browser)",
-      "model": "WebGazer.js \u2014 TF.js facemesh + ridge regression",
-      "params": 1200000,
-      "params_b": 0.0012,
-      "source": "webgazer 3.5.3",
-      "note": "estimate from bundled facemesh size",
+      "model": "MobileGaze MobileOne-S0 (eye-image gaze) + iris/head-pose ridge calibration",
+      "params": 1238004,
+      "params_b": 0.00124,
+      "source": "yakhyo/gaze-estimation mobileone_s0_gaze.onnx (MIT)",
+      "note": "ONNX initializers counted offline; the per-user ridge adds ~50 weights",
       "verified": false
     },
     {

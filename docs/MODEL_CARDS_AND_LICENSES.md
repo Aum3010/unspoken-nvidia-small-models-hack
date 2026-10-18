@@ -11,7 +11,7 @@ Parameter counts below come from `scripts/verify_weights.py`, which reads the we
 | Speech enhancement | RNNoise (xiph) via `pyrnnoise` | ≈0.0001 B | CPU | BSD-3 |
 | TTS | Kokoro-82M, `mlx-community/Kokoro-82M-bf16` | 0.082 B | MLX | Apache-2.0 (voices per model card) |
 | Face / blink (browser) | MediaPipe Face Landmarker float16 | ≤0.002 B | wasm/WebGL | Apache-2.0 |
-| Gaze (browser) | WebGazer.js 3.5.3 (TF.js facemesh + ridge) | ≈0.001 B (estimate) | browser | GPL-3.0-or-later |
+| Gaze (browser) | MobileGaze MobileOne-S0 eye-image model (`mobileone_s0_gaze.onnx`, trained on Gaze360) + per-user ridge calibration on MediaPipe iris/head-pose features | 0.00124 B (ONNX initializers) | ONNX Runtime Web (WebGPU / WebAssembly) | MIT |
 | Mouth detector (VSR preprocessing) | MediaPipe face detection 0.10.21 | ≈0.001 B (estimate) | CPU | Apache-2.0 |
 | P300 decoder | xDAWN covariances → tangent space → logistic regression, trained per participant | ~50 weights | scikit-learn / pyRiemann | BSD-3 |
 | **Total distinct deployed** | | **≈32.04 B ≤ 33 B** | | |

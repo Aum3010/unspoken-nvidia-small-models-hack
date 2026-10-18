@@ -91,8 +91,9 @@ def main():
     add("TTS", "Kokoro-82M (MLX bf16)", lambda: count_safetensors("mlx-community/Kokoro-82M-bf16"), "mlx-community/Kokoro-82M-bf16")
     add("Face / blink (browser)", "MediaPipe Face Landmarker", lambda: (count_tflite_task(ROOT / "web/public/mediapipe/face_landmarker.task"), "upper bound from fp16 bytes"),
         "face_landmarker.task (float16)")
-    rows.append({"component": "Gaze (browser)", "model": "WebGazer.js — TF.js facemesh + ridge regression", "params": 1_200_000, "params_b": 0.0012,
-                 "source": "webgazer 3.5.3", "note": "estimate from bundled facemesh size", "verified": False})
+    rows.append({"component": "Gaze (browser)", "model": "MobileGaze MobileOne-S0 (eye-image gaze) + iris/head-pose ridge calibration", "params": 1_238_004,
+                 "params_b": 0.00124, "source": "yakhyo/gaze-estimation mobileone_s0_gaze.onnx (MIT)",
+                 "note": "ONNX initializers counted offline; the per-user ridge adds ~50 weights", "verified": False})
     rows.append({"component": "Audio enhancement", "model": "RNNoise (xiph)", "params": 88_000, "params_b": 0.000088,
                  "source": "pyrnnoise", "note": "published model size", "verified": False})
     rows.append({"component": "Mouth detector (VSR preprocessing)", "model": "MediaPipe face detection (short+full range)", "params": 600_000,

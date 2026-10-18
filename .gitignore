@@ -9,6 +9,7 @@ web/node_modules/
 web/dist/
 web/public/mediapipe/
 web/public/vendor/
+web/public/models/
 __pycache__/
 *.pyc
 .DS_Store
