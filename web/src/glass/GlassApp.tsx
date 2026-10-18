@@ -102,9 +102,12 @@ export function GlassApp() {
   }, [])
 
   // capture is allowed only while nothing waits for confirmation and nothing is being spoken
+  // one clip per agent at a time: always-on capture outpaces the lip model, and a queue of clips only
+  // times out (each waits behind the others); a clip that starts while the last is read is skipped
+  const inFlight = useRef<Record<string, boolean>>({})
   const canCapture = useCallback((svc: string) => {
     const { state: s, health: h, connected: c, calibrating: cal } = live.current
-    return !!s && c && !cal && performance.now() > speakingUntil.current &&
+    return !!s && c && !cal && !inFlight.current[svc] && performance.now() > speakingUntil.current &&
       !['selected', 'confirmed'].includes(s.message.status) && h?.[svc]?.state === 'ready'
   }, [])
 
@@ -122,6 +125,10 @@ export function GlassApp() {
   }, [])
 
   const run = useCallback((p: Promise<unknown>) => p.catch((e: Error) => E.caption(e.message || 'Something went wrong', 'the gateway refused that')), [])
+  const sendClip = useCallback((svc: string, req: () => Promise<unknown>) => {
+    inFlight.current[svc] = true
+    run(req().finally(() => { inFlight.current[svc] = false }))
+  }, [run])
 
   /* ---------- camera: the room, lips, blink, head ---------- */
   useEffect(() => {
@@ -145,7 +152,7 @@ export function GlassApp() {
           stream: s,
           canCapture: () => canCapture('vsr'),
           onMouthing: (on) => { if (on) E.fire('lips', .6, 'WATCHING') },
-          onClip: (b) => { E.fire('lips', 1, 'READING'); run(api.captureLip(b)) },
+          onClip: (b) => { E.fire('lips', 1, 'READING'); sendClip('vsr', () => api.captureLip(b)) },
         }))
       } catch {
         setCam('off')
@@ -162,7 +169,7 @@ export function GlassApp() {
     startVoice({
       canCapture: () => canCapture('audio'),
       onSpeech: (on) => { setHearing(on); if (on) E.fire('voice', .7, 'HEARING') },
-      onClip: (b) => { E.fire('voice', 1, 'DECODING'); run(api.captureAudio(b, true)) },
+      onClip: (b) => { E.fire('voice', 1, 'DECODING'); sendClip('audio', () => api.captureAudio(b, true)) },
     }).then((f) => { if (alive) { stop = f; setMic('on') } else f() }).catch(() => setMic('off'))
     return () => { alive = false; stop?.() }
   }, [run, canCapture])

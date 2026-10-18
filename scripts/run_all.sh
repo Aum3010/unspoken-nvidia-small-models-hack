@@ -6,6 +6,9 @@ PY=.venv/bin/python
 mkdir -p .run/logs
 export PYTHONPATH="$PWD"
 export TOKENIZERS_PARALLELISM=false
+# numpy's OpenBLAS threads spin against the models sharing the CPU: lip-phrase matching took 10-30 s a
+# clip with them, 0.1 s with one
+export OPENBLAS_NUM_THREADS=1
 
 pids=()
 start() {

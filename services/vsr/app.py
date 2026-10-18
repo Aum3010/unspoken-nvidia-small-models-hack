@@ -9,6 +9,10 @@ from __future__ import annotations
 
 import base64
 import os
+
+# before numpy loads: OpenBLAS threads contend with the models sharing the CPU and made enrollment matching
+# 10-30 s a clip (0.1 s single-threaded); run_all.sh sets the same for every service
+os.environ.setdefault("OPENBLAS_NUM_THREADS", "1")
 import sys
 import time
 from pathlib import Path
@@ -39,9 +43,10 @@ PHRASE_TOP = 3
 # Optional fine-tuned decoder + CTC head (scripts/finetune_vsr_grid.py). The GRID one only knows GRID words.
 DECODER_PATH = os.environ.get("UNSPOKEN_VSR_DECODER", "")
 # Free-text beam search (any sentence) runs only when a clip matches none of the recorded phrases (and no
-# phrase list is set). UNSPOKEN_VSR_FREE_TEXT=0 turns it off once phrases are recorded: then an unmatched clip
-# returns no reading instead of a free-text guess.
-FREE_TEXT = os.environ.get("UNSPOKEN_VSR_FREE_TEXT", "1") != "0"
+# phrase list is set). Off by default once phrases are recorded (UNSPOKEN_VSR_FREE_TEXT=1 turns it on): an
+# unmatched clip then returns no reading at once, instead of a 20-30 s free-text guess that holds up every
+# clip behind it under always-on capture.
+FREE_TEXT = os.environ.get("UNSPOKEN_VSR_FREE_TEXT", "0") != "0"
 # Personal enrollment: a clip farther than this (length-normalised DTW over cosine distance) from every
 # recording is not one of the person's phrases. On the first 10 recordings, a held-out take of the same
 # phrase was 0.13-0.28 from its others, another recorded phrase >= 0.22, an unrelated GRID clip ~0.33.
