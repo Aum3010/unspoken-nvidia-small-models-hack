@@ -37,6 +37,9 @@ BEAM = int(os.environ.get("UNSPOKEN_VSR_BEAM", 12))
 # Mean absolute frame-to-frame change of the 88x88 mouth crop below which we
 # flag "low_mouth_motion" (a still face makes Auto-AVSR hallucinate fluent text).
 MOTION_THRESHOLD = float(os.environ.get("UNSPOKEN_VSR_MOTION_THRESHOLD", 2.2))
+# The pixel measure above is fooled by light (a flickering lamp read as 10.6, speech is 2.1-3.2), so the browser
+# also sends how long the lips moved, measured on the lip landmarks; under this the clip is a still mouth.
+MIN_MOVING_MS = int(os.environ.get("UNSPOKEN_VSR_MIN_MOVING_MS", 450))
 # Optional closed phrase list: its best matches are added as candidates (see services/vsr/phrases.py).
 PHRASES_PATH = os.environ.get("UNSPOKEN_VSR_PHRASES", "")
 PHRASE_TOP = 3
@@ -48,9 +51,11 @@ DECODER_PATH = os.environ.get("UNSPOKEN_VSR_DECODER", "")
 # clip behind it under always-on capture.
 FREE_TEXT = os.environ.get("UNSPOKEN_VSR_FREE_TEXT", "0") != "0"
 # Personal enrollment: a clip farther than this (length-normalised DTW over cosine distance) from every
-# recording is not one of the person's phrases. On the first 10 recordings, a held-out take of the same
-# phrase was 0.13-0.28 from its others, another recorded phrase >= 0.22, an unrelated GRID clip ~0.33.
-ENROLL_MAX_DIST = float(os.environ.get("UNSPOKEN_ENROLL_MAX_DIST", 0.30))
+# recording is not one of the person's phrases. More takes bring chance matches closer, so this is re-checked
+# as recordings grow. With 213 takes (20 phrases x 8-12, plus negatives), a held-out take was within 0.24 of
+# its own phrase for 159/171 takes (0.26: 162), and 39 GRID clips of 8 other people were all farther than
+# 0.24 (0.26 accepted 2; nearest 0.247).
+ENROLL_MAX_DIST = float(os.environ.get("UNSPOKEN_ENROLL_MAX_DIST", 0.24))
 # Enrollment scores are -100 x distance, so the shared margin rules apply: the closest phrase is offered
 # alone when it beats the next by > 3 (0.03 distance; held-out takes beat other phrases by >= 0.048).
 ENROLL_SCALE = 100.0
@@ -98,9 +103,12 @@ def _load():
         lines = [l.strip() for l in open(PHRASES_PATH) if l.strip() and not l.lstrip().startswith("#")]
         phrases = [(l, tokenize(l, piece_to_id)) for l in lines]
     n_params = sum(p.numel() for p in avsr.model.parameters())
-    # warm-up so the first real request is not 2x slower
+    # warm-up so the first real request is not 2x slower (and the compiled DTW is built now, not on a clip)
     with torch.no_grad():
         avsr.beam_search(avsr.model.encode(torch.zeros(1, 12, 88, 88).to(dev)))
+    from services.vsr.phrases import dtw_many
+    dtw_many(np.ones((3, 4), np.float32), [np.ones((2, 4), np.float32)])
+    enrolled.phrases()  # read the recordings from disk now, not on the first clip
     return {
         "avsr": avsr,
         "detector": LandmarksDetector(),
@@ -203,7 +211,8 @@ def _encode(m, data: bytes, flags: list[str], quality: dict):
 
 
 @app.post("/infer")
-def infer(video: UploadFile = File(...), session_id: str = Form("demo-session"), source_ref: str = Form("")):
+def infer(video: UploadFile = File(...), session_id: str = Form("demo-session"), source_ref: str = Form(""),
+          moving_ms: int | None = Form(None)):
     t0 = time.time()
     m = model.get()
     data = video.file.read()
@@ -214,10 +223,20 @@ def infer(video: UploadFile = File(...), session_id: str = Form("demo-session"),
         preprocess="pyav-25fps -> mediapipe face det -> mean-face similarity warp -> 96px mouth ROI -> centercrop 88",
     )
 
+    if moving_ms is not None:
+        quality.update(lip_moving_ms=moving_ms, lip_min_moving_ms=MIN_MOVING_MS)
+        if moving_ms < MIN_MOVING_MS:
+            flags.append("low_mouth_motion")
     with model.lock:
         enc, crops = _encode(m, data, flags, quality)
         if enc is None:
             return _evidence(session_id, source_ref, [], flags, quality, prov, t0)
+        if {"low_mouth_motion", "no_face"} & set(flags):
+            # a still mouth matches still parts of the recordings closely (0.09-0.11 on test clips, closer than
+            # real takes) and makes free text hallucinate: no reading at all
+            quality["mode"] = "still"
+            quality["mouth_thumbs"] = _thumbs(crops)
+            return _evidence(session_id, source_ref, [], sorted(set(flags)), quality, prov, t0)
 
         # 1. the person's own recordings (fast: DTW over the encoder features)
         personal = []
@@ -304,7 +323,7 @@ def enroll_remove(phrase: str):
 def _evidence(session_id, source_ref, hyps, flags, quality, prov, t0) -> Evidence:
     prov.latency_ms = int((time.time() - t0) * 1000)
     status = "proposed" if hyps and not {"no_face", "low_mouth_motion"} & set(flags) else "unknown"
-    if hyps and len(hyps) > 1 and quality.get("top2_margin", 99) < 1.5:
+    if status == "proposed" and len(hyps) > 1 and quality.get("top2_margin", 99) < 1.5:
         status = "ambiguous"
     return Evidence(
         session_id=session_id, modality="lip", source_mode="live", source_ref=source_ref or "browser-camera-clip",

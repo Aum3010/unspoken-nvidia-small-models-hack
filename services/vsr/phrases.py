@@ -62,3 +62,28 @@ def dtw(a: np.ndarray, b: np.ndarray) -> float:
         j = s - i
         acc[i, j] = d[i - 1, j - 1] + np.minimum(np.minimum(acc[i - 1, j], acc[i, j - 1]), acc[i - 1, j - 1])
     return float(acc[n, m] / (n + m))
+
+
+
+try:  # compiled DTW when numba is installed (it comes with mlx-whisper on the Mac); numpy otherwise
+    from numba import njit
+
+    @njit(cache=True)
+    def _acc_end(d):
+        n, m = d.shape
+        acc = np.full((n + 1, m + 1), np.inf, dtype=np.float32)
+        acc[0, 0] = 0.0
+        for i in range(1, n + 1):
+            for j in range(1, m + 1):
+                acc[i, j] = d[i - 1, j - 1] + min(acc[i - 1, j], acc[i, j - 1], acc[i - 1, j - 1])
+        return acc[n, m] / (n + m)
+except ImportError:  # pragma: no cover
+    _acc_end = None
+
+
+def dtw_many(a: np.ndarray, bs: list[np.ndarray]) -> np.ndarray:
+    """dtw(a, b) for every recording b (same values as dtw)."""
+    a = a.astype(np.float32)
+    if _acc_end is None:
+        return np.array([dtw(a, b) for b in bs])
+    return np.array([_acc_end(1.0 - a @ b.astype(np.float32).T) for b in bs])

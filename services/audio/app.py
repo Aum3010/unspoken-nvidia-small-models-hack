@@ -92,8 +92,13 @@ def infer(audio: UploadFile = File(...), session_id: str = Form("demo-session"),
         # accepted: it passed the score and margin gates, so the runners-up are not plausible readings;
         # one option keeps the question as small as possible (they stay in quality.top3 for the audit)
         return _evidence(session_id, hyps[:1], [], "proposed", quality, prov, t0)
-    # unknown (low score, small margin, negation): offer the top 3 so the person chooses, never pick for them
-    return _evidence(session_id, hyps, ["low_word_confidence"], "ambiguous", quality, prov, t0)
+    if r["reason"] == "small_margin":
+        # a phrase scored well but another came close: offer the top 3 so the person chooses, never pick for them
+        return _evidence(session_id, hyps, ["low_word_confidence"], "ambiguous", quality, prov, t0)
+    # low_score (words, but none of the phrases: background talk, unrelated speech) or negation ("I don't need
+    # water"): no reading. With always-on capture, offering the top 3 here turned any nearby talk into a guess.
+    # The top 3 stay in quality.top3 for the audit.
+    return _evidence(session_id, [], ["low_word_confidence"], "unknown", quality, prov, t0)
 
 
 def _evidence(session_id, hyps, flags, status, quality, prov, t0) -> Evidence:

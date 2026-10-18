@@ -40,6 +40,13 @@ interaction step by calling exactly ONE tool. Hard rules:
   propose_correction with that sentence: keep the person's words, only fix the misread ones, never add new meaning.
   If the reading already makes sense, do not correct it. The person still confirms before anything is spoken.
 - Otherwise you only reference candidate ids that exist.
+- Each evidence item's detail says how sure that agent was; use it, not the raw scores alone. Scores of different
+  agents are on different scales and must not be compared with each other.
+  Voice: decision "accepted" passed its calibrated gates (a strong reading); "unknown" with reason "small_margin"
+  means two phrases came close; transcript is what it actually heard (if the transcript is not the phrase, be wary).
+  Lips: mode "enrollment" matched the person's own recordings; enroll_best_dist is the distance to the closest one
+  (lower is closer; at or above enroll_max_dist it is not a phrase). A reading close to the cut-off is weak.
+  A reading supported by both lips and voice is much stronger than either alone.
 - Prefer the smallest useful question: if one candidate clearly dominates, ask to confirm just it; if 2-4 are plausible, offer them.
 - Capture is always on, so most clips are not messages: background sound, the person breathing, yawning or talking to
   someone else. If the readings look like noise, call ignore_input; staying silent is better than asking about noise.
@@ -49,6 +56,9 @@ interaction step by calling exactly ONE tool. Hard rules:
 - If lip and audio candidates disagree, offer both so the person chooses; do not pick for them.
 - If the person rejected all candidates before ("none_of_these" in history), switch to the spelling or phrase board.
 - Choose an input method the person currently has available. Gaze is only usable if gaze calibration is good.
+- person_activity says what the person is doing right now. While they are mouthing or using their voice
+  ("mouthing", "voice"), their eyes wander and a look is not a choice: ask with blink or a button, not gaze.
+  When person_activity is empty they are still and looking, and gaze is the easiest way for them to answer.
 - The rationale is a short note to the person (max 20 words) about WHY you ask, never a guess of their meaning.
 Respond with one tool call and no other text."""
 
@@ -163,6 +173,8 @@ class EvidenceSummary(BaseModel):
     quality_flags: list[str] = Field(default_factory=list)
     top2_margin: float | None = None
     n_hypotheses: int = 0
+    # how sure the agent itself was: voice decision/reason/transcript, lip mode and match distance (see prompt)
+    detail: dict = Field(default_factory=dict)
 
 
 class PlanRequest(BaseModel):
@@ -171,6 +183,7 @@ class PlanRequest(BaseModel):
     evidence: list[EvidenceSummary]
     available_inputs: list[str]
     gaze_calibrated: bool = False
+    person_activity: list[str] = Field(default_factory=list)   # "mouthing", "voice": happening right now
     history: list[str] = Field(default_factory=list)
     use_llm: bool = True
 
@@ -196,6 +209,8 @@ def validate(call: ToolCall, req: PlanRequest) -> ToolCall:
             errors.append(f"input method {method!r} not available")
         if method == "gaze" and not req.gaze_calibrated:
             errors.append("gaze not calibrated")
+        if method == "gaze" and req.person_activity:
+            errors.append(f"person is {' and '.join(req.person_activity)} now, so a look is not a choice: ask with blink or a button")
     elif call.name == "switch_input_method":
         if a.get("method") not in ({"spelling", "board", "lip", "audio"} | set(req.available_inputs)):
             errors.append(f"method {a.get('method')!r} not available")
@@ -268,14 +283,19 @@ def correction_errors(a: dict, req: PlanRequest) -> list[str]:
         errors.append(f"input method {method!r} not available")
     if method == "gaze" and not req.gaze_calibrated:
         errors.append("gaze not calibrated")
+    if method == "gaze" and req.person_activity:
+        errors.append(f"person is {' and '.join(req.person_activity)} now, so a look is not a choice: ask with blink or a button")
     return errors
 
 
 def deterministic_plan(req: PlanRequest, why: str = "") -> ToolCall:
     """Safe rule-based policy; also the baseline in the evaluation ablation."""
     flags = {f for e in req.evidence for f in e.quality_flags}
-    method = "gaze" if req.gaze_calibrated and "gaze" in req.available_inputs else (
-        "button" if "button" in req.available_inputs else req.available_inputs[0])
+    # gaze when the person is still and looking; while they mouth or use their voice, a blink or a button
+    if req.gaze_calibrated and "gaze" in req.available_inputs and not req.person_activity:
+        method = "gaze"
+    else:
+        method = next((m for m in ("blink", "button") if m in req.available_inputs), req.available_inputs[0])
     if "none_of_these" in req.history[-3:]:
         return ToolCall(name="switch_input_method", arguments={"method": "spelling"},
                         rationale="None of the guesses fit. Let's spell it.", by="deterministic_fallback")
@@ -308,6 +328,7 @@ def _user_payload(req: PlanRequest) -> str:
         "evidence": [e.model_dump() for e in req.evidence],
         "available_inputs": req.available_inputs,
         "gaze_calibrated": req.gaze_calibrated,
+        "person_activity": req.person_activity,
         "history": req.history[-6:],
     })
 

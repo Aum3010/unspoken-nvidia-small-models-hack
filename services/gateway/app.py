@@ -98,6 +98,9 @@ async def evals():
 
 # ---- coordination -----------------------------------------------------------
 
+# what each agent decided, passed to the coordinator with its readings (voice: services/audio, lips: services/vsr)
+EVIDENCE_DETAIL = ("decision", "reason", "transcript", "margin", "mode", "enroll_best_dist", "enroll_max_dist", "enroll_negative")
+
 async def coordinate(s: Session):
     m = s.message
     req = {
@@ -105,10 +108,12 @@ async def coordinate(s: Session):
         "candidates": [{"id": c.id, "text": c.text, "modality": c.modality, "score": c.score,
                         "supporting_modalities": c.supporting_modalities, "origin": c.origin} for c in m.candidates],
         "evidence": [{"modality": e.modality, "status": e.status, "quality_flags": e.quality_flags,
-                      "top2_margin": e.quality.get("top2_margin"), "n_hypotheses": len(e.hypotheses)}
+                      "top2_margin": e.quality.get("top2_margin"), "n_hypotheses": len(e.hypotheses),
+                      "detail": {k: e.quality[k] for k in EVIDENCE_DETAIL if e.quality.get(k) is not None}}
                      for e in (s.evidence[i] for i in m.evidence_ids)],
         "available_inputs": s.settings["available_inputs"],
         "gaze_calibrated": s.settings["gaze_calibrated"],
+        "person_activity": s.settings.get("person_activity", []),
         "history": s.history,
         "use_llm": s.settings["use_llm"],
     }
@@ -295,8 +300,10 @@ async def _forward_capture(s: Session, service: str, field: str, upload: UploadF
 
 
 @app.post("/api/{sid}/capture/lip")
-async def capture_lip(sid: str, video: UploadFile = File(...)):
-    return await _forward_capture(get_session(sid), "vsr", "video", video, "Mouth clip")
+async def capture_lip(sid: str, video: UploadFile = File(...), moving_ms: int | None = Form(None)):
+    # moving_ms: how long the lips moved in the clip, measured by the browser on the lip landmarks
+    return await _forward_capture(get_session(sid), "vsr", "video", video, "Mouth clip",
+                                  None if moving_ms is None else {"moving_ms": str(moving_ms)})
 
 
 @app.post("/api/{sid}/capture/audio")
@@ -461,7 +468,7 @@ async def new(sid: str):
 @app.post("/api/{sid}/settings")
 async def settings(sid: str, body: dict):
     s = get_session(sid)
-    for k in ("available_inputs", "gaze_calibrated", "use_llm", "voice", "speech_rate"):
+    for k in ("available_inputs", "gaze_calibrated", "person_activity", "use_llm", "voice", "speech_rate"):
         if k in body:
             s.settings[k] = body[k]
     await push(s)

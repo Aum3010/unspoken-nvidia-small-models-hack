@@ -19,6 +19,7 @@ opencv-python-headless==4.11.0.86
 # visual speech (Chaplin / Auto-AVSR on CUDA)
 mediapipe==0.10.21
 six==1.17.0
+numba==0.61.2            # compiled DTW for lip-phrase matching (services/vsr/phrases.py); numpy fallback without it
 # audio: the voice agent (Nemotron Speech + Silero VAD) runs in asr_eval's NeMo venv; see scripts/brev/start_app.sh
 # speech output: Kokoro-82M in PyTorch (replaces mlx-audio)
 kokoro==0.9.4

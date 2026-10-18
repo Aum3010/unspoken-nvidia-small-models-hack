@@ -14,6 +14,8 @@ interface VoiceOpts {
   canCapture: () => boolean
   onSpeech: (active: boolean) => void
   onClip: (wav: Blob, ms: number) => void
+  /** Every ~45 ms block, capture or not: is there voice (or a whisper) above the room's noise? */
+  onLevel?: (voice: boolean) => void
 }
 
 const TAP = `class Tap extends AudioWorkletProcessor {
@@ -44,6 +46,8 @@ export async function startVoice(o: VoiceOpts): Promise<() => void> {
   src.connect(tap); tap.connect(sink); sink.connect(ac.destination)
   const sr = ac.sampleRate, blockMs = 2048 / sr * 1000
 
+  // the first 1.5 s only learn the room's noise floor: no clip, no "voice" (the floor starts as a guess)
+  const VOICE_WARMUP_MS = 1500, t0 = performance.now()
   let floor = -60, above = 0, quiet = 0, voiced = 0
   let clip: Float32Array[] | null = null
   const pre: Float32Array[] = []
@@ -56,7 +60,9 @@ export async function startVoice(o: VoiceOpts): Promise<() => void> {
     const b = ev.data
     let sum = 0; for (let i = 0; i < b.length; i++) sum += b[i] * b[i]
     const db = 10 * Math.log10(sum / b.length + 1e-12)
+    if (performance.now() - t0 < VOICE_WARMUP_MS) { floor += (db - floor) * 0.3; return }
     const loud = db > Math.max(floor + 12, -52)
+    o.onLevel?.(loud)
     if (!clip) {
       // the floor follows the room while nobody speaks
       floor += (db - floor) * (db < floor ? 0.2 : loud ? 0.002 : 0.04)
@@ -99,7 +105,7 @@ interface LipOpts {
   stream: MediaStream
   canCapture: () => boolean
   onMouthing: (active: boolean) => void
-  onClip: (video: Blob, ms: number) => void
+  onClip: (video: Blob, ms: number, movingMs: number) => void
 }
 
 const LIP_WINDOW_MS = 600
@@ -108,21 +114,35 @@ const LIP_STILL_MS = 900
 const LIP_MIN_MS = 900
 const LIP_MAX_MS = 8000
 
+// A clip is only cut around real lip movement, measured on the lip landmarks (lighting cannot fake it, unlike
+// pixel change): the face must be tracked steadily first (the camera's first second adjusts exposure and the
+// landmarks settle), the lips must keep moving to start a clip, and a clip whose lips moved for less than
+// LIP_MIN_MOVING_MS in total is dropped. The lip agent re-checks the moving time it is sent.
+const FACE_WARMUP_MS = 1500
+const LIP_CONFIRM_MS = 350
+export const LIP_MIN_MOVING_MS = 450
+
 export function startLips(o: LipOpts): () => void {
   const hist: { t: number; g: number }[] = []
   let rec: Recording | null = null, recT0 = 0, movingSince = 0, stillSince = 0, confirmed = false
+  let faceSince = 0, movingMs = 0, lastT = 0
   const stop = (send: boolean) => {
     const r = rec; if (!r) return
     rec = null
     if (confirmed) o.onMouthing(false)
     const ms = performance.now() - recT0
-    if (send && confirmed && ms >= LIP_MIN_MS) r.stop().then((b) => o.onClip(b, ms))
+    const moved = movingMs
+    if (send && confirmed && ms >= LIP_MIN_MS && moved >= LIP_MIN_MOVING_MS) r.stop().then((b) => o.onClip(b, ms, moved))
     else r.cancel()
-    confirmed = false
+    confirmed = false; movingMs = 0
   }
   const off = onFace((f: FaceFrame) => {
     const now = f.t
-    if (!f.present || !f.landmarks) { stop(true); hist.length = 0; return }
+    const dt = lastT ? Math.min(100, now - lastT) : 0
+    lastT = now
+    if (!f.present || !f.landmarks) { stop(true); hist.length = 0; faceSince = 0; return }
+    faceSince ||= now
+    if (now - faceSince < FACE_WARMUP_MS) { hist.length = 0; return }
     const lm = f.landmarks
     const faceH = Math.hypot(lm[10].x - lm[152].x, lm[10].y - lm[152].y) || 1
     hist.push({ t: now, g: Math.hypot(lm[13].x - lm[14].x, lm[13].y - lm[14].y) / faceH })
@@ -134,9 +154,10 @@ export function startLips(o: LipOpts): () => void {
     if (moving) {
       stillSince = 0
       if (!movingSince) movingSince = now
-      // start recording at the first movement so the onset is kept; commit after 200 ms of it
-      if (!rec) { rec = record(o.stream, 'video', LIP_MAX_MS + 500); recT0 = performance.now() }
-      if (!confirmed && now - movingSince > 200) { confirmed = true; o.onMouthing(true) }
+      if (rec) movingMs += dt
+      // start recording at the first movement so the onset is kept; commit after LIP_CONFIRM_MS of it
+      if (!rec) { rec = record(o.stream, 'video', LIP_MAX_MS + 500); recT0 = performance.now(); movingMs = 0 }
+      if (!confirmed && now - movingSince > LIP_CONFIRM_MS) { confirmed = true; o.onMouthing(true) }
     } else {
       movingSince = 0
       if (!stillSince) stillSince = now
@@ -146,6 +167,26 @@ export function startLips(o: LipOpts): () => void {
     if (rec && performance.now() - recT0 > LIP_MAX_MS) stop(true)
   })
   return () => { off(); stop(false) }
+}
+
+/* ============ mouth activity (no capture) ============ */
+/** Whether the mouth is moving, from the same lip-gap measure as startLips, but always on: it keeps reporting
+ *  while capture is paused (a clip being read, a message waiting), so the room always knows. */
+export function watchMouth(onChange: (moving: boolean) => void): () => void {
+  const hist: { t: number; g: number }[] = []
+  let moving = false, faceSince = 0
+  return onFace((f: FaceFrame) => {
+    let now = false
+    if (f.present && f.landmarks && (faceSince ||= f.t) && f.t - faceSince >= FACE_WARMUP_MS) {
+      const lm = f.landmarks
+      const faceH = Math.hypot(lm[10].x - lm[152].x, lm[10].y - lm[152].y) || 1
+      hist.push({ t: f.t, g: Math.hypot(lm[13].x - lm[14].x, lm[13].y - lm[14].y) / faceH })
+      while (hist.length && f.t - hist[0].t > LIP_WINDOW_MS) hist.shift()
+      const mean = hist.reduce((a, h) => a + h.g, 0) / hist.length
+      now = Math.sqrt(hist.reduce((a, h) => a + (h.g - mean) ** 2, 0) / hist.length) > LIP_MOVING
+    } else { hist.length = 0; if (!f.present) faceSince = 0 }
+    if (now !== moving) { moving = now; onChange(now) }
+  })
 }
 
 /* ============ head ============ */

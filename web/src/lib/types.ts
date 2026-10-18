@@ -105,6 +105,7 @@ export interface SessionState {
     voice: string
     speech_rate: number
     auto_speak?: boolean
+    person_activity?: string[]   // what the browser sees the person doing now: "mouthing", "voice"
   }
   audit_count: number
 }

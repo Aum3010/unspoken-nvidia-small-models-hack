@@ -629,6 +629,10 @@ export function setGazeSource(s: 'pointer' | 'eyes') {
 let gazeErr = 80
 export function setGazeError(px: number | null) { gazeErr = Math.max(50, Math.min(160, px ?? 80)) }
 export function setPaused(p: boolean) { paused = p }
+// How much a look counts (eyes only): 1 = full, 0.5 = dwell takes twice as long, 0 = gaze cannot select.
+// The room lowers it while the person mouths or whispers (their eyes wander then) and as the coordinator asks.
+let gazeWeight = 1
+export function setGazeWeight(w: number) { gazeWeight = w; gazeEl?.classList.toggle('muted', w < 1) }
 
 let gazeEl: HTMLElement
 let gx = -100, gy = -100, sgx = -100, sgy = -100, hot: HTMLElement | null = null, hotT0 = 0, hotDone = false, hasPointer = false
@@ -746,7 +750,8 @@ function dwellTick(now: number, dt = 16.7) {
   let p = 0
   if (hot && !hotDone) {
     // confirm targets need a longer look than select targets
-    const need = hot.dataset.confirm != null ? DWELL * 1.5 : DWELL
+    const need = (hot.dataset.confirm != null ? DWELL * 1.5 : DWELL) / (source === 'eyes' ? Math.max(gazeWeight, 1e-6) : 1)
+    if (source === 'eyes' && gazeWeight === 0) hotT0 = now   // the look does not count: the ring stays empty
     p = Math.min(1, (now - hotT0) / need)
     if (p >= 1) { hotDone = true; dwelledAt = now; select(hot, source === 'eyes' ? 'eyes' : 'pointer'); p = 0 }
   }
