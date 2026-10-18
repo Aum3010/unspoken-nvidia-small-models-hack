@@ -49,7 +49,8 @@ status() {
 # time instead of time-slicing between their contexts (docs/SERVING.md). Clients attach when they start, so the
 # daemon is (re)set before any GPU process launches. UNSPOKEN_MPS=0 runs without it, for A/B latency runs.
 MPS=${UNSPOKEN_MPS:-1}
-mps_running() { pgrep -x nvidia-cuda-mps-control >/dev/null; }
+# -f: Linux truncates process names to 15 characters, so `pgrep -x nvidia-cuda-mps-control` never matches
+mps_running() { pgrep -f '[n]vidia-cuda-mps-control' >/dev/null; }
 mps() {
   if [[ $MPS == 1 ]] && ! mps_running; then nvidia-cuda-mps-control -d && echo "  MPS daemon started"; fi
   if [[ $MPS == 0 ]] && mps_running; then echo quit | nvidia-cuda-mps-control && echo "  MPS daemon stopped"; fi
