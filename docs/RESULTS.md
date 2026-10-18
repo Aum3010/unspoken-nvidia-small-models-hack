@@ -189,7 +189,34 @@ Reproduce: `av_fusion_grid.py cands`, `lips` (app venv), `voice` (NeMo venv), `f
 
 ## 7. EEG decisions in NeMo Gym (`neuro_comm`)
 
-_Running: first Nemotron run on held-out Study F session 3._
+**Question.** In the EEG stopping problem (keep flashing, commit a character, or abstain), does Nemotron decide better
+than a Bayesian rule?
+
+**Method.** NeMo Gym environment `neuro_comm`: each episode replays one recorded Study F selection, repetition by
+repetition; the agent sees the posterior and calls `request_more_eeg`, `commit_character` or `abstain`. Reward: +1
+correct, -1 wrong, -0.2 abstain, -0.01 per second of EEG, small costs per call. Held-out session 3, 120 selections,
+10 ALS participants. Nemotron 3.5 Lightning 30B-A3B BF16 on vLLM (2x H100), temperature 0, thinking off. The Bayes
+rows reproduce the earlier benchmark exactly (parity check passes).
+
+| Policy | Mean reward | Correct | Wrong | Abstain | EEG time | Model time |
+|---|---:|---:|---:|---:|---:|---:|
+| Bayes, commit at 0.99 | **0.253** | 75.8% | 29 | 0 | 21.6 s | 0 |
+| Bayes + abstain | 0.217 | 56.7% | **0** | 52 | 21.6 s | 0 |
+| Hybrid: Bayes, Nemotron when unsure (54% of episodes) | 0.217 | 75.0% | 30 | 0 | 22.2 s | 6.6 s |
+| Nemotron alone | 0.119 | 73.3% | 32 | 0 | 28.1 s | 14.4 s |
+
+**Finding: on this numeric decision, Nemotron does not help, and we report that.** Alone it waits for more EEG than
+needed (28 vs 22 s) and still commits wrong characters; it **never abstains**, even though the reward makes abstaining
+better than a near-chance commit. As the hybrid's escalation step it adds model time without changing outcomes. Zero
+invalid tool calls in 2,000+ calls, so the failure is judgment, not format.
+
+**What it means for the design.** The EEG stopping decision stays with the calibrated Bayesian rule (section 3), and
+Nemotron is used where language judgment matters: misreads, noise, history (section 5). This environment, with its
+600 training episodes from separate sessions, is the right place for a future Gym training run: "learn to abstain" is
+a clear, measurable target on genuinely held-out sessions.
+
+Files: `evaluations/results/neuro_comm_brev/` (`aggregate.csv`, `per_participant.csv`, `rollouts.jsonl`).
+Reproduce: `run_neuro_comm_eval.py --policies bayes bayes_abstain nemotron hybrid --tau 0.99 --base-url <vLLM> --model <name>`.
 
 ## 8. Model improvement with NeMo Gym
 
