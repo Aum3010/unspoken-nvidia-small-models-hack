@@ -11,7 +11,32 @@ Inputs: Kokoro speaks the 20 voice phrases (and those clips feed the voice agent
 feed the lip agent; one BNCI letter feeds the EEG agent; a fixed two-candidate question feeds the coordinator.
 Run-to-run variation is about ±10% (the lip agent alone measured 501–619 ms p50 across runs).
 
-## Current: branch `ui` (enrollment lip reading, auto-speak, MPS + early voice decode)
+## Current: speedups on top of `ui` (local branch `ui-local`)
+
+All measured on Brev with MPS on (`latency_brev_final2.json`, coordinator files in `evaluations/results/`). Accuracy
+was checked for each one before it was kept.
+
+| Change | Speed | Accuracy check | Kept |
+|---|---|---|---|
+| Accepted readings decided by rules, without Nemotron | accepted voice clip → spoken **413 → 71 ms** p50 | rules ask exactly what Nemotron is asked to; Nemotron still runs for ambiguous/unknown | yes |
+| Auto-speak only for accepted readings | — | `test_auto_speak.py`: ambiguous, lip-only, disagreement and corrections wait for Yes/No | yes |
+| Batched DTW (enrollment matching) | lip agent alone **391 → 265 ms** | distances equal to 3e-8; 0 of 270 top-3 changes | yes |
+| Pre-rendered phrase audio, preloaded by the page | skips Kokoro and the audio download for fixed phrases | the gate still decides; other text still goes to Kokoro | yes |
+| Streamed lip clips (250 ms pieces over the WebSocket) | lip reading after the clip ends **898 → 407 ms** (laptop), 477 → 104 ms (box) | identical readings 12/12 (box) and 8/8 (laptop) | yes |
+| Compact coordinator JSON | 272 → 84 ms | worse on ambiguous readings and after a rejection | **no** (`UNSPOKEN_COORD_COMPACT=1`) |
+| MTP speculative decoding | 272 → 229 ms | NeMo Gym unchanged | **no**: one CUDA fault under full load took every GPU process down under MPS (`LLM_MTP=1`) |
+| Prefix caching (`--mamba-cache-mode all`) | — | — | **no**: cannot hit; the cache block is 4,224 tokens and the prompt about 1,700 |
+
+**What a person waits for now:**
+- an accepted voice message: about 0.85–0.9 s, of which 0.7 s is the deliberate pause;
+- a lip message: about 1.3 s to the question, of which 0.9 s is the deliberate pause.
+
+Not done:
+- **Early lip send:** the early clip would be a different input, and verifying it needs the person's own videos.
+- **Face-crop upload:** the upload is already hidden by streaming.
+- **Another region:** 120 ms round trip; that is a deployment choice.
+
+## Earlier: branch `ui` (enrollment lip reading, auto-speak, MPS + early voice decode)
 
 Measured with an auto-speak-aware copy of the benchmark (the gateway speaks without a confirm step). Files:
 `latency_brev_ui_mps0.json` and `latency_brev_ui_mps1.json`; `latency_brev_ui_as_pushed.json` is `ui` as first pushed, before

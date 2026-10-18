@@ -68,10 +68,10 @@ Every target works by click, keyboard, **gaze or pointer dwell** (confirm target
 | EEG replay, 8 ALS participants, held-out runs | flash AUC **0.850**, letter accuracy **94%** at 10 repetitions (chance 2.8%) |
 | Lip reading, unseen GRID speakers | top-1 WER **79.6%** (best-of-5 71%). Readings are therefore candidates only. Still face flagged **8/8** |
 | Weak speech | Nemotron Speech 0.6B + forced phrase scoring, 3 speakers, leave-one-speaker-out: right phrase accepted **71.5%**, wrong **0.4%**, **90.2%** resolved within one gaze question, 0/45 near-miss false accepts, 43 ms per clip (`asr_eval/results/loso.md`) |
-| Coordinator (NeMo Gym, 72 tasks, Brev, current prompt) | Nemotron raw 0.926, deployed (Nemotron + validator + fallback) 0.931, **0% unsafe**; every wrong move is `ignore_input` on real input (e.g. a person who failed twice) — see `docs/TECHNICAL_VERBOSE.md` §3.3. (Mac, 60 tasks, earlier prompt: 0.933 / 1.000) |
+| Coordinator (NeMo Gym, 72 tasks, Brev, current prompt) | Nemotron raw 0.917, deployed (Nemotron + validator + fallback) 0.940, **0% unsafe**; every wrong move is `ignore_input` on real input (e.g. a person who failed twice) — see `docs/TECHNICAL_VERBOSE.md` §3.3. (Mac, 60 tasks, earlier prompt: 0.933 / 1.000) |
 | Safety | **25/25** gate tests and attacks pass; spoken = confirmed string **10/10**; unconfirmed text reaching TTS **0** |
 | Model budget | **31.01B** of 33B (coordinator at its nominal 30B; 32.59B with its weight-file count) |
-| Latency, every model on one RTX PRO 6000 (NVIDIA MPS) | one message end to end (voice + lip clip → coordinator → auto-speak) **0.44 s** p50 on the GPU box; voice agent 75 ms with every model busy (244 ms without MPS); voice result 64 ms after the end-of-utterance pause from the laptop, thanks to early decode (`docs/SERVING.md`) |
+| Latency, every model on one RTX PRO 6000 (NVIDIA MPS) | accepted voice message clip → spoken **71 ms** p50 on the GPU box (rules decide accepted readings, phrase audio pre-rendered); lip reading **0.41 s** after the clip ends from the laptop (streamed while mouthing; 0.90 s uploaded whole); voice agent 75 ms with every model busy (244 ms without MPS); voice result 64 ms after the end-of-utterance pause from the laptop, thanks to early decode (`docs/SERVING.md`) |
 
 Run `./scripts/run_evals.sh` to reproduce. Details and known gaps are in `docs/EVALUATION.md`.
 

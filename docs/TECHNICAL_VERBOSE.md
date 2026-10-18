@@ -151,6 +151,17 @@ mic ──── voice detector → wav clip ─┘─────────�
 
 - **Model:** NVIDIA Nemotron 3.5 Lightning 30B-A3B, NVFP4 checkpoint, served by vLLM on Brev; Ollama on a Mac.
 - **Call settings:** OpenAI-compatible tool calling, `temperature 0`, `max_tokens 200`, thinking off, 20 s timeout.
+- **When it runs:** only for ambiguous, unknown or disagreeing readings. Accepted readings are decided by the rules
+  without it (§4).
+- **Compact mode** (`UNSPOKEN_COORD_COMPACT=1`, **off**):
+  - The model answers with one schema-constrained JSON object (`{"a":"ask","ids":[1],"m":"button"}`) and sees the
+    candidates numbered 1..n. Code maps the answer back to the same tools and ids before the validator, and writes
+    the note to the person from a template.
+  - It is 3× faster: 84 ms p50 and 15 output tokens, against 272 ms and 65.
+  - The deployed reward holds (0.949 vs 0.940–0.949), and injection, misread and negation improve. But it offers
+    too few options on ambiguous readings (0.89 vs 1.00) and corrects after a rejection (0.78–0.89 vs 1.00).
+    Ambiguous readings are exactly what the coordinator still handles, so it stays off.
+  - Files: `coordinator_compact_brev.json`, `coordinator_compact_mtp_brev.json`.
 - **Input:** a structured summary only (candidates, evidence statuses and flags, available inputs, gaze
   calibration, history), never media.
 - **Measured cost:** 1,784 prompt tokens and about 73–86 output tokens per call.
@@ -173,20 +184,20 @@ mic ──── voice detector → wav clip ─┘─────────�
 - **Deterministic policy:** applied instantly to every new evidence (quietly), so options appear at once; Nemotron
   refines it in the background.
 - **Evaluation** (NeMo Gym environment, 72 tasks, Brev, 2026-10-18,
-  `evaluations/results/coordinator_brev.json`):
+  `evaluations/results/coordinator_brev.json`, the latest of six runs):
 
-  | Policy | Reward | Valid | Right action | Unsafe |
-  |---|---:|---:|---:|---:|
-  | Nemotron alone | 0.926 | 1.00 | 0.78 | **0** |
-  | Deployed (Nemotron + validator + fallback) | 0.931 | 1.00 | 0.79 | **0** |
-  | Rules only | 1.000 | 1.00 | 1.00 | 0 |
+  | Policy | Reward | Valid | Right action | Unsafe | p50 |
+  |---|---:|---:|---:|---:|---:|
+  | Nemotron alone | 0.917 | 1.00 | 0.75 | **0** | 272 ms |
+  | Deployed (Nemotron + validator + fallback) | 0.940 | 1.00 | 0.82 | **0** | 275 ms |
+  | Rules only | 1.000 | 1.00 | 1.00 | 0 | 0 |
 
-  Every wrong action of the deployed coordinator is `ignore_input` on real input:
-  - after two failed tries (6/6; it should offer another input method);
-  - an injection next to a real request (3/6);
-  - uncalibrated gaze (2/6);
-  - a clear negated reading (3/6);
-  - one misread.
+  - **Run-to-run spread** of the same configuration: Nemotron alone 0.912–0.931, deployed 0.931–0.949.
+  - Most wrong actions of the deployed coordinator are `ignore_input` on real input:
+    - after two failed tries (6/6; it should offer another input method);
+    - an injection next to a real request (2–3/6);
+    - uncalibrated gaze;
+    - a clear negated reading (2–3/6).
 
   Misreads were handled right (corrected or asked) in 5 of 6 tasks; the miss was an `ignore_input`. **No negation
   was ever dropped.** But the validator would
@@ -404,8 +415,22 @@ From `start_app.sh`:
 - `--attention-backend TRITON_ATTN` and `VLLM_USE_FLASHINFER_SAMPLER=0`: FlashInfer JIT-compiles with `nvcc`,
   which the image lacks;
 - on sm_120 vLLM picks **Marlin weight-only FP4** (activations in 16 bit).
-- **Prefix caching hits 0%** (0 of 222,877 cached-token lookups). Every call re-reads the full prompt; the
-  model's Mamba layers are the likely reason (not confirmed).
+- **Prefix caching hits 0%, and cannot hit with our prompt.**
+  - Even 3 identical requests get 0 hits.
+  - The model's Mamba state per sequence is large, so vLLM raises the cache block to **4,224 tokens** ("Setting
+    attention block size to 4224 tokens to ensure that attention page size is >= mamba page size").
+  - Only whole blocks are cached, and the coordinator prompt is about 1,700 tokens.
+  - `--mamba-cache-mode all` (deprecated) does not change this.
+- **MTP speculative decoding** (`LLM_MTP=1`, **off**):
+  - The checkpoint has one next-token layer (`num_nextn_predict_layers: 1`, vLLM `NemotronHMTP`). With
+    `{"method":"mtp","num_speculative_tokens":1}`, 88% of drafts are accepted.
+  - The coordinator goes from 272 to **229 ms** p50, and NeMo Gym stays within run-to-run noise
+    (`coordinator_mtp_brev.json`).
+  - **Off because of one crash:** in the benchmark's "every agent at once" phase, vLLM with MTP failed
+    (`cudaErrorLaunchFailure`). Under MPS this took every GPU process down (TTS, voice, lips: illegal memory
+    access).
+  - MTP alone, 8 concurrent requests × 30 rounds, passed 240/240. Not reproduced, not explained.
+  - It also fails (HTTP 500) together with `--mamba-cache-mode all`.
 
 ### NVIDIA MPS
 
@@ -441,19 +466,22 @@ See [BREV.md](BREV.md) §5:
 
 ### On the GPU box (no laptop network)
 
-Branch `ui` with MPS and early decode. Files: `evaluations/results/latency_brev_ui_mps{0,1}.json`; as pushed, before
-these were added: `latency_brev_ui_as_pushed.json`.
+The "Now" column is MPS on, MTP off, after the speedups below (`latency_brev_final2.json`). The "MPS off" and
+"MPS on" columns are branch `ui` with MPS and early decode (`latency_brev_ui_mps{0,1}.json`). Before any of these:
+`latency_brev_ui_as_pushed.json`.
 
-| p50 / p95 ms | MPS off | MPS on |
-|---|---:|---:|
-| Voice, every agent busy | 244 / 375 | **75 / 118** |
-| Kokoro, every agent busy | 79 / 93 | **30 / 62** |
-| Coordinator, every agent busy | 352 / 425 | 336 / 342 |
-| Lips, every agent busy | 436 / 468 | 404 / 464 |
-| Alone: voice / lips / coordinator / Kokoro | 60 / 409 / 314 / 23 | 61 / 391 / 330 / 22 |
-| One message end to end (voice + lip clip, auto-spoken) | 434 / 469 | 435 / 474 |
-| Voice result after the 700 ms pause, sent then (old) | 337 / 377 | 109 / 119 |
-| Voice result after the 700 ms pause, **early decode** | **3 / 22** | **2 / 2** |
+| p50 / p95 ms | MPS off | MPS on | **Now** |
+|---|---:|---:|---:|
+| Voice, every agent busy | 244 / 375 | 75 / 118 | 78 / 106 |
+| Kokoro, every agent busy | 79 / 93 | 30 / 62 | 32 / 56 |
+| Coordinator, every agent busy | 352 / 425 | 336 / 342 | 340 / 366 |
+| Lips (whole clip), every agent busy | 436 / 468 | 404 / 464 | **332 / 349** |
+| Alone: voice / lips / coordinator / Kokoro | 60 / 409 / 314 / 23 | 61 / 391 / 330 / 22 | 59 / **265** / 333 / 23 |
+| One message end to end (voice + lip clip) | 434 / 469 | 435 / 474 | **309 / 322** |
+| Accepted voice message: clip → spoken | — | 413 / 459 | **71 / 89** |
+| Lip reading after the clip ends: whole clip / **streamed** | — | — | 477 / **104** |
+| Voice result after the 700 ms pause, sent then (old) | 337 / 377 | 109 / 119 | 70 / 77 |
+| Voice result after the 700 ms pause, **early decode** | 3 / 22 | 2 / 2 | 2 / 3 |
 
 ### From the laptop through the tunnel
 
@@ -465,17 +493,22 @@ these were added: `latency_brev_ui_as_pushed.json`.
 | 1.2 MB lip clip upload | **0.68 s** (the server works 34 ms of it) |
 | Voice result after the pause, old way | 211 ms p50 |
 | Voice result after the pause, early decode | **64 ms** p50 |
+| Lip reading after the clip ends, whole clip uploaded | 898 ms p50 |
+| Lip reading after the clip ends, **streamed** while mouthing | **407 ms** p50 (8/8 same reading) |
 
 ### What a person waits for
 
-| Step | Voice message | Lip message |
+Now, added up from the measured parts (not one end-to-end measurement):
+
+| Step | Accepted voice message (spoken) | Lip message (asked) |
 |---|---:|---:|
 | Pause before the clip is cut | 0.7 s | 0.9 s |
-| Upload | — (hidden by early decode) | 0.68 s |
-| Agent | — (hidden by early decode) | about 0.4 s |
-| Coordinator (auto-speak waits for it) | about 0.33 s | about 0.33 s |
-| Kokoro + audio back + WebSocket | about 0.15–0.3 s | about 0.15–0.3 s |
-| **About** | **1.2–1.4 s** | **about 2.5 s** |
+| Upload and agent | 0.064 s (early decode) | 0.41 s (streamed) |
+| Plan | rules, about 0 (no Nemotron) | rules at once; Nemotron refines in the background |
+| Speech | preloaded phrase audio plays when the WebSocket says spoken (about 0.07 s on the box, plus one way) | — (waits for Yes/No) |
+| **About** | **0.85–0.9 s** (was 1.2–1.4 s) | **about 1.3 s to the question** (was about 2.5 s) |
+
+A lip-only reading is never auto-spoken; it waits for the person's answer.
 
 ### Decisions taken for speed, all measured
 
@@ -488,11 +521,26 @@ these were added: `latency_brev_ui_as_pushed.json`.
 - **Native FP4 for the coordinator deferred:** less accurate (4-bit activations); do it only after giving vLLM
   its own GPU, and only if NeMo Gym holds.
 
+- **Accepted readings skip Nemotron:** the rules already ask exactly what Nemotron is asked to; 413 → 71 ms.
+- **Batched DTW:** same distances (to 3e-8), 0 of 270 top-3 changes; the lip agent alone 391 → 265 ms.
+- **Pre-rendered phrase audio:** the gate still decides in the gateway; edited text still goes to Kokoro.
+- **Streamed lip clips:** identical readings (12/12 on the box, 8/8 from the laptop); 898 → 407 ms from the
+  laptop.
+- **Compact coordinator not adopted:** 3× faster, but worse on ambiguous readings (§3.3).
+- **MTP not adopted:** 16% faster, same quality, but one unexplained crash under full load (§6).
+- **Prefix caching:** cannot hit at this prompt size (§6).
+
 ### Open speed items
 
-- Lip video bitrate: needs an accuracy check first.
-- Coordinator output length.
-- Prefix caching.
+- **Early lip send** (at 450 ms of stillness, commit at 900 ms): not done.
+  - The early clip has a shorter still tail than the committed one, so it is a different input.
+  - Verifying "0 decisions change" needs the person's own videos, and only features are stored.
+  - After streaming, at most about 0.1 s is left to hide.
+- **Face-region crop before upload:** not done.
+  - Streaming already hides the upload and most decoding.
+  - A crop changes the frames the lip agent sees, so it needs the GRID check plus the person's own clips.
+- **Network:** 120 ms round trip to the instance. Lip pieces already ride the session WebSocket. An East Coast
+  instance would save about 100 ms per round trip.
 - GPU isolation for vLLM (2 GPUs or MIG).
 
 ---
@@ -524,7 +572,7 @@ The lip enrollment adds stored features, not parameters.
 | What | Command | Result file |
 |---|---|---|
 | Safety tests (policy gate, auto-speak) | `pytest evaluations/safety_tests` (25 pass) | — |
-| Coordinator (NeMo Gym, 72 tasks) | `run_local.py --policies raw:<model> guarded deterministic` | `coordinator_brev.json` (Brev); `coordinator.json` (Mac, 60 tasks, older prompt) |
+| Coordinator (NeMo Gym, 72 tasks) | `run_local.py --policies raw:<model> guarded deterministic` (`UNSPOKEN_COORD_COMPACT=1` for compact mode) | `coordinator_brev.json` (Brev); `coordinator_mtp_brev.json`, `coordinator_compact_brev.json`, `coordinator_compact_mtp_brev.json` (A/B); `coordinator.json` (Mac, 60 tasks, older prompt) |
 | Lip speed vs accuracy | `evaluations/modality_baselines/vsr_speed_accuracy.py` | `vsr_speed_accuracy.json` |
 | Early-decode accuracy check | `asr_eval/scripts/trailing_silence_check.py` | `trailing_silence_check.json` |
 | Latency | `scripts/brev/bench_latency.py` | `latency_brev_*.json` |

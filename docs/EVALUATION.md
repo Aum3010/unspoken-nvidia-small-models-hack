@@ -49,11 +49,21 @@ The test set is 10 synthetic Kokoro utterances (5 voices) with pink noise, so th
 
 | Policy | Reward | Valid | Correct action | Unsafe | Decided by model | p50 latency (Brev) |
 |---|---:|---:|---:|---:|---:|---:|
-| Nemotron 3.5 Lightning, raw | 0.926 | 100% | 78% | **0%** | 100% | 278 ms |
-| **Deployed: Nemotron + outside validator + fallback** | 0.931 | 100% | 79% | **0%** | 90% | 273 ms |
+| Nemotron 3.5 Lightning, raw | 0.917 | 100% | 75% | **0%** | 100% | 272 ms |
+| **Deployed: Nemotron + outside validator + fallback** | 0.940 | 100% | 82% | **0%** | 92% | 275 ms |
 | Deterministic rules (reference) | 1.000 | 100% | 100% | 0% | 0% | 0 ms |
 
-Every wrong action of the deployed coordinator is `ignore_input` on real input: a person who failed twice (6/6; should switch input method), an injection next to a genuine request (3/6), uncalibrated gaze (2/6), a clear negated reading (3/6), one misread. Misreads were handled right in 5 of 6 tasks and no correction ever dropped a negation, although the validator would accept one. The validator's history rules (retake, none of these) do not apply to `ignore_input`, which is how the old failure mode comes back. The scorer now knows the two new tools; ignoring is accepted only for failed captures with no reading.
+Across six runs of the same configuration: raw 0.912–0.931, deployed 0.931–0.949. Most wrong actions of the deployed coordinator are `ignore_input` on real input: a person who failed twice (6/6; should switch input method), an injection next to a genuine request, uncalibrated gaze, a clear negated reading.
+
+**Speed variants (same 72 tasks, Brev):**
+
+| Variant | Raw | Deployed | p50 | Output tokens | Adopted |
+|---|---:|---:|---:|---:|---|
+| Default (tool calls, verbose prompt) | 0.912–0.917 | 0.940–0.949 | 272 ms | 65 | yes |
+| MTP speculative decoding | 0.912 | 0.940 | 229 ms | 65 | no: one crash under full load |
+| Compact JSON, numbered candidates (v2) | 0.907 | 0.949 | 84 ms | 15 | no: ambiguous 0.89, after a rejection 0.78–0.89 |
+| Compact v2 + MTP | 0.907 | 0.963 | 78 ms | 15 | no |
+| Compact v1 (looser "fix" rule) | 0.806 | 0.931 | 97 ms | 18 | no: corrected readings that were fine | Misreads were handled right in 5 of 6 tasks and no correction ever dropped a negation, although the validator would accept one. The validator's history rules (retake, none of these) do not apply to `ignore_input`, which is how the old failure mode comes back. The scorer now knows the two new tools; ignoring is accepted only for failed captures with no reading.
 
 **Earlier (Mac, Ollama, previous prompt without the two tools, 60 tasks, 10 categories, `coordinator.json`):**
 

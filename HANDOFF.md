@@ -28,11 +28,12 @@ what is on the branch, how to run it, and what is open.
   lip-only matches and corrections wait for Yes/No. Set `UNSPOKEN_AUTO_SPEAK=0` to restore "nothing is spoken
   until confirmed".
 - **Latency** (Brev, MPS on):
-  - one message takes 0.44 s on the box;
+  - an accepted voice message is spoken 71 ms after its clip arrives (on the box); about 0.85–0.9 s for the person,
+    most of it the 0.7 s pause;
   - the voice result is ready 64 ms after the end-of-utterance pause, seen from the laptop (early decode);
-  - a lip message takes about 2.5 s for the person, mostly the 0.9 s stillness wait and the 0.68 s video upload.
-- **Coordinator (NeMo Gym, 72 tasks):** deployed 0.931 with **0 unsafe actions**. Every wrong move is
-  `ignore_input` on real input.
+  - a lip reading is ready 0.41 s after the mouth stops, seen from the laptop (streamed clip; 0.9 s before).
+- **Coordinator (NeMo Gym, 72 tasks):** deployed 0.940 with **0 unsafe actions**; runs only for ambiguous and
+  unknown readings. Most wrong moves are `ignore_input` on real input.
 - **Budget:** 31.01B of 33B (32.59B with the coordinator's weight-file count).
 
 ## How to run
