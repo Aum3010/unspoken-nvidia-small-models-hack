@@ -568,12 +568,23 @@ function melt(el: HTMLElement, to: Element | null) {
 export interface BubbleItem { a: string; text: string; sub: string; color: string; icon: string }
 let bubbles: HTMLElement[] = [], bubbleFrom: Element | null = null, bubbleKey = ''
 export const bubblesKey = () => bubbleKey
+/** Where bubble i of n is placed (its centre, before keeping a bubble of width w on screen). */
+function bubbleSlot(i: number, n: number, w: number) {
+  const cols = Math.min(3, n), rows = Math.ceil(n / cols)
+  const cx = BLOCK_CX, cy = H * 0.5, rx = Math.min(W * 0.3, 420), ry = Math.min(H * 0.26, 220)
+  const wide = W > 860, minX = wide ? 130 : 76, maxX = W - (wide ? 440 : 0) - 12
+  const row = Math.floor(i / cols), inRow = Math.min(cols, n - row * cols), col = i % cols
+  const x = cx + (col - (inRow - 1) / 2) * Math.min(rx * 0.95, (W - 160) / 3.2), y = cy + (row - (rows - 1) / 2) * Math.min(ry, 120)
+  return { left: Math.max(minX, Math.min(maxX - w, x - w / 2)), y }
+}
+/** Screen centres the bubbles of an n-item menu will have (calibration puts dots there). */
+export function bubbleCentres(n: number, w = 230): [number, number][] {
+  return Array.from({ length: n }, (_, i) => { const s = bubbleSlot(i, n, w); return [s.left + w / 2, s.y] })
+}
 export function showBubbles(items: BubbleItem[], from: Element, key: string) {
   closeBubbles()
   bubbleFrom = from; bubbleKey = key
-  const n = items.length, cols = Math.min(3, n), rows = Math.ceil(n / cols)
-  const cx = BLOCK_CX, cy = H * 0.5, rx = Math.min(W * 0.3, 420), ry = Math.min(H * 0.26, 220)
-  const wide = W > 860, minX = wide ? 130 : 76, maxX = W - (wide ? 440 : 0) - 12
+  const n = items.length
   items.forEach((it, i) => {
     const el = document.createElement('button'); el.className = 'bubble glass'; el.dataset.a = it.a
     el.style.setProperty('--c', it.color)
@@ -582,9 +593,8 @@ export function showBubbles(items: BubbleItem[], from: Element, key: string) {
     const sub = document.createElement('small'); sub.className = 'mono'; sub.textContent = it.sub; body.append(sub)
     el.append(peb, body)
     document.body.append(el)
-    const row = Math.floor(i / cols), inRow = Math.min(cols, n - row * cols), col = i % cols
-    const x = cx + (col - (inRow - 1) / 2) * Math.min(rx * 0.95, (W - 160) / 3.2), y = cy + (row - (rows - 1) / 2) * Math.min(ry, 120)
-    el.style.left = Math.max(minX, Math.min(maxX - el.offsetWidth, x - el.offsetWidth / 2)) + 'px'
+    const { left, y } = bubbleSlot(i, n, el.offsetWidth)
+    el.style.left = left + 'px'
     el.style.top = (y - el.offsetHeight / 2) + 'px'
     spawn(el, from, i * 55); bubbles.push(el)
   })
@@ -611,14 +621,20 @@ let DWELL = 1200
 export const getDwell = () => DWELL
 export function setDwell(ms: number) { DWELL = ms }
 let source: 'pointer' | 'eyes' = 'pointer', paused = false
-export function setGazeSource(s: 'pointer' | 'eyes') { source = s; if (s === 'eyes') { hasPointer = false; gazeEl?.classList.remove('on') } }
+export function setGazeSource(s: 'pointer' | 'eyes') {
+  source = s
+  if (s === 'eyes') { hasPointer = false; gazeEl?.classList.remove('on') }
+}
+// measured webcam gaze error (px): how far a target may be from the estimate and still be the one meant
+let gazeErr = 80
+export function setGazeError(px: number | null) { gazeErr = Math.max(50, Math.min(160, px ?? 80)) }
 export function setPaused(p: boolean) { paused = p }
 
 let gazeEl: HTMLElement
 let gx = -100, gy = -100, sgx = -100, sgy = -100, hot: HTMLElement | null = null, hotT0 = 0, hotDone = false, hasPointer = false
 let clicked: HTMLElement | null = null // chosen by click: the gaze settling onto it must not choose it again
 let dwelledAt = 0                       // a reflex click right after a dwell must not choose it again
-function arrive() { hasPointer = true; sgx = gx; sgy = gy; gazeEl.classList.add('on'); document.body.classList.add('gazing') }
+function arrive() { hasPointer = true; sgx = ax = gx; sgy = ay = gy; gazeEl.classList.add('on'); document.body.classList.add('gazing') }
 const onPointer = (ev: PointerEvent) => {
   if (ev.pointerType !== 'mouse' || source !== 'pointer') return
   gx = ev.clientX; gy = ev.clientY
@@ -636,19 +652,76 @@ function targetAt(x: number, y: number) {
   const t = el && el.closest<HTMLElement>('[data-a]')
   return t && !(t as HTMLButtonElement).disabled ? t : null
 }
+/** Distance from a point to an element's box (0 inside). */
+function boxDist(el: HTMLElement, x: number, y: number) {
+  const r = el.getBoundingClientRect()
+  return Math.hypot(Math.max(r.left - x, 0, x - r.right), Math.max(r.top - y, 0, y - r.bottom))
+}
+const usable = (el: HTMLElement) => !(el as HTMLButtonElement).disabled && el.getClientRects().length > 0
+const centre = (el: HTMLElement) => { const r = (el.querySelector<HTMLElement>('.ic') ?? el).getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2] }
+const SWITCH_PX = 40   // a neighbouring zone must win by this much before the choice changes
+/** Of a group of targets, the one whose zone holds the point, keeping the current one near a boundary. */
+function zonePick(group: HTMLElement[], d: (el: HTMLElement) => number): HTMLElement | null {
+  let best: HTMLElement | null = null, bd = Infinity
+  for (const el of group) { const v = d(el); if (v < bd) { bd = v; best = el } }
+  if (hot && group.includes(hot) && d(hot) < bd + SWITCH_PX) return hot
+  return best
+}
+/**
+ * Webcam gaze is off by tens of pixels and drifts, so the eyes choose a screen area, not a point:
+ * the left strip is the dock (top, middle, bottom third -> its buttons), the top band is Yes | No,
+ * and while phrase cards are open the room is split between them. Anywhere else (the writing,
+ * the agents panel) chooses nothing, so reading never selects.
+ */
+function eyeTarget(x: number, y: number): HTMLElement | null {
+  const rail = $<HTMLElement>('.rail'), answers = $<HTMLElement>('.answers'), side = $<HTMLElement>('.side')
+  const sideLeft = side ? side.getBoundingClientRect().left : W
+  if (rail && x < rail.getBoundingClientRect().right + 90)
+    return zonePick($$('.rail [data-a]').filter(usable), (el) => Math.abs(y - centre(el)[1]))
+  if (answers && y < answers.getBoundingClientRect().bottom + 60 && x < sideLeft)
+    return zonePick($$('.answers [data-a]').filter(usable), (el) => Math.abs(x - centre(el)[0]))
+  const open = bubbles.filter(usable)
+  if (open.length && x < sideLeft)
+    return zonePick(open, (el) => { const [cx, cy] = centre(el); return Math.hypot(x - cx, y - cy) })
+  // anything else (e.g. the calibration screen's buttons): the nearest within the gaze error
+  let best: HTMLElement | null = null, bd = Infinity
+  for (const el of $$('[data-a]')) {
+    if (!usable(el) || el.closest('.brand, .rail, .answers, .side')) continue
+    const d = boxDist(el, x, y)
+    if (d < bd) { bd = d; best = el }
+  }
+  return bd <= gazeErr ? best : null
+}
+let lx = -100, ly = -100   // where the lens is drawn: on the gaze, or settled on the chosen target
+let ax = -100, ay = -100   // eyes: fixation anchor; the estimate's jitter inside the gaze error does not move it
 function dwellTick(now: number, dt = 16.7) {
-  // eyes are not a mouse: the gaze point drifts and settles, it never snaps
-  const kz = 1 - Math.pow(0.72, dt / 16.7); sgx += (gx - sgx) * kz; sgy += (gy - sgy) * kz
-  gazeEl.style.transform = `translate(${sgx}px,${sgy}px)`
-  const t = hasPointer && !paused ? targetAt(sgx, sgy) : null
+  // eyes are not a mouse: the gaze point drifts and settles, it never snaps; the webcam estimate
+  // jitters, so the eyes get a slower follow than the pointer
+  let fx = gx, fy = gy
+  if (source === 'eyes') {
+    // a resting eye wobbles within the webcam error; only a move past ~half of it is a new look
+    const R = gazeErr * 0.5, d = Math.hypot(gx - ax, gy - ay)
+    if (ax < -50) { ax = gx; ay = gy } else if (d > R) { ax += (gx - ax) * (1 - R / d); ay += (gy - ay) * (1 - R / d) }
+    fx = ax; fy = ay
+  }
+  const kz = 1 - Math.pow(source === 'eyes' ? 0.94 : 0.72, dt / 16.7); sgx += (fx - sgx) * kz; sgy += (fy - sgy) * kz
+  const t = hasPointer && !paused ? (source === 'eyes' ? eyeTarget(sgx, sgy) : targetAt(sgx, sgy)) : null
   if (t !== hot) {
     if (hot) hot.classList.remove('hot')
     hot = t; hotT0 = now; hotDone = !!hot && hot === clicked
     if (hot && hot !== clicked) clicked = null
     if (hot) hot.classList.add('hot')
-    gazeEl.style.width = gazeEl.style.height = hot ? '60px' : '46px'
-    gazeEl.style.margin = hot ? '-30px 0 0 -30px' : '-23px 0 0 -23px'
+    gazeEl.classList.toggle('lock', !!hot && source === 'eyes')
   }
+  // with the eyes, the lens settles on the chosen target, so it holds still while the dwell fills
+  let tx = sgx, ty = sgy
+  if (hot && source === 'eyes') {
+    const r = (hot.querySelector<HTMLElement>('.ic') ?? hot).getBoundingClientRect()
+    tx = r.left + r.width / 2; ty = r.top + r.height / 2
+  }
+  const kl = 1 - Math.pow(source === 'eyes' ? 0.88 : 0.78, dt / 16.7); lx += (tx - lx) * kl; ly += (ty - ly) * kl
+  if (lx < -50) { lx = tx; ly = ty }
+  gazeEl.style.transform = `translate(${lx}px,${ly}px)`
   // rail magnification: tiles swell as the gaze approaches, like the Mac Dock
   $$('.rail button').forEach((b) => {
     const r = b.getBoundingClientRect()

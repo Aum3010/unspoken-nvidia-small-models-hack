@@ -1,14 +1,14 @@
 // The Unspoken room: one liquid-glass page wired to the local gateway.
 //   every input runs at once: lips + blink + head (camera), voice (mic), gaze (eyes or pointer)
 //   readings arrive as faint ink and glass bubbles; nothing is spoken until the person confirms
-//   (Speak, Yes, a deliberate blink or a nod), then the policy gate signs the exact text for TTS
+//   (Yes, a deliberate blink or a nod), then the policy gate signs the exact text for TTS
 //   top right: live agent activity from the gateway timeline, then the spoken history
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { api, useHealth, useSession } from '../lib/api'
 import { getCamera } from '../lib/capture'
 import { onBlink, trackVideo } from '../lib/face'
-import { gazeState, onGaze } from '../lib/gaze'
+import { gazeState, learnFromSelection, onGaze, saveCalibration, startGaze } from '../lib/gaze'
 import type { Candidate, ConfirmationMethod, Modality, SessionState, TimelineItem } from '../lib/types'
 import { Calibration } from './Calibration'
 import * as E from './engine'
@@ -33,7 +33,6 @@ const METHOD_TEXT: Record<string, string> = {
 // modality -> its input's colour in the room
 const MOD_NODE: Partial<Record<Modality, E.NodeId>> = { audio: 'voice', lip: 'lips', gaze: 'gaze', eeg_replay: 'eeg', gesture: 'head' }
 const MOD_LABEL: Record<string, string> = { audio: 'Voice', lip: 'Lips', gaze: 'Eyes', gesture: 'Head', board: 'Phrase', eeg_replay: 'Recorded EEG', spelling: 'Spelled' }
-const MOD_ICON: Record<string, string> = { audio: '〰', lip: '👄', eeg_replay: '🧠', board: '✋', gaze: '👁' }
 const AGENTS: Record<string, { label: string; c: E.Rgb; node?: E.NodeId }> = {
   audio: { label: 'Voice agent', c: E.COL.voice, node: 'voice' },
   vsr: { label: 'Lip agent', c: E.COL.lips, node: 'lips' },
@@ -63,9 +62,10 @@ function quote(t: string, n = 16) { const u = t.toUpperCase(); return `“${u.le
 export function GlassApp() {
   const { state, connected } = useSession()
   const health = useHealth()
-  const [calibrating, setCalibrating] = useState(true)
+  // a saved calibration (same window size) is used straight away: no recalibrating after a reload
+  const [calibrating, setCalibrating] = useState(() => !gazeState.calibrated)
   const [focusMode, setFocusMode] = useState(false)
-  const [eyes, setEyes] = useState(false)
+  const [eyes, setEyes] = useState(() => gazeState.calibrated)
   const [cam, setCam] = useState<'starting' | 'on' | 'off'>('starting')
   const [mic, setMic] = useState<'starting' | 'on' | 'off'>('starting')
   const [hearing, setHearing] = useState(false)
@@ -81,8 +81,13 @@ export function GlassApp() {
 
   useEffect(() => E.mount(), [])
   useEffect(() => { E.setPaused(focusMode) }, [focusMode])
-  useEffect(() => { E.setGazeSource(eyes ? 'eyes' : 'pointer') }, [eyes])
+  useEffect(() => { E.setGazeSource(eyes ? 'eyes' : 'pointer'); E.setGazeError(gazeState.accuracyPx) }, [eyes])
   useEffect(() => onGaze((p) => E.feedGaze(p)), [])
+  useEffect(() => {
+    if (!gazeState.calibrated) return
+    void startGaze().then(() => saveCalibration())   // keep what this session has learned, too
+    setTimeout(() => { E.greet(); E.caption('Using your saved eye calibration', 'rest your eyes 1.2 s on anything, or blink, to choose') }, 500)
+  }, [])
 
   // capture is allowed only while nothing waits for confirmation and nothing is being spoken
   const canCapture = useCallback((svc: string) => {
@@ -194,6 +199,7 @@ export function GlassApp() {
         E.setOrch(t.level === 'pending' ? 'Nemotron is planning…'
           : /ask_confirmation/.test(t.title) ? 'Asking which you meant'
             : /request_retake/.test(t.title) ? 'Asking for one more try'
+              : /ignore_input/.test(t.title) ? 'Ignored as noise'
               : /switch_input_method/.test(t.title) ? 'Suggesting another way'
                 : /offline|fallback/i.test(t.title) ? 'Deterministic policy' : t.title, 5000)
       } else if (t.agent === 'policy') {
@@ -210,37 +216,30 @@ export function GlassApp() {
     if (!state || calibrating) return
     const m = state.message
     const shown = shownCandidates(state)
-    const cKey = 'cands:' + shown.map((c) => c.id).join(',')
-    if (E.bubblesKey().startsWith('cands:') && (!PENDING.includes(m.status) || E.bubblesKey() !== cKey)) E.closeBubbles()
 
     if (m.status === 'selected') {
       const c = m.candidates.find((x) => x.id === m.selected_candidate_id)
       if (c) {
         E.setTranscript([], words(c.text))
-        E.caption(`Will say exactly “${c.text}”`, 'look at Speak, blink, or nod to say it · No or shake to change it')
+        E.caption(`Will say exactly “${c.text}”`, 'look at Yes, blink, or nod to say it · No or shake to change it')
       }
     } else if (PENDING.includes(m.status) && shown.length) {
-      E.setTranscript([], words(shown[0].text))
-      if (E.bubblesKey() !== cKey) {
-        const from = document.querySelector('.twin') ?? document.body
-        E.showBubbles(shown.map((c) => ({
-          a: 'pick:' + c.id, text: c.text,
-          sub: [c.supporting_modalities.map((x) => MOD_LABEL[x] ?? x).join(' + '), c.score != null ? `raw ${c.score.toFixed(2)}` : ''].filter(Boolean).join(' · '),
-          color: (MOD_NODE[c.modality] ? E.COL[MOD_NODE[c.modality]!] : [94, 200, 255]).join(','),
-          icon: MOD_ICON[c.modality] ?? '•',
-        })), from, cKey)
-      }
-      E.caption(state.plan?.rationale || 'Which did you mean?', 'look at one to choose it · No or shake for none of these')
+      // only the best reading, written in ink; Yes/blink/nod chooses it, No/shake rejects it
+      E.setTranscript(words(shown[0].text), [])
+      E.caption('Did you mean this?', 'Yes, blink or nod to choose it · No or shake if it is wrong')
     } else if (m.status === 'spoken') {
       const sp = state.spoken[state.spoken.length - 1]
       if (sp && sp.message_id !== lastSpoken.current) {
         lastSpoken.current = sp.message_id
         E.setTranscript(words(sp.text), [])
-        E.caption(`Spoken · confirmed by ${METHOD_TEXT[sp.method] ?? sp.method}`, 'look at Speak to say it again')
+        E.caption(`Spoken · confirmed by ${METHOD_TEXT[sp.method] ?? sp.method}`)
       }
     } else if (m.status === 'rejected') {
       E.setTranscript([], [])
       E.caption('None of these', 'nothing will be spoken · try again, or open Phrases')
+    } else if (state.plan?.name === 'ignore_input' && !m.candidates.length) {
+      E.setTranscript([], [])
+      E.caption('Listening', 'mouth or say what you need, or open Phrases')
     } else if (state.plan?.name === 'request_retake' && !m.candidates.length) {
       E.caption(state.plan.rationale || 'Let’s try that once more', 'mouth or say it again, or open Phrases')
     } else if (state.plan?.name === 'switch_input_method') {
@@ -251,13 +250,25 @@ export function GlassApp() {
   /* ---------- actions: from the rail, bubbles, blinks, nods and keys ---------- */
   const confirm = useCallback((how: E.How) => run(api.confirm(METHOD[how]).then((r) => play(r.audio_url, r.text))), [run, play])
   const act = (a: string, el: HTMLElement | null, how: E.How) => {
+    // a completed eye dwell means the person was looking at that target: refine the calibration with it
+    if (how === 'eyes' && el) {
+      const r = (el.querySelector<HTMLElement>('.ic') ?? el).getBoundingClientRect()
+      learnFromSelection(r.left + r.width / 2, r.top + r.height / 2, E.getDwell())
+      saveCalibration()   // so what it learned survives a reload
+    }
     if (a.startsWith('calib:')) { calibAct.current?.(a.slice(6)); return }
     if (a === 'calibrate') { E.closeBubbles(); setCalibrating(true); return }
     if (a === 'camera') { if (cam === 'off') location.reload(); return }
     const s = live.current.state
     if (!s) { E.caption('The gateway is offline', 'start it with ./scripts/run_all.sh'); return }
     const m = s.message
-    if (a.startsWith('say:')) { E.closeBubbles(); run(api.board(a.slice(4), 'board')); return }
+    // a phrase card is the person's own explicit choice (held with the eyes, or clicked), not a model's
+    // reading, so choosing it is the confirmation: it is spoken straight away, through the same policy gate
+    if (a.startsWith('say:')) {
+      E.closeBubbles()
+      run(api.board(a.slice(4), 'board').then(() => api.confirm(METHOD[how])).then((r) => play(r.audio_url, r.text)))
+      return
+    }
     if (a.startsWith('pick:')) { E.closeBubbles(); run(api.select(a.slice(5), METHOD[how])); return }
     switch (a) {
       case 'phrases':
@@ -266,6 +277,7 @@ export function GlassApp() {
         break
       case 'yes':
         if (m.status === 'selected') confirm(how)
+        else if (PENDING.includes(m.status) && shownCandidates(s)[0]) run(api.select(shownCandidates(s)[0].id, METHOD[how]))
         else { E.closeBubbles(); run(api.board('Yes', 'board')) }
         break
       case 'no': case 'shake':
@@ -295,6 +307,7 @@ export function GlassApp() {
       // a blink with nothing under the eyes, or a nod: confirms what is waiting
       case 'blink': case 'nod':
         if (m.status === 'selected') confirm(how)
+        else if (PENDING.includes(m.status) && shownCandidates(s)[0]) run(api.select(shownCandidates(s)[0].id, METHOD[how]))
         break
     }
     if (['yes', 'speak', 'blink', 'nod'].includes(a) && m.status === 'selected') E.caption(`Confirmed by ${HOW_TEXT[how]}`, 'policy gate checks the exact text')
@@ -305,6 +318,7 @@ export function GlassApp() {
   const bindCalib = useCallback((fn: ((a: string) => void) | null) => { calibAct.current = fn }, [])
   const doneCalib = useCallback((useEyes: boolean) => {
     setEyes(useEyes)
+    E.setGazeError(gazeState.accuracyPx)
     setCalibrating(false)
     setTimeout(() => { E.greet(); E.caption(useEyes ? 'Rest your eyes 1.2 s on anything, or blink, to choose' : 'Rest the pointer 1.2 s on anything, or blink, to choose') }, 500)
   }, [])
@@ -357,11 +371,14 @@ export function GlassApp() {
         </section>
       </div>
 
+      {/* Yes and No are needed most often: two big targets far apart, well beyond the webcam gaze error */}
+      <nav className="answers" aria-label="Answer">
+        <button data-a="yes" {...(selected ? { 'data-confirm': '' } : {})} className={`answer glass ${selected ? 'ready' : ''}`} style={{ ['--c' as string]: '72,190,110' }}><span className="ic"><svg viewBox="0 0 24 24"><path d="m5 12 4.5 4.5L19 7" /></svg></span><span className="lb">Yes</span></button>
+        <button data-a="no" className="answer glass" style={{ ['--c' as string]: '240,92,104' }}><span className="ic"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" /></svg></span><span className="lb">No</span></button>
+      </nav>
+
       <nav className="rail glass" aria-label="Always available">
         <button data-a="phrases" style={{ ['--c' as string]: '250,160,70' }}><span className="ic"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h7" /></svg></span><span className="lb">Phrases</span></button>
-        <button data-a="yes" {...(selected ? { 'data-confirm': '' } : {})} className={selected ? 'ready' : ''} style={{ ['--c' as string]: '72,190,110' }}><span className="ic"><svg viewBox="0 0 24 24"><path d="m5 12 4.5 4.5L19 7" /></svg></span><span className="lb">Yes</span></button>
-        <button data-a="no" style={{ ['--c' as string]: '240,92,104' }}><span className="ic"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" /></svg></span><span className="lb">No</span></button>
-        <button data-a="speak" data-confirm="" className={selected ? 'ready' : ''} style={{ ['--c' as string]: '64,148,246' }}><span className="ic"><svg viewBox="0 0 24 24"><path d="M4 10v4M8 7v10M12 4v16M16 7v10M20 10v4" /></svg></span><span className="lb">Speak</span></button>
         <button data-a="clear" style={{ ['--c' as string]: '126,132,148' }}><span className="ic"><svg viewBox="0 0 24 24"><path d="M5 19 19 5M8 5h11v11" /></svg></span><span className="lb">Clear</span></button>
         <button data-a="help" className="alert" style={{ ['--c' as string]: '236,72,64' }}><span className="ic"><svg viewBox="0 0 24 24"><path d="M12 3 2 21h20zM12 10v4M12 18h.01" /></svg></span><span className="lb">Help</span></button>
       </nav>

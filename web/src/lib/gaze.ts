@@ -20,7 +20,10 @@ const listeners = new Set<Listener>()
 const FEAT_FRAMES = 4      // feature averaging window (frames)
 const LAMBDA = 3           // ridge penalty on z-scored features (best on held-out dots in recorded sessions)
 const LOST_MS = 600        // emit null after this long without a face
-const BLINK = 0.35         // eyelid closure above which iris landmarks are unreliable
+const BLINK = 0.35         // eyelid closure above which iris landmarks are unreliable...
+const BLINK_RISE = 0.25    // ...measured above this person's resting level: the blink score also rises when
+                           // the eyes look down (camera above the screen), which is not a blink
+const BLINK_BASE_FRAMES = 90  // ~3 s of frames for the resting level
 const KEEP = 0.8           // per calibration dot, keep the 80% of samples closest to its median
 const MAX_IMPLICIT = 300   // samples learned from confirmed gaze selections (oldest dropped first)
 
@@ -66,6 +69,7 @@ let recent: number[][] = []
 let current: { f: number[]; t: number } | null = null
 let lastFace = 0
 let blinking = false
+const lidHistory: number[] = []
 let history: { f: number[]; t: number }[] = []   // last few seconds of features, for implicit learning
 const samples: { f: number[]; x: number; y: number }[] = []
 const implicit: { f: number[]; x: number; y: number }[] = []
@@ -141,8 +145,9 @@ function features(f: FaceFrame): number[] | null {
   const lm = f.landmarks
   if (!lm || lm.length < 478 || !f.pose) return null
   // appearance features: required when the calibration was made with them, so samples and
-  // predictions always have the same layout
-  const app = gazeState.appearance ? currentAppearance() : null
+  // predictions always have the same layout. A result counts as current for two model runs,
+  // so a slower backend (WebAssembly instead of WebGPU) still yields usable frames.
+  const app = gazeState.appearance ? currentAppearance(Math.max(250, 2 * appearanceState.ms + 100)) : null
   const [hR, vR, oR] = eye(lm, R)
   const [hL, vL, oL] = eye(lm, L)
   const p = f.pose
@@ -214,7 +219,11 @@ function onFrame(f: FaceFrame) {
   }
   lastFace = f.t
   // during a blink the iris is hidden: hold the last estimate instead of jumping
-  blinking = f.blinkL > BLINK || f.blinkR > BLINK
+  const lid = Math.max(f.blinkL, f.blinkR)
+  lidHistory.push(lid)
+  if (lidHistory.length > BLINK_BASE_FRAMES) lidHistory.shift()
+  const rest = [...lidHistory].sort((a, b) => a - b)[Math.floor(lidHistory.length / 2)]
+  blinking = lid > Math.max(BLINK, rest + BLINK_RISE)
   if (blinking) return
   recent = [...recent.slice(-(FEAT_FRAMES - 1)), feat]
   const avg = feat.map((_, j) => recent.reduce((a, r) => a + r[j], 0) / recent.length)
@@ -308,6 +317,12 @@ export function learnFromSelection(x: number, y: number, dwellMs: number) {
 }
 
 export function calibrationSampleCount() { return samples.length }
+
+/** True while fresh, open-eyed face frames are arriving (what calibration needs to record samples). */
+export function eyesVisible() { return !blinking && !!current && performance.now() - current.t < 300 }
+
+/** True once enough samples are in to predict a gaze point. */
+export function hasGazeModel() { return model != null }
 
 /** Downloads the last calibration's labelled features as JSON (for offline tuning). */
 export function downloadDiagnostics() {

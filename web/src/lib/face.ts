@@ -58,9 +58,12 @@ export function initFace(): Promise<FaceLandmarker> {
 export function onFace(l: FrameListener) { frameListeners.add(l); return () => { frameListeners.delete(l) } }
 export function onBlink(l: BlinkListener) { blinkListeners.add(l); return () => { blinkListeners.delete(l) } }
 
+let liveTrackers = 0   // tracking loops running on any video (every frame listener gets all of them)
+
 /** Run the landmarker on every new video frame until the returned stop() is called. */
 export function trackVideo(video: HTMLVideoElement): () => void {
   let stopped = false
+  liveTrackers++
   let lastTs = -1
   const step = () => {
     if (stopped) return
@@ -96,7 +99,7 @@ export function trackVideo(video: HTMLVideoElement): () => void {
     else requestAnimationFrame(step)
   }
   initFace().then(step).catch((e) => console.warn('face landmarker unavailable', e))
-  return () => { stopped = true }
+  return () => { if (!stopped) liveTrackers--; stopped = true }
 }
 
 // Background tracking for pages with no visible camera (gaze, blink scanning on the boards).
@@ -104,6 +107,8 @@ export function trackVideo(video: HTMLVideoElement): () => void {
 let bg: { video: HTMLVideoElement; stop: () => void } | null = null
 let bgUsers = 0
 export async function trackCameraInBackground(): Promise<() => void> {
+  // a page already tracking the camera feeds every listener: a second loop would analyse each frame twice
+  if (!bg && liveTrackers > 0) return () => {}
   bgUsers++
   if (!bg) {
     const video = document.createElement('video')
