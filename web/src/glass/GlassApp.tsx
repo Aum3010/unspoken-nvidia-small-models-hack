@@ -13,6 +13,7 @@ import type { Candidate, ConfirmationMethod, Modality, SessionState, TimelineIte
 import { Calibration } from './Calibration'
 import * as E from './engine'
 import { startHead, startLips, startVoice } from './sensors'
+import { VisionPreview } from './VisionPreview'
 import './glass.css'
 
 const METHOD: Record<E.How, ConfirmationMethod> = {
@@ -62,6 +63,11 @@ function quote(t: string, n = 16) { const u = t.toUpperCase(); return `“${u.le
 export function GlassApp() {
   const { state, connected } = useSession()
   const health = useHealth()
+  // clips leave this device when the gateway runs elsewhere (e.g. "NVIDIA Brev"); the page says so
+  const host = health?.gateway?.host
+  const remoteHost = host && host !== 'this device' ? host : null
+  // vision preview: only when the gateway runs with UNSPOKEN_CHECKIN=1
+  const checkinOn = !!health?.gateway?.checkin
   // a saved calibration (same window size) is used straight away: no recalibrating after a reload
   const [calibrating, setCalibrating] = useState(() => !gazeState.calibrated)
   const [focusMode, setFocusMode] = useState(false)
@@ -288,10 +294,29 @@ export function GlassApp() {
     }
   }, [state])
 
+  /* ---------- optional auto-speak countdown (UNSPOKEN_AUTO_SPEAK_DELAY_MS) ---------- */
+  const [countdown, setCountdown] = useState<{ key: string; left: number } | null>(null)
+  const autoSpeakMs = state?.auto_speak_in_ms ?? null
+  const countdownKey = autoSpeakMs !== null && PENDING.includes(state?.message.status ?? '') ? `${state?.auto_speak_candidate_id}:${autoSpeakMs}` : null
+  useEffect(() => {
+    if (countdownKey === null || autoSpeakMs === null) return
+    const deadline = performance.now() + autoSpeakMs
+    const tick = () => setCountdown({ key: countdownKey, left: Math.max(0, deadline - performance.now()) })
+    const first = window.setTimeout(tick, 0)
+    const id = window.setInterval(tick, 250)
+    return () => { window.clearTimeout(first); window.clearInterval(id) }
+  }, [countdownKey, autoSpeakMs])
+  const autoSpeakLeft = countdown && countdown.key === countdownKey ? countdown.left : null
+
   /* ---------- session state -> ink, bubbles, caption ---------- */
   const lastSpoken = useRef<string | null>(null)
   useEffect(() => {
     if (!state || calibrating) return
+    if (state.checkin?.status === 'open') { E.caption(state.checkin.question, 'Yes, blink or nod · No or shake'); return }
+    if (state.checkin?.status === 'answered' && state.checkin.answered_ts && Date.now() - state.checkin.answered_ts < 8000) {
+      E.caption(`Nurse notified: patient answered ${(state.checkin.answer ?? '').toUpperCase()}`, 'vision preview · nothing was spoken')
+      return
+    }
     const m = state.message
     const shown = shownCandidates(state)
 
@@ -331,6 +356,14 @@ export function GlassApp() {
     }
   }, [state, calibrating])
 
+  // the countdown caption, on top of the one above, while a delayed auto-speak is pending
+  useEffect(() => {
+    if (autoSpeakLeft === null || !state || calibrating) return
+    const shown = shownCandidates(state)
+    if (shown.length && state.auto_speak_candidate_id === shown[0].id)
+      E.caption(`Speaking in ${Math.ceil(autoSpeakLeft / 1000)} s…`, 'No or shake to stop it')
+  }, [autoSpeakLeft, state, calibrating])
+
   /* ---------- actions: from the rail, bubbles, blinks, nods and keys ---------- */
   const confirm = useCallback((how: E.How) => run(api.confirm(METHOD[how]).then((r) => play(r.audio_url, r.text, r.phrase_audio_id))), [run, play])
   const act = (a: string, el: HTMLElement | null, how: E.How) => {
@@ -345,6 +378,11 @@ export function GlassApp() {
     if (a === 'camera') { if (cam === 'off') location.reload(); return }
     const s = live.current.state
     if (!s) { E.caption('The gateway is offline', 'start it with ./scripts/run_all.sh'); return }
+    if (a === 'vision:checkin') { run(api.checkin()); return }
+    if (s.checkin?.status === 'open' && ['yes', 'blink', 'nod', 'no', 'shake'].includes(a)) {
+      run(api.checkinAnswer(a === 'no' || a === 'shake' ? 'no' : 'yes', METHOD[how]))
+      return
+    }
     const m = s.message
     // a phrase card is the person's own explicit choice (held with the eyes, or clicked), not a model's
     // reading, so choosing it is the confirmation: it is spoken straight away, through the same policy gate
@@ -400,6 +438,12 @@ export function GlassApp() {
     if (['yes', 'speak', 'blink', 'nod'].includes(a) && m.status === 'selected') E.caption(`Confirmed by ${HOW_TEXT[how]}`, 'policy gate checks the exact text')
   }
   useLayoutEffect(() => { actRef.current = act })
+  useEffect(() => {
+    if (!checkinOn) return
+    const onV = (e: KeyboardEvent) => { if (e.key.toLowerCase() === 'v' && !e.repeat && !(e.target instanceof HTMLInputElement)) actRef.current('vision:checkin', null, 'keyboard') }
+    addEventListener('keydown', onV)
+    return () => removeEventListener('keydown', onV)
+  }, [checkinOn])
   useEffect(() => E.onAction((a, el, how) => actRef.current(a, el, how)), [])
 
   const bindCalib = useCallback((fn: ((a: string) => void) | null) => { calibAct.current = fn }, [])
@@ -427,7 +471,7 @@ export function GlassApp() {
 
       <div className="brand">
         <div className="name"><span className="logo" /><span>unspoken<i>.</i></span></div>
-        <button className={`chip glass mono ${cam === 'on' ? 'live' : ''}`} data-a="camera"><b /><span>{cam === 'on' ? 'Camera · on device' : cam === 'off' ? 'Camera off · allow & reload' : 'Camera · starting'}</span></button>
+        <button className={`chip glass mono ${cam === 'on' ? 'live' : ''}`} data-a="camera"><b /><span>{cam === 'on' ? (remoteHost ? `Camera · clips to ${remoteHost}` : 'Camera · on device') : cam === 'off' ? 'Camera off · allow & reload' : 'Camera · starting'}</span></button>
         <span className={`chip glass mono ${mic === 'on' ? (hearing ? 'live' : 'ok') : ''}`}><b /><span>{mic === 'on' ? (health?.audio?.state !== 'ready' ? 'Mic · voice agent offline' : hearing ? 'Mic · hearing you' : 'Mic · listening') : mic === 'off' ? 'Mic off' : 'Mic · starting'}</span></span>
         <button className={`chip glass mono ${eyes ? 'ok' : 'warn'}`} data-a="calibrate"><b /><span>{eyes ? `Eyes · ≈${Math.round(gazeState.accuracyPx ?? 0)} px` : 'Eyes · pointer · calibrate'}</span></button>
       </div>
@@ -439,6 +483,7 @@ export function GlassApp() {
           <canvas id="twin" />
           <Feed timeline={state?.timeline ?? []} />
         </section>
+        {checkinOn && <VisionPreview />}
         <section className="chat glass" aria-label="What you said">
           <header><div>History</div><span className="mono">{state?.spoken.length ? `${state.spoken.length} spoken` : 'today'}</span></header>
           <div className="history" ref={histRef}>
@@ -474,7 +519,7 @@ export function GlassApp() {
       <div className="hint mono">Look or point to aim · blink or Space selects<br />Nod = yes · shake = no · P = phrases</div>
       <div className="gaze" id="gaze" />
 
-      {calibrating && <Calibration bind={bindCalib} onFocusMode={setFocusMode} onDone={doneCalib} />}
+      {calibrating && <Calibration bind={bindCalib} onFocusMode={setFocusMode} onDone={doneCalib} remoteHost={remoteHost} />}
     </>
   )
 }

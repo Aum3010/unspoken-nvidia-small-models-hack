@@ -42,9 +42,11 @@ interface Props {
   /** Hide the room's dwell targets while dots are on screen. */
   onFocusMode: (on: boolean) => void
   onDone: (useEyes: boolean) => void
+  /** where clips are processed: the gateway's host label, null when it is this device */
+  remoteHost?: string | null
 }
 
-export function Calibration({ bind, onFocusMode, onDone }: Props) {
+export function Calibration({ bind, onFocusMode, onDone, remoteHost }: Props) {
   const [phase, setPhase] = useState<Phase>('intro')
   const plan = useRef(layoutPoints())
   const [idx, setIdx] = useState(0)
@@ -211,7 +213,9 @@ export function Calibration({ bind, onFocusMode, onDone }: Props) {
             ? <button className="cbtn" data-a="calib:continue">{usable ? 'Use my eyes' : 'Continue with pointer'}</button>
             : <button className="cbtn" data-a="calib:skip">Skip · use pointer</button>}
         </div>
-        <div className="calib-perm mono">Camera and microphone stay on this device · lips, voice, blink and head run together</div>
+        <div className="calib-perm mono">{remoteHost
+          ? `Mouth and voice clips are processed on the ${remoteHost} GPU server, not stored · eye calibration stays on this device`
+          : 'Camera and microphone stay on this device'} · lips, voice, blink and head run together</div>
       </section>
     </div>
   )

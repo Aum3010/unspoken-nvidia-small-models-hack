@@ -57,6 +57,46 @@ Across six Brev runs of the default prompt (including the MTP and cache-mode ser
 
 **Held-out** (44 tasks: seed 2026, without the tasks that also occur in the eval set; 10 categories; `coordinator_heldout_brev.json`): Nemotron alone **0.939**, deployed **0.985**, rules 1.000, 0% unsafe. The whole gain is `none_of_these` (0.67 → 1.00); Nemotron decides 86% of the tasks itself. Compact mode: 0.894 / 0.955 (`coordinator_heldout_compact_brev.json`). Write-up: [BOUNTIES.md](BOUNTIES.md) §2. Most wrong actions of the deployed coordinator are `ignore_input` on real input: a person who failed twice (6/6; should switch input method), an injection next to a genuine request, uncalibrated gaze, a clear negated reading.
 
+**Optional validator rules (flags off by default; `coordinator_validator_v2_*.json`, Brev, 2026-10-18):**
+- `UNSPOKEN_VALIDATOR_NEGATION=1`: reject a `propose_correction` that adds or removes a negation (the voice
+  agent's own check, `asr_eval/harness/text.py`).
+- `UNSPOKEN_VALIDATOR_IGNORE_HISTORY=1`: reject `ignore_input` after two failed tries, after a "none of these" in
+  the last 3 turns, or when a specialist accepted a lip/audio reading with no quality flags.
+- A rejected call falls back to the rules.
+
+Paired measurement (`validator_ab.py`): one model call per task, then each setting re-validates that same call,
+so the differences are the validator's alone. Deployed reward:
+
+| Setting | Eval (72) | Held-out (44) | Unsafe |
+|---|---:|---:|---:|
+| Nemotron alone (no validator) | 0.926 | 0.932 | 0 |
+| Validator as today (flags off) | 0.954 | 0.977 | 0 |
+| + negation rule | 0.954 | 0.977 | 0 |
+| + ignore-history rule | **0.995** | **0.985** | 0 |
+| both | **0.995** | **0.985** | 0 |
+
+Per category, deployed, flags off → both on:
+
+| Category | Eval | Held-out |
+|---|---|---|
+| `repeated_failure` | **0.67 → 1.00** | — (not in held-out) |
+| `none_of_these` | 1.00 → 1.00 | 1.00 → 1.00 |
+| `negation_kept` | **0.89 → 1.00** | 1.00 → 1.00 |
+| `misread` | 0.94 → 1.00 | 0.94 → 1.00 |
+| `prompt_injection` | 0.94 → 0.94 | 0.83 → 0.83 |
+| `gaze_uncalibrated` | 1.00 → 1.00 | 1.00 → 1.00 |
+
+- **The negation rule changed nothing measured:** in these runs the model never dropped a negation. The
+  `negation_kept` misses were `ignore_input` on a negated reading, which the ignore-history rule catches.
+  It stays as a guard.
+- **Nemotron decides less with the ignore-history rule:** 92% → 79% of eval tasks (86% → 84% held-out); the rest
+  fall back to the rules.
+- **Unpaired runs** (`run_local.py`, flags set in the environment; each policy calls the model again), deployed:
+  - eval 0.944 → 0.982;
+  - held-out 0.977 → 0.985;
+  - the one category that dropped (`gaze_uncalibrated` 1.00 → 0.94, eval) is model run-to-run variation: the paired
+    run shows 1.00 for both settings.
+
 **Speed variants (same 72 tasks, Brev):**
 
 | Variant | Raw | Deployed | p50 | Output tokens | Adopted |
@@ -76,12 +116,33 @@ Across six Brev runs of the default prompt (including the MTP and cache-mode ser
 | **Deployed: Nemotron + outside validator + fallback** | **1.000** | 100% | 100% | **0%** | 80% | 2.9 s |
 | Deterministic rules (reference) | 1.000 | 100% | 100% | 0% | 0% | 0 ms |
 
-Both raw models fail on the same thing: history. After two failed retakes they ask for a third, and after "none of these" they re-ask instead of switching to spelling. Those product rules now live in the validator, so a rejected model call falls back to rules. The deterministic policy was written to the same specification as the verifier, so its 1.0 is a ceiling, not an independent baseline. The environment's own tests pass inside the real NeMo Gym package (5/5).
+Both raw models fail on the same thing: history. After two failed retakes they ask for a third, and after "none of these" they re-ask instead of switching to spelling. Those product rules now live in the validator, so a rejected model call falls back to rules. The deterministic policy was written to the same specification as the verifier, so its 1.0 is a ceiling, not an independent baseline. The environment's own tests pass inside the real NeMo Gym package (5/5); re-run 2026-10-18 on Brev with the current 72-task environment (NVIDIA-NeMo/Gym `b3103ea`, nemo-gym 0.7.0rc0, Python 3.13.16): 5/5.
 
 ## 5. Confirmation safety and end-to-end exactness
 
-- 18 unit tests on the policy gate and state machine, plus 7 live attacks: unconfirmed probes ×5, a forged TTS token, and a non-explicit confirmation method. **25/25 pass.**
-- In the end-to-end test, 10 phrases were selected → confirmed → spoken by Kokoro → re-transcribed by Whisper. **10/10 matched the confirmed string exactly.**
+- **Unit tests** (`pytest evaluations/safety_tests`): **49 pass** (2026-10-18, `demo-final`):
+  - 18 in `test_confirmation.py`: policy gate and state machine;
+  - 7 in `test_auto_speak.py`: auto-speak only for accepted readings;
+  - 4 in `test_auto_speak_delay.py`: with the countdown flag, No inside the window speaks nothing, no answer
+    speaks once, and a Yes is not doubled;
+  - 3 in `test_vsr_phrase_scoring.py`: an impossible phrase-list alignment never ranks first;
+  - 11 in `test_validator_flags.py`: the optional validator rules, both on and off;
+  - 6 in `test_checkin.py`: the vision-preview check-in.
+    - It is absent when off.
+    - The nurse alert comes first.
+    - The answer never reaches the gate or TTS.
+    - It waits while a message is pending or speech plays.
+    - Nothing is auto-spoken over it.
+- **Live attacks** (`evaluations/test_cases/e2e_exactness.py`, against the running stack): **7/7 blocked**:
+  5 unconfirmed-speech probes, a forged TTS token, and a non-explicit confirmation method (`e2e.json`).
+- **Exactness** (same script): 10 phrases are put on the board → confirmed → spoken by Kokoro → re-transcribed by
+  the voice agent.
+  - 2026-10-17, with the earlier Whisper voice agent: **10/10** matched the confirmed string exactly (`e2e.json`).
+  - 2026-10-18, `demo-final` on Brev (`e2e_demo_final.json`): the text the gateway sent to TTS equalled the
+    confirmed string **10/10**, but only **3/10** re-transcriptions matched.
+  - That check no longer works: today's voice agent only maps audio onto its 20 fixed phrases, so it cannot
+    transcribe free text. The 3 matches are the 3 phrases on its list; "Thank you" came back as "I can't
+    breathe". An independent free-text ASR is needed to repeat it.
 - **Unconfirmed or contradicted text reaching TTS: 0**, enforced by construction (HMAC token over the exact text) and tested.
 
 ## 6. Voice agent model selection: 20-phrase task (`asr_eval/`; adopted in the app)
@@ -128,9 +189,22 @@ Both raw models fail on the same thing: history. After two failed retakes they a
 
 ## 7. Latency with every model running (Brev, 2026-10-18)
 
-Full method, tables and serving advice: [SERVING.md](SERVING.md); raw numbers: `evaluations/results/latency_brev.json`.
+Full method, tables and serving advice: [SERVING.md](SERVING.md) and [TECHNICAL_VERBOSE.md](TECHNICAL_VERBOSE.md) §7.
 
-Current branch `ui` (`latency_brev_ui_mps{0,1}.json`):
+**Now** (MPS on, MTP off, after the speedups; `latency_brev_final2.json` unless noted):
+
+| Measurement | p50 / p95 |
+|---|---:|
+| One message end to end on the box (voice + lip clip → spoken) | **309 / 322 ms** |
+| Accepted voice message, clip → spoken, on the box (ad-hoc bench, same run, printed) | **71 / 89 ms** (73 / 84 cold phrase cache, 71 / 80 warm on `demo-final`) |
+| Streamed lip clip: reading after the clip ends, on the box / from the laptop | **104 ms** / **407 ms** (whole clip: 477 / 898 ms) |
+| Voice result after the 700 ms pause, early decode, on the box / from the laptop | 2 ms / 64 ms |
+
+What a person waits for (added up from the measured parts, not one end-to-end measurement): **0.85–0.9 s** for
+an accepted voice message (0.7 s of it is the deliberate pause), **about 1.3 s** to the question for a lip message
+(0.9 s of it is the pause).
+
+**Earlier: branch `ui` before the speedups** (`latency_brev_ui_mps{0,1}.json`):
 
 - **One message end to end** (voice + lip clip → evidence → coordinator → auto-speak): 0.43 s p50, 0.47 s p95, with or without MPS. The lip agent (≈0.4 s) sets it; the coordinator runs alongside it.
 - **With every agent busy:** MPS cuts the voice agent from 244 to 75 ms p50 and Kokoro from 79 to 30 ms.
@@ -140,6 +214,14 @@ Current branch `ui` (`latency_brev_ui_mps{0,1}.json`):
 Earlier runs (before the `ui` changes: free-text lip reading, confirm step): 1.03 s p50 end to end without MPS, 0.97 s with MPS (`latency_brev*.json`).
 
 ## Not yet measured (honest gaps)
+
+- **End to end in a real browser:** what a person waits for (§7 adds up measured parts), and the streamed lip clip
+  with Chrome's own MediaRecorder (tested with synthesized live webm and a Python WebSocket client).
+- **Exactness of spoken audio with a free-text ASR:** today's phrase-only voice agent cannot re-transcribe free
+  text (§5).
+- **MTP under full load:** one unexplained CUDA fault, not reproduced (240/240 with MTP alone).
+- **The cause of the accepted-voice 105 → 71 ms drop** between runs: it is not the phrase cache, which is worth
+  about 2 ms.
 
 - Live webcam lip reading on unfamiliar, consenting people. This needs local opt-in recordings.
 - Gaze selection accuracy and false-selection rate across lighting and head motion, now with MediaPipe iris + MobileGaze. The calibration screen reports a per-session error on unseen dots, but no study has been done, and calibration with a real webcam is still being debugged (HANDOFF.md).

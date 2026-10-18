@@ -1,0 +1,7 @@
+# SYNTHETIC profile for the vision preview. Not a real person; not linked to the MIMIC-IV record in any way.
+synthetic: true
+label: SYNTHETIC profile (vision preview)
+preferred_name: Raj
+family_member:
+  name: Priya
+  relation: family

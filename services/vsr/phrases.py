@@ -11,6 +11,10 @@ from __future__ import annotations
 import numpy as np
 import torch
 
+# log P for a phrase the clip cannot contain (more tokens than CTC can align to its frames); the same value and
+# meaning as asr_eval/harness/models.py IMPOSSIBLE. Finite, so evidence JSON stays valid; it always ranks last.
+IMPOSSIBLE = -1e6
+
 
 def tokenize(text: str, piece_to_id: dict[str, int]) -> list[int]:
     """Greedy longest-match over the model's unigram5000 pieces."""
@@ -44,11 +48,22 @@ def score_phrases(model, enc: torch.Tensor, phrase_tokens: list[list[int]], ctc_
     att = (logp.gather(-1, ys_out.clamp(min=0).unsqueeze(-1)).squeeze(-1) * valid).sum(-1)
 
     ctc_lp = torch.log_softmax(model.ctc.ctc_lo(enc), dim=-1).cpu()  # CTC loss runs on CPU
+    ctc = ctc_logp(ctc_lp, phrase_tokens)
+    out = (1 - ctc_weight) * att.cpu() + ctc_weight * ctc
+    return torch.where(ctc <= IMPOSSIBLE, torch.full_like(out, IMPOSSIBLE), out)
+
+
+def ctc_logp(ctc_lp: torch.Tensor, phrase_tokens: list[list[int]]) -> torch.Tensor:
+    """CTC log P(phrase | frames) for every phrase, from one clip's (frames, vocab) log-probabilities.
+
+    An alignment that cannot exist gets IMPOSSIBLE. (zero_infinity=True used to turn its infinite loss into 0, a
+    perfect score, so an impossible phrase could rank first.)"""
+    n = len(phrase_tokens)
     targets = torch.cat([torch.tensor(t) for t in phrase_tokens])
-    ctc = -torch.nn.functional.ctc_loss(
-        ctc_lp.unsqueeze(1).expand(-1, n, -1), targets, torch.full((n,), len(enc)),
-        torch.tensor([len(t) for t in phrase_tokens]), reduction="none", zero_infinity=True)
-    return (1 - ctc_weight) * att.cpu() + ctc_weight * ctc
+    nll = torch.nn.functional.ctc_loss(
+        ctc_lp.unsqueeze(1).expand(-1, n, -1), targets, torch.full((n,), len(ctc_lp)),
+        torch.tensor([len(t) for t in phrase_tokens]), reduction="none", zero_infinity=False)
+    return torch.where(torch.isfinite(nll), -nll, torch.full_like(nll, IMPOSSIBLE))
 
 
 def dtw(a: np.ndarray, b: np.ndarray) -> float:

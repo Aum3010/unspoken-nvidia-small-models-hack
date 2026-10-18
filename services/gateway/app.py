@@ -20,7 +20,7 @@ from pydantic import BaseModel
 from services.gateway.state import Session, TransitionError
 from shared.confirmation import PolicyViolation, authorize_speech, phrase_preload_token, sign
 from shared.provenance import MODEL_LEDGER, ROOT, service_url
-from shared.schemas import ALLOWED_CONFIRMATION_METHODS, Candidate, Evidence, ToolCall
+from shared.schemas import ALLOWED_CONFIRMATION_METHODS, Candidate, Evidence, ToolCall, now_ms
 from shared.service import make_app
 
 app = make_app("unspoken-gateway")
@@ -78,7 +78,8 @@ async def health():
             results = await asyncio.gather(*[_probe(client, n) for n in SPECIALISTS])
         _health_cache.update(ts=time.time(), data={n: r for n, r in zip(SPECIALISTS, results)})
     # where the agents run; the UI must say so when clips leave the person's device
-    return {"gateway": {"state": "ready", "host": os.environ.get("UNSPOKEN_HOST_LABEL", "this device")}, **_health_cache["data"]}
+    gw = {"state": "ready", "host": os.environ.get("UNSPOKEN_HOST_LABEL", "this device")} | ({"checkin": True} if CHECKIN else {})
+    return {"gateway": gw, **_health_cache["data"]}
 
 
 @app.get("/api/ledger")
@@ -142,6 +143,15 @@ _background: set[asyncio.Task] = set()
 # agent accepted it, or lips and voice agree on it) the rules decide that case exactly as Nemotron is asked to, so the
 # person does not wait for the model and the GPU does not run it. UNSPOKEN_LLM_FOR_ACCEPTED=1 restores the model call.
 LLM_FOR_ACCEPTED = os.environ.get("UNSPOKEN_LLM_FOR_ACCEPTED", "0") != "0"
+# Optional pause before an accepted reading is auto-spoken, shown as a countdown; No or a shake in that time
+# rejects it and nothing is spoken. 0 (the default) speaks at once, as before.
+AUTO_SPEAK_DELAY_MS = int(os.environ.get("UNSPOKEN_AUTO_SPEAK_DELAY_MS", "0") or 0)
+# Vision preview (proactive check-in, services/gateway/checkin.py). Off: none of its routes exist.
+CHECKIN = os.environ.get("UNSPOKEN_CHECKIN", "0") != "0"
+
+
+def _checkin_open(s: Session) -> bool:
+    return bool(s.checkin) and s.checkin.get("status") == "open"
 
 
 def _accepted_reading(s: Session):
@@ -164,9 +174,12 @@ def _schedule(coro):
 
 
 async def _auto_speak(s: Session, message_id: str, candidate_id: str):
-    """Demo auto-speak: say the coordinator's final reading, unless the person moved on or said No meanwhile."""
+    """Demo auto-speak: say the accepted reading, unless the person moved on or said No meanwhile."""
+    if AUTO_SPEAK_DELAY_MS > 0:
+        await asyncio.sleep(AUTO_SPEAK_DELAY_MS / 1000)
     m = s.message
-    if m.id != message_id or m.status not in ("proposed", "ambiguous", "clarifying"):
+    if m.id != message_id or m.status not in ("proposed", "ambiguous", "clarifying") \
+            or s.auto_speak_candidate_id != candidate_id or _checkin_open(s):
         return
     ev = s.auto_confirm(candidate_id)
     try:
@@ -257,8 +270,10 @@ def apply_plan(s: Session, call: ToolCall, quiet: bool = False):
                 latency_ms=call.latency_ms, data={"call": call.model_dump()})
     # Demo auto-speak covers accepted readings only. Ambiguous readings, lip-only matches and corrections always wait
     # for the person's Yes/No.
-    if call.name == "ask_confirmation" and s.settings["auto_speak"] and accepted and s.shown_candidate_ids == [accepted.id]:
+    if call.name == "ask_confirmation" and s.settings["auto_speak"] and accepted and s.shown_candidate_ids == [accepted.id] \
+            and not _checkin_open(s):  # nothing is spoken over an open check-in
         s.auto_speak_candidate_id = accepted.id
+        s.auto_speak_at = now_ms() + AUTO_SPEAK_DELAY_MS if AUTO_SPEAK_DELAY_MS > 0 else None
         _schedule(_auto_speak(s, m.id, accepted.id))
 
 
@@ -776,3 +791,9 @@ async def ws(websocket: WebSocket, sid: str):
         pass
     finally:
         sockets[sid].discard(websocket)
+
+
+if CHECKIN:
+    from services.gateway import checkin as _checkin
+
+    _checkin.register(app, get_session, push)

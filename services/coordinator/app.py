@@ -16,6 +16,7 @@ import json
 import os
 import re
 import time
+from pathlib import Path
 from difflib import SequenceMatcher
 
 import httpx
@@ -33,6 +34,13 @@ TIMEOUT_S = float(os.environ.get("UNSPOKEN_LLM_TIMEOUT", 20))
 # instead of their ids. About 15 output tokens instead of ~80. Code maps the answer back onto the same tools and
 # ids before validation, and writes the note to the person from a template.
 COMPACT = os.environ.get("UNSPOKEN_COORD_COMPACT", "0") != "0"
+# Optional validator rules (off by default; measured in docs/EVALUATION.md §4):
+# - NEGATION: a propose_correction must keep its source reading's negation ("I don't need water" never becomes
+#   "I need water"), using the voice agent's own negation check (asr_eval/harness/text.py, configured words).
+# - IGNORE_HISTORY: ignore_input is rejected after two failed tries or a "none of these" in the last 3 turns, and
+#   when a specialist accepted a lip/audio reading with no quality flags.
+VALIDATOR_NEGATION = os.environ.get("UNSPOKEN_VALIDATOR_NEGATION", "0") != "0"
+VALIDATOR_IGNORE_HISTORY = os.environ.get("UNSPOKEN_VALIDATOR_IGNORE_HISTORY", "0") != "0"
 MAX_RATIONALE = 160
 
 app = make_app("unspoken-coordinator")
@@ -256,12 +264,16 @@ def validate(call: ToolCall, req: PlanRequest) -> ToolCall:
             errors.append("retake only for lip/audio")
     elif call.name == "propose_correction":
         errors += correction_errors(a, req)
+        if VALIDATOR_NEGATION:
+            errors += negation_errors(a, req)
     elif call.name == "ignore_input":
         # a reading two modalities agree on, or one from an explicit input, is a real message
         if any(len(set(c.supporting_modalities)) >= 2 for c in req.candidates):
             errors.append("lip and audio agree on a reading; it is not noise")
         if any(c.modality not in ("lip", "audio") for c in req.candidates):
             errors.append("only lip/audio readings can be ignored as noise")
+        if VALIDATOR_IGNORE_HISTORY:
+            errors += ignore_history_errors(req)
     # no forced consensus: when lips and voice disagree, the person sees both
     if call.name == "ask_confirmation" and not errors:
         cids = set(a.get("candidate_ids") or [])
@@ -283,6 +295,41 @@ def validate(call: ToolCall, req: PlanRequest) -> ToolCall:
     call.valid = not errors
     call.validation_errors = errors
     return call
+
+
+_NEGATION_WORDS: set[str] | None = None
+
+
+def _negated(text: str) -> bool:
+    """The voice agent's negation check: asr_eval's normalisation (don't -> do not) and its configured words."""
+    global _NEGATION_WORDS
+    from asr_eval.harness.text import has_negation, normalize
+    if _NEGATION_WORDS is None:
+        try:
+            import yaml
+            cfg = yaml.safe_load((Path(__file__).resolve().parents[2] / "asr_eval" / "configs" / "eval.yaml").read_text())
+            _NEGATION_WORDS = set(cfg["decision"]["negation_words"])
+        except Exception:
+            _NEGATION_WORDS = {"not", "no", "never"}
+    return has_negation(normalize(text), _NEGATION_WORDS)
+
+
+def negation_errors(a: dict, req: PlanRequest) -> list[str]:
+    src = [c for c in req.candidates if c.id in (a.get("source_candidate_ids") or [])]
+    fixed = _negated(str(a.get("text", "")))
+    return ["correction adds or removes a negation"] if any(_negated(c.text) != fixed for c in src) else []
+
+
+def ignore_history_errors(req: PlanRequest) -> list[str]:
+    errors = []
+    if req.history.count("retake") >= 2:
+        errors.append("two tries already failed; offer another input method, not silence")
+    if "none_of_these" in req.history[-3:]:
+        errors.append("the person rejected the readings; switch input method, not silence")
+    accepted = {e.modality for e in req.evidence if e.modality in ("lip", "audio") and e.status == "proposed" and not e.quality_flags}
+    if any(c.modality in accepted for c in req.candidates):
+        errors.append("a specialist accepted this reading with no quality flags; it is not noise")
+    return errors
 
 
 CORRECTION_MAX_WORDS = 12

@@ -91,3 +91,15 @@ manifest.csv ─► Silero VAD ─► model (own process) ─► rankers ─► 
 - **Every detail** of the system and its serving: [TECHNICAL_VERBOSE.md](TECHNICAL_VERBOSE.md).
 - **Same code on both.** Device selection goes through `shared.service.pick_device` (cuda > mps > cpu). The ASR and TTS backends are picked by platform: MLX on a Mac, PyTorch/NeMo on CUDA.
 - **Latency** with every model running together, and how to serve it faster: [SERVING.md](SERVING.md).
+
+## Optional behaviour on `demo-final` (flags, all off by default)
+
+| Flag | Effect | Where |
+|---|---|---|
+| `UNSPOKEN_VALIDATOR_NEGATION` | the coordinator validator rejects a correction that adds or removes a negation | `services/coordinator/app.py` |
+| `UNSPOKEN_VALIDATOR_IGNORE_HISTORY` | the validator rejects `ignore_input` after two failed tries, a recent "none of these", or on an accepted clean reading | `services/coordinator/app.py` |
+| `UNSPOKEN_AUTO_SPEAK_DELAY_MS` | a cancellable countdown before an accepted reading is auto-spoken | `services/gateway/app.py`, `GlassApp.tsx` |
+| `UNSPOKEN_CHECKIN` | vision preview: a proactive check-in question on recorded MIMIC-IV demo data. The answer is logged for the nurse and never spoken | `services/gateway/checkin.py`, `VisionPreview.tsx` |
+
+Measured effects and the full list of flags: [TECHNICAL_VERBOSE.md](TECHNICAL_VERBOSE.md) §2–§4 and
+[EVALUATION.md](EVALUATION.md) §4. Open issues: TECHNICAL_VERBOSE §10.

@@ -70,9 +70,9 @@ Every target works by click, keyboard, **gaze or pointer dwell** (confirm target
 | Lip reading, unseen GRID speakers | top-1 WER **79.6%** (best-of-5 71%). Readings are therefore candidates only. Still face flagged **8/8** |
 | Weak speech | Nemotron Speech 0.6B + forced phrase scoring, 3 speakers, leave-one-speaker-out: right phrase accepted **71.5%**, wrong **0.4%**, **90.2%** resolved within one gaze question, 0/45 near-miss false accepts, 43 ms per clip (`asr_eval/results/loso.md`) |
 | Coordinator (NeMo Gym, 72 tasks, Brev, current prompt) | Nemotron raw 0.917, deployed (Nemotron + validator + fallback) 0.940, **0% unsafe**; every wrong move is `ignore_input` on real input (e.g. a person who failed twice) — see `docs/TECHNICAL_VERBOSE.md` §3.3. (Mac, 60 tasks, earlier prompt: 0.933 / 1.000) |
-| Safety | **25/25** gate tests and attacks pass; spoken = confirmed string **10/10**; unconfirmed text reaching TTS **0** |
+| Safety | **49/49** unit tests (gate, state machine, auto-speak, phrase scoring, optional validator rules, check-in preview) and **7/7** live attacks blocked; TTS text = confirmed string **10/10** (re-transcription matched 10/10 with the earlier Whisper voice agent; today's phrase-only voice agent cannot re-transcribe free text, `docs/EVALUATION.md` §5); unconfirmed text reaching TTS **0** |
 | Model budget | **31.01B** of 33B (coordinator at its nominal 30B; 32.59B with its weight-file count) |
-| Latency, every model on one RTX PRO 6000 (NVIDIA MPS) | accepted voice message clip → spoken **71 ms** p50 on the GPU box (rules decide accepted readings, phrase audio pre-rendered); lip reading **0.41 s** after the clip ends from the laptop (streamed while mouthing; 0.90 s uploaded whole); voice agent 75 ms with every model busy (244 ms without MPS); voice result 64 ms after the end-of-utterance pause from the laptop, thanks to early decode (`docs/SERVING.md`) |
+| Latency, every model on one RTX PRO 6000 (NVIDIA MPS) | accepted voice message clip → spoken **71–73 ms** p50 on the GPU box (rules decide accepted readings, no model call); lip reading **0.41 s** after the clip ends from the laptop (streamed while mouthing; 0.90 s uploaded whole); voice agent 75 ms with every model busy (244 ms without MPS); voice result 64 ms after the end-of-utterance pause from the laptop, thanks to early decode (`docs/SERVING.md`) |
 
 Run `./scripts/run_evals.sh` to reproduce. Details and known gaps are in `docs/EVALUATION.md`.
 
@@ -120,8 +120,17 @@ docs/                   TECHNICAL_VERBOSE.md (everything in one place), architec
                         datasets & consent, evaluation, BREV.md, SERVING.md
 ```
 
+## Status and open issues
+
+The current branch is `demo-final` (local; pushed branches: `ui`, `ui-speedups`, `serving-mps`).
+- **Where to look:** what is on each branch, how to run it, and every open bug, shortfall and pending decision
+  are in [HANDOFF.md](HANDOFF.md); the full technical list is in
+  [docs/TECHNICAL_VERBOSE.md](docs/TECHNICAL_VERBOSE.md) §10.
+- **Flags:** new behaviour is behind flags, and the defaults reproduce the measured system; the table is in
+  TECHNICAL_VERBOSE §2.
+
 ## Product invariant
 
 **No unverified interpretation is ever spoken as the patient's intention.** This is enforced by code, not by prompting. See `shared/confirmation.py` and `evaluations/safety_tests/`.
 
-**Exception on branch `ui`: demo auto-speak.** With `UNSPOKEN_AUTO_SPEAK=1` (currently the default) the gateway speaks an **accepted** reading (the voice agent accepted it, or lips and voice agree) without the person's confirmation; ambiguous readings, lip-only matches and corrections still wait for Yes/No (`evaluations/safety_tests/test_auto_speak.py`). It is audited as `demo_auto_spoken` by the system, never as a user action, and the policy gate requires its own audited event for the exact text. The invariant above holds only with `UNSPOKEN_AUTO_SPEAK=0`. Risks are listed in `docs/TECHNICAL_VERBOSE.md` §10.
+**Exception on branches `ui`, `ui-speedups` and `demo-final`: demo auto-speak.** With `UNSPOKEN_AUTO_SPEAK=1` (currently the default) the gateway speaks an **accepted** reading (the voice agent accepted it, or lips and voice agree) without the person's confirmation; ambiguous readings, lip-only matches and corrections still wait for Yes/No (`evaluations/safety_tests/test_auto_speak.py`). It is audited as `demo_auto_spoken` by the system, never as a user action, and the policy gate requires its own audited event for the exact text. The invariant above holds only with `UNSPOKEN_AUTO_SPEAK=0`. Risks are listed in `docs/TECHNICAL_VERBOSE.md` §10.

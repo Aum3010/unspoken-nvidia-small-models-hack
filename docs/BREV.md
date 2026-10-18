@@ -169,12 +169,15 @@ brev exec marginal-sapphire-whale 'bash ~/unspoken/scripts/brev/start_app.sh sta
 bash scripts/brev/connect.sh marginal-sapphire-whale
 ```
 
-- **Privacy:** mouth video and voice clips leave the laptop for the instance (over SSH). They are processed in memory and not stored. The gateway reports `host: "NVIDIA Brev"`, but the UI on branch `ui` no longer shows it (the camera chip says "on device"): tell the person.
+- **Privacy:** mouth video and voice clips leave the laptop for the instance (over SSH). They are processed in memory and not stored. The gateway reports `host: "NVIDIA Brev"`, and on `demo-final` the UI shows it: the camera chip says "Camera · clips to NVIDIA Brev" and calibration says clips are processed on the GPU server (on branch `ui` it still says "on device": tell the person there).
 - **Ports:** the asr_eval bench also uses 8800 on the instance. The app's UI uses the laptop's 8800, so don't forward the bench to 8800 while the app UI is open.
 - **NVIDIA MPS** is on by default: `start_app.sh` starts the daemon before any GPU process, and `UNSPOKEN_MPS=0` stops it. It is detected by full command line (`pgrep -f`), since `pgrep -x` cannot match the 15-character-truncated process name.
 - **Early voice decode:** the gateway's `/capture/audio/early|commit|discard` routes let the voice decode run during the end-of-utterance pause.
-- Measured 2026-10-18 on branch `ui` (MPS on, asr_eval bench stopped): the whole stack peaks at about 63 GB of the 96 GB. One message end to end takes 0.44 s p50 on the box; the voice agent takes 75 ms with every model busy; the voice result is ready 64 ms after the pause from the laptop ([SERVING.md](SERVING.md)). Every detail: [TECHNICAL_VERBOSE.md](TECHNICAL_VERBOSE.md).
+- Measured 2026-10-18 on branch `ui` (MPS on, asr_eval bench stopped): the whole stack peaks at about 63 GB of the 96 GB. One message end to end took 0.44 s p50 on the box on branch `ui` (`latency_brev_ui_mps1.json`), and **0.31 s** after the speedups (`latency_brev_final2.json`, 309 ms p50); the voice agent takes 75 ms with every model busy; the voice result is ready 64 ms after the pause from the laptop ([SERVING.md](SERVING.md)). Every detail: [TECHNICAL_VERBOSE.md](TECHNICAL_VERBOSE.md).
 - **Latency:** `PYTHONPATH=. /workspace/venv-app/bin/python scripts/brev/bench_latency.py` (on the instance) measures each agent alone, all at once, and one message end to end. Results and how to serve faster: [SERVING.md](SERVING.md).
+- **Vision preview data** (only with `UNSPOKEN_CHECKIN=1`): run `python scripts/vision/fetch_mimic_event.py` on the laptop, then copy `data/vision/` to `~/unspoken/data/vision/` like `data/enroll/`. `sync_app.sh` ships neither.
+- **NeMo Gym check:** a Gym checkout with Python 3.13 sits in `/workspace/nemo-gym-check/Gym` (the environment's tests pass 5/5 there).
+- **Flags** (pass as environment variables to `start_app.sh`): see TECHNICAL_VERBOSE §2. Open issues: TECHNICAL_VERBOSE §10 and HANDOFF.md.
 - Logs: `~/unspoken/.run/logs/<service>.log`; pinned versions: `~/unspoken/.run/requirements-cuda.lock`, `requirements-vllm.lock`.
 
 ## 5. Problems we hit, and the fixes

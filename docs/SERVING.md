@@ -11,21 +11,23 @@ Inputs: Kokoro speaks the 20 voice phrases (and those clips feed the voice agent
 feed the lip agent; one BNCI letter feeds the EEG agent; a fixed two-candidate question feeds the coordinator.
 Run-to-run variation is about ±10% (the lip agent alone measured 501–619 ms p50 across runs).
 
-## Current: speedups on top of `ui` (local branch `ui-local`)
+## Current: speedups on top of `ui` (`ui-local`, pushed as `ui-speedups`; `demo-final` adds no speed changes)
 
 All measured on Brev with MPS on (`latency_brev_final2.json`, coordinator files in `evaluations/results/`). Accuracy
 was checked for each one before it was kept.
 
 | Change | Speed | Accuracy check | Kept |
 |---|---|---|---|
-| Accepted readings decided by rules, without Nemotron | accepted voice clip → spoken **413 → 71 ms** p50 | rules ask exactly what Nemotron is asked to; Nemotron still runs for ambiguous/unknown | yes |
+| Accepted readings decided by rules, without Nemotron | accepted voice clip → spoken **413 → 105 ms** p50 right after the change, 71–73 ms in later runs (²) | rules ask exactly what Nemotron is asked to; Nemotron still runs for ambiguous/unknown | yes |
 | Auto-speak only for accepted readings | — | `test_auto_speak.py`: ambiguous, lip-only, disagreement and corrections wait for Yes/No | yes |
 | Batched DTW (enrollment matching) | lip agent alone **391 → 265 ms** | distances equal to 3e-8; 0 of 270 top-3 changes | yes |
-| Pre-rendered phrase audio, preloaded by the page | skips Kokoro and the audio download for fixed phrases | the gate still decides; other text still goes to Kokoro | yes |
+| Pre-rendered phrase audio, preloaded by the page | skips Kokoro on the gateway: about 2 ms (cold 73 vs warm 71 ms); the page's preload request fails with HTTP 500 (TECHNICAL_VERBOSE §10), so the page still downloads the audio | the gate still decides; other text still goes to Kokoro | yes (bug open) |
 | Streamed lip clips (250 ms pieces over the WebSocket) | lip reading after the clip ends **898 → 407 ms** (laptop), 477 → 104 ms (box) | identical readings 12/12 (box) and 8/8 (laptop) | yes |
 | Compact coordinator JSON | 272 → 84 ms | worse on ambiguous readings and after a rejection | **no** (`UNSPOKEN_COORD_COMPACT=1`) |
 | MTP speculative decoding | 272 → 229 ms | NeMo Gym unchanged | **no**: one CUDA fault under full load took every GPU process down under MPS (`LLM_MTP=1`) |
 | Prefix caching (`--mamba-cache-mode all`) | — | — | **no**: cannot hit; the cache block is 4,224 tokens and the prompt about 1,700 |
+
+(²) Measured with an ad-hoc voice-only bench on the box (40 Kokoro-rendered phrase clips), printed, not saved to a file: 413 / 459 ms before the change (Nemotron planned every message); 106 / 120 ms with accepted readings decided by rules (commit `51df483`); 105 / 115 ms after auto-speak was limited to accepted readings (`09c44c1`); 71 / 89 ms in the final run (same run as `latency_brev_final2.json`); on `demo-final`, 73 / 84 ms with the gateway's phrase cache cold and 71 / 80 ms warm. So the later 105 → 71 ms drop is **not** from pre-rendered phrase audio (worth about 2 ms), and its cause was not isolated.
 
 **What a person waits for now:**
 - an accepted voice message: about 0.85–0.9 s, of which 0.7 s is the deliberate pause;
