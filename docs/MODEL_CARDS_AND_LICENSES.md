@@ -5,11 +5,11 @@ Parameter counts below come from `scripts/verify_weights.py`, which reads the we
 | Role | Model / checkpoint | Params (counted) | Runtime | Licence |
 |---|---|---:|---|---|
 | Coordinator (all logical agent roles share it) | NVIDIA Nemotron 3.5 Lightning 30B-A3B — Ollama `nemotron-3.5-lightning:30b-a3b` / `mlx-community/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-4bit` | 30 B (nominal; weight files 31.578 B) | Ollama (Metal) · MLX · vLLM on Brev (NVFP4) | OpenMDW-1.1 |
-| Visual speech | Auto-AVSR `LRS3_V_WER19.1` via Chaplin (`huggingface.co/Amanvir/LRS3_V_WER19.1`) | 0.250 B | PyTorch MPS | code Apache-2.0 / MIT (Chaplin); weights follow LRS3 terms |
-| VSR beam-search LM | Auto-AVSR `lm_en_subword` | 0.054 B | PyTorch MPS | as above |
+| Visual speech | Auto-AVSR `LRS3_V_WER19.1` via Chaplin (`huggingface.co/Amanvir/LRS3_V_WER19.1`) | 0.250 B | PyTorch MPS / CUDA | code Apache-2.0 / MIT (Chaplin); weights follow LRS3 terms |
+| VSR beam-search LM | Auto-AVSR `lm_en_subword` | 0.054 B | PyTorch MPS / CUDA | as above |
 | ASR | NVIDIA Nemotron Speech Streaming en 0.6B (`nvidia/nemotron-speech-streaming-en-0.6b`), forced_llr phrase scoring | 0.618 B | NeMo, CUDA (bf16 autocast) | NVIDIA Open Model License |
 | Voice activity gate | Silero VAD 6.2.3 | 0.0005 B | PyTorch CPU | MIT |
-| TTS | Kokoro-82M, `mlx-community/Kokoro-82M-bf16` | 0.082 B | MLX | Apache-2.0 (voices per model card) |
+| TTS | Kokoro-82M: `mlx-community/Kokoro-82M-bf16` on a Mac, `hexgrad/Kokoro-82M` (`kokoro` KPipeline) on CUDA | 0.082 B | MLX · PyTorch CUDA | Apache-2.0 (voices per model card) |
 | Face / blink (browser) | MediaPipe Face Landmarker float16 | ≤0.002 B | wasm/WebGL | Apache-2.0 |
 | Gaze (browser) | MobileGaze MobileOne-S0 eye-image model (`mobileone_s0_gaze.onnx`, trained on Gaze360) + per-user ridge calibration on MediaPipe iris/eyelid features | 0.00124 B (ONNX initializers) | ONNX Runtime Web (WebGPU / WebAssembly) | MIT |
 | Mouth detector (VSR preprocessing) | MediaPipe face detection 0.10.21 | ≈0.001 B (estimate) | CPU | Apache-2.0 |
@@ -18,9 +18,9 @@ Parameter counts below come from `scripts/verify_weights.py`, which reads the we
 
 Not deployed and not counted: LipVoicer and VoiceBridge, which are research references only (no verified checkpoint for VoiceBridge). `granite4.2:8b` appears in the coordinator evaluation only as a comparison policy.
 
-## ASR candidates under evaluation (`asr_eval/`, not deployed yet)
+## ASR candidates evaluated (`asr_eval/`)
 
-These models are benchmarked on Brev to choose a replacement for Whisper base in the voice agent (see [BREV.md](BREV.md) and `asr_eval/README.md`).
+These models were benchmarked on Brev to replace Whisper base in the voice agent; Nemotron Speech Streaming en 0.6B won and is deployed (see [BREV.md](BREV.md), `asr_eval/README.md` and [EVALUATION.md](EVALUATION.md) §6).
 - Licences were read from each Hugging Face model card on 2026-10-17.
 - "Measured" parameter counts come from the loaded weights (`results/raw/{model}_info.json`). The others are model-card figures until measured.
 - Revisions are pinned at run time and logged.

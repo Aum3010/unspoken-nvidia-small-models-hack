@@ -63,7 +63,8 @@ On a laptop (CPU) the same code runs with `configs/local_smoke.yaml`, which writ
 | `harness/text.py` | Normalisation (contractions expanded), negation detection |
 | `harness/vad.py` | Silero frame probabilities → speech seconds per threshold |
 | `harness/models.py` | Model interface: `hf_ctc` (Parakeet-CTC, forced scoring), `nemo_transducer` (Parakeet-TDT, Nemotron streaming incl. 160/560 ms lookahead), `faster_whisper` |
-| `harness/pipeline.py` | One clip through one model (transcript, phrase scores, timings), shared by `run_eval.py` and `serve.py` |
+| `harness/pipeline.py` | One clip through one model (transcript, phrase scores, timings), shared by `run_eval.py` and `harness/live.py` |
+| `harness/live.py` | `Bench`: one live clip through the evaluated pipeline (Silero gate, model, rankers, `decide()`, frozen thresholds). Used by `serve.py` **and by the app's voice agent** (`services/audio/`) |
 | `serve.py`, `static/index.html` | Live push-to-talk test bench and labelled-recording capture |
 | `harness/decide.py` | Rankers (`text`, `forced_sum`, `forced_norm`, `forced_llr`), `decide()` and `explain()`, calib-only threshold search, language-aware surface forms |
 | `harness/metrics.py` | Positive/negative metrics, Wilson CI, rule of three, WER/CER, latency |
@@ -104,6 +105,7 @@ On a laptop (CPU) the same code runs with `configs/local_smoke.yaml`, which writ
 | Forced phrase scoring for Nemotron (RNNT) | Done; adopted |
 | Multilingual Nemotron 3.5 (en-US prompt) vs English-only | Done; not adopted (less accurate, slower). Language selector and draft translations kept |
 | Live test bench (`serve.py`) | Running on Brev with Nemotron en / `forced_llr` / balanced |
+| In the app | Done (2026-10-18): `services/audio/` runs Nemotron en / `forced_llr` / balanced through `harness/live.py` |
 | Next | More noisy/muffled/whisper recordings and negatives from p02/p03 and new speakers; native-speaker review and recordings before any non-English use |
 | Optional: sherpa-onnx keyword spotter | Not started |
 | Optional: SAP dysarthric fine-tunes | Skipped (SAP data use agreement) |

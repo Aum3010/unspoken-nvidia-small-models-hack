@@ -21,7 +21,9 @@ Chance is 2.8%. These are healthy-protocol research recordings, so they do not s
 
 The Auto-AVSR LRS3 model has never seen these speakers or GRID's letter/digit grammar. Its paper LRS3 WER of about 19% does **not** transfer, which is why lip readings are only ever *candidates* for the person to confirm. The median latency of 7.9 s was measured while the coordinator benchmark shared the GPU, so it is a contended number. With a still face the model still produces fluent sentences (for example "THAT'S WHAT I'M GOING TO DO"); the mouth-motion gate flags every such clip.
 
-## 3. Weak speech: raw vs RNNoise-enhanced Whisper-base (MLX)
+## 3. Weak speech: raw vs RNNoise-enhanced Whisper-base (MLX), the previous voice agent
+
+*Historical: this was the voice agent before Nemotron Speech replaced it (§6). Kept because the finding still applies: enhancement is not used in front of the new model either.*
 
 The test set is 10 synthetic Kokoro utterances (5 voices) with pink noise, so the references are exact. This is **not** a dysarthria benchmark.
 
@@ -54,7 +56,7 @@ Both raw models fail on the same thing: history. After two failed retakes they a
 - In the end-to-end test, 10 phrases were selected → confirmed → spoken by Kokoro → re-transcribed by Whisper. **10/10 matched the confirmed string exactly.**
 - **Unconfirmed or contradicted text reaching TTS: 0**, enforced by construction (HMAC token over the exact text) and tested.
 
-## 6. Voice agent model selection: 20-phrase task (in progress, `asr_eval/`)
+## 6. Voice agent model selection: 20-phrase task (`asr_eval/`; adopted in the app)
 
 **Question.** Which open ASR model can map a weak or impaired utterance onto **one of 20 request phrases**, and refuse otherwise? The voice agent's output is a phrase candidate, `unknown`, or `no_speech`.
 - Proposing a phrase on silence, noise or unrelated speech is the worst failure.
@@ -87,15 +89,25 @@ Both raw models fail on the same thing: history. After two failed retakes they a
 - Remaining losses are noisy, muffled and whispered speech.
 - The multilingual Nemotron 3.5 was tested with an English prompt and was less accurate and slower, so it was not adopted.
 
-**Earlier status (2026-10-17).**
-- Milestone 1 (Silero + Parakeet-CTC 0.6B + manifest) passes end to end on CPU and is running on Brev (RTX PRO 6000).
-- The other models (Parakeet-TDT, Nemotron Speech Streaming, Whisper via faster-whisper) follow.
-- Results go to `asr_eval/results/summary.md` and replace this paragraph when measured.
-- Brev workflow: [BREV.md](BREV.md).
+**In the app (2026-10-18).** `services/audio/` runs this configuration at the balanced operating point through `asr_eval/harness/live.py`, the same recognizer as the live test bench, so the app decides exactly as evaluated. Spot check on Brev through the gateway (Windows SAPI voice):
+
+| Clip | Decision | Time |
+|---|---|---:|
+| "I need water" | proposed "I need water" (margin 3.4 over the runner-up) | 71 ms |
+| "I'm in pain" | proposed "I'm in pain" | 239 ms |
+| "I don't need water" | not accepted (low score); top 3 offered as a question | 145 ms |
+| 2 s of room noise | no speech, no hypotheses | 206 ms |
+
+## 7. Latency with every model running (Brev, 2026-10-18)
+
+Full method, tables and serving advice: [SERVING.md](SERVING.md); raw numbers: `evaluations/results/latency_brev.json`.
+
+- **One message end to end** (voice + lip clip → evidence → coordinator → confirm → speech): **1.03 s p50, 1.10 s p95**. Lip reading (≈0.5 s per 3 s clip) is the long pole.
+- **Interference:** with all agents busy at once, the voice agent goes from 55 to 304 ms p50 and Kokoro from 23 to 78 ms. The GPU is only 50% busy on average, so the cost is processes time-slicing the GPU, not missing compute.
 
 ## Not yet measured (honest gaps)
 
 - Live webcam lip reading on unfamiliar, consenting people. This needs local opt-in recordings.
-- Gaze selection accuracy and false-selection rate across lighting and head motion. The calibration screen reports a per-session error, but no study has been done.
+- Gaze selection accuracy and false-selection rate across lighting and head motion, now with MediaPipe iris + MobileGaze. The calibration screen reports a per-session error on unseen dots, but no study has been done, and calibration with a real webcam is still being debugged (HANDOFF.md).
 - Clarification efficiency (selections per successful message) with real users.
 - EEG+gaze fusion. BNCI2014-008 has no synchronized eye tracking; bigP3BCI sessions with eye data would be needed.

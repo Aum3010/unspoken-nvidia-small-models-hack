@@ -63,9 +63,9 @@ brev delete unspoken-asr                            # billing stops; disk is gon
 | Type | `massedcompute_RTXPro6000`, $2.63/hr, **not stoppable** |
 | GPU | NVIDIA RTX PRO 6000 Blackwell Server Edition, 96 GB, driver 580.126.09 |
 | Host | 16 vCPU, 141 GB RAM, 665 GB free disk, Ubuntu with Python 3.10.12, user `shadeform`, passwordless sudo |
-| Layout | `/workspace/venv-asr` (venv), `/workspace/hf` (HF cache), `/workspace/asr_eval_data` (data, symlinked as `~/asr_eval/data`), `~/asr_eval` (code) |
+| Layout | `/workspace/venv-asr` (NeMo venv: asr_eval and the app's voice agent), `/workspace/venv-app` (app agents, torch cu128), `/workspace/venv-vllm` (vLLM), `/workspace/hf` (HF cache), `/workspace/asr_eval_data` (data, symlinked as `~/asr_eval/data`), `~/asr_eval` (bench code), `~/unspoken` (app backend) |
 | Recordings | `/workspace/asr_eval_data/own/`: 307 clips from 3 speakers (17 MB), backed up to the laptop in `asr_eval/data/own/` on 2026-10-17 |
-| Running | Live test bench on 127.0.0.1:8800 (Nemotron en, `forced_llr`, balanced), reached through `brev port-forward` |
+| Running | The whole app backend (§4b: vLLM + 6 services, about 66 GB of GPU memory) and the asr_eval live test bench on 127.0.0.1:8800 (a second Nemotron Speech, 5.6 GB; stop it while the app runs, see [SERVING.md](SERVING.md)) |
 | Status | **Kept running** for more recording sessions. Billing continues at $2.63/hr until deleted (about $16 by the end of 2026-10-17). Copy recordings home before deleting |
 
 ## 4. The loop
@@ -149,7 +149,7 @@ The UI runs on the laptop (`cd web && npm run dev` → http://localhost:8800). E
 | Service | Mac | Brev (CUDA) |
 |---|---|---|
 | gateway :8000, eeg :8103 | CPU | CPU, unchanged |
-| audio :8102 | mlx-whisper base | faster-whisper base, float16 (`UNSPOKEN_ASR_BACKEND`) |
+| audio :8102 | Nemotron Speech Streaming en 0.6B + Silero VAD (NeMo, CPU/MPS) | the same, CUDA bf16, run from the NeMo venv `/workspace/venv-asr` (asr_eval's decision code and frozen thresholds) |
 | tts :8104 | mlx-audio Kokoro-82M | `kokoro` KPipeline on CUDA (`UNSPOKEN_TTS_BACKEND`) |
 | vsr :8101 | torch MPS | torch CUDA (`pick_device`, `UNSPOKEN_VSR_DEVICE`) |
 | coordinator :8105 | Ollama | vLLM 0.31 on 127.0.0.1:8001 serving `nvidia/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-NVFP4` (`--gpu-memory-utilization 0.55`, so the agents and the asr_eval bench fit beside it). On this RTX PRO 6000 (sm_120) vLLM picks Marlin weight-only FP4 for the GEMMs/MoE, Triton attention and the PyTorch sampler (see §5) |
@@ -168,7 +168,8 @@ bash scripts/brev/connect.sh marginal-sapphire-whale
 
 - **Privacy:** mouth video and voice clips now leave the laptop for the instance (over SSH). The gateway reports `host: "NVIDIA Brev"` and the UI's camera chip says *clips to NVIDIA Brev*. Clips are processed in memory and not stored.
 - **Ports:** the asr_eval bench also uses 8800 on the instance. The app's UI uses the laptop's 8800, so don't forward the bench to 8800 while the app UI is open.
-- Measured 2026-10-18: Nemotron loads 17.8 GiB of weights; the whole stack uses about 63 GB of the 96 GB (with the asr_eval bench). Whisper base on Brev: 89 ms per clip at the gateway; the coordinator's tool call (`ask_confirmation`, by the LLM): 272 ms.
+- Measured 2026-10-18: Nemotron loads 17.8 GiB of weights; the whole stack uses about 72 GB of the 96 GB (with the asr_eval bench). One message end to end (voice + lip clip → coordinator → confirm → speech) takes 1.03 s p50; the voice agent 55 ms alone and 304 ms with every model busy ([SERVING.md](SERVING.md)).
+- **Latency:** `PYTHONPATH=. /workspace/venv-app/bin/python scripts/brev/bench_latency.py` (on the instance) measures each agent alone, all at once, and one message end to end. Results and how to serve faster: [SERVING.md](SERVING.md).
 - Logs: `~/unspoken/.run/logs/<service>.log`; pinned versions: `~/unspoken/.run/requirements-cuda.lock`, `requirements-vllm.lock`.
 
 ## 5. Problems we hit, and the fixes

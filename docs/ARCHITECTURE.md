@@ -3,10 +3,11 @@
 ```text
  Browser (web/, React + Vite)                  ── camera/mic frames stay in the browser; clips go to the gateway ──
  ┌───────────────────────────────────────────────────────────────────────────────────────────────┐
- │ MediaPipe Face Landmarker (wasm/GPU): mouth ROI overlay, face-quality hints, deliberate blink  │
- │ Gaze: MediaPipe iris + MobileGaze (ONNX) → per-user ridge → dwell (error-scaled slack, confirm) │
- │ Selection engine: click · keyboard · hover dwell · gaze dwell · blink scan → audited method    │
- │ MediaRecorder: silent mouth clip (webm) · voice clip (webm/opus)                               │
+ │ Glass room (web/src/glass): ink + agent-activity canvases, rail, bubbles, black calibration    │
+ │ MediaPipe Face Landmarker (wasm/GPU), one loop: mouth motion, deliberate blink, nod / shake    │
+ │ Gaze: MediaPipe iris + MobileGaze (ONNX Runtime Web) → per-user ridge → dwell (error-scaled)   │
+ │ Always-on capture: voice VAD → 16 kHz WAV clip · mouth motion → webm clip (paused while a      │
+ │   message waits for confirmation or speech plays) · click · keyboard → audited method          │
  └──────────────┬─────────────────────────────────────────────────────────────▲──────────────────┘
                 │ REST (clips, selections, confirm)                           │ WebSocket: state +
                 ▼                                                             │ agent timeline
@@ -31,9 +32,9 @@
 | Agent | Input | Output | May not |
 |---|---|---|---|
 | Lip-reading (vsr) | mouth video clip | n-best raw transcripts, beam scores, face/mouth-motion quality | rewrite or "correct" text (Chaplin's LLM correction is deliberately not used) |
-| Voice (audio) | microphone clip | raw-audio and enhanced-audio transcripts with word probabilities and a word diff | merge the two, or emit words when no voice activity is detected |
+| Voice (audio) | microphone clip | one of 20 fixed phrases with its raw `forced_llr` score (confident accept), the top 3 (uncertain), or nothing (no speech / no words heard); transcript and decision reason in `quality` | propose free text, or a phrase when Silero finds no speech or the model heard no words |
 | EEG replay (eeg) | recorded BNCI2014-008 trials | per-flash P300 scores, decoded row/column/letter | read ground-truth labels before predicting; claim live brain input |
-| Gaze / blink (browser) | webcam | selection events with method + dwell | count as confirmation unless the person dwells on the separate confirm target |
+| Gaze / blink / head (browser) | webcam | selection events with method + dwell; nod / shake | count as confirmation unless the person dwells on a confirm target (1.5× longer), blinks, or nods while a message waits |
 | Coordinator | structured evidence summary (no media) | exactly one typed tool call: `ask_confirmation`, `request_retake`, `switch_input_method`, (`speak_confirmed_text`, always rejected without a confirmation event) | write, rephrase or choose the patient's message |
 | Policy gate (code) | message + audit log | TTS token or `PolicyViolation` | — |
 | TTS | token + text | audio of exactly that text | speak anything without a matching token |
@@ -75,3 +76,17 @@ manifest.csv ─► Silero VAD ─► model (own process) ─► rankers ─► 
 ## Ports & processes
 
 `scripts/run_all.sh` starts gateway 8000, vsr 8101, audio 8102, eeg 8103, tts 8104, coordinator 8105 and the web app on 8800. Logs go to `.run/logs/`. Each service exposes `/health`; the gateway aggregates them at `/api/health`.
+
+## Two deployments
+
+```text
+ Mac (scripts/run_all.sh)                         Brev GPU (scripts/brev/start_app.sh)
+ browser :8800 → gateway :8000 → agents (MPS/MLX)  browser :8800 (laptop) ══ SSH tunnel ══► gateway :8000 (Brev)
+                 coordinator → Ollama :11434                    agents on CUDA, all on 127.0.0.1:
+                                                                vsr 8101 · audio 8102 (NeMo venv) · eeg 8103 · tts 8104
+                                                                coordinator 8105 → vLLM 8001 (Nemotron NVFP4)
+```
+
+- **Brev:** one RTX PRO 6000 holds everything (about 72 GB with the asr_eval bench). The gateway reports `host: "NVIDIA Brev"` in `/api/health`, and the UI's camera chip then says clips go to Brev.
+- **Same code on both.** Device selection goes through `shared.service.pick_device` (cuda > mps > cpu). The ASR and TTS backends are picked by platform: MLX on a Mac, PyTorch/NeMo on CUDA.
+- **Latency** with every model running together, and how to serve it faster: [SERVING.md](SERVING.md).
