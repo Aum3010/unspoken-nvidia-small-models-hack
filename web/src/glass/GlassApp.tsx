@@ -68,6 +68,12 @@ export function GlassApp() {
   const remoteHost = host && host !== 'this device' ? host : null
   // vision preview: only when the gateway runs with UNSPOKEN_CHECKIN=1
   const checkinOn = !!health?.gateway?.checkin
+  // the profile's preferred name, so the check-in addresses the person (synthetic profile in the preview)
+  const [patientName, setPatientName] = useState<string | null>(null)
+  useEffect(() => {
+    if (!checkinOn) return
+    Promise.resolve().then(() => api.visionData()).then((d) => setPatientName(d?.profile?.preferred_name ?? null)).catch(() => {})
+  }, [checkinOn])
   // a saved calibration (same window size) is used straight away: no recalibrating after a reload
   const [calibrating, setCalibrating] = useState(() => !gazeState.calibrated)
   const [focusMode, setFocusMode] = useState(false)
@@ -314,7 +320,9 @@ export function GlassApp() {
     if (!state || calibrating) return
     if (state.checkin?.status === 'open') { E.caption(state.checkin.question, 'Yes, blink or nod · No or shake'); return }
     if (state.checkin?.status === 'answered' && state.checkin.answered_ts && Date.now() - state.checkin.answered_ts < 8000) {
-      E.caption(`Nurse notified: patient answered ${(state.checkin.answer ?? '').toUpperCase()}`, 'vision preview · nothing was spoken')
+      // written in ink like a reading, addressed by name; a note to the person, not a message: nothing is spoken
+      E.setTranscript(words(`${patientName ? `${patientName}, your` : 'Your'} nurse has been notified`), [])
+      E.caption(`You answered ${(state.checkin.answer ?? '').toUpperCase()}`, 'sent to your nurse · nothing was spoken')
       return
     }
     const m = state.message
@@ -354,7 +362,7 @@ export function GlassApp() {
     } else if (state.plan?.name === 'switch_input_method') {
       E.caption(state.plan.rationale, `try ${state.plan.arguments.method ?? 'another way'}`)
     }
-  }, [state, calibrating])
+  }, [state, calibrating, patientName])
 
   // the countdown caption, on top of the one above, while a delayed auto-speak is pending
   useEffect(() => {
