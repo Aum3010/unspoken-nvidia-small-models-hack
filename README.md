@@ -19,6 +19,50 @@ That is why we built **Unspoken**.
 
 ---
 
+## Quickstart
+
+### On an NVIDIA Brev GPU (backend) + your laptop (UI)
+
+On Windows, run the `brev` and `scripts/brev/*.sh` lines inside WSL. Replace `<instance>` with your instance name.
+
+```bash
+# once: log in, ship the code, set up the instance (about 30–45 min, runs in the background)
+brev login
+bash scripts/brev/sync_app.sh <instance>
+bash asr_eval/scripts/brev/sync.sh <instance>
+brev exec <instance> 'cd ~/unspoken && mkdir -p .run && nohup bash scripts/brev/setup_app.sh > .run/setup.log 2>&1 < /dev/null &'
+brev exec <instance> 'cd ~/asr_eval && nohup bash scripts/setup_brev.sh > setup.log 2>&1 < /dev/null &'
+
+# every time: start the backend (vLLM + 6 services, NVIDIA MPS on), wait until every service is ready
+brev exec <instance> 'bash ~/unspoken/scripts/brev/start_app.sh'
+brev exec <instance> 'bash ~/unspoken/scripts/brev/start_app.sh status'
+
+# laptop: tunnel the gateway to localhost:8000, then open the UI at http://localhost:8800
+bash scripts/brev/connect.sh <instance>
+cd web && npm install && npm run dev
+
+# when done
+brev exec <instance> 'bash ~/unspoken/scripts/brev/start_app.sh stop'
+```
+
+- **Before the first `npm run dev`:** fetch the browser model files once ([step 5](#5-open-the-ui-on-the-laptop)).
+- **Optional:** ship the lip enrollment ([step 3](#3-personal-data-optional-not-in-git-published-on-hugging-face)).
+- **The full walkthrough:** [Run it on NVIDIA Brev](#run-it-on-nvidia-brev).
+
+### On a Mac (Apple Silicon, everything local)
+
+```bash
+./scripts/setup_models.sh   # venv, checkpoints, data, web deps, ollama pull
+./scripts/run_all.sh        # gateway + services + web -> http://localhost:8800
+./scripts/smoke_test.sh     # health + board -> confirm -> speak round trip
+```
+
+### Tests
+
+```bash
+python -m pytest -q         # safety + dataset tests
+```
+
 ## See it work
 
 What the demo shows, on one NVIDIA RTX PRO 6000 running every model at once:
@@ -133,6 +177,7 @@ to speak does not have to mean losing the ability to communicate.
 
 ## Contents
 
+0. [Quickstart](#quickstart)
 1. [The agents](#the-agents)
 2. [Results at a glance](#results-at-a-glance)
    · [Data sources](#data-sources)
