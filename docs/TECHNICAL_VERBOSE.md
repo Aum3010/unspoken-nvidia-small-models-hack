@@ -3,7 +3,8 @@
 Everything about the system as it is on branch `ui` (2026-10-18): what runs where, every agent and its
 contract, the decision and safety logic, the browser, how it is served on the NVIDIA Brev GPU, every measured
 number, and the known issues. Shorter docs: [README](../README.md), [ARCHITECTURE](ARCHITECTURE.md),
-[SERVING](SERVING.md), [BREV](BREV.md), [EVALUATION](EVALUATION.md), [web/README](../web/README.md).
+[SERVING](SERVING.md), [BREV](BREV.md), [EVALUATION](EVALUATION.md), [web/README](../web/README.md). Bounty
+write-ups (Nemotron Lightning, NeMo Gym, vLLM): [BOUNTIES](BOUNTIES.md).
 
 ---
 
@@ -192,7 +193,19 @@ mic ──── voice detector → wav clip ─┘─────────�
   | Deployed (Nemotron + validator + fallback) | 0.940 | 1.00 | 0.82 | **0** | 275 ms |
   | Rules only | 1.000 | 1.00 | 1.00 | 0 | 0 |
 
-  - **Run-to-run spread** of the same configuration: Nemotron alone 0.912–0.931, deployed 0.931–0.949.
+  - **Run-to-run spread** over six Brev runs of the default prompt (including the MTP and cache-mode server
+    variants): Nemotron alone 0.912–0.931, deployed 0.940–0.949.
+  - **Held-out** (44 tasks: seed 2026 without the tasks that also occur in the eval set; 10 categories;
+    `coordinator_heldout_brev.json`):
+
+    | Policy | Reward | Right action | Unsafe |
+    |---|---:|---:|---:|
+    | Nemotron alone | 0.939 | 0.82 | 0 |
+    | Deployed | **0.985** | 0.95 | 0 |
+
+    The whole gain is `none_of_these` (0.67 → 1.00), from the validator's history rule and the fallback.
+    Nemotron decides 86% of the tasks itself. Compact mode on the same tasks: 0.894 / 0.955
+    (`coordinator_heldout_compact_brev.json`).
   - Most wrong actions of the deployed coordinator are `ignore_input` on real input:
     - after two failed tries (6/6; it should offer another input method);
     - an injection next to a real request (2–3/6);
@@ -572,7 +585,7 @@ The lip enrollment adds stored features, not parameters.
 | What | Command | Result file |
 |---|---|---|
 | Safety tests (policy gate, auto-speak) | `pytest evaluations/safety_tests` (25 pass) | — |
-| Coordinator (NeMo Gym, 72 tasks) | `run_local.py --policies raw:<model> guarded deterministic` (`UNSPOKEN_COORD_COMPACT=1` for compact mode) | `coordinator_brev.json` (Brev); `coordinator_mtp_brev.json`, `coordinator_compact_brev.json`, `coordinator_compact_mtp_brev.json` (A/B); `coordinator.json` (Mac, 60 tasks, older prompt) |
+| Coordinator (NeMo Gym, 72 tasks; held-out 44) | `run_local.py --policies raw:<model> guarded deterministic` (held-out: `--seed 2026 --distinct-from 7 --out <file>`; `UNSPOKEN_COORD_COMPACT=1` for compact mode) | `coordinator_brev.json` (Brev); `coordinator_heldout_brev.json`, `coordinator_heldout_compact_brev.json` (held-out); `coordinator_mtp_brev.json`, `coordinator_compact_brev.json`, `coordinator_compact_mtp_brev.json` (A/B); `coordinator.json` (Mac, 60 tasks, older prompt) |
 | Lip speed vs accuracy | `evaluations/modality_baselines/vsr_speed_accuracy.py` | `vsr_speed_accuracy.json` |
 | Early-decode accuracy check | `asr_eval/scripts/trailing_silence_check.py` | `trailing_silence_check.json` |
 | Latency | `scripts/brev/bench_latency.py` | `latency_brev_*.json` |

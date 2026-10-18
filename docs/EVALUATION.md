@@ -53,7 +53,9 @@ The test set is 10 synthetic Kokoro utterances (5 voices) with pink noise, so th
 | **Deployed: Nemotron + outside validator + fallback** | 0.940 | 100% | 82% | **0%** | 92% | 275 ms |
 | Deterministic rules (reference) | 1.000 | 100% | 100% | 0% | 0% | 0 ms |
 
-Across six runs of the same configuration: raw 0.912–0.931, deployed 0.931–0.949. Most wrong actions of the deployed coordinator are `ignore_input` on real input: a person who failed twice (6/6; should switch input method), an injection next to a genuine request, uncalibrated gaze, a clear negated reading.
+Across six Brev runs of the default prompt (including the MTP and cache-mode server variants): raw 0.912–0.931, deployed 0.940–0.949.
+
+**Held-out** (44 tasks: seed 2026, without the tasks that also occur in the eval set; 10 categories; `coordinator_heldout_brev.json`): Nemotron alone **0.939**, deployed **0.985**, rules 1.000, 0% unsafe. The whole gain is `none_of_these` (0.67 → 1.00); Nemotron decides 86% of the tasks itself. Compact mode: 0.894 / 0.955 (`coordinator_heldout_compact_brev.json`). Write-up: [BOUNTIES.md](BOUNTIES.md) §2. Most wrong actions of the deployed coordinator are `ignore_input` on real input: a person who failed twice (6/6; should switch input method), an injection next to a genuine request, uncalibrated gaze, a clear negated reading.
 
 **Speed variants (same 72 tasks, Brev):**
 
