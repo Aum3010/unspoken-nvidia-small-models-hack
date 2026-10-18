@@ -3,6 +3,9 @@
 //   readings arrive as faint ink and glass bubbles; nothing is spoken until the person confirms
 //   (Speak, Yes, a deliberate blink or a nod), then the policy gate signs the exact text for TTS
 //   top right: live agent activity from the gateway timeline, then the spoken history
+//   /?lips: lips-only room for working on lip reading (no voice, blink, head or eye calibration);
+//   start the backend with `scripts/run_all.sh --lips` or `scripts/brev/start_app.sh lips`
+//   /?gaze: gaze-only room for testing eye tracking (no lips, voice, blink or head); `scripts/run_all.sh --gaze`
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { api, useHealth, useSession } from '../lib/api'
@@ -50,6 +53,9 @@ const PHRASES: [string, string, string, string][] = [
   ['Thank you', 'warmth', '181,232,107', '🙏'], ['I love you', 'warmth', '232,121,249', '❤️'], ['Move me, please', 'body', '165,180,252', '↻'],
 ]
 const HELP_TEXT = 'I need help now.'
+const LIPS_ONLY = new URLSearchParams(location.search).has('lips')
+const GAZE_ONLY = new URLSearchParams(location.search).has('gaze')
+const SOLO = LIPS_ONLY || GAZE_ONLY   // one input on its own: the others stay off
 const PENDING = ['proposed', 'ambiguous', 'clarifying']
 const words = (t: string) => t.split(/\s+/).filter(Boolean)
 
@@ -63,7 +69,7 @@ function quote(t: string, n = 16) { const u = t.toUpperCase(); return `“${u.le
 export function GlassApp() {
   const { state, connected } = useSession()
   const health = useHealth()
-  const [calibrating, setCalibrating] = useState(true)
+  const [calibrating, setCalibrating] = useState(!LIPS_ONLY)
   const [focusMode, setFocusMode] = useState(false)
   const [eyes, setEyes] = useState(false)
   const [cam, setCam] = useState<'starting' | 'on' | 'off'>('starting')
@@ -120,17 +126,21 @@ export function GlassApp() {
         await v.play().catch(() => undefined)
         setCam('on')
         stops.push(trackVideo(v))
-        stops.push(onBlink(() => E.blink('blink')))
-        stops.push(startHead((g) => {
-          E.fire('head', 1, g === 'nod' ? 'NOD' : 'SHAKE')
-          actRef.current(g, null, 'nod')
-        }))
-        stops.push(startLips({
-          stream: s,
-          canCapture: () => canCapture('vsr'),
-          onMouthing: (on) => { if (on) E.fire('lips', .6, 'WATCHING') },
-          onClip: (b) => { E.fire('lips', 1, 'READING'); run(api.captureLip(b)) },
-        }))
+        if (!SOLO) {
+          stops.push(onBlink(() => E.blink('blink')))
+          stops.push(startHead((g) => {
+            E.fire('head', 1, g === 'nod' ? 'NOD' : 'SHAKE')
+            actRef.current(g, null, 'nod')
+          }))
+        }
+        if (!GAZE_ONLY) {
+          stops.push(startLips({
+            stream: s,
+            canCapture: () => canCapture('vsr'),
+            onMouthing: (on) => { if (on) E.fire('lips', .6, 'WATCHING') },
+            onClip: (b) => { E.fire('lips', 1, 'READING'); run(api.captureLip(b)) },
+          }))
+        }
       } catch (e) {
         setCamErr((e as Error).name)
         setCam('off')
@@ -142,6 +152,7 @@ export function GlassApp() {
 
   /* ---------- microphone: voice ---------- */
   useEffect(() => {
+    if (SOLO) { setMic('off'); return }
     let stop: (() => void) | null = null
     let alive = true
     startVoice({
@@ -155,7 +166,7 @@ export function GlassApp() {
   /* ---------- tell the gateway what the person can use ---------- */
   useEffect(() => {
     if (!state || calibrating) return
-    const inputs = [...(eyes ? ['gaze'] : []), ...(cam === 'on' ? ['blink'] : []), 'button', 'keyboard']
+    const inputs = [...(eyes ? ['gaze'] : []), ...(cam === 'on' && !SOLO ? ['blink'] : []), 'button', 'keyboard']
     const cal = eyes && gazeState.calibrated
     if (JSON.stringify(inputs) !== JSON.stringify(state.settings.available_inputs) || cal !== state.settings.gaze_calibrated) {
       api.settings({ available_inputs: inputs, gaze_calibrated: cal }).catch(() => undefined)
@@ -169,11 +180,15 @@ export function GlassApp() {
       const st = health?.[name]?.state
       return st === 'ready' ? ['on', 'LIVE'] : ['off', st === 'loading' ? 'LOADING' : 'OFFLINE']
     }
+    E.setNode('lips', ...(GAZE_ONLY ? ['off', 'GAZE ONLY'] as [E.NodeState, string] : svc('vsr', cam === 'on', cam === 'starting' ? 'STARTING' : 'NO CAMERA')))
+    E.setNode('gaze', 'on', eyes ? 'LIVE' : 'POINTER')
+    if (SOLO) {
+      for (const n of ['voice', 'blink', 'head', 'eeg'] as const) E.setNode(n, 'off', LIPS_ONLY ? 'LIPS ONLY' : 'GAZE ONLY')
+      return
+    }
     E.setNode('voice', ...svc('audio', mic === 'on', mic === 'starting' ? 'STARTING' : 'NO MIC'))
-    E.setNode('lips', ...svc('vsr', cam === 'on', cam === 'starting' ? 'STARTING' : 'NO CAMERA'))
     E.setNode('blink', cam === 'on' ? 'on' : 'off', cam === 'on' ? 'LIVE' : 'NO CAMERA')
     E.setNode('head', cam === 'on' ? 'on' : 'off', cam === 'on' ? 'LIVE' : 'NO CAMERA')
-    E.setNode('gaze', 'on', eyes ? 'LIVE' : 'POINTER')
     E.setNode('eeg', health?.eeg?.state === 'ready' ? 'on' : 'off', health?.eeg?.state === 'ready' ? 'REPLAY' : 'OFFLINE')
   }, [health, mic, cam, eyes])
 
@@ -317,6 +332,8 @@ export function GlassApp() {
   const remote = host && host !== 'this device' ? host : null
   const active = useMemo(() => {
     const up = (svc: string) => health?.[svc]?.state === 'ready'
+    if (LIPS_ONLY) return 1 + (cam === 'on' && up('vsr') ? 1 : 0)
+    if (GAZE_ONLY) return 1
     return 1 + (cam === 'on' ? 2 : 0) + (up('eeg') ? 1 : 0) + (mic === 'on' && up('audio') ? 1 : 0) + (cam === 'on' && up('vsr') ? 1 : 0)
   }, [health, cam, mic])
   useEffect(() => { const h = histRef.current; if (h) h.scrollTop = h.scrollHeight }, [state?.spoken.length])
@@ -332,7 +349,8 @@ export function GlassApp() {
       <div className="brand">
         <div className="name"><span className="logo" /><span>unspoken<i>.</i></span></div>
         <button className={`chip glass mono ${cam === 'on' ? 'live' : ''}`} data-a="camera"><b /><span>{cam === 'on' ? `Camera · ${remote ? `clips to ${remote}` : 'on device'}` : cam === 'off' ? (camErr === 'NotReadableError' ? 'Camera busy · in use by another app or tab' : 'Camera off · allow & reload') : 'Camera · starting'}</span></button>
-        <span className={`chip glass mono ${mic === 'on' ? (hearing ? 'live' : 'ok') : ''}`}><b /><span>{mic === 'on' ? (health?.audio?.state !== 'ready' ? 'Mic · voice agent offline' : hearing ? 'Mic · hearing you' : 'Mic · listening') : mic === 'off' ? 'Mic off' : 'Mic · starting'}</span></span>
+        {SOLO ? <span className="chip glass mono ok"><b /><span>{LIPS_ONLY ? 'Lips only · voice, blink and head off' : 'Gaze only · lips, voice, blink and head off'}</span></span>
+        : <span className={`chip glass mono ${mic === 'on' ? (hearing ? 'live' : 'ok') : ''}`}><b /><span>{mic === 'on' ? (health?.audio?.state !== 'ready' ? 'Mic · voice agent offline' : hearing ? 'Mic · hearing you' : 'Mic · listening') : mic === 'off' ? 'Mic off' : 'Mic · starting'}</span></span>}
         <button className={`chip glass mono ${eyes ? 'ok' : 'warn'}`} data-a="calibrate"><b /><span>{eyes ? `Eyes · ≈${Math.round(gazeState.accuracyPx ?? 0)} px` : 'Eyes · pointer · calibrate'}</span></button>
       </div>
       {!connected && <div className="offline mono">Gateway offline · reconnecting</div>}
@@ -372,7 +390,7 @@ export function GlassApp() {
       </nav>
 
       <div className="caption mono" id="caption" aria-live="polite" />
-      <div className="hint mono">Look or point to aim · blink or Space selects<br />Nod = yes · shake = no · P = phrases</div>
+      <div className="hint mono">{GAZE_ONLY ? <>Rest your eyes on anything to choose it<br />Eyes chip = calibrate again · Space selects</> : LIPS_ONLY ? <>Mouth a phrase silently · point or click to choose<br />Space selects · readings match your recorded phrases</> : <>Look or point to aim · blink or Space selects<br />Nod = yes · shake = no · P = phrases</>}</div>
       <div className="gaze" id="gaze" />
 
       {calibrating && <Calibration bind={bindCalib} onFocusMode={setFocusMode} onDone={doneCalib} />}

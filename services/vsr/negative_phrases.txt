@@ -1,0 +1,9 @@
+# Near-miss sentences that must become "unknown" (the voice agent's hard negatives, asr_eval/configs/eval.yaml).
+# Recorded in My phrases as negatives: a clip whose closest recording is a negative gets no reading.
+I don't need water
+I'm not in pain
+Don't call the nurse
+I can breathe fine
+Water the plants
+Call my family later
+What time does it close

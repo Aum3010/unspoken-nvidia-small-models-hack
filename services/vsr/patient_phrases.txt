@@ -1,0 +1,23 @@
+# The 20 request phrases, worded exactly as the voice agent's list (asr_eval/configs/eval.yaml) so the
+# gateway fuses a lip and a voice reading of the same phrase into one candidate. Suggestions in My phrases,
+# and the optional closed phrase list (UNSPOKEN_VSR_PHRASES). One phrase per line; '#' lines are ignored.
+I need water
+I'm in pain
+Call the nurse
+I can't breathe
+I need suction
+Please reposition me
+I'm cold
+I'm too hot
+I need the bathroom
+Turn off the light
+Where is my family
+What time is it
+I feel sick
+I'm scared
+I'm tired
+Fix my pillow
+Yes
+No
+Help me
+Stop

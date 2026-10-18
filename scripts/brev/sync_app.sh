@@ -2,12 +2,18 @@
 # Laptop -> Brev: ship the committed backend (services, shared, scripts, requirements, and the asr_eval
 # decision code + frozen thresholds the voice agent uses) to ~/unspoken.
 # Instance-only state (third_party/, data/, .run/) is left in place. Usage: sync_app.sh <instance>
+# WORKTREE=1 ships the working copy instead of HEAD (uncommitted and new files too, minus .gitignored ones).
 set -euo pipefail
 INST=${1:?usage: sync_app.sh <instance>}
 cd "$(dirname "$0")/../.."
 tmp=$(mktemp -d)
-git -c core.autocrlf=false archive --format=tar.gz -o "$tmp/unspoken.tgz" HEAD services shared scripts evaluations requirements-cuda.txt requirements.txt pytest.ini \
-  asr_eval/harness asr_eval/configs asr_eval/results/thresholds.json
+paths=(services shared scripts evaluations requirements-cuda.txt requirements.txt pytest.ini
+  asr_eval/harness asr_eval/configs asr_eval/results/thresholds.json)
+if [[ "${WORKTREE:-0}" == "1" ]]; then
+  git ls-files -z -co --exclude-standard -- "${paths[@]}" | tar -czf "$tmp/unspoken.tgz" --null -T -
+else
+  git -c core.autocrlf=false archive --format=tar.gz -o "$tmp/unspoken.tgz" HEAD "${paths[@]}"
+fi
 brev copy "$tmp/unspoken.tgz" "$INST:/home/shadeform/unspoken.tgz"
 brev exec "$INST" 'mkdir -p ~/unspoken && tar -xzf ~/unspoken.tgz -C ~/unspoken && rm ~/unspoken.tgz && echo synced $(ls ~/unspoken | tr "\n" " ")'
 rm -rf "$tmp"

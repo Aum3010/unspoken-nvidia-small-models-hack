@@ -1,0 +1,396 @@
+{
+  "dataset": "MIRACL-VC1 (research use only)",
+  "speakers": [
+    "F01",
+    "F02",
+    "F04",
+    "F05",
+    "F06",
+    "F07",
+    "F08",
+    "F09",
+    "F10",
+    "F11",
+    "M01",
+    "M02",
+    "M04",
+    "M07",
+    "M08"
+  ],
+  "seeds": 2,
+  "protocol": "per speaker: k repetitions per class enrolled, remaining repetitions tested",
+  "results": {
+    "phrases (10 classes), enroll k=1": {
+      "n_test": 2700,
+      "chance": 0.1,
+      "phrase-list": {
+        "top1": 0.72,
+        "top3": 0.897
+      },
+      "enroll-dtw": {
+        "top1": 0.9607,
+        "top3": 0.9915
+      },
+      "combined": {
+        "top1": 0.9519,
+        "top3": 0.99
+      },
+      "per_speaker_top1": {
+        "F01": {
+          "phrase-list": 0.456,
+          "enroll-dtw": 0.867,
+          "combined": 0.878
+        },
+        "F02": {
+          "phrase-list": 0.744,
+          "enroll-dtw": 0.956,
+          "combined": 0.961
+        },
+        "F04": {
+          "phrase-list": 0.806,
+          "enroll-dtw": 0.967,
+          "combined": 0.978
+        },
+        "F05": {
+          "phrase-list": 0.872,
+          "enroll-dtw": 1.0,
+          "combined": 1.0
+        },
+        "F06": {
+          "phrase-list": 0.883,
+          "enroll-dtw": 0.989,
+          "combined": 1.0
+        },
+        "F07": {
+          "phrase-list": 0.833,
+          "enroll-dtw": 0.994,
+          "combined": 0.994
+        },
+        "F08": {
+          "phrase-list": 0.756,
+          "enroll-dtw": 0.989,
+          "combined": 0.978
+        },
+        "F09": {
+          "phrase-list": 0.639,
+          "enroll-dtw": 0.939,
+          "combined": 0.9
+        },
+        "F10": {
+          "phrase-list": 0.539,
+          "enroll-dtw": 0.906,
+          "combined": 0.922
+        },
+        "F11": {
+          "phrase-list": 0.611,
+          "enroll-dtw": 0.944,
+          "combined": 0.9
+        },
+        "M01": {
+          "phrase-list": 0.85,
+          "enroll-dtw": 1.0,
+          "combined": 0.983
+        },
+        "M02": {
+          "phrase-list": 0.694,
+          "enroll-dtw": 0.95,
+          "combined": 0.9
+        },
+        "M04": {
+          "phrase-list": 0.889,
+          "enroll-dtw": 0.983,
+          "combined": 1.0
+        },
+        "M07": {
+          "phrase-list": 0.678,
+          "enroll-dtw": 0.994,
+          "combined": 1.0
+        },
+        "M08": {
+          "phrase-list": 0.55,
+          "enroll-dtw": 0.933,
+          "combined": 0.883
+        }
+      }
+    },
+    "phrases (10 classes), enroll k=3": {
+      "n_test": 2100,
+      "chance": 0.1,
+      "phrase-list": {
+        "top1": 0.7171,
+        "top3": 0.8957
+      },
+      "enroll-dtw": {
+        "top1": 0.9905,
+        "top3": 0.9986
+      },
+      "combined": {
+        "top1": 0.9657,
+        "top3": 0.9957
+      },
+      "per_speaker_top1": {
+        "F01": {
+          "phrase-list": 0.443,
+          "enroll-dtw": 0.95,
+          "combined": 0.893
+        },
+        "F02": {
+          "phrase-list": 0.757,
+          "enroll-dtw": 1.0,
+          "combined": 0.986
+        },
+        "F04": {
+          "phrase-list": 0.807,
+          "enroll-dtw": 1.0,
+          "combined": 0.993
+        },
+        "F05": {
+          "phrase-list": 0.857,
+          "enroll-dtw": 1.0,
+          "combined": 1.0
+        },
+        "F06": {
+          "phrase-list": 0.886,
+          "enroll-dtw": 1.0,
+          "combined": 1.0
+        },
+        "F07": {
+          "phrase-list": 0.829,
+          "enroll-dtw": 1.0,
+          "combined": 1.0
+        },
+        "F08": {
+          "phrase-list": 0.736,
+          "enroll-dtw": 1.0,
+          "combined": 0.993
+        },
+        "F09": {
+          "phrase-list": 0.643,
+          "enroll-dtw": 0.964,
+          "combined": 0.9
+        },
+        "F10": {
+          "phrase-list": 0.507,
+          "enroll-dtw": 0.986,
+          "combined": 0.95
+        },
+        "F11": {
+          "phrase-list": 0.636,
+          "enroll-dtw": 1.0,
+          "combined": 0.986
+        },
+        "M01": {
+          "phrase-list": 0.864,
+          "enroll-dtw": 0.993,
+          "combined": 0.979
+        },
+        "M02": {
+          "phrase-list": 0.679,
+          "enroll-dtw": 0.979,
+          "combined": 0.907
+        },
+        "M04": {
+          "phrase-list": 0.886,
+          "enroll-dtw": 1.0,
+          "combined": 1.0
+        },
+        "M07": {
+          "phrase-list": 0.686,
+          "enroll-dtw": 1.0,
+          "combined": 1.0
+        },
+        "M08": {
+          "phrase-list": 0.543,
+          "enroll-dtw": 0.986,
+          "combined": 0.9
+        }
+      }
+    },
+    "all (20 classes), enroll k=1": {
+      "n_test": 5400,
+      "chance": 0.05,
+      "phrase-list": {
+        "top1": 0.6622,
+        "top3": 0.8089
+      },
+      "enroll-dtw": {
+        "top1": 0.9424,
+        "top3": 0.9887
+      },
+      "combined": {
+        "top1": 0.9339,
+        "top3": 0.9806
+      },
+      "per_speaker_top1": {
+        "F01": {
+          "phrase-list": 0.547,
+          "enroll-dtw": 0.847,
+          "combined": 0.836
+        },
+        "F02": {
+          "phrase-list": 0.642,
+          "enroll-dtw": 0.986,
+          "combined": 0.969
+        },
+        "F04": {
+          "phrase-list": 0.658,
+          "enroll-dtw": 0.989,
+          "combined": 0.978
+        },
+        "F05": {
+          "phrase-list": 0.833,
+          "enroll-dtw": 0.95,
+          "combined": 0.986
+        },
+        "F06": {
+          "phrase-list": 0.786,
+          "enroll-dtw": 0.981,
+          "combined": 0.989
+        },
+        "F07": {
+          "phrase-list": 0.722,
+          "enroll-dtw": 0.972,
+          "combined": 0.964
+        },
+        "F08": {
+          "phrase-list": 0.717,
+          "enroll-dtw": 0.953,
+          "combined": 0.95
+        },
+        "F09": {
+          "phrase-list": 0.625,
+          "enroll-dtw": 0.922,
+          "combined": 0.894
+        },
+        "F10": {
+          "phrase-list": 0.594,
+          "enroll-dtw": 0.892,
+          "combined": 0.847
+        },
+        "F11": {
+          "phrase-list": 0.494,
+          "enroll-dtw": 0.917,
+          "combined": 0.892
+        },
+        "M01": {
+          "phrase-list": 0.731,
+          "enroll-dtw": 0.969,
+          "combined": 0.961
+        },
+        "M02": {
+          "phrase-list": 0.592,
+          "enroll-dtw": 0.95,
+          "combined": 0.933
+        },
+        "M04": {
+          "phrase-list": 0.856,
+          "enroll-dtw": 0.961,
+          "combined": 0.986
+        },
+        "M07": {
+          "phrase-list": 0.608,
+          "enroll-dtw": 0.958,
+          "combined": 0.961
+        },
+        "M08": {
+          "phrase-list": 0.528,
+          "enroll-dtw": 0.889,
+          "combined": 0.861
+        }
+      }
+    },
+    "all (20 classes), enroll k=3": {
+      "n_test": 4200,
+      "chance": 0.05,
+      "phrase-list": {
+        "top1": 0.661,
+        "top3": 0.8079
+      },
+      "enroll-dtw": {
+        "top1": 0.9788,
+        "top3": 0.9964
+      },
+      "combined": {
+        "top1": 0.9586,
+        "top3": 0.9886
+      },
+      "per_speaker_top1": {
+        "F01": {
+          "phrase-list": 0.546,
+          "enroll-dtw": 0.939,
+          "combined": 0.896
+        },
+        "F02": {
+          "phrase-list": 0.632,
+          "enroll-dtw": 0.989,
+          "combined": 0.975
+        },
+        "F04": {
+          "phrase-list": 0.661,
+          "enroll-dtw": 0.996,
+          "combined": 0.989
+        },
+        "F05": {
+          "phrase-list": 0.825,
+          "enroll-dtw": 0.986,
+          "combined": 0.993
+        },
+        "F06": {
+          "phrase-list": 0.771,
+          "enroll-dtw": 0.996,
+          "combined": 0.996
+        },
+        "F07": {
+          "phrase-list": 0.725,
+          "enroll-dtw": 0.993,
+          "combined": 0.971
+        },
+        "F08": {
+          "phrase-list": 0.707,
+          "enroll-dtw": 0.986,
+          "combined": 0.961
+        },
+        "F09": {
+          "phrase-list": 0.625,
+          "enroll-dtw": 0.979,
+          "combined": 0.932
+        },
+        "F10": {
+          "phrase-list": 0.586,
+          "enroll-dtw": 0.979,
+          "combined": 0.9
+        },
+        "F11": {
+          "phrase-list": 0.504,
+          "enroll-dtw": 0.979,
+          "combined": 0.946
+        },
+        "M01": {
+          "phrase-list": 0.736,
+          "enroll-dtw": 0.982,
+          "combined": 0.971
+        },
+        "M02": {
+          "phrase-list": 0.607,
+          "enroll-dtw": 0.968,
+          "combined": 0.95
+        },
+        "M04": {
+          "phrase-list": 0.854,
+          "enroll-dtw": 0.993,
+          "combined": 1.0
+        },
+        "M07": {
+          "phrase-list": 0.607,
+          "enroll-dtw": 0.975,
+          "combined": 0.982
+        },
+        "M08": {
+          "phrase-list": 0.529,
+          "enroll-dtw": 0.943,
+          "combined": 0.914
+        }
+      }
+    }
+  }
+}

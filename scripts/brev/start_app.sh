@@ -4,6 +4,8 @@
 #   gateway 8000 · vsr 8101 · audio 8102 · eeg 8103 · tts 8104
 # Everything binds 127.0.0.1: the laptop reaches the gateway only through `brev port-forward`
 # (scripts/brev/connect.sh). `start_app.sh stop` stops everything; `start_app.sh status` checks health.
+# `start_app.sh lips` starts only the gateway and the lip agent (no vLLM, voice, EEG or TTS): the whole GPU
+# goes to lip reading, and the gateway's deterministic policy stands in for the coordinator.
 set -uo pipefail
 cd "$(dirname "$0")/../.."
 export HF_HOME=${HF_HOME:-/workspace/hf}
@@ -45,7 +47,8 @@ status() {
   nvidia-smi --query-gpu=memory.used,memory.total --format=csv,noheader
 }
 
-case "${1:-start}" in
+MODE=${1:-start}
+case "$MODE" in
   stop) stop; exit 0 ;;
   status) status; exit 0 ;;
 esac
@@ -58,6 +61,18 @@ launch() {  # name, then the command
   echo "  • $name (pid $!, log $LOGS/$name.log)"
 }
 
+export PYTHONPATH=$PWD TOKENIZERS_PARALLELISM=false
+export UNSPOKEN_HOST_LABEL="NVIDIA Brev"
+
+if [[ $MODE == lips ]]; then
+  echo "Starting lip reading only on $(hostname)"
+  for svc in gateway:8000 vsr:8101; do
+    launch "${svc%%:*}" "$APP" -m uvicorn "services.${svc%%:*}.app:app" --host 127.0.0.1 --port "${svc##*:}" --log-level warning
+  done
+  echo "The lip model loads in about a minute. Check: bash scripts/brev/start_app.sh status"
+  exit 0
+fi
+
 echo "Starting Unspoken backend on $(hostname)"
 # FlashInfer's sampler JIT-compiles too; the PyTorch sampler needs no compiler (greedy decoding anyway)
 launch vllm env VLLM_USE_FLASHINFER_SAMPLER=0 "$LLM" serve "$LLM_MODEL" --host 127.0.0.1 --port 8001 \
@@ -65,8 +80,6 @@ launch vllm env VLLM_USE_FLASHINFER_SAMPLER=0 "$LLM" serve "$LLM_MODEL" --host 1
   --enable-auto-tool-choice --tool-call-parser qwen3_coder --reasoning-parser nemotron_v3 \
   --enable-prefix-caching --max-num-seqs 8
 
-export PYTHONPATH=$PWD TOKENIZERS_PARALLELISM=false
-export UNSPOKEN_HOST_LABEL="NVIDIA Brev"
 export UNSPOKEN_LLM_BACKEND=openai UNSPOKEN_LLM_BASE_URL=http://127.0.0.1:8001 UNSPOKEN_LLM_MODEL="$LLM_MODEL"
 for svc in gateway:8000 coordinator:8105 eeg:8103 tts:8104 audio:8102 vsr:8101; do
   py=$APP; [[ ${svc%%:*} == audio ]] && py=$ASR

@@ -218,6 +218,36 @@ async def capture_lip(sid: str, video: UploadFile = File(...)):
     return await _forward_capture(get_session(sid), "vsr", "video", video, "Mouth clip")
 
 
+# ---- personal enrollment (stored and matched by the vsr service, on this machine) ----
+
+async def _vsr(method: str, path: str, **kw):
+    try:
+        async with httpx.AsyncClient(timeout=120) as client:
+            r = await client.request(method, f"{service_url('vsr')}{path}", **kw)
+    except Exception as exc:
+        raise HTTPException(503, f"lip reading unavailable ({type(exc).__name__})")
+    if r.status_code != 200:
+        raise HTTPException(r.status_code, r.json().get("detail", r.text[:200]) if r.headers.get("content-type", "").startswith("application/json") else r.text[:200])
+    return r.json()
+
+
+@app.get("/api/enroll")
+async def enroll_list():
+    return await _vsr("GET", "/enroll")
+
+
+@app.post("/api/enroll")
+async def enroll_add(video: UploadFile = File(...), phrase: str = Form(...)):
+    data = await video.read()
+    return await _vsr("POST", "/enroll", files={"video": (video.filename or "clip.webm", data, video.content_type or "video/webm")},
+                      data={"phrase": phrase})
+
+
+@app.delete("/api/enroll")
+async def enroll_remove(phrase: str):
+    return await _vsr("DELETE", "/enroll", params={"phrase": phrase})
+
+
 @app.post("/api/{sid}/capture/audio")
 async def capture_audio(sid: str, audio: UploadFile = File(...), enhance: bool = Form(True)):
     return await _forward_capture(get_session(sid), "audio", "audio", audio, "Voice clip", {"enhance": str(enhance).lower()})

@@ -182,3 +182,4 @@ body.calibrating .gaze{display:none}
   .caption{bottom:24px}
 }
 @media (prefers-reduced-motion:reduce){.ambient{animation:none}}
+
