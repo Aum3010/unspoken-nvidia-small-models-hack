@@ -17,10 +17,11 @@ LLM_MEM=${LLM_MEM:-0.55}
 # FlashInfer's attention JIT-compiles with nvcc on first use and the image has no CUDA toolkit;
 # Triton attention needs no compiler. Set LLM_ATTN=FLASHINFER once a toolkit matching the driver is installed.
 LLM_ATTN=${LLM_ATTN:-TRITON_ATTN}
-# MTP speculative decoding with the checkpoint's own next-token layer: coordinator 272 -> 229 ms p50, NeMo Gym
-# unchanged within run-to-run noise (evaluations/results/coordinator_mtp_brev.json). LLM_MTP=0 turns it off.
-# It fails (HTTP 500) together with --mamba-cache-mode all.
-LLM_MTP=${LLM_MTP:-1}
+# MTP speculative decoding with the checkpoint's own next-token layer (LLM_MTP=1): coordinator 272 -> 229 ms p50 and
+# NeMo Gym unchanged within run-to-run noise (evaluations/results/coordinator_mtp_brev.json), but OFF by default: with
+# concurrent requests next to the other agents it ended in a CUDA fault that, under MPS, took every GPU process down.
+# It also fails (HTTP 500) together with --mamba-cache-mode all.
+LLM_MTP=${LLM_MTP:-0}
 SPEC=(); [[ $LLM_MTP == 1 ]] && SPEC=(--speculative-config '{"method":"mtp","num_speculative_tokens":1}')
 # extra vLLM flags for experiments
 LLM_EXTRA=${LLM_EXTRA:-}
