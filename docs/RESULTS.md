@@ -15,6 +15,7 @@ they apply to, not in a footnote.
 | [EEG, ALS patients](#3-eeg-alone-als-patients-study-f) | Wrong characters: **24 → 1** per 120, same decoder; throughput not lower (2.51 → 3.13 correct/min) | bigP3BCI Study F, 10 ALS participants, session 3 | Yields on 36% of selections; 4 of 10 participants cannot be served reliably by EEG; throughput CIs overlap |
 | [EEG + gaze](#4-eeg--gaze-study-h) | Correct within 3 s at ~1% wrong: **2.9% → 29.1%** (+26.1 points, 95% CI 18.2 to 35.3) | bigP3BCI Study H, 16 participants, held-out runs | Participants do not have ALS: supports the mechanism, not ALS speed |
 | [Lips + voice](#6-lips--voice-on-the-same-utterances) | Babble at 0 dB, correct commits: voice **8.0%**, lips **53.5%**, together **76.0%**; at every noise level together beats both. Latency = the slower agent (348 ms p50), not the sum | GRID s1+s2, 200 utterances, real paired audio and video, neither speaker trained on | Fixed 51-word grammar; candidates differ in one word; wrong commits 2.9% overall vs a 2% target |
+| [Gym training, EEG decisions](#8-model-improvement-with-nemo-gym-one-training-run-neuro_comm) | Nemotron Nano 4B, LoRA on verifier-selected trajectories: reward **-0.52 → 0.01**, wrong 89 → 32, abstains 0 → 40 | `neuro_comm`, trained on Study F sessions 1-2, tested on session 3 | Still below the Bayes rule (0.25) and the untrained 30B (0.12): not deployed |
 | [Coordinator](#5-coordinator-nemo-gym-unspoken_communication) | Right action **82% → 95%**, unsafe 0% → 0%, 278 ms p50 (Nemotron alone → Nemotron + validator) | NeMo Gym `unspoken_communication`, 44 held-out tasks | The gain is validator code, not a retrained model |
 
 ---
@@ -212,14 +213,49 @@ invalid tool calls in 2,521 model calls, so the failure is judgment, not format.
 
 **What it means for the design.** The EEG stopping decision stays with the calibrated Bayesian rule (section 3), and
 Nemotron is used where language judgment matters: misreads, noise, history (section 5). This environment, with its
-600 training episodes from separate sessions, is the right place for a future Gym training run: "learn to abstain" is
-a clear, measurable target on genuinely held-out sessions.
+600 training episodes from separate sessions, is where we trained: "learn to abstain" is a clear, measurable target on
+genuinely held-out sessions (section 8).
 
 Files: `evaluations/results/neuro_comm_brev/` (`aggregate.csv`, `per_participant.csv`, `rollouts.jsonl`).
 Reproduce: `run_neuro_comm_eval.py --policies bayes bayes_abstain nemotron hybrid --tau 0.99 --base-url <vLLM> --model <name>`.
 
-## 8. Model improvement with NeMo Gym
+## 8. Model improvement with NeMo Gym: one training run (`neuro_comm`)
 
-Not claimed. No model weights were trained with NeMo Gym. The coordinator's gain (section 5) is validator code. The
-coordinator task set's inputs also repeat across seeds (49 of 60 eval tasks had exact copies in a re-seeded set), so an
-honest training split needs held-out phrases or categories, which did not fit the time.
+**Question.** Section 7 showed the 30B never abstains. Can a small Nemotron, trained only on the environment's own
+reward, learn to stop and abstain on held-out ALS sessions?
+
+**Method.**
+- Student: `nvidia/Llama-3.1-Nemotron-Nano-4B-v1.1`, LoRA rank 16, 2 epochs, 98 s on one H100.
+- Training data: verifier-selected best-of-N (rejection-sampling fine-tuning). For each of the 600 **calibration**
+  selections (Study F sessions 1-2), every "request k repetitions, then commit or abstain" trajectory was replayed in
+  `neuro_comm`, and the highest-reward one gave the labels: 1,696 steps (more 1,096, commit 479, abstain 121). Session
+  3 was never read during training.
+- Restricted action space: `more`, `commit` (always the top candidate) or `abstain`. The student scores the three
+  words and takes the most likely, with no sampling, through the same Gym replay tools and reward as section 7.
+- Evaluation: the same 120 held-out session-3 selections as section 7.
+
+| Policy | Mean reward [95% CI] | Correct | Wrong | Abstain | EEG time | Model time |
+|---|---:|---:|---:|---:|---:|---:|
+| Nano 4B, base (same prompt) | -0.518 [-0.75, -0.27] | 25.8% | 89 | 0 | 3.0 s | 0.03 s |
+| **Nano 4B, fine-tuned** | **0.008** [-0.18, 0.19] | 40.0% | **32** | **40** | 4.9 s | 0.08 s |
+| Nemotron 30B, untrained (section 7) | 0.119 | 73.3% | 32 | 0 | 28.1 s | 14.4 s |
+| Bayes, commit at 0.99 (section 7) | **0.253** | 75.8% | 29 | 0 | 21.6 s | 0 |
+
+**Finding: training worked against its own baseline, but not against the deployed rule.**
+- The fine-tuned 4B learned to abstain: 0 → 40 abstentions, and 89 → 32 wrong. Reward rose from -0.52 to 0.01, with
+  participant-bootstrap CIs that do not overlap.
+- It is still below Bayes (0.253) and the untrained 30B (0.119). It stops after 1.9 repetitions on average, against
+  about 7 for Bayes.
+- The cause is in the labels. Best-of-N with hindsight commits at the first repetition where the top candidate happens
+  to be right, which teaches the student to stop too early. A value-based label (expected reward of stopping now versus
+  waiting) is the fix. It was not run.
+
+**Claim we make.** A NeMo Gym environment built on real ALS recordings can train a small Nemotron to change the behaviour
+that matters (abstaining), measured on held-out sessions. **Claim we do not make:** that the trained model should
+replace the Bayesian rule. It should not. The EEG stopping decision stays Bayesian.
+
+Files: `evaluations/results/neuro_comm_student/` (`aggregate.csv`, `per_participant.csv`, `episodes.csv`,
+`student_train.log`). Reproduce: `scripts/benchmark/neuro_comm_student.py data | train | eval`. The adapter and the
+training labels are on the Brev box only, not published.
+
+The coordinator's gain (section 5) remains validator code, not training. Its task set's inputs repeat across seeds (49 of 60).

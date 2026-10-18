@@ -6,9 +6,9 @@
 > Gym runs (72 eval + 44 held-out) and the serving/latency work on `ui-speedups` are used as they are, not re-run.
 > - `docs/RESULTS.md` is the one-page results summary; its coordinator row uses the held-out Brev numbers from
 >   `coordinator_heldout_brev.json`.
-> - **Bounty wording to check:** `BOUNTIES.md` §2 ("Best Model Improvement With NeMo Gym") says, correctly, that no
->   weights changed: the gain is the validator. A judge reading "model improvement" may expect training. We have no
->   training run, so we should not claim one; keep the wording as it is.
+> - **Bounty wording to check:** `BOUNTIES.md` §2 ("Best Model Improvement With NeMo Gym") says the coordinator gain is
+>   the validator. That stays true. There is now also one real training run (E6, `RESULTS.md` §8): Nano 4B LoRA on
+>   `neuro_comm`, held-out ALS session. It beats its own base clearly but not the Bayes rule. Cite it with that caveat.
 > - Copied code needed two small fixes: `scripts/data/audit_eeg_datasets.py --skip-bnci` (the Study F audit crashed
 >   with BNCI files present) and `evaluations/dataset_manifests/` (missing from the first copy).
 
@@ -65,6 +65,11 @@ wrong, abstain, model calls, end-to-end latency, participant bootstrap CIs.
 NVIDIA MPS on one GPU: with every agent busy, voice 244 → 75 ms p50, Kokoro 79 → 30 ms, vLLM 352 → 336 ms
 (`latency_brev_ui_mps{0,1}.json`). Not re-run.
 
+### E6. Gym training: Nemotron Nano 4B learns to abstain (Brev)
+`scripts/benchmark/neuro_comm_student.py`. LoRA on verifier-selected best-of-N trajectories from the 600 calibration
+selections; evaluated on the same 120 session-3 selections as E4. Reward -0.52 → 0.01, abstains 0 → 40, still below
+Bayes (0.25). Hindsight labels make it stop too early; value-based labels are the next step.
+
 ## Box layout (2x H100 80GB, `breakable-tomato-hippopotamus`)
 
 | GPU | Process |
@@ -76,8 +81,8 @@ Lips (E1) ran on the Mac: 200 clips, top-1 88.5%, 348 ms p50 (MPS).
 
 ## Not claimed
 
-- NeMo Gym model improvement (no training run: no time for an honest held-out design; the coordinator task set's
-  inputs repeat across seeds, 49 of 60 eval tasks).
+- That the Gym-trained model beats the deployed EEG rule (it does not; E6).
+- Coordinator training (its task set's inputs repeat across seeds, 49 of 60 eval tasks).
 - Gaze accuracy (no measurement).
 - Study H as ALS evidence.
 - The GRID fine-tune as deployed.
