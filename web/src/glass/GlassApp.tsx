@@ -62,6 +62,9 @@ function quote(t: string, n = 16) { const u = t.toUpperCase(); return `“${u.le
 export function GlassApp() {
   const { state, connected } = useSession()
   const health = useHealth()
+  // clips leave this device when the gateway runs elsewhere (e.g. "NVIDIA Brev"); the page says so
+  const host = health?.gateway?.host
+  const remoteHost = host && host !== 'this device' ? host : null
   // a saved calibration (same window size) is used straight away: no recalibrating after a reload
   const [calibrating, setCalibrating] = useState(() => !gazeState.calibrated)
   const [focusMode, setFocusMode] = useState(false)
@@ -427,7 +430,7 @@ export function GlassApp() {
 
       <div className="brand">
         <div className="name"><span className="logo" /><span>unspoken<i>.</i></span></div>
-        <button className={`chip glass mono ${cam === 'on' ? 'live' : ''}`} data-a="camera"><b /><span>{cam === 'on' ? 'Camera · on device' : cam === 'off' ? 'Camera off · allow & reload' : 'Camera · starting'}</span></button>
+        <button className={`chip glass mono ${cam === 'on' ? 'live' : ''}`} data-a="camera"><b /><span>{cam === 'on' ? (remoteHost ? `Camera · clips to ${remoteHost}` : 'Camera · on device') : cam === 'off' ? 'Camera off · allow & reload' : 'Camera · starting'}</span></button>
         <span className={`chip glass mono ${mic === 'on' ? (hearing ? 'live' : 'ok') : ''}`}><b /><span>{mic === 'on' ? (health?.audio?.state !== 'ready' ? 'Mic · voice agent offline' : hearing ? 'Mic · hearing you' : 'Mic · listening') : mic === 'off' ? 'Mic off' : 'Mic · starting'}</span></span>
         <button className={`chip glass mono ${eyes ? 'ok' : 'warn'}`} data-a="calibrate"><b /><span>{eyes ? `Eyes · ≈${Math.round(gazeState.accuracyPx ?? 0)} px` : 'Eyes · pointer · calibrate'}</span></button>
       </div>
@@ -474,7 +477,7 @@ export function GlassApp() {
       <div className="hint mono">Look or point to aim · blink or Space selects<br />Nod = yes · shake = no · P = phrases</div>
       <div className="gaze" id="gaze" />
 
-      {calibrating && <Calibration bind={bindCalib} onFocusMode={setFocusMode} onDone={doneCalib} />}
+      {calibrating && <Calibration bind={bindCalib} onFocusMode={setFocusMode} onDone={doneCalib} remoteHost={remoteHost} />}
     </>
   )
 }
