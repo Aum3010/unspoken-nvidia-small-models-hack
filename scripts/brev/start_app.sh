@@ -45,10 +45,10 @@ status() {
   nvidia-smi --query-gpu=memory.used,memory.total --format=csv,noheader
 }
 
-# NVIDIA MPS (UNSPOKEN_MPS=1): one MPS server lets kernels from every GPU process run at the same
+# NVIDIA MPS (UNSPOKEN_MPS=1, the default; measured in docs/SERVING.md): one MPS server lets kernels from every GPU process run at the same
 # time instead of time-slicing between their contexts (docs/SERVING.md). Clients attach when they start, so the
 # daemon is (re)set before any GPU process launches. UNSPOKEN_MPS=0 runs without it, for A/B latency runs.
-MPS=${UNSPOKEN_MPS:-0}
+MPS=${UNSPOKEN_MPS:-1}
 mps_running() { pgrep -x nvidia-cuda-mps-control >/dev/null; }
 mps() {
   if [[ $MPS == 1 ]] && ! mps_running; then nvidia-cuda-mps-control -d && echo "  MPS daemon started"; fi
