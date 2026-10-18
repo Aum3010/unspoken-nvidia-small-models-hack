@@ -521,7 +521,6 @@ export function GlassApp() {
       </nav>
 
       <div className="caption mono" id="caption" aria-live="polite" />
-      <div className="hint mono">Look or point to aim · blink or Space selects<br />Nod = yes · shake = no · P = phrases</div>
       <div className="gaze" id="gaze" />
 
       {calibrating && <Calibration bind={bindCalib} onFocusMode={setFocusMode} onDone={doneCalib} remoteHost={remoteHost} />}
