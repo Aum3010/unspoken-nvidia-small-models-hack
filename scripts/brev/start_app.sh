@@ -8,6 +8,8 @@ set -uo pipefail
 cd "$(dirname "$0")/../.."
 export HF_HOME=${HF_HOME:-/workspace/hf}
 APP=/workspace/venv-app/bin/python
+# the voice agent (Nemotron Speech + asr_eval's decision code) runs in the NeMo venv built by asr_eval/scripts/setup_brev.sh
+ASR=/workspace/venv-asr/bin/python
 LLM=/workspace/venv-vllm/bin/vllm
 LLM_MODEL=${UNSPOKEN_LLM_MODEL:-nvidia/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-NVFP4}
 # the GPU is shared with the agents (and the asr_eval bench): keep vLLM well under the whole card
@@ -59,6 +61,7 @@ export PYTHONPATH=$PWD TOKENIZERS_PARALLELISM=false
 export UNSPOKEN_HOST_LABEL="NVIDIA Brev"
 export UNSPOKEN_LLM_BACKEND=openai UNSPOKEN_LLM_BASE_URL=http://127.0.0.1:8001 UNSPOKEN_LLM_MODEL="$LLM_MODEL"
 for svc in gateway:8000 coordinator:8105 eeg:8103 tts:8104 audio:8102 vsr:8101; do
-  launch "${svc%%:*}" "$APP" -m uvicorn "services.${svc%%:*}.app:app" --host 127.0.0.1 --port "${svc##*:}" --log-level warning
+  py=$APP; [[ ${svc%%:*} == audio ]] && py=$ASR
+  launch "${svc%%:*}" "$py" -m uvicorn "services.${svc%%:*}.app:app" --host 127.0.0.1 --port "${svc##*:}" --log-level warning
 done
 echo "Models load in the background (vLLM takes a few minutes the first time). Check: bash scripts/brev/start_app.sh status"

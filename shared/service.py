@@ -68,20 +68,6 @@ def pick_device(override_env: str | None = None) -> str:
     return "mps" if torch.backends.mps.is_available() else "cpu"
 
 
-def preload_cudnn() -> None:
-    """CTranslate2 (faster-whisper) needs cuDNN 9; torch's wheel ships it but not on the loader path."""
-    import ctypes
-    import glob
-    import site
-
-    for sp in site.getsitepackages():
-        for lib in sorted(glob.glob(f"{sp}/nvidia/cudnn/lib/libcudnn*.so.9")):
-            try:
-                ctypes.CDLL(lib, mode=ctypes.RTLD_GLOBAL)
-            except OSError:
-                pass
-
-
 def make_app(title: str) -> FastAPI:
     app = FastAPI(title=title)
     app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])

@@ -11,11 +11,12 @@ PY=.venv/bin/python bash scripts/fetch_assets.sh
 
 echo "== Web app + on-device browser models"
 (cd web && npm install)
-mkdir -p web/public/mediapipe web/public/vendor
+mkdir -p web/public/mediapipe web/public/models
 cp -r web/node_modules/@mediapipe/tasks-vision/wasm web/public/mediapipe/
-cp web/node_modules/webgazer/dist/webgazer.js web/public/vendor/
 [[ -s web/public/mediapipe/face_landmarker.task ]] || curl -sSL -o web/public/mediapipe/face_landmarker.task \
   https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task
+# gaze: MobileGaze MobileOne-S0 eye-image model (MIT, yakhyo/gaze-estimation)
+[[ -s web/public/models/mobileone_s0_gaze.onnx ]] || curl -sSL -o web/public/models/mobileone_s0_gaze.onnx   https://github.com/yakhyo/gaze-estimation/releases/download/weights/mobileone_s0_gaze.onnx
 
 echo "== Coordinator model (Ollama, Metal)"
 if command -v ollama >/dev/null; then ollama pull nemotron-3.5-lightning:30b-a3b; else echo "  install Ollama, or set UNSPOKEN_LLM_BACKEND=openai (see scripts/serve_coordinator_mlx.sh)"; fi

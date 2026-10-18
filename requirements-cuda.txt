@@ -19,9 +19,7 @@ opencv-python-headless==4.11.0.86
 # visual speech (Chaplin / Auto-AVSR on CUDA)
 mediapipe==0.10.21
 six==1.17.0
-# audio: Whisper base on CTranslate2 (replaces mlx-whisper)
-faster-whisper==1.2.1
-pyrnnoise==0.4.5
+# audio: the voice agent (Nemotron Speech + Silero VAD) runs in asr_eval's NeMo venv; see scripts/brev/start_app.sh
 # speech output: Kokoro-82M in PyTorch (replaces mlx-audio)
 kokoro==0.9.4
 misaki[en]==0.9.4

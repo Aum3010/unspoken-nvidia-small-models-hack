@@ -4,6 +4,7 @@
 // point (eyes, or the pointer as a stand-in) that selects by dwelling or blinking.
 // Imperative on purpose: it draws every frame. React drives it through the exports.
 
+import { gazeState, learnFromSelection } from '../lib/gaze'
 import { G } from './glyphs'
 
 export type NodeId = 'voice' | 'lips' | 'gaze' | 'blink' | 'eeg' | 'head'
@@ -636,11 +637,35 @@ function targetAt(x: number, y: number) {
   const t = el && el.closest<HTMLElement>('[data-a]')
   return t && !(t as HTMLButtonElement).disabled ? t : null
 }
+/** Distance from a point to an element's box (0 inside). */
+function distTo(el: HTMLElement, x: number, y: number) {
+  const r = el.getBoundingClientRect()
+  return Math.hypot(Math.max(r.left - x, 0, x - r.right), Math.max(r.top - y, 0, y - r.bottom))
+}
+/**
+ * Gaze is an estimate: tolerate misses in proportion to the measured calibration error. The current
+ * target holds while the gaze stays within that slack, and a gaze point in the gap between targets goes
+ * to the nearest one within it. The pointer stand-in is exact and needs neither.
+ */
+function pick(x: number, y: number) {
+  const direct = targetAt(x, y)
+  if (source !== 'eyes') return direct
+  const slack = Math.max(36, Math.min(140, (gazeState.accuracyPx ?? 80) * 0.6))
+  if (hot && hot.isConnected && !(hot as HTMLButtonElement).disabled && distTo(hot, x, y) <= slack) return hot
+  if (direct) return direct
+  let best: HTMLElement | null = null, bestD = slack
+  for (const el of $$('[data-a]')) {
+    if ((el as HTMLButtonElement).disabled || !el.getBoundingClientRect().width) continue
+    const d = distTo(el, x, y)
+    if (d <= bestD) { best = el; bestD = d }
+  }
+  return best
+}
 function dwellTick(now: number, dt = 16.7) {
-  // eyes are not a mouse: the gaze point drifts and settles, it never snaps
-  const kz = 1 - Math.pow(0.72, dt / 16.7); sgx += (gx - sgx) * kz; sgy += (gy - sgy) * kz
+  // the pointer stand-in drifts and settles like eyes would; real gaze is already filtered in lib/gaze.ts
+  const kz = source === 'eyes' ? 1 : 1 - Math.pow(0.72, dt / 16.7); sgx += (gx - sgx) * kz; sgy += (gy - sgy) * kz
   gazeEl.style.transform = `translate(${sgx}px,${sgy}px)`
-  const t = hasPointer && !paused ? targetAt(sgx, sgy) : null
+  const t = hasPointer && !paused ? pick(sgx, sgy) : null
   if (t !== hot) {
     if (hot) hot.classList.remove('hot')
     hot = t; hotT0 = now; hotDone = !!hot && hot === clicked
@@ -663,7 +688,15 @@ function dwellTick(now: number, dt = 16.7) {
     // confirm targets need a longer look than select targets
     const need = hot.dataset.confirm != null ? DWELL * 1.5 : DWELL
     p = Math.min(1, (now - hotT0) / need)
-    if (p >= 1) { hotDone = true; dwelledAt = now; select(hot, source === 'eyes' ? 'eyes' : 'pointer'); p = 0 }
+    if (p >= 1) {
+      hotDone = true; dwelledAt = now
+      if (source === 'eyes') {
+        // the person was looking at this target for the dwell: its centre labels those frames for the calibration
+        const r = hot.getBoundingClientRect()
+        learnFromSelection(r.left + r.width / 2, r.top + r.height / 2, need)
+      }
+      select(hot, source === 'eyes' ? 'eyes' : 'pointer'); p = 0
+    }
   }
   gazeEl.style.setProperty('--p', String(p))
 }

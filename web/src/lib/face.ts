@@ -1,8 +1,9 @@
 // MediaPipe Face Landmarker (runs locally in the browser, wasm + GPU delegate).
-// Used for: mouth ROI overlay/crop preview, face-quality hints before a lip
-// capture, and deliberate-blink detection. Landmarks do not decode words.
+// Used for: mouth-motion clips for the lip agent, deliberate-blink detection, head nod/shake,
+// and the iris + head-pose features used for gaze (lib/gaze.ts). Landmarks do not decode words.
 
 import { FaceLandmarker, FilesetResolver } from '@mediapipe/tasks-vision'
+import { getCamera } from './capture'
 
 export interface FaceFrame {
   present: boolean
@@ -14,6 +15,8 @@ export interface FaceFrame {
   yaw: number            // rough left/right head turn, -1..1
   headPitch: number      // head pose from the face transform, degrees (nod axis)
   headYaw: number        // degrees (shake axis)
+  pose: number[] | null  // 4x4 facial transformation matrix (flattened), head rotation + translation
+  source: HTMLVideoElement  // the frame these landmarks belong to (used for the face crop in lib/appearance.ts)
   t: number
 }
 
@@ -55,8 +58,10 @@ export function onFace(l: FrameListener) { frameListeners.add(l); return () => {
 export function onBlink(l: BlinkListener) { blinkListeners.add(l); return () => { blinkListeners.delete(l) } }
 
 /** Run the landmarker on every new video frame until the returned stop() is called. */
+let trackers = 0
 export function trackVideo(video: HTMLVideoElement): () => void {
   let stopped = false
+  trackers++
   let lastTs = -1
   const step = () => {
     if (stopped) return
@@ -82,7 +87,7 @@ export function trackVideo(video: HTMLVideoElement): () => void {
       const headPitch = M ? Math.atan2(M[6], M[10]) * 180 / Math.PI : 0
       const headYaw = M ? Math.asin(Math.max(-1, Math.min(1, -M[2]))) * 180 / Math.PI : 0
       const frame: FaceFrame = {
-        present: !!lm, landmarks: lm, mouthBox, yaw, headPitch, headYaw,
+        present: !!lm, landmarks: lm, mouthBox, yaw, headPitch, headYaw, pose: M ? [...M] : null, source: video,
         mouthOpen: shapes.jawOpen ?? 0, blinkL: shapes.eyeBlinkLeft ?? 0, blinkR: shapes.eyeBlinkRight ?? 0, t,
       }
       detectBlink(frame)
@@ -92,7 +97,34 @@ export function trackVideo(video: HTMLVideoElement): () => void {
     else requestAnimationFrame(step)
   }
   initFace().then(step).catch((e) => console.warn('face landmarker unavailable', e))
-  return () => { stopped = true }
+  return () => { if (!stopped) { stopped = true; trackers-- } }
+}
+
+// Background tracking for when no page video is tracked yet (gaze needs face frames).
+// Reference-counted: one off-screen video and one tracking loop, however many users. If a visible
+// video is already tracked (the room camera), its frames are used instead of a second tracker.
+let bg: { video: HTMLVideoElement; stop: () => void } | null = null
+let bgUsers = 0
+export async function trackCameraInBackground(): Promise<() => void> {
+  if (trackers > 0 && !bg) return () => {}
+  bgUsers++
+  if (!bg) {
+    const video = document.createElement('video')
+    // off-screen but rendered: display:none would stop frame decoding
+    Object.assign(video.style, { position: 'fixed', width: '2px', height: '2px', opacity: '0', pointerEvents: 'none', left: '0', top: '0' })
+    video.muted = true
+    video.playsInline = true
+    document.body.appendChild(video)
+    video.srcObject = await getCamera()
+    await video.play()
+    bg = { video, stop: trackVideo(video) }
+  }
+  let released = false
+  return () => {
+    if (released) return
+    released = true
+    if (--bgUsers === 0 && bg) { bg.stop(); bg.video.remove(); bg = null }
+  }
 }
 
 function detectBlink(f: FaceFrame) {

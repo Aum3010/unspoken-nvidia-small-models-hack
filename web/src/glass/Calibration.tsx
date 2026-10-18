@@ -1,16 +1,25 @@
 // Eye calibration in the glass style. Shown when the app opens and from the Eyes chip.
-// Webcam gaze is an estimate, so we measure its error and only switch selection to the
-// eyes when it is usable; otherwise the pointer stays the stand-in for gaze.
+// Gaze comes from MediaPipe iris + eyelid geometry and MobileGaze's eye-image angles, fitted to this
+// person with a ridge regression (lib/gaze.ts). It is an estimate, so we measure its error on dots it
+// was not fitted on, and only switch selection to the eyes when it is usable; otherwise the pointer
+// stays the stand-in. A good calibration is saved on this device and offered next time.
 // Its buttons are ordinary [data-a] targets, so they work by click, dwell or blink.
 
-import { useEffect, useState } from 'react'
-import { clearCalibration, gazeState, measureAccuracy, onGaze, recordCalibrationPoint, startGaze } from '../lib/gaze'
+import { useEffect, useRef, useState } from 'react'
+import { appearanceState } from '../lib/appearance'
+import { calibrationSampleCount, clearCalibration, gazeState, measureAccuracy, onGaze, recordCalibrationPoint, saveCalibration, setCalibrating, startGaze } from '../lib/gaze'
 
 const POINTS = [[0.1, 0.12], [0.5, 0.12], [0.9, 0.12], [0.1, 0.5], [0.5, 0.5], [0.9, 0.5], [0.1, 0.88], [0.5, 0.88], [0.9, 0.88]]
-const HOLD_MS = 2200
-const MEASURE_MS = 2600
+// two passes, the second in a different order, so drift and order effects average out
+const SEQUENCE = [...POINTS, ...[4, 8, 0, 6, 2, 7, 1, 5, 3].map((i) => POINTS[i])]
+// accuracy is tested on points that were not trained on
+const TEST_POINTS = [[0.5, 0.5], [0.3, 0.3], [0.7, 0.3], [0.3, 0.7], [0.7, 0.7]]
+const SETTLE_MS = 600   // eyes travel to a new dot (~200-400 ms) before samples count
+const RECORD_MS = 1000
+const SAMPLE_MS = 50
+const TEST_MS = 1200
 
-type Phase = 'intro' | 'starting' | 'points' | 'measure' | 'done' | 'error'
+type Phase = 'intro' | 'starting' | 'points' | 'measure' | 'done' | 'noface' | 'error'
 
 interface Props {
   /** Routes this screen's [data-a="calib:*"] actions here. */
@@ -25,6 +34,9 @@ export function Calibration({ bind, onFocusMode, onDone }: Props) {
   const [idx, setIdx] = useState(0)
   const [acc, setAcc] = useState<number | null>(gazeState.accuracyPx)
   const [gaze, setGaze] = useState<{ x: number; y: number } | null>(null)
+  const errors = useRef<number[]>([])
+  // a calibration saved on this device for this window size (lib/gaze.ts restores it on load)
+  const [saved] = useState(() => gazeState.calibrated && gazeState.savedAt != null ? { acc: gazeState.accuracyPx ?? 0, at: gazeState.savedAt } : null)
 
   useEffect(() => onGaze((p) => setGaze(p)), [])
   useEffect(() => { onFocusMode(phase === 'points' || phase === 'measure') }, [phase, onFocusMode])
@@ -37,53 +49,75 @@ export function Calibration({ bind, onFocusMode, onDone }: Props) {
       if (a === 'start' && phase !== 'starting') {
         setPhase('starting')
         try {
+          setCalibrating(true)   // pure gaze while calibrating and measuring: no head fine-tune
+          await startGaze()      // loads MobileGaze first, so the new calibration can use it
           clearCalibration()
-          await startGaze()
           setIdx(0)
           setPhase('points')
         } catch {
+          setCalibrating(false)
           setPhase('error')
         }
+      } else if (a === 'saved' && saved) {
+        try { await startGaze(); onDone(true) } catch { setPhase('error') }
       } else if (a === 'skip') onDone(false)
       else if (a === 'continue') onDone(usable)
     })
     return () => bind(null)
-  }, [bind, phase, usable, onDone])
+  }, [bind, phase, usable, onDone, saved])
 
-  // hands-free: hold each dot while samples are recorded
+  // hands-free: let the eyes settle on each dot, then record samples
   useEffect(() => {
     if (phase !== 'points') return
-    const [px, py] = POINTS[idx]
+    const [px, py] = SEQUENCE[idx]
     const x = px * window.innerWidth, y = py * window.innerHeight
-    const iv = window.setInterval(() => recordCalibrationPoint(x, y), 90)
-    const t = window.setTimeout(() => {
+    let iv = 0
+    const settle = window.setTimeout(() => { iv = window.setInterval(() => recordCalibrationPoint(x, y), SAMPLE_MS) }, SETTLE_MS)
+    const next = window.setTimeout(() => {
       window.clearInterval(iv)
-      if (idx + 1 < POINTS.length) setIdx(idx + 1)
-      else setPhase('measure')
-    }, HOLD_MS)
-    return () => { window.clearInterval(iv); window.clearTimeout(t) }
+      if (idx + 1 < SEQUENCE.length) setIdx(idx + 1)
+      else if (calibrationSampleCount() < SEQUENCE.length * 5) { setCalibrating(false); setAcc(null); setPhase('noface') }  // eyes were not seen
+      else { setIdx(0); setPhase('measure') }
+    }, SETTLE_MS + RECORD_MS)
+    return () => { window.clearTimeout(settle); window.clearInterval(iv); window.clearTimeout(next) }
   }, [phase, idx])
 
+  // accuracy: mean error over unseen test points, each measured after the eyes settle
   useEffect(() => {
     if (phase !== 'measure') return
-    measureAccuracy({ x: window.innerWidth / 2, y: window.innerHeight / 2 }, MEASURE_MS).then((a) => {
-      gazeState.accuracyPx = a
-      gazeState.calibrated = a != null && a < 220
-      setAcc(a)
-      setPhase('done')
-    })
-  }, [phase])
+    if (idx === 0) errors.current = []
+    const [px, py] = TEST_POINTS[idx]
+    let cancelled = false
+    const t = window.setTimeout(() => {
+      measureAccuracy({ x: px * window.innerWidth, y: py * window.innerHeight }, TEST_MS).then((e) => {
+        if (cancelled) return
+        if (e != null) errors.current.push(e)
+        if (idx + 1 < TEST_POINTS.length) { setIdx(idx + 1); return }
+        const a = errors.current.length >= 3 ? errors.current.reduce((x, y) => x + y, 0) / errors.current.length : null
+        gazeState.accuracyPx = a
+        gazeState.calibrated = a != null && a < 220
+        saveCalibration()  // reused next time (same window size and camera position)
+        setAcc(a)
+        setCalibrating(false)
+        setPhase('done')
+      })
+    }, SETTLE_MS)
+    return () => { cancelled = true; window.clearTimeout(t) }
+  }, [phase, idx])
 
   if (phase === 'points' || phase === 'measure') {
-    const [px, py] = phase === 'measure' ? [0.5, 0.5] : POINTS[idx]
+    const [px, py] = phase === 'measure' ? TEST_POINTS[idx] : SEQUENCE[idx]
+    const ms = SETTLE_MS + (phase === 'measure' ? TEST_MS : RECORD_MS)
     return (
       <>
         <div className="calib" style={{ background: 'rgba(3,5,9,.55)' }} />
         <div key={phase + idx} className="calib-dot" style={{ left: `${px * 100}%`, top: `${py * 100}%` }}>
-          <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" style={{ animationDuration: `${phase === 'measure' ? MEASURE_MS : HOLD_MS}ms` }} /></svg>
+          <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" style={{ animationDuration: `${ms}ms` }} /></svg>
         </div>
-        <div className="calib-instr glass mono">{phase === 'measure' ? 'Keep looking at the centre · measuring accuracy' : `Look at the dot · ${idx + 1} of ${POINTS.length}`}</div>
-        {gaze && <div className="calib-gaze" style={{ transform: `translate(${gaze.x}px, ${gaze.y}px)` }} />}
+        <div className="calib-instr glass mono">
+          {phase === 'measure' ? `Checking accuracy · look at the dot · ${idx + 1} of ${TEST_POINTS.length}` : `Look at the dot · ${idx + 1} of ${SEQUENCE.length}`}
+        </div>
+        {gaze && phase === 'measure' && <div className="calib-gaze" style={{ transform: `translate(${gaze.x}px, ${gaze.y}px)` }} />}
       </>
     )
   }
@@ -93,23 +127,42 @@ export function Calibration({ bind, onFocusMode, onDone }: Props) {
       <section className="calib-card glass" aria-label="Eye calibration" style={{ ['--c' as string]: '94,234,212' }}>
         <h1><span className="pebble">👁</span>Set up your eyes</h1>
         <p>
-          Unspoken follows where you look, so you can choose without touching anything. Webcam gaze is an
-          estimate, not clinical eye tracking: we tune it to you, measure its error, and only use it when it is good enough.
+          Unspoken follows where you look, so you can choose without touching anything. Gaze is estimated from your
+          iris and the eye image (MobileGaze), on this device. It is an estimate, not clinical eye tracking: we tune
+          it to you, measure its error, and only use it when it is good enough.
         </p>
-        {phase !== 'done' && (
+        {phase !== 'done' && phase !== 'noface' && (
           <ol>
             <li>Sit about an arm's length from the screen, face lit from the front.</li>
-            <li>Look at each of the 9 dots until its ring closes. No clicking needed.</li>
-            <li>We then test accuracy at the centre.</li>
+            <li>Look at each dot until its ring closes: two rounds of 9, no clicking (about 30 seconds).</li>
+            <li>We then test accuracy on 5 new dots.</li>
           </ol>
+        )}
+        {phase === 'intro' && saved && (
+          <div className="calib-result" style={{ ['--c' as string]: '94,234,212' }}>
+            <span className="pebble" />
+            <div>
+              <b>Saved calibration on this device</b>
+              <small>≈{Math.round(saved.acc)} px · {new Date(saved.at).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })} · same seat and camera position?</small>
+            </div>
+          </div>
         )}
         {phase === 'done' && (
           <div className="calib-result" style={{ ['--c' as string]: usable ? '94,234,212' : '255,184,108' }}>
             <span className="pebble" />
             <div>
               <b>{quality === 'good' ? 'Your eyes are ready' : quality === 'fair' ? 'Usable, with some drift' : 'Too imprecise for gaze yet'}</b>
-              <small>Mean error ≈ {acc ? `${Math.round(acc)} px` : 'not measured'} · {usable ? 'rest your gaze to choose, blink to select' : 'the pointer stays the stand-in for your eyes'}</small>
+              <small>
+                Mean error ≈ {acc ? `${Math.round(acc)} px` : 'not measured'} on new dots · {gazeState.appearance ? `MobileGaze on ${appearanceState.provider}` : 'iris geometry only'}
+                {' · '}{usable ? 'rest your gaze to choose, blink to select' : 'the pointer stays the stand-in for your eyes'}
+              </small>
             </div>
+          </div>
+        )}
+        {phase === 'noface' && (
+          <div className="calib-result" style={{ ['--c' as string]: '255,184,108' }}>
+            <span className="pebble" />
+            <div><b>Your eyes were not seen for most dots</b><small>Face the camera with light on your face, then try again.</small></div>
           </div>
         )}
         {phase === 'error' && (
@@ -119,14 +172,15 @@ export function Calibration({ bind, onFocusMode, onDone }: Props) {
           </div>
         )}
         <div className="row">
-          <button className="cbtn primary" data-a="calib:start" disabled={phase === 'starting'}>
-            {phase === 'starting' ? 'Starting camera…' : phase === 'done' || phase === 'error' ? 'Calibrate again' : 'Start calibration'}
+          {phase === 'intro' && saved && <button className="cbtn primary" data-a="calib:saved">Use saved calibration</button>}
+          <button className={`cbtn ${phase === 'intro' && saved ? '' : 'primary'}`} data-a="calib:start" disabled={phase === 'starting'}>
+            {phase === 'starting' ? 'Starting camera…' : phase === 'intro' ? (saved ? 'Calibrate again' : 'Start calibration') : 'Calibrate again'}
           </button>
           {phase === 'done'
             ? <button className="cbtn" data-a="calib:continue">{usable ? 'Use my eyes' : 'Continue with pointer'}</button>
             : <button className="cbtn" data-a="calib:skip">Skip · use pointer</button>}
         </div>
-        <div className="calib-perm mono">Camera and microphone stay on this device · lips, voice, blink and head run together</div>
+        <div className="calib-perm mono">Gaze, blink, head and mouth tracking run in this browser · lips, voice, blink and head run together</div>
       </section>
     </div>
   )
