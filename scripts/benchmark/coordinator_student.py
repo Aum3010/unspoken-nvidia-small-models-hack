@@ -85,26 +85,38 @@ def prep():
     (WORK / "system.txt").write_text(system_text(cc))
 
 
-def run(epochs: int, lr: float, batch: int, rank: int):
+def run(epochs: int, lr: float, batch: int, rank: int, model_id: str = MODEL, tag: str = "", accum: int = 1):
     import torch
     from peft import LoraConfig, get_peft_model
     from transformers import AutoModelForCausalLM, AutoTokenizer
 
     system = (WORK / "system.txt").read_text()
-    tok = AutoTokenizer.from_pretrained(MODEL)
+    big = model_id != MODEL  # Nemotron 3.5 30B-A3B: split over both GPUs, batch 1 with accumulation, no out_proj LoRA
+    tok = AutoTokenizer.from_pretrained(model_id)
     tok.padding_side = "left"
     if tok.pad_token is None:
         tok.pad_token = tok.eos_token
     ids = [tok(a, add_special_tokens=False).input_ids[0] for a in ACTIONS]
     assert len(set(ids)) == 3, ids
+    if big:
+        system = system.replace("detailed thinking off\n", "")
+    kw = {"enable_thinking": False} if big else {}
     prompt = lambda s: tok.apply_chat_template([{"role": "system", "content": system}, {"role": "user", "content": s}],
-                                               tokenize=False, add_generation_prompt=True)
+                                               tokenize=False, add_generation_prompt=True, **kw)
     for fold in ("s1", "s2"):
         tr = [json.loads(l) for l in (WORK / f"{fold}_train.jsonl").read_text().splitlines()]
         te = [json.loads(l) for l in (WORK / f"{fold}_test.jsonl").read_text().splitlines()]
-        model = AutoModelForCausalLM.from_pretrained(MODEL, dtype=torch.bfloat16).to("cuda")
+        if big:
+            model = AutoModelForCausalLM.from_pretrained(model_id, dtype=torch.bfloat16, device_map="auto",
+                                                         max_memory={0: "34GiB", 1: "34GiB"})
+            model.gradient_checkpointing_enable()
+            model.enable_input_require_grads()
+            targets = ["q_proj", "k_proj", "v_proj", "o_proj", "in_proj"]  # PEFT rejects out_proj/conv1d on Mamba
+        else:
+            model = AutoModelForCausalLM.from_pretrained(model_id, dtype=torch.bfloat16).to("cuda")
+            targets = ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
         model = get_peft_model(model, LoraConfig(r=rank, lora_alpha=2 * rank, lora_dropout=0.05, task_type="CAUSAL_LM",
-                                                 target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]))
+                                                 target_modules=targets))
         # zero-shot scores first (adapter disabled), then train, then fine-tuned scores
         preds = {"base": [], "tuned": []}
 
@@ -119,8 +131,9 @@ def run(epochs: int, lr: float, batch: int, rank: int):
                 preds[tag].append({"clip": r["clip"], "condition": r["condition"], "action": ACTIONS[int(s.argmax())],
                                    "ms": (time.perf_counter() - t0) * 1000})
 
-        with model.disable_adapter():
-            score("base")
+        if not big:  # the untrained 30B was already measured through vLLM (E7)
+            with model.disable_adapter():
+                score("base")
         model.train()
         opt = torch.optim.AdamW([p for p in model.parameters() if p.requires_grad], lr=lr)
         rng = random.Random(0)
@@ -132,16 +145,19 @@ def run(epochs: int, lr: float, batch: int, rank: int):
                 enc = tok([prompt(r["state"]) for r in b], return_tensors="pt", padding=True).to("cuda")
                 logits = model(**enc).logits[:, -1, :][:, ids].float()
                 y = torch.tensor([ACTIONS.index(r["label"]) for r in b], device="cuda")
-                loss = torch.nn.functional.cross_entropy(logits, y)
+                loss = torch.nn.functional.cross_entropy(logits, y) / accum
                 loss.backward()
-                opt.step()
-                opt.zero_grad()
                 step += 1
-                if step % 20 == 0:
+                if step % accum == 0:
+                    opt.step()
+                    opt.zero_grad()
+                if step % (20 * accum) == 0:
                     print(f"{fold} step {step} loss {loss.item():.3f} {time.time() - t0:.0f}s", flush=True)
         score("tuned")
-        for tag, p in preds.items():
-            (WORK / f"{fold}_pred_{tag}.jsonl").write_text("\n".join(json.dumps(x) for x in p) + "\n")
+        for t, p in preds.items():
+            if not p:
+                continue
+            (WORK / f"{fold}_pred_{t}{tag}.jsonl").write_text("\n".join(json.dumps(x) for x in p) + "\n")
         print(f"{fold}: trained {step} steps in {time.time() - t0:.0f}s", flush=True)
         del model, opt
         torch.cuda.empty_cache()
@@ -158,14 +174,16 @@ def evaluate():
     rows = []
     for fold in ("s1", "s2"):
         te = {(r["clip"], r["condition"]): r for r in map(json.loads, (WORK / f"{fold}_test.jsonl").read_text().splitlines())}
-        for tag in ("base", "tuned"):
+        for tag, policy in (("base", "nano4b_base"), ("tuned", "nano4b_tuned"), ("tuned_30b", "nemotron30b_tuned")):
+            if not (WORK / f"{fold}_pred_{tag}.jsonl").exists():
+                continue
             for p in map(json.loads, (WORK / f"{fold}_pred_{tag}.jsonl").read_text().splitlines()):
                 r = te[(p["clip"], p["condition"])]
                 act, shown = p["action"], (r["order"][:r["k"]] if p["action"] == "confirm" else [])
                 ep_eeg = eeg.iloc[(r["i"] * len(conds) + r["ci"]) % len(eeg)]
                 o = cc.play(act, r["order"][0], shown, r["truth"], ep_eeg, np.random.default_rng(r["i"] * 31 + r["ci"]))
                 audio = max(ms["voice"][r["i"]], ms["lips"][r["i"]]) / 1000
-                rows.append({"policy": f"nano4b_{tag}", "clip": r["clip"], "speaker": fold, "condition": r["condition"],
+                rows.append({"policy": policy, "clip": r["clip"], "speaker": fold, "condition": r["condition"],
                              "action": act, **o, "reward": cc.reward(o), "latency_s": audio + p["ms"] / 1000 + o["eeg_s"],
                              "model_s": p["ms"] / 1000, "valid": True, "fit": ""})
     new = pd.DataFrame(rows)
@@ -182,13 +200,18 @@ def evaluate():
     pd.set_option("display.width", 200)
     print(tot.round(3).to_string(index=False))
     rule = df[df.policy == "cascade"].set_index(["clip", "condition"]).sort_index()
-    tuned = df[df.policy == "nano4b_tuned"].set_index(["clip", "condition"]).sort_index()
-    print("agreement with rule:", round(float((rule.action == tuned.action).mean()), 4))
     rng = np.random.default_rng(0)
-    for col in ("right", "wrong"):
-        x = (tuned.groupby("clip")[col].sum() - rule.groupby("clip")[col].sum()).to_numpy()
-        bs = [x[rng.integers(0, len(x), len(x))].sum() for _ in range(5000)]
-        print(f"nano4b_tuned - cascade {col}: {int(x.sum()):+d}, 95% CI {np.percentile(bs, [2.5, 97.5]).round(0)}")
+    for name in ("nano4b_tuned", "nemotron30b_tuned", "nemotron30b"):
+        if name not in set(df.policy):
+            continue
+        tuned = df[df.policy == name].set_index(["clip", "condition"]).sort_index()
+        print(f"{name} agreement with rule:", round(float((rule.action == tuned.action).mean()), 4))
+        for col in ("right", "wrong"):
+            x = (tuned.groupby("clip")[col].sum() - rule.groupby("clip")[col].sum()).to_numpy()
+            bs = [x[rng.integers(0, len(x), len(x))].sum() for _ in range(5000)]
+            print(f"  {name} - cascade {col}: {int(x.sum()):+d}, 95% CI {np.percentile(bs, [2.5, 97.5]).round(0)}")
+    print(df.groupby(["policy", "speaker"]).agg(right=("right", "mean"), wrong=("wrong", "sum"),
+                                                confirmed=("confirmed", "mean")).round(3).to_string())
     by = df.groupby(["policy", "condition"]).right.mean().unstack(0).reindex(conds)
     print(by.round(3).to_string())
 
@@ -202,6 +225,9 @@ if __name__ == "__main__":
     r.add_argument("--lr", type=float, default=2e-4)
     r.add_argument("--batch", type=int, default=16)
     r.add_argument("--rank", type=int, default=16)
+    r.add_argument("--model", default=MODEL)
+    r.add_argument("--tag", default="")
+    r.add_argument("--accum", type=int, default=1)
     sub.add_parser("eval")
     a = ap.parse_args()
-    {"prep": prep, "eval": evaluate}.get(a.stage, lambda: run(a.epochs, a.lr, a.batch, a.rank))()
+    {"prep": prep, "eval": evaluate}.get(a.stage, lambda: run(a.epochs, a.lr, a.batch, a.rank, a.model, a.tag, a.accum))()
