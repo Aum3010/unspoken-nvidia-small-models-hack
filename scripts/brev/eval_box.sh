@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Evaluation box (2x H100): vLLM for the 30B coordinator (GPU 0) and a 4B comparison (GPU 1), plus a NeMo venv for the
-# voice agent. Run on the instance from ~/unspoken after sync. Usage: eval_box.sh setup | serve | status | stop
+# Evaluation box (2x H100): vLLM for the 30B coordinator on GPU 0 (neuro_comm, E4) and a NeMo venv for the voice
+# agent on GPU 1 (lips+voice fusion, E1). Run on the instance from ~/unspoken after sync. Usage: eval_box.sh setup | serve | status | stop
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 W=${W:-$HOME/work}
@@ -8,7 +8,6 @@ export HF_HOME=$W/hf
 mkdir -p "$W" .run/logs
 UV=$(command -v uv || echo "$HOME/.local/bin/uv")
 BIG=nvidia/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-BF16
-SMALL=nvidia/NVIDIA-Nemotron-3-Nano-4B-BF16
 
 case "${1:-}" in
 setup)
@@ -26,7 +25,7 @@ setup)
   wait
   HF_HUB_ENABLE_HF_TRANSFER=1 "$W/venv-vllm/bin/python" -c "
 from huggingface_hub import snapshot_download as s
-for r in ('$BIG', '$SMALL'): print(s(r))"
+print(s('$BIG'))"
   echo "setup done"
   ;;
 serve)
@@ -34,11 +33,7 @@ serve)
     --max-model-len 16384 --gpu-memory-utilization 0.92 --trust-remote-code \
     --enable-auto-tool-choice --tool-call-parser qwen3_coder --reasoning-parser nemotron_v3 \
     > .run/logs/vllm_big.log 2>&1 < /dev/null &
-  CUDA_VISIBLE_DEVICES=1 nohup "$W/venv-vllm/bin/vllm" serve $SMALL --port 8002 --served-model-name small \
-    --max-model-len 16384 --gpu-memory-utilization 0.45 --trust-remote-code \
-    --enable-auto-tool-choice --tool-call-parser qwen3_coder --reasoning-parser nemotron_v3 \
-    > .run/logs/vllm_small.log 2>&1 < /dev/null &
-  echo "serving: big :8001 (GPU 0), small :8002 (GPU 1); logs .run/logs/vllm_*.log"
+  echo "serving: big :8001 (GPU 0); GPU 1 is free for the voice agent (E1); log .run/logs/vllm_big.log"
   ;;
 status)
   nvidia-smi --query-gpu=index,memory.used,utilization.gpu --format=csv
