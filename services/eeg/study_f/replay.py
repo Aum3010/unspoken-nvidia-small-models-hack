@@ -33,7 +33,7 @@ TOOLS = ("get_state", "request_more_eeg", "commit_character", "abstain", "reques
 
 @dataclass
 class RewardConfig:
-    """Reward = outcome - cost terms. All coefficients are configurable (see docs/NEUROCOMM_GYM_EXPERIMENT.md)."""
+    """Reward = outcome - cost terms. All coefficients are configurable (see docs/experiments/NEUROCOMM_GYM_EXPERIMENT.md)."""
 
     r_correct: float = 1.0        # + correct commit
     p_wrong: float = 1.0          # - incorrect commit

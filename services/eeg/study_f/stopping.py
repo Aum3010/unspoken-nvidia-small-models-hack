@@ -1,6 +1,6 @@
 """Stopping policies over frozen per-repetition evidence (pure numpy, no EEG, no labels except at scoring time).
 
-Evidence model (Bayesian update rule, documented in docs/EEG_STOPPING_BENCHMARK.md):
+Evidence model (Bayesian update rule, documented in docs/experiments/EEG_STOPPING_BENCHMARK.md):
     Each flash j has a classifier score s_j and a log-likelihood ratio  l_j = log p(s_j | target flash) - log p(s_j | non-target).
     Under the hypothesis "character c is the target", flash j is a target flash iff c was lit in flash j, so
         log p(data | c) = const + sum_{j : c in G_j} l_j.

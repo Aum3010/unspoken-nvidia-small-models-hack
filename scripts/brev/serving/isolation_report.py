@@ -98,7 +98,7 @@ def main():
         md += ["## Latency (p50 / p95 ms)", "", "| | all-MPS, MTP off (`latency_brev_final2.json`) | vLLM isolated + MTP | p50 change |", "|---|---:|---:|---:|"]
         md += [f"| {r['what']} | {r['all_mps'][0]} / {r['all_mps'][1]} | {r['isolated_mtp'][0]} / {r['isolated_mtp'][1]} | "
                f"{'' if r['p50_change_pct'] is None else f'{r['p50_change_pct']:+.0f}%'} |" for r in rows]
-        md += ["", f"n = 10 per row here vs 20 in the baseline; run-to-run variation is about ±10% (SERVING.md).", ""]
+        md += ["", f"n = 10 per row here vs 20 in the baseline; run-to-run variation is about ±10% (TECHNICAL_VERBOSE §7).", ""]
     h = res["heldout"]
     if "missing" not in h:
         md += ["## NeMo Gym held-out (guarded = deployed coordinator)", "",

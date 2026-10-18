@@ -1,6 +1,6 @@
 """Strict typed messages shared by every Unspoken service.
 
-Mirrors plan.md §4. `score` values are raw model scores (log-likelihoods,
+Described in docs/TECHNICAL_VERBOSE.md §3–§4. `score` values are raw model scores (log-likelihoods,
 word probabilities, classifier margins) and are never presented as calibrated
 probabilities.
 """
@@ -132,7 +132,7 @@ class AuditEvent(BaseModel):
     data: dict = Field(default_factory=dict)
 
 
-# ---- Coordinator tool calls (plan.md §4) ---------------------------------
+# ---- Coordinator tool calls (docs/TECHNICAL_VERBOSE.md §3.3) -------------
 
 InputMethod = Literal["gaze", "blink", "button", "keyboard", "spelling", "board"]
 

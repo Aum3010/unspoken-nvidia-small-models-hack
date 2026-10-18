@@ -7,7 +7,7 @@ agent makes exactly the decisions the evaluation measured.
 
 It proposes phrases, never free text: a fixed phrase list cannot hallucinate words, and the raw
 forced_llr scores (not probabilities) are passed on. Nothing is inferred from silence or from a clip in
-which the model heard no words (plan.md). The patient's confirmation stays the final say.
+which the model heard no words. The patient's confirmation stays the final say.
 """
 
 from __future__ import annotations

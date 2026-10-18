@@ -13,14 +13,13 @@ how it is served on the NVIDIA Brev GPU, every measured number, and every known 
 (§10). Where a number or behaviour differs on an older branch, the text says so.
 
 Other docs:
-- shorter: [README](../README.md), [ARCHITECTURE](ARCHITECTURE.md), [SERVING](SERVING.md), [BREV](BREV.md),
-  [EVALUATION](EVALUATION.md), [web/README](../web/README.md);
+- shorter: [README](../README.md), [BREV](BREV.md), [web/README](../web/README.md);
 - bounty write-ups (Nemotron Lightning, NeMo Gym, vLLM): [BOUNTIES](BOUNTIES.md);
 - the data we made and published: [DATA_RELEASE](DATA_RELEASE.md);
 - every agent against its baseline: [RESULTS](RESULTS.md), with its experiment write-ups
-  ([EXPERIMENT_PLAN](EXPERIMENT_PLAN.md), [LIP_READING](LIP_READING.md), [EEG_DATASET_AUDIT](EEG_DATASET_AUDIT.md),
-  [EEG_STOPPING_BENCHMARK](EEG_STOPPING_BENCHMARK.md), [EEG_FAST_SELECTION](EEG_FAST_SELECTION.md),
-  [EEG_GAZE_FUSION](EEG_GAZE_FUSION.md), [NEUROCOMM_GYM_EXPERIMENT](NEUROCOMM_GYM_EXPERIMENT.md));
+  ([LIP_READING](experiments/LIP_READING.md), [EEG_DATASET_AUDIT](experiments/EEG_DATASET_AUDIT.md),
+  [EEG_STOPPING_BENCHMARK](experiments/EEG_STOPPING_BENCHMARK.md), [EEG_FAST_SELECTION](experiments/EEG_FAST_SELECTION.md),
+  [EEG_GAZE_FUSION](experiments/EEG_GAZE_FUSION.md), [NEUROCOMM_GYM_EXPERIMENT](experiments/NEUROCOMM_GYM_EXPERIMENT.md));
 - vLLM serving experiments: `evaluations/results/serving/SUMMARY.md`.
 
 ---
@@ -59,6 +58,24 @@ mic ──── voice detector → wav clip ─┘─────────�
   - the coordinator's corrections.
 
   It is audited as `demo_auto_spoken` by `system`, never as a user action.
+
+**What each part may not do:**
+
+| Part | Output | May not |
+|---|---|---|
+| Lip agent | up to 3 of the person's enrolled phrases, or nothing; quality flags | rewrite or "correct" text (Chaplin's LLM correction is not used) |
+| Voice agent | one of its fixed phrases with a raw score, the top 3 when unsure, or nothing | propose free text, or a phrase when Silero hears no speech or the model heard no words |
+| EEG replay | per-flash P300 scores and the decoded letter | read ground-truth labels before predicting; claim live brain input |
+| Gaze, blink, head (browser) | selection events with their method | count as a confirmation unless the person dwells on a confirm target, blinks, or nods while a message waits |
+| Coordinator | exactly one typed tool call | invent a message: a correction keeps at least half the words read and the length within ±2 words; negations are checked only with `UNSPOKEN_VALIDATOR_NEGATION=1` |
+| Policy gate (code) | a TTS token, or `PolicyViolation` | — |
+| TTS | audio of exactly the signed text | speak anything without a matching token |
+
+**When something fails:**
+- A specialist is down: its capture answers 503, the timeline shows it, and the phrase board keeps working.
+- The coordinator model is down or slow: the deterministic policy answers instead.
+- TTS is down: the browser's own speech synthesis speaks the same confirmed text.
+- Gaze calibration is poor (220 px or more): gaze selection stays off; click, pointer dwell and blink remain.
 
 ---
 
@@ -196,7 +213,7 @@ The evaluation experiments of `eval-consolidation` ran on a separate box, not on
   - **Free-text accuracy** (beam 12, 132 GRID clips, 33 unseen speakers): WER 69.4%, best-of-5 60.9%.
   - **Enrollment matcher on strangers:** 5 of 43 GRID clips (unrelated people and sentences) matched an enrolled
     phrase within 0.30 (about 12%).
-- **Evaluated on `eval-consolidation`** ([RESULTS](RESULTS.md) §2, [LIP_READING](LIP_READING.md)):
+- **Evaluated on `eval-consolidation`** ([RESULTS](RESULTS.md) §2, [LIP_READING](experiments/LIP_READING.md)):
   - **Personal enrollment** on MIRACL-VC1 (15 speakers, research use only): top-1 phrase 72.0% (phrase list) →
     **96.1%** (own recordings).
   - **Decoder fine-tuned on GRID:** encoder frozen, decoder + CTC head trained on other speakers. WER on the unseen
@@ -246,7 +263,7 @@ The evaluation experiments of `eval-consolidation` ran on a separate box, not on
       these", or on an accepted lip/audio reading with no quality flags.
     - Paired NeMo Gym, deployed: eval **0.954 → 0.995**, held-out **0.977 → 0.985**, 0 unsafe.
     - It fixes `repeated_failure` (0.67 → 1.00) and `negation_kept` (0.89 → 1.00).
-    - The negation rule changed nothing measured. See EVALUATION §4.
+    - The negation rule changed nothing measured. See RESULTS §5.
 - **Deterministic policy:** applied instantly to every new evidence (quietly), so options appear at once; Nemotron
   refines it in the background.
 - **Evaluation** (NeMo Gym environment, 72 tasks, Brev, 2026-10-18,
@@ -315,7 +332,7 @@ The evaluation experiments of `eval-consolidation` ran on a separate box, not on
 - **`services/eeg/datasets/`:** a protocol-aware dataset layer. It has a BNCI2014-008 adapter and a bigP3BCI
   EDF+ parser (`bigp3bci.py`), fetched by `scripts/data/fetch_bigp3bci.py` from the PhysioNet S3 mirror and
   SHA-256 checked. It writes canonical tables (`schema.py`): agent-safe selection and stimulus tables kept apart
-  from the labels. Fail-loud QA lives in `qa.py`. Audit: [EEG_DATASET_AUDIT](EEG_DATASET_AUDIT.md).
+  from the labels. Fail-loud QA lives in `qa.py`. Audit: [EEG_DATASET_AUDIT](experiments/EEG_DATASET_AUDIT.md).
 - **`services/eeg/study_f/`:** bigP3BCI Study F, 10 ALS participants, 36 characters.
   - Frozen flash-level evidence (`evidence.py`, built by `scripts/benchmark/build_study_f_evidence.py`).
   - Sequential Bayesian stopping (`stopping.py`, `flash_stopping.py`).
@@ -801,7 +818,7 @@ The lip enrollment adds stored features, not parameters.
 |---|---|---|
 | Safety tests (policy gate, auto-speak, phrase scoring, validator flags, check-in) | `pytest evaluations/safety_tests`: **49 tests** = 18 `test_confirmation.py` + 7 `test_auto_speak.py` + 4 `test_auto_speak_delay.py` + 3 `test_vsr_phrase_scoring.py` + 11 `test_validator_flags.py` + 6 `test_checkin.py` | — |
 | Validator flags, paired A/B | `evaluations/nemo_gym/validator_ab.py [--seed 2026 --distinct-from 7] --out <file>` | `coordinator_validator_v2_paired_{eval,heldout}.json`; unpaired: `coordinator_validator_v2_{eval,heldout}_{off,on}.json` |
-| Live attacks + exactness (needs the running stack) | `python evaluations/test_cases/e2e_exactness.py`: 7 attacks (5 unconfirmed-speech probes, a forged TTS token, a non-explicit method): 7/7 blocked on `demo-final`. Its exactness half (10 phrases spoken and re-transcribed) needs a free-text ASR; today's phrase-only voice agent cannot do it (EVALUATION §5) | `e2e.json` (2026-10-17, Whisper), `e2e_demo_final.json` |
+| Live attacks + exactness (needs the running stack) | `python evaluations/test_cases/e2e_exactness.py`: 7 attacks (5 unconfirmed-speech probes, a forged TTS token, a non-explicit method): 7/7 blocked on `demo-final`. Its exactness half (10 phrases spoken and re-transcribed) needs a free-text ASR; today's phrase-only voice agent cannot do it (RESULTS §11) | `e2e.json` (2026-10-17, Whisper), `e2e_demo_final.json` |
 | Coordinator (NeMo Gym, 72 tasks; held-out 44) | `run_local.py --policies raw:<model> guarded deterministic` (held-out: `--seed 2026 --distinct-from 7 --out <file>`; `UNSPOKEN_COORD_COMPACT=1` for compact mode) | `coordinator_brev.json` (Brev); `coordinator_heldout_brev.json`, `coordinator_heldout_compact_brev.json` (held-out); `coordinator_mtp_brev.json`, `coordinator_compact_brev.json`, `coordinator_compact_mtp_brev.json` (A/B); `coordinator.json` (Mac, 60 tasks, older prompt) |
 | Lip speed vs accuracy | `evaluations/modality_baselines/vsr_speed_accuracy.py` | `vsr_speed_accuracy.json` |
 | Early-decode accuracy check | `asr_eval/scripts/trailing_silence_check.py` | `trailing_silence_check.json` |
@@ -828,8 +845,6 @@ Every public dataset used for training or testing, with citation, licence and so
 ---
 
 ## 10. Shortfalls, bugs and pending tasks (`main`, 2026-10-18)
-
-An older, shorter version of this list (as of `demo-final`) is in [HANDOFF.md](../HANDOFF.md).
 
 ### Bugs (open)
 
@@ -873,7 +888,7 @@ An older, shorter version of this list (as of `demo-final`) is in [HANDOFF.md](.
    - The camera / mic state prompts ("Camera off · allow & reload", "Mic · voice agent offline") went with the
      chips.
    - **So disclosure is a spoken step.** Tell the person, and get their opt-in, before using the Brev backend
-     (DATASETS_AND_CONSENT, "Cloud processing").
+     (DATA_RELEASE, "Media rules in the app").
 
 8. **Auto-speak is on by default** (`UNSPOKEN_AUTO_SPEAK=1`).
    - It contradicts the README's product rule.

@@ -180,4 +180,4 @@ actual checkpoints **32.0394B** (unchanged) and organizer-counted **30.4615B**, 
 
 ## 12. Next step
 
-Study F decoding and stopping baselines are in `docs/EEG_STOPPING_BENCHMARK.md`. Still open: the BNCI audit (needs a machine with the files) and questions 2 (generator), 4 (dynamic granularity), 6-8 above.
+Study F decoding and stopping baselines are in `docs/experiments/EEG_STOPPING_BENCHMARK.md`. Still open: the BNCI audit (needs a machine with the files) and questions 2 (generator), 4 (dynamic granularity), 6-8 above.

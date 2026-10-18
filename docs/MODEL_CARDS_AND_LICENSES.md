@@ -20,7 +20,7 @@ Not deployed and not counted: LipVoicer and VoiceBridge, which are research refe
 
 ## ASR candidates evaluated (`asr_eval/`)
 
-These models were benchmarked on Brev to replace Whisper base in the voice agent; Nemotron Speech Streaming en 0.6B won and is deployed (see [BREV.md](BREV.md), `asr_eval/README.md` and [EVALUATION.md](EVALUATION.md) §6).
+These models were benchmarked on Brev to replace Whisper base in the voice agent; Nemotron Speech Streaming en 0.6B won and is deployed (see [BREV.md](BREV.md), `asr_eval/README.md` and [RESULTS.md](RESULTS.md) §1).
 - Licences were read from each Hugging Face model card on 2026-10-17.
 - "Measured" parameter counts come from the loaded weights (`results/raw/{model}_info.json`). The others are model-card figures until measured.
 - Revisions are pinned at run time and logged.
@@ -59,7 +59,7 @@ Supporting components in the harness:
 
 ## Known model limitations
 
-- **Auto-AVSR** was trained on LRS3 broadcast speech. Its benchmark WER (~19–20%) is not webcam or patient accuracy; see EVALUATION.md for unseen-speaker GRID results. A still face makes it hallucinate fluent sentences, so mouth-motion gating is mandatory.
+- **Auto-AVSR** was trained on LRS3 broadcast speech. Its benchmark WER (~19–20%) is not webcam or patient accuracy; see [RESULTS.md](RESULTS.md) §2 for unseen-speaker GRID results. A still face makes it hallucinate fluent sentences, so mouth-motion gating is mandatory.
 - **Nemotron Speech** proposes only the 20 fixed phrases (`asr_eval/configs/eval.yaml`), never free text. Validated on 3 speakers (leave-one-speaker-out: 71.5% accepted correctly, 0.4% wrong at the strict point); the app uses the balanced point because every candidate is confirmed. No hypotheses when Silero finds no speech or the model hears no words.
 - **Gaze** (MediaPipe iris + MobileGaze) gives an estimate of screen position with tens of pixels of error after calibration, measured on unseen dots. It is not clinical eye tracking.
 - **Lip enrollment matching** is person-specific. Its threshold (DTW distance 0.30) was set from 10 recordings, and in an incidental check 5 of 43 clips from strangers (GRID) matched an enrolled phrase. A held-out false-match evaluation is still needed.

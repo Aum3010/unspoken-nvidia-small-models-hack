@@ -66,7 +66,7 @@ clips: top-1 **96.1%** vs 72.0% for scoring a phrase list, top-3 99.2% vs 89.7%.
 20 phrases (leave-one-out): top-1 73%, top-3 83%. A clip farther than 0.30 from every recording gives no reading.
 
 Files: `evaluations/results/vsr_finetune.json`, `evaluations/results/brev/vsr_finetune.json`,
-`evaluations/results/brev/vsr_enrollment_miracl.json`, `docs/LIP_READING.md`. Reproduce: `scripts/finetune_vsr_grid.py`,
+`evaluations/results/brev/vsr_enrollment_miracl.json`, `docs/experiments/LIP_READING.md`. Reproduce: `scripts/finetune_vsr_grid.py`,
 `scripts/eval_enrollment_miracl.py`.
 
 ## 3. EEG alone, ALS patients (Study F)
@@ -95,8 +95,8 @@ Under 3 s nothing is reliable: no policy gets correct characters within 3 s with
 wrong. Five strong participants get 0-1 wrong in 12 at a median of 4.6-13.4 s; F_08 gets 12/12 within 5 s. F_07 has no
 usable P300, and the policy never commits for them.
 
-Files: `evaluations/results/eeg_stopping/`, `evaluations/results/eeg_fast_selection/`, `docs/EEG_STOPPING_BENCHMARK.md`,
-`docs/EEG_FAST_SELECTION.md`. Reproduce: `scripts/benchmark/run_study_f_baselines.py`, `run_study_f_fast_selection.py`.
+Files: `evaluations/results/eeg_stopping/`, `evaluations/results/eeg_fast_selection/`, `docs/experiments/EEG_STOPPING_BENCHMARK.md`,
+`docs/experiments/EEG_FAST_SELECTION.md`. Reproduce: `scripts/benchmark/run_study_f_baselines.py`, `run_study_f_fast_selection.py`.
 
 ## 4. EEG + gaze (Study H)
 
@@ -118,7 +118,7 @@ Gaze alone points at the right key 84% of the time by 3 s, but 42 of its 46 miss
 policy rarely commits: EEG is what separates neighbours. With gaze shifted by 1-3 keys, fusion falls back to about
 EEG-alone performance instead of failing.
 
-Files: `evaluations/results/eeg_gaze_fusion/`, `docs/EEG_GAZE_FUSION.md`. Reproduce: `scripts/benchmark/study_h_fusion.py`.
+Files: `evaluations/results/eeg_gaze_fusion/`, `docs/experiments/EEG_GAZE_FUSION.md`. Reproduce: `scripts/benchmark/study_h_fusion.py`.
 
 ## 5. Coordinator: NeMo Gym `unspoken_communication`
 
@@ -146,7 +146,31 @@ on vLLM:
 - p95 < 500 ms up to 2 concurrent requests;
 - no tool call that was valid alone became invalid under load.
 
-Files: `evaluations/results/coordinator_heldout_brev.json`, `coordinator_brev.json`, `docs/BOUNTIES.md` §2.
+**Optional validator rules** (flags, off by default). `UNSPOKEN_VALIDATOR_NEGATION` rejects a correction that adds or
+removes a negation; `UNSPOKEN_VALIDATOR_IGNORE_HISTORY` rejects `ignore_input` after two failed tries, after a recent
+"none of these", or on a specialist-accepted clean reading. Paired measurement (`validator_ab.py`: one model call per
+task, re-validated under each setting), deployed reward:
+
+| Setting | Eval (72) | Held-out (44) | Unsafe |
+|---|---:|---:|---:|
+| Nemotron alone (no validator) | 0.926 | 0.932 | 0 |
+| Validator as deployed (flags off) | 0.954 | 0.977 | 0 |
+| + negation rule | 0.954 | 0.977 | 0 |
+| + ignore-history rule (or both) | **0.995** | **0.985** | 0 |
+
+The ignore-history rule fixes `repeated_failure` (0.67 → 1.00) and `negation_kept` (0.89 → 1.00) on the eval set. The
+negation rule changed nothing measured: the model never dropped a negation, so it is a guard. With ignore-history on,
+Nemotron decides 79% of eval tasks instead of 92%; the rest fall back to rules.
+
+**Speed variants** (same 72 tasks):
+
+| Variant | Deployed reward | p50 | Output tokens | Adopted |
+|---|---:|---:|---:|---|
+| Tool calls (default) | 0.940–0.949 | 272 ms | 65 | yes |
+| MTP speculative decoding | 0.940 | 229 ms | 65 | no: one crash under full load |
+| Compact JSON, numbered candidates | 0.949 | 84 ms | 15 | no: worse on ambiguous readings (0.89) and after a rejection |
+
+Files: `evaluations/results/coordinator_heldout_brev.json`, `coordinator_brev.json`, `coordinator_validator_v2_*.json`, `coordinator_mtp_brev.json`, `coordinator_compact_brev.json`, `docs/BOUNTIES.md` §2.
 Reproduce: `python evaluations/nemo_gym/run_local.py --seed 2026 --distinct-from 7 --out coordinator_heldout.json`.
 
 ## 6. Lips + voice on the same utterances
@@ -392,3 +416,31 @@ Its input is the same text the 30B read; its labels are the rule cascade's decis
 Files: `evaluations/results/coordinated_cascade/` (`overall*.csv`, `by_condition*.csv`, `episodes*.csv`), plus
 `neuro_comm_student/eeg_calibration_rates.json`. Reproduce:
 `coordinated_cascade.py [--llm-url http://<vLLM>/v1 --llm-model big]`.
+
+## 10. EEG replay in the app: BNCI2014-008
+
+**Method.** The app's EEG replay decoder: xDAWN covariances → Riemannian tangent space → logistic regression, epochs
+−0.1 to 0.7 s after each flash, 1–20 Hz band-pass. Trained on the 15 calibration characters (runs 1–3), scored on
+the 20 online characters (runs 4–7), the original protocol split. Baseline: shrinkage LDA on decimated epochs.
+
+| 8 participants with ALS | Flash AUC | Letters @1 rep | @5 reps | @10 reps | LDA @10 |
+|---|---:|---:|---:|---:|---:|
+| Mean | **0.850** | 31% | 81% | **94%** | 96% |
+| Range | 0.783–0.939 | 15–55% | 65–100% | 90–100% | 90–100% |
+
+Chance is 2.8%. These are research recordings: they do not show how a new person would do. Files:
+`evaluations/results/eeg.json`. Reproduce: `./scripts/run_evals.sh`.
+
+## 11. Safety: nothing unconfirmed is spoken
+
+- **Unit tests** (`pytest evaluations/safety_tests`, 49 pass): the policy gate and state machine (18), auto-speak only
+  for accepted readings (7), the auto-speak countdown (4), phrase-list scoring (3), the optional validator rules (11)
+  and the vision-preview check-in (6).
+- **Live attacks** (`evaluations/test_cases/e2e_exactness.py`, against the running stack): **7/7 blocked**, being 5
+  unconfirmed-speech probes, a forged TTS token and a non-explicit confirmation method (`e2e.json`,
+  `e2e_demo_final.json`).
+- **Exactness:** the text sent to TTS equalled the confirmed string 10/10. Re-transcribing the audio matched 10/10
+  with the earlier Whisper voice agent, but the current voice agent only knows its 20 phrases, so that half of the
+  check needs a free-text ASR to repeat.
+- **Unconfirmed or contradicted text reaching TTS: 0**, by construction: TTS needs an HMAC token over the exact
+  confirmed text.

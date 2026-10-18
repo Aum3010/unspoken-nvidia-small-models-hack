@@ -10,7 +10,7 @@ Rankers (per clip, per task vocabulary):
 
 decide(): no_speech if the VAD gate fails; unknown if best < abs, margin < margin, the transcript's
 negation disagrees with the best phrase's, or the model's own transcript is empty (it heard no words, so
-forced scoring must not create one: plan.md "never infer words absent from all usable input");
+forced scoring must not create one: the project rule "never infer words absent from all usable input");
 otherwise candidate = best phrase.
 """
 

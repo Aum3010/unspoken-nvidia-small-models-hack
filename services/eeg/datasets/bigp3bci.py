@@ -1,6 +1,6 @@
 """bigP3BCI (PhysioNet v1.0.0, CC BY 4.0) EDF+ parser -> canonical tables.
 
-Everything is read from the files. Observed on Study F / F_03 (see docs/EEG_DATASET_AUDIT.md):
+Everything is read from the files. Observed on Study F / F_03 (see docs/experiments/EEG_DATASET_AUDIT.md):
 62 signals @256 Hz = 16 EEG + 36 per-character "presented" flags (label <char>_<row>_<col>) + 10 BCI2000 state channels
 (StimulusType, SelectedTarget, SelectedRow, SelectedColumn, PhaseInSequence, StimulusBegin, StimulusCode, CurrentTarget,
 FakeFeedback, DisplayResults). Flash = rising edge of StimulusBegin; a selection = one PhaseInSequence==2 segment.
@@ -169,7 +169,7 @@ def read_recording(path: Path, root: Path, res: AuditResult, protocol_hint: dict
 
 
 def repetition_blocks(shown: np.ndarray) -> list[tuple[int, bool]]:
-    """Split a selection's flashes into repetitions. Rule (derived from the data, see docs/EEG_DATASET_AUDIT.md):
+    """Split a selection's flashes into repetitions. Rule (derived from the data, see docs/experiments/EEG_DATASET_AUDIT.md):
     a repetition is a maximal run of consecutive flashes whose character sets are disjoint; it is *complete* when their
     union is every character. Returns [(n_flashes, complete)]."""
     blocks, cur, n = [], np.zeros(shown.shape[1], bool), 0

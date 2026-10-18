@@ -1,6 +1,6 @@
 """Study F (bigP3BCI) flash-level decoding -> frozen evidence artifacts.
 
-Study-F specific facts (measured; see docs/EEG_DATASET_AUDIT.md): 36 characters, each flash lights 3-5 of them,
+Study-F specific facts (measured; see docs/experiments/EEG_DATASET_AUDIT.md): 36 characters, each flash lights 3-5 of them,
 a repetition is a randomised partition of all 36 characters (10 flashes, then 8, alternating), 14 repetitions
 (= 7 sequences of 18 flashes, Mainsah et al. 2015) = 126 flashes. Row/column decoding does not apply; evidence is
 aggregated per character from the characters each flash lit (`stopping.py`).

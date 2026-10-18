@@ -34,7 +34,7 @@ TIMEOUT_S = float(os.environ.get("UNSPOKEN_LLM_TIMEOUT", 20))
 # instead of their ids. About 15 output tokens instead of ~80. Code maps the answer back onto the same tools and
 # ids before validation, and writes the note to the person from a template.
 COMPACT = os.environ.get("UNSPOKEN_COORD_COMPACT", "0") != "0"
-# Optional validator rules (off by default; measured in docs/EVALUATION.md §4):
+# Optional validator rules (off by default; measured in docs/RESULTS.md §5):
 # - NEGATION: a propose_correction must keep its source reading's negation ("I don't need water" never becomes
 #   "I need water"), using the voice agent's own negation check (asr_eval/harness/text.py, configured words).
 # - IGNORE_HISTORY: ignore_input is rejected after two failed tries or a "none of these" in the last 3 turns, and

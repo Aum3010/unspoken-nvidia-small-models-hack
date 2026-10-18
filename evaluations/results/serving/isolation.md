@@ -17,7 +17,7 @@ MPS check: EngineCore pid 513577, MPS clients ['508312', '508311', '508313'], nv
 | lips alone | 265 / 275 | 270 / 299 | +2% |
 | one message end to end | 309 / 322 | 285 / 292 | -8% |
 
-n = 10 per row here vs 20 in the baseline; run-to-run variation is about ±10% (SERVING.md).
+n = 10 per row here vs 20 in the baseline; run-to-run variation is about ±10% (TECHNICAL_VERBOSE §7).
 
 ## NeMo Gym held-out (guarded = deployed coordinator)
 

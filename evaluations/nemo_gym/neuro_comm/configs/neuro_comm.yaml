@@ -9,7 +9,7 @@ neuro_comm:
       evidence_dir: data/evidence/study_f
       decoder: xdawn_riemann_lr
       roles: [calibration, evaluation, evaluation_secondary]
-      reward:                       # see docs/NEUROCOMM_GYM_EXPERIMENT.md
+      reward:                       # see docs/experiments/NEUROCOMM_GYM_EXPERIMENT.md
         r_correct: 1.0
         p_wrong: 1.0
         p_abstain: 0.2

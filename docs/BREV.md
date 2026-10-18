@@ -158,8 +158,11 @@ The UI runs on the laptop (`cd web && npm run dev` → http://localhost:8800). E
 # laptop: commit first, then ship services/shared/scripts to ~/unspoken
 bash scripts/brev/sync_app.sh marginal-sapphire-whale
 # instance, once (~15-30 min): uv venvs /workspace/venv-app (torch cu128) + /workspace/venv-vllm, checkpoints, EEG decoders
-brev exec marginal-sapphire-whale 'cd ~/unspoken && nohup bash scripts/brev/setup_app.sh > .run/setup.log 2>&1 < /dev/null &'
-# laptop -> instance: the lip agent's enrollment data is not in git or sync_app.sh (consent, docs/DATASETS_AND_CONSENT.md): ship the local folder
+brev exec marginal-sapphire-whale 'cd ~/unspoken && mkdir -p .run && nohup bash scripts/brev/setup_app.sh > .run/setup.log 2>&1 < /dev/null &'
+# instance, once: the voice agent's NeMo venv /workspace/venv-asr (asr_eval ships it; start_app.sh runs the voice agent from it)
+bash asr_eval/scripts/brev/sync.sh marginal-sapphire-whale
+brev exec marginal-sapphire-whale 'cd ~/asr_eval && nohup bash scripts/setup_brev.sh > setup.log 2>&1 < /dev/null &'
+# laptop -> instance: the lip agent's enrollment data is not in git or sync_app.sh (published separately, docs/DATA_RELEASE.md): ship the local folder
 tar -czf /tmp/enroll.tgz -C data enroll && brev copy /tmp/enroll.tgz marginal-sapphire-whale:/home/shadeform/enroll.tgz
 brev exec marginal-sapphire-whale 'cd ~/unspoken && rm -rf data/enroll && tar -xzf ~/enroll.tgz -C data'
 # instance: (re)start everything detached (NVIDIA MPS on; UNSPOKEN_MPS=0 for off); `status` shows each /health, GPU memory, MPS
@@ -173,11 +176,11 @@ bash scripts/brev/connect.sh marginal-sapphire-whale
 - **Ports:** the asr_eval bench also uses 8800 on the instance. The app's UI uses the laptop's 8800, so don't forward the bench to 8800 while the app UI is open.
 - **NVIDIA MPS** is on by default: `start_app.sh` starts the daemon before any GPU process, and `UNSPOKEN_MPS=0` stops it. It is detected by full command line (`pgrep -f`), since `pgrep -x` cannot match the 15-character-truncated process name.
 - **Early voice decode:** the gateway's `/capture/audio/early|commit|discard` routes let the voice decode run during the end-of-utterance pause.
-- Measured 2026-10-18 on branch `ui` (MPS on, asr_eval bench stopped): the whole stack peaks at about 63 GB of the 96 GB. One message end to end took 0.44 s p50 on the box on branch `ui` (`latency_brev_ui_mps1.json`), and **0.31 s** after the speedups (`latency_brev_final2.json`, 309 ms p50); the voice agent takes 75 ms with every model busy; the voice result is ready 64 ms after the pause from the laptop ([SERVING.md](SERVING.md)). Every detail: [TECHNICAL_VERBOSE.md](TECHNICAL_VERBOSE.md).
-- **Latency:** `PYTHONPATH=. /workspace/venv-app/bin/python scripts/brev/bench_latency.py` (on the instance) measures each agent alone, all at once, and one message end to end. Results and how to serve faster: [SERVING.md](SERVING.md).
+- Measured 2026-10-18 on branch `ui` (MPS on, asr_eval bench stopped): the whole stack peaks at about 63 GB of the 96 GB. One message end to end took 0.44 s p50 on the box on branch `ui` (`latency_brev_ui_mps1.json`), and **0.31 s** after the speedups (`latency_brev_final2.json`, 309 ms p50); the voice agent takes 75 ms with every model busy; the voice result is ready 64 ms after the pause from the laptop. Every detail: [TECHNICAL_VERBOSE.md](TECHNICAL_VERBOSE.md) §6–7.
+- **Latency:** `PYTHONPATH=. /workspace/venv-app/bin/python scripts/brev/bench_latency.py` (on the instance) measures each agent alone, all at once, and one message end to end. Results and how to serve faster: [TECHNICAL_VERBOSE.md](TECHNICAL_VERBOSE.md) §6–7.
 - **Vision preview data** (only with `UNSPOKEN_CHECKIN=1`): run `python scripts/vision/fetch_mimic_event.py` on the laptop, then copy `data/vision/` to `~/unspoken/data/vision/` like `data/enroll/`. `sync_app.sh` ships neither.
 - **NeMo Gym check:** a Gym checkout with Python 3.13 sits in `/workspace/nemo-gym-check/Gym` (the environment's tests pass 5/5 there).
-- **Flags** (pass as environment variables to `start_app.sh`): see TECHNICAL_VERBOSE §2. Open issues: TECHNICAL_VERBOSE §10 and HANDOFF.md.
+- **Flags** (pass as environment variables to `start_app.sh`): see TECHNICAL_VERBOSE §2. Open issues: TECHNICAL_VERBOSE §10.
 - Logs: `~/unspoken/.run/logs/<service>.log`; pinned versions: `~/unspoken/.run/requirements-cuda.lock`, `requirements-vllm.lock`.
 
 ## 5. Problems we hit, and the fixes

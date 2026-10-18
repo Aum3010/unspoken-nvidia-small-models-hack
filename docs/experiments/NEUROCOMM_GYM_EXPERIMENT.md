@@ -109,7 +109,7 @@ compared episode by episode with the standalone benchmark policy on the same fro
 
 Predictions, repetitions, flashes, commit/abstain and recorded acquisition and latency times are identical in all 720 episode comparisons.
 (`bayes_tau0.99`: accuracy 0.758, 29 incorrect, 9.375 repetitions, 21.6 s recorded latency, 3.22 correct characters/min: the same
-row as `docs/EEG_STOPPING_BENCHMARK.md`.) No discrepancy was found. Parity is also a test (`test_bayes_through_replay_tools_matches_...`),
+row as `docs/experiments/EEG_STOPPING_BENCHMARK.md`.) No discrepancy was found. Parity is also a test (`test_bayes_through_replay_tools_matches_...`),
 and over HTTP against the running Gym server the Bayesian policy and `/verify` reproduce the in-process rewards exactly
 (`test_bayes_policy_over_the_gym_server_...`; live server: section 4b).
 

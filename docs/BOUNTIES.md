@@ -208,7 +208,7 @@ The 6 runs are today's Brev runs of the default prompt, including the MTP and ca
 - Nemotron alone: **0.806 → 0.907**; deployed: **0.931 → 0.949**.
 - Cause of the gain: far fewer needless corrections in `clear_single`, `ambiguous_nbest` and
   `cross_modal_conflict`.
-- Files: `coordinator_compact_brev.json` (v2 rule) vs the A/B summary in [EVALUATION.md](EVALUATION.md) §4 (v1).
+- Files: `coordinator_compact_brev.json` (v2 rule) vs the A/B summary in [RESULTS.md](RESULTS.md) §5.
 - Compact mode as a whole was still not adopted: on held-out tasks it scores below the default prompt.
 
 **A third isolated change: two optional validator rules** (flags, **off by default** pending the team's decision).

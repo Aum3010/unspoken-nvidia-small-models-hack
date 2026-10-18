@@ -15,7 +15,7 @@ Ground truth is read only by the verifier. Built and checked against NeMo Gym 0.
 
 Reward (all coefficients in `configs/neuro_comm.yaml`, defaults in `services/eeg/study_f/replay.py::RewardConfig`):
 `+1 correct`, `-1 wrong commit`, `-0.2 abstain`, `-0.5 no decision`, `-0.01 per recorded second of EEG`, `-0.005 per tool call`,
-`-0.1 per rejected call`, `-0.05 per unavailable-modality request`. Full explanation in `docs/NEUROCOMM_GYM_EXPERIMENT.md`.
+`-0.1 per rejected call`, `-0.05 per unavailable-modality request`. Full explanation in `docs/experiments/NEUROCOMM_GYM_EXPERIMENT.md`.
 
 ## Use
 

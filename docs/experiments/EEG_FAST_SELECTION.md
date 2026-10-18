@@ -151,5 +151,5 @@ Outputs are in `evaluations/results/eeg_fast_selection/`:
 - `prefix_accuracy_per_participant.csv` and `calibration_ece_by_band.csv`
 - Figures: `pareto_latency_errors_accuracy.png`, `latency_cdf.png`, `prefix_accuracy_per_participant.png`, `per_participant.png`
 
-The earlier benchmark (`docs/EEG_STOPPING_BENCHMARK.md`, `evaluations/results/eeg_stopping/`) is unchanged and is the
+The earlier benchmark (`docs/experiments/EEG_STOPPING_BENCHMARK.md`, `evaluations/results/eeg_stopping/`) is unchanged and is the
 baseline.

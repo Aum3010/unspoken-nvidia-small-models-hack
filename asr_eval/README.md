@@ -86,7 +86,7 @@ On a laptop (CPU) the same code runs with `configs/local_smoke.yaml`, which writ
 - **Impossible is not perfect.** `ctc_loss(zero_infinity=True)` maps impossible alignments (a long phrase on a short clip) to loss 0, which reads as a perfect score. The harness keeps them impossible.
 - **Silence favours short phrases.** In local tests, forced scoring on silence ranked "yes" first among phrases. That's why the VAD gate comes first, and why `forced_llr` compares each phrase with the model's own free transcript.
 - **Negation is a hard gate.** "I'm not in pain" must never become `pain`. A transcript whose negation (not/no/never, after expanding contractions) disagrees with the best phrase becomes `unknown`.
-- **No words heard, no phrase.** If the model's own transcript is empty, forced scoring may not create a phrase; the result is `unknown` (`plan.md`: never infer words absent from all usable input). This removed a "yes" accepted on a breathing clip.
+- **No words heard, no phrase.** If the model's own transcript is empty, forced scoring may not create a phrase; the result is `unknown` (the project rule: never infer words absent from all usable input). This removed a "yes" accepted on a breathing clip.
 - **Tuning sees calib only.** Objective: correct accepts ÷ positives, subject to a false-accept rate ≤ 1% (strict, headline) or ≤ 5% (balanced, live UI default) for *each* negative type.
   - Ties go to the most permissive thresholds inside that limit. Tie-breaking toward strict made the agent abstain on real voices when tuning data was clean.
   - If a task has no human calib speakers, positives fall back to TTS, and the summary says so.

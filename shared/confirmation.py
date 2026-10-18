@@ -1,4 +1,4 @@
-"""Deterministic speech authorization (plan.md §4 policy gate).
+"""Deterministic speech authorization (the policy gate, docs/TECHNICAL_VERBOSE.md §4).
 
 This module is the only path to a TTS authorization token. It lives outside
 the coordinator model: the model can *request* speech for a confirmation

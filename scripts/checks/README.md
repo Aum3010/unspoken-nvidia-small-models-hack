@@ -1,6 +1,6 @@
 # Live checks used on `demo-final`
 
-Small scripts that produced the numbers in `docs/TECHNICAL_VERBOSE.md` §7, `docs/EVALUATION.md` and the phase
+Small scripts that produced the numbers in `docs/TECHNICAL_VERBOSE.md` §7, `docs/RESULTS.md` and the phase
 checks of `demo-final`. They talk to a running stack; none of them changes the system.
 
 **Inputs not in git:**
