@@ -1,0 +1,176 @@
+{
+ "dataset": "bigP3BCI",
+ "version": "1.0.0",
+ "doi": "10.13026/0byy-ry86",
+ "license": "CC BY 4.0",
+ "source_page": "https://physionet.org/content/bigp3bci/1.0.0/",
+ "download_mirror": "https://physionet-open.s3.amazonaws.com/bigp3bci/1.0.0/",
+ "checksums": "SHA256SUMS.txt from the same mirror",
+ "acquired_utc": "2026-10-17T18:08:37+00:00",
+ "study": "F",
+ "participant": "F_21",
+ "files": [
+  {
+   "file": "StudyF/F_21/SE001/Test/Dyn/F_21_SE001_Dyn_Test01.edf",
+   "bytes": 2492438,
+   "sha256": "acc8b82263871aa0a0f2ef2870b89978a0f26efae453e0f536933bf1e8fd4809",
+   "status": "already_present"
+  },
+  {
+   "file": "StudyF/F_21/SE001/Test/Dyn/F_21_SE001_Dyn_Test02.edf",
+   "bytes": 2738454,
+   "sha256": "041bca7941f0d95fa5347ea0f0bf501225e61b7f185de9ec1d6a6c2b9fda16d8",
+   "status": "already_present"
+  },
+  {
+   "file": "StudyF/F_21/SE001/Test/DynBigram/F_21_SE001_DynBigram_Test01.edf",
+   "bytes": 2413078,
+   "sha256": "0247c00f2d9e7189ff4087a1972d2f3c7ed39775611749a26b9331aaffee041c",
+   "status": "already_present"
+  },
+  {
+   "file": "StudyF/F_21/SE001/Test/DynBigram/F_21_SE001_DynBigram_Test02.edf",
+   "bytes": 2603542,
+   "sha256": "f8020e9eceab5f98cb15fb35a066e991ac592d9130ce0a5389f28aa9f537b363",
+   "status": "already_present"
+  },
+  {
+   "file": "StudyF/F_21/SE001/Test/Static/F_21_SE001_Static_Test01.edf",
+   "bytes": 6793750,
+   "sha256": "06b48622fbb27337b94d17b5e7dcdc42617b149c95e04e53d6174e4d50147810",
+   "status": "already_present"
+  },
+  {
+   "file": "StudyF/F_21/SE001/Test/Static/F_21_SE001_Static_Test02.edf",
+   "bytes": 6936598,
+   "sha256": "558ba9e26ef21d8a82dbe71d0ffaef18e3fc232edc8464c3ca62bf88a83b8299",
+   "status": "already_present"
+  },
+  {
+   "file": "StudyF/F_21/SE001/Train/CBCol/F_21_SE001_CBCol_Train01.edf",
+   "bytes": 6936598,
+   "sha256": "563d93476492d759776e4628853cbcb55b726f11e7777b79787caba499a49552",
+   "status": "already_present"
+  },
+  {
+   "file": "StudyF/F_21/SE001/Train/CBCol/F_21_SE001_CBCol_Train02.edf",
+   "bytes": 6936598,
+   "sha256": "766ad87cdb9a54de1da1a4c99139769c35a6ff23c5aaaa227eb579921a3f221e",
+   "status": "already_present"
+  },
+  {
+   "file": "StudyF/F_21/SE001/Train/CBCol/F_21_SE001_CBCol_Train03.edf",
+   "bytes": 6936598,
+   "sha256": "e084850e2acec5af9a2cf0b5e00b00d493b8a802e06381b30aa248e99b878235",
+   "status": "already_present"
+  },
+  {
+   "file": "StudyF/F_21/SE002/Test/Dyn/F_21_SE002_Dyn_Test01.edf",
+   "bytes": 2444822,
+   "sha256": "c7de6eb6a8be77d4a4870b44d37778e45c84f9a830c39989aad4cd76e6889274",
+   "status": "already_present"
+  },
+  {
+   "file": "StudyF/F_21/SE002/Test/Dyn/F_21_SE002_Dyn_Test02.edf",
+   "bytes": 2357526,
+   "sha256": "b19b83194dc1ddcabfbdf934558d4a271d9b5698e129eb663dea66ade2cbb866",
+   "status": "already_present"
+  },
+  {
+   "file": "StudyF/F_21/SE002/Test/DynBigram/F_21_SE002_DynBigram_Test01.edf",
+   "bytes": 2040086,
+   "sha256": "73cdffe5fbe6ca09a21d206f8c75f0e7ddb93d212171a4d577e0e5e681064768",
+   "status": "already_present"
+  },
+  {
+   "file": "StudyF/F_21/SE002/Test/DynBigram/F_21_SE002_DynBigram_Test02.edf",
+   "bytes": 2309910,
+   "sha256": "d86a83a6437c3592e01ee947deac48aca14cc08c8013b3e09a35961269524c87",
+   "status": "already_present"
+  },
+  {
+   "file": "StudyF/F_21/SE002/Test/Static/F_21_SE002_Static_Test01.edf",
+   "bytes": 6936598,
+   "sha256": "35fcc1f1ad67c7acd17bed578958fce0ad1c7ab0e78ab953022c48e35598d923",
+   "status": "already_present"
+  },
+  {
+   "file": "StudyF/F_21/SE002/Test/Static/F_21_SE002_Static_Test02.edf",
+   "bytes": 6936598,
+   "sha256": "5f528297d76f9310b0ce7f387ee06174723e7fc265d9021f1e410ed9892dc9a9",
+   "status": "already_present"
+  },
+  {
+   "file": "StudyF/F_21/SE002/Train/CBCol/F_21_SE002_CBCol_Train01.edf",
+   "bytes": 6793750,
+   "sha256": "1ea8efa4135ccd96b389eb1d58ad288a6c75e82d703953f7e277efcae4752553",
+   "status": "already_present"
+  },
+  {
+   "file": "StudyF/F_21/SE002/Train/CBCol/F_21_SE002_CBCol_Train02.edf",
+   "bytes": 6936598,
+   "sha256": "09c2a862700fbc3b67ea20472c666bddfb61128e67411727739660614aa13f32",
+   "status": "already_present"
+  },
+  {
+   "file": "StudyF/F_21/SE002/Train/CBCol/F_21_SE002_CBCol_Train03.edf",
+   "bytes": 6936598,
+   "sha256": "c612ed1c7209217c49243812de38959d46c228c7e64c271895e16cb4d4eb931a",
+   "status": "already_present"
+  },
+  {
+   "file": "StudyF/F_21/SE003/Test/Dyn/F_21_SE003_Dyn_Test01.edf",
+   "bytes": 2809878,
+   "sha256": "0c7001eb4f1b0e7d0904031d619ca2615843e1c0dcfe5e12af42d8398d7f5635",
+   "status": "already_present"
+  },
+  {
+   "file": "StudyF/F_21/SE003/Test/Dyn/F_21_SE003_Dyn_Test02.edf",
+   "bytes": 2159126,
+   "sha256": "3bf099c7006d0353c32dcb5494d8d2f0a127efcb64068d46dae7deb1dd56885f",
+   "status": "downloaded"
+  },
+  {
+   "file": "StudyF/F_21/SE003/Test/DynBigram/F_21_SE003_DynBigram_Test01.edf",
+   "bytes": 2262294,
+   "sha256": "84783f1d63ebc030aa21206fbb2db6cd63f854b937da00a9c339c70a9d8a2096",
+   "status": "downloaded"
+  },
+  {
+   "file": "StudyF/F_21/SE003/Test/DynBigram/F_21_SE003_DynBigram_Test02.edf",
+   "bytes": 2889238,
+   "sha256": "5e28edf9248b5b9a06ad6b0f42422539a74745a2d9b51caca0e144881ea3a567",
+   "status": "downloaded"
+  },
+  {
+   "file": "StudyF/F_21/SE003/Test/Static/F_21_SE003_Static_Test01.edf",
+   "bytes": 6222358,
+   "sha256": "3fe35c565887c5c2e96ec09f4bcd17cebe605dd55bfd91d277e6e6435da60890",
+   "status": "downloaded"
+  },
+  {
+   "file": "StudyF/F_21/SE003/Test/Static/F_21_SE003_Static_Test02.edf",
+   "bytes": 6936598,
+   "sha256": "d1c4c47bbac4b394d4ef31caa2d431a5b5a95e05007ed96f2410af2e3152fcfe",
+   "status": "downloaded"
+  },
+  {
+   "file": "StudyF/F_21/SE003/Train/CBCol/F_21_SE003_CBCol_Train01.edf",
+   "bytes": 6936598,
+   "sha256": "c38d80c389696719b641d35d66074c47eac36e5d3c704946bdebcf4e7807abdb",
+   "status": "downloaded"
+  },
+  {
+   "file": "StudyF/F_21/SE003/Train/CBCol/F_21_SE003_CBCol_Train02.edf",
+   "bytes": 6936598,
+   "sha256": "bba27326e222dfeaea33b19028ee204896b0f43c47e9444b1ce909e4da2ed712",
+   "status": "downloaded"
+  },
+  {
+   "file": "StudyF/F_21/SE003/Train/CBCol/F_21_SE003_CBCol_Train03.edf",
+   "bytes": 6936598,
+   "sha256": "467e41eb1bc9d10864b8d2d04dbb380406ed30e271812fce2dcd6dc288e67286",
+   "status": "downloaded"
+  }
+ ]
+}

@@ -1,0 +1,40 @@
+{
+ "criterion": "mean log p(target) over flash prefixes 1..36, out-of-fold calibration, per-participant mean",
+ "summary": [
+  {
+   "decoder": "ens_lda_riemann",
+   "existing": false,
+   "oof_auc": 0.8079322746802248,
+   "early_logpost": -2.1691410090551386
+  },
+  {
+   "decoder": "compact_slda",
+   "existing": false,
+   "oof_auc": 0.7983408026836578,
+   "early_logpost": -2.273750426370231
+  },
+  {
+   "decoder": "shrinkage_lda",
+   "existing": true,
+   "oof_auc": 0.7975167542182741,
+   "early_logpost": -2.3076993432537387
+  },
+  {
+   "decoder": "xdawn_riemann_lr",
+   "existing": true,
+   "oof_auc": 0.7732056146770458,
+   "early_logpost": -2.3276360715056343
+  },
+  {
+   "decoder": "xdawn_slda",
+   "existing": false,
+   "oof_auc": 0.7685511608330141,
+   "early_logpost": -2.469245438779727
+  }
+ ],
+ "best_existing": "shrinkage_lda",
+ "best_new": "ens_lda_riemann",
+ "adopted": true,
+ "decoder_for_session3": "ens_lda_riemann",
+ "chance_logpost": -3.58351893845611
+}
