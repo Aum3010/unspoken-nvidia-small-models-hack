@@ -1,0 +1,250 @@
+{
+  "experiment": "C: vLLM isolated from MPS + MTP (num_speculative_tokens 1); small models under MPS",
+  "compute_mode": "Default",
+  "vllm_relaunch": {
+    "ok": true,
+    "ready_s": 36.0,
+    "env_changes": [
+      "CUDA_MPS_PIPE_DIRECTORY=/tmp/serving_nomps.DD0d/pipe",
+      "CUDA_MPS_LOG_DIRECTORY=/tmp/serving_nomps.DD0d/log"
+    ],
+    "argv": [
+      "/workspace/venv-vllm/bin/python",
+      "/workspace/venv-vllm/bin/vllm",
+      "serve",
+      "nvidia/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-NVFP4",
+      "--host",
+      "127.0.0.1",
+      "--port",
+      "8001",
+      "--max-model-len",
+      "16384",
+      "--gpu-memory-utilization",
+      "0.55",
+      "--attention-backend",
+      "TRITON_ATTN",
+      "--enable-auto-tool-choice",
+      "--tool-call-parser",
+      "qwen3_coder",
+      "--reasoning-parser",
+      "nemotron_v3",
+      "--enable-prefix-caching",
+      "--max-num-seqs",
+      "8",
+      "--speculative-config",
+      "{\"method\":\"mtp\",\"num_speculative_tokens\":1}"
+    ]
+  },
+  "mps_check": {
+    "engine_pid": "513577",
+    "mps_client_pids": [
+      "508312",
+      "508311",
+      "508313"
+    ],
+    "nvidia_smi_engine_row": "| 0 N/A N/A 513577 C VLLM::EngineCore 53502MiB |",
+    "engine_is_mps_client": false,
+    "nvidia_smi_rows": [
+      "| 0 N/A N/A 475323 C nvidia-cuda-mps-server 58MiB |",
+      "| 0 N/A N/A 508311 M+C /workspace/venv-app/bin/python 1384MiB |",
+      "| 0 N/A N/A 508312 M+C /workspace/venv-asr/bin/python 6126MiB |",
+      "| 0 N/A N/A 508313 M+C+G /workspace/venv-app/bin/python 2166MiB |",
+      "| 0 N/A N/A 513577 C VLLM::EngineCore 53502MiB |"
+    ]
+  },
+  "restore": {
+    "experiment": "C",
+    "all_ready": true,
+    "safety_tests": "49 passed in 2.52s",
+    "safety_ok": true,
+    "mtp_on": false,
+    "mps_on": true,
+    "vllm_args": "nvidia/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-NVFP4 --host 127.0.0.1 --port 8001 --max-model-len 16384 --gpu-memory-utilization 0.55 --attention-backend TRITON_ATTN --enable-auto-tool-choice --tool-call-parser qwen3_coder --reasoning-parser nemotron_v3 --enable-prefix-caching --max-num-seqs 8",
+    "vllm_default_args": true,
+    "seconds": 43,
+    "ok": true
+  },
+  "spec_decode_counters": "vllm:spec_decode_num_draft_tokens_total{engine=\"0\",model_name=\"nvidia/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-NVFP4\"} 2418.0\nvllm:spec_decode_num_accepted_tokens_total{engine=\"0\",model_name=\"nvidia/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-NVFP4\"} 2172.0",
+  "vllm_log_after_kill": "(APIServer pid=513469) ERROR 10-18 09:21:42 [async_llm.py:871] AsyncLLM output_handler failed.\n(APIServer pid=513469) ERROR 10-18 09:21:42 [async_llm.py:871] Traceback (most recent call last):\n(APIServer pid=513469) ERROR 10-18 09:21:42 [async_llm.py:871]   File \"/workspace/venv-vllm/lib/python3.12/site-packages/vllm/v1/engine/async_llm.py\", line 817, in output_handler\n(APIServer pid=513469) ERROR 10-18 09:21:42 [async_llm.py:871]     outputs = await engine_core.get_output_async()\n(APIServer pid=513469) ERROR 10-18 09:21:42 [async_llm.py:871]               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n(APIServer pid=513469) ERROR 10-18 09:21:42 [async_llm.py:871]   File \"/workspace/venv-vllm/lib/python3.12/site-packages/vllm/v1/engine/core_client.py\", line 1215, in get_output_async\n(APIServer pid=513469) ERROR 10-18 09:21:42 [async_llm.py:871]     raise self._format_exception(outputs) from None\n(APIServer pid=513469) ERROR 10-18 09:21:42 [async_llm.py:871] vllm.v1.engine.exceptions.EngineDeadError: EngineCore encountered an issue. See stack trace (above) for the root cause.\nINFO:     127.0.0.1:40070 - \"POST /v1/chat/completions HTTP/1.1\" 500 Internal Server Error\nINFO:     Shutting down\nINFO:     Waiting for application shutdown.\nINFO:     Application shutdown complete.\nINFO:     Finished server process [513469]\n/home/shadeform/.local/share/uv/python/cpython-3.12.15-linux-x86_64-gnu/lib/python3.12/multiprocessing/resource_tracker.py:279: UserWarning: resource_tracker: There appear to be 1 leaked semaphore objects to clean up at shutdown\n  warnings.warn('resource_tracker: There appear to be %d '",
+  "agent_log_errors_after_kill": "",
+  "latency": {
+    "baseline_file": "latency_brev_final2.json (n 20)",
+    "file": "serving/latency_isolated_mtp.json (n 10)",
+    "rows": [
+      {
+        "what": "coordinator alone",
+        "all_mps": [
+          333,
+          338
+        ],
+        "isolated_mtp": [
+          232,
+          268
+        ],
+        "p50_change_pct": -30.3
+      },
+      {
+        "what": "coordinator, every agent busy",
+        "all_mps": [
+          340,
+          366
+        ],
+        "isolated_mtp": [
+          262,
+          379
+        ],
+        "p50_change_pct": -22.9
+      },
+      {
+        "what": "voice, every agent busy",
+        "all_mps": [
+          78,
+          106
+        ],
+        "isolated_mtp": [
+          104,
+          266
+        ],
+        "p50_change_pct": 33.3
+      },
+      {
+        "what": "lips, every agent busy",
+        "all_mps": [
+          332,
+          349
+        ],
+        "isolated_mtp": [
+          308,
+          343
+        ],
+        "p50_change_pct": -7.2
+      },
+      {
+        "what": "Kokoro, every agent busy",
+        "all_mps": [
+          32,
+          56
+        ],
+        "isolated_mtp": [
+          53,
+          80
+        ],
+        "p50_change_pct": 65.6
+      },
+      {
+        "what": "voice alone",
+        "all_mps": [
+          59,
+          66
+        ],
+        "isolated_mtp": [
+          63,
+          68
+        ],
+        "p50_change_pct": 6.8
+      },
+      {
+        "what": "lips alone",
+        "all_mps": [
+          265,
+          275
+        ],
+        "isolated_mtp": [
+          270,
+          299
+        ],
+        "p50_change_pct": 1.9
+      },
+      {
+        "what": "one message end to end",
+        "all_mps": [
+          309,
+          322
+        ],
+        "isolated_mtp": [
+          285,
+          292
+        ],
+        "p50_change_pct": -7.8
+      }
+    ],
+    "gpu_all_mps": {
+      "util_mean_pct": 89,
+      "util_max_pct": 99,
+      "mem_max_mib": 63439,
+      "wall_s": 6.7
+    },
+    "gpu_isolated": {
+      "util_mean_pct": 69,
+      "util_max_pct": 99,
+      "mem_max_mib": 63543,
+      "wall_s": 3.2
+    }
+  },
+  "heldout": {
+    "n_tasks": 44,
+    "baseline": 0.9848,
+    "isolated_mtp": 0.9697,
+    "unsafe": 0.0,
+    "valid": 1.0,
+    "llm_share": 0.864,
+    "p50_ms": 227,
+    "baseline_p50_ms": 278,
+    "unchanged": true,
+    "tolerance": "one task (0.023)",
+    "by_category_diff": {
+      "misread": [
+        1.0,
+        0.889
+      ]
+    }
+  },
+  "fault_test": {
+    "killed_engine_pid": "513577",
+    "checks": {
+      "voice_health_ready": {
+        "ok": true,
+        "s_after_kill": 0.1,
+        "detail": "ready"
+      },
+      "lips_health_ready": {
+        "ok": true,
+        "s_after_kill": 0.11,
+        "detail": "ready"
+      },
+      "tts_health_ready": {
+        "ok": true,
+        "s_after_kill": 0.11,
+        "detail": "ready"
+      },
+      "accepted_voice_auto_spoken": {
+        "ok": true,
+        "s_after_kill": 0.45,
+        "detail": "status=proposed spoken='I need water' by=demo_auto_spoken 85 ms"
+      },
+      "ambiguous_gets_rules_question": {
+        "ok": true,
+        "s_after_kill": 0.45,
+        "detail": "status=ambiguous question on screen after 87 ms: ask_confirmation ['cand_1559450f75b2', 'cand_5835e904090a', 'cand_f05ccbae9d6b']; final plan by=deterministic_fallback spoken=0"
+      }
+    },
+    "within_10_s": true,
+    "small_model_pids_alive": {
+      "508312": true,
+      "508313": true,
+      "508311": true
+    },
+    "gpu_processes": [
+      "475323, nvidia-cuda-mps-server, 58 MiB",
+      "508311, /workspace/venv-app/bin/python, 1384 MiB",
+      "508313, /workspace/venv-app/bin/python, 2166 MiB",
+      "508312, /workspace/venv-asr/bin/python, 6126 MiB"
+    ],
+    "pass": true
+  },
+  "recommendation": {
+    "choice": "keep all-MPS (isolation only with a second GPU or MIG)",
+    "why": "the fault was contained, but outside MPS vLLM time-slices with the small models: voice, every agent busy +33% p50, Kokoro, every agent busy +66% p50",
+    "defaults_changed": false
+  }
+}

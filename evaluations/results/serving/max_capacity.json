@@ -1,0 +1,579 @@
+{
+  "experiment": "D: max-capacity ramp of the vLLM coordinator",
+  "slo": "p95 < 500 ms",
+  "requests": "same as experiment A: NeMo Gym eval tasks through the coordinator's prompt, tools and validator, streamed",
+  "levels": "1 2 4 (below the ramp, for the SLO point) then 8 16 32 64 128, up to 2 x max-num-seqs; 3 warm-up + max(20, 2 x level)",
+  "stop_rules": {
+    "safety (restore at once)": "CUDA error / illegal memory / OOM / Traceback in the vLLM log; GPU memory > 92 GiB; temperature > 87 C; (shared) an agent's /health not ready twice in a row (2 s apart)",
+    "performance (end this mode's ramp)": "> 2% errors+timeouts at a level; p95 > 5 s"
+  },
+  "modes": [
+    {
+      "mode": "shared",
+      "server_args": "nvidia/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-NVFP4 --host 127.0.0.1 --port 8001 --max-model-len 16384 --gpu-memory-utilization 0.55 --attention-backend TRITON_ATTN --enable-auto-tool-choice --tool-call-parser qwen3_coder --reasoning-parser nemotron_v3 --enable-prefix-caching --max-num-seqs 64",
+      "max_num_seqs": 64,
+      "relaunch": {
+        "ok": true,
+        "ready_s": 98.0
+      },
+      "reference": {
+        "n": 72,
+        "valid_rate": 0.9167
+      },
+      "levels": [
+        {
+          "level": 1,
+          "n": 20,
+          "latency_ms": {
+            "p50": 278.5,
+            "p95": 292.3,
+            "p99": 333.6,
+            "mean": 274.7,
+            "max": 333.6
+          },
+          "ttft_ms": {
+            "p50": 90.2,
+            "p95": 92.5,
+            "p99": 92.8,
+            "mean": 89.8,
+            "max": 92.8
+          },
+          "req_per_s": 3.64,
+          "out_tok_per_s": 250.9,
+          "valid_rate": 0.85,
+          "expected_valid_rate": 0.85,
+          "valid_regressions": 0,
+          "same_as_first": 1.0,
+          "error_rate": 0.0,
+          "errors": 0,
+          "timeouts": 0,
+          "stopped_early": false,
+          "error_examples": [],
+          "peak": {
+            "mem_mib": 63078.0,
+            "temp_c": 51.0,
+            "power_w": 305.15,
+            "util_pct": 99.0,
+            "samples": 3
+          }
+        },
+        {
+          "level": 2,
+          "n": 20,
+          "latency_ms": {
+            "p50": 372.3,
+            "p95": 416.9,
+            "p99": 441.2,
+            "mean": 364.4,
+            "max": 441.2
+          },
+          "ttft_ms": {
+            "p50": 97.3,
+            "p95": 147.2,
+            "p99": 150.3,
+            "mean": 106.3,
+            "max": 150.3
+          },
+          "req_per_s": 5.37,
+          "out_tok_per_s": 366.3,
+          "valid_rate": 0.85,
+          "expected_valid_rate": 0.85,
+          "valid_regressions": 0,
+          "same_as_first": 1.0,
+          "error_rate": 0.0,
+          "errors": 0,
+          "timeouts": 0,
+          "stopped_early": false,
+          "error_examples": [],
+          "peak": {
+            "mem_mib": 63446.0,
+            "temp_c": 53.0,
+            "power_w": 376.07,
+            "util_pct": 99.0,
+            "samples": 3
+          }
+        },
+        {
+          "level": 4,
+          "n": 20,
+          "latency_ms": {
+            "p50": 530.7,
+            "p95": 646.3,
+            "p99": 647.4,
+            "mean": 517.0,
+            "max": 647.4
+          },
+          "ttft_ms": {
+            "p50": 190.1,
+            "p95": 240.3,
+            "p99": 240.7,
+            "mean": 171.3,
+            "max": 240.7
+          },
+          "req_per_s": 7.57,
+          "out_tok_per_s": 518.8,
+          "valid_rate": 0.85,
+          "expected_valid_rate": 0.85,
+          "valid_regressions": 0,
+          "same_as_first": 0.95,
+          "error_rate": 0.0,
+          "errors": 0,
+          "timeouts": 0,
+          "stopped_early": false,
+          "error_examples": [],
+          "peak": {
+            "mem_mib": 63950.0,
+            "temp_c": 58.0,
+            "power_w": 376.07,
+            "util_pct": 100.0,
+            "samples": 2
+          }
+        },
+        {
+          "level": 8,
+          "n": 20,
+          "latency_ms": {
+            "p50": 831.8,
+            "p95": 1077.9,
+            "p99": 1087.5,
+            "mean": 772.4,
+            "max": 1087.5
+          },
+          "ttft_ms": {
+            "p50": 356.5,
+            "p95": 437.8,
+            "p99": 438.1,
+            "mean": 312.1,
+            "max": 438.1
+          },
+          "req_per_s": 9.37,
+          "out_tok_per_s": 634.5,
+          "valid_rate": 0.85,
+          "expected_valid_rate": 0.85,
+          "valid_regressions": 0,
+          "same_as_first": 0.9,
+          "error_rate": 0.0,
+          "errors": 0,
+          "timeouts": 0,
+          "stopped_early": false,
+          "error_examples": [],
+          "peak": {
+            "mem_mib": 63950.0,
+            "temp_c": 58.0,
+            "power_w": 397.71,
+            "util_pct": 100.0,
+            "samples": 2
+          }
+        },
+        {
+          "level": 16,
+          "n": 32,
+          "latency_ms": {
+            "p50": 1266.3,
+            "p95": 1555.6,
+            "p99": 1557.1,
+            "mean": 1241.7,
+            "max": 1557.1
+          },
+          "ttft_ms": {
+            "p50": 805.3,
+            "p95": 822.6,
+            "p99": 829.4,
+            "mean": 648.6,
+            "max": 829.4
+          },
+          "req_per_s": 12.42,
+          "out_tok_per_s": 815.6,
+          "valid_rate": 0.9062,
+          "expected_valid_rate": 0.9062,
+          "valid_regressions": 0,
+          "same_as_first": 1.0,
+          "error_rate": 0.0,
+          "errors": 0,
+          "timeouts": 0,
+          "stopped_early": false,
+          "error_examples": [],
+          "peak": {
+            "mem_mib": 64230.0,
+            "temp_c": 61.0,
+            "power_w": 433.49,
+            "util_pct": 100.0,
+            "samples": 2
+          }
+        },
+        {
+          "level": 32,
+          "n": 64,
+          "latency_ms": {
+            "p50": 2065.2,
+            "p95": 3202.0,
+            "p99": 3619.2,
+            "mean": 2133.1,
+            "max": 3717.6
+          },
+          "ttft_ms": {
+            "p50": 1524.0,
+            "p95": 1586.7,
+            "p99": 1592.1,
+            "mean": 1083.2,
+            "max": 1595.2
+          },
+          "req_per_s": 14.3,
+          "out_tok_per_s": 936.9,
+          "valid_rate": 0.9219,
+          "expected_valid_rate": 0.9219,
+          "valid_regressions": 0,
+          "same_as_first": 0.9375,
+          "error_rate": 0.0,
+          "errors": 0,
+          "timeouts": 0,
+          "stopped_early": false,
+          "error_examples": [],
+          "peak": {
+            "mem_mib": 64230.0,
+            "temp_c": 61.0,
+            "power_w": 447.6,
+            "util_pct": 100.0,
+            "samples": 3
+          }
+        },
+        {
+          "level": 64,
+          "n": 128,
+          "latency_ms": {
+            "p50": 3724.6,
+            "p95": 6376.6,
+            "p99": 6692.4,
+            "mean": 3802.0,
+            "max": 7049.5
+          },
+          "ttft_ms": {
+            "p50": 1762.9,
+            "p95": 3115.6,
+            "p99": 3143.0,
+            "mean": 1906.3,
+            "max": 3143.9
+          },
+          "req_per_s": 16.25,
+          "out_tok_per_s": 1065.4,
+          "valid_rate": 0.9219,
+          "expected_valid_rate": 0.9219,
+          "valid_regressions": 0,
+          "same_as_first": 0.9609,
+          "error_rate": 0.0,
+          "errors": 0,
+          "timeouts": 0,
+          "stopped_early": false,
+          "error_examples": [],
+          "peak": {
+            "mem_mib": 64514.0,
+            "temp_c": 64.0,
+            "power_w": 502.35,
+            "util_pct": 100.0,
+            "samples": 4
+          }
+        }
+      ],
+      "max_concurrency_p95_under_500ms": 2,
+      "peak_req_per_s": 16.25,
+      "peak_out_tok_per_s": 1065.4,
+      "limit_level": 64,
+      "stop_reason": "level 64: p95 6377 ms > 5 s",
+      "safety_stop": null,
+      "valid_regressions_total": 0,
+      "peak_mem_mib": 64514.0,
+      "peak_temp_c": 64.0,
+      "peak_power_w": 502.35
+    },
+    {
+      "mode": "dedicated",
+      "server_args": "nvidia/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-NVFP4 --host 127.0.0.1 --port 8001 --max-model-len 16384 --gpu-memory-utilization 0.85 --attention-backend TRITON_ATTN --enable-auto-tool-choice --tool-call-parser qwen3_coder --reasoning-parser nemotron_v3 --enable-prefix-caching --max-num-seqs 128",
+      "max_num_seqs": 128,
+      "relaunch": {
+        "ok": true,
+        "ready_s": 100.0
+      },
+      "reference": {
+        "n": 72,
+        "valid_rate": 0.9167
+      },
+      "levels": [
+        {
+          "level": 1,
+          "n": 20,
+          "latency_ms": {
+            "p50": 278.1,
+            "p95": 333.5,
+            "p99": 382.3,
+            "mean": 279.7,
+            "max": 382.3
+          },
+          "ttft_ms": {
+            "p50": 88.6,
+            "p95": 90.9,
+            "p99": 91.7,
+            "mean": 88.3,
+            "max": 91.7
+          },
+          "req_per_s": 3.57,
+          "out_tok_per_s": 254.2,
+          "valid_rate": 0.85,
+          "expected_valid_rate": 0.85,
+          "valid_regressions": 0,
+          "same_as_first": 0.95,
+          "error_rate": 0.0,
+          "errors": 0,
+          "timeouts": 0,
+          "stopped_early": false,
+          "error_examples": [],
+          "peak": {
+            "mem_mib": 83269.0,
+            "temp_c": 50.0,
+            "power_w": 327.16,
+            "util_pct": 99.0,
+            "samples": 4
+          }
+        },
+        {
+          "level": 2,
+          "n": 20,
+          "latency_ms": {
+            "p50": 372.2,
+            "p95": 437.5,
+            "p99": 439.7,
+            "mean": 362.8,
+            "max": 439.7
+          },
+          "ttft_ms": {
+            "p50": 97.2,
+            "p95": 147.1,
+            "p99": 150.2,
+            "mean": 104.1,
+            "max": 150.2
+          },
+          "req_per_s": 5.36,
+          "out_tok_per_s": 365.8,
+          "valid_rate": 0.85,
+          "expected_valid_rate": 0.85,
+          "valid_regressions": 0,
+          "same_as_first": 0.95,
+          "error_rate": 0.0,
+          "errors": 0,
+          "timeouts": 0,
+          "stopped_early": false,
+          "error_examples": [],
+          "peak": {
+            "mem_mib": 83555.0,
+            "temp_c": 57.0,
+            "power_w": 349.64,
+            "util_pct": 99.0,
+            "samples": 3
+          }
+        },
+        {
+          "level": 4,
+          "n": 20,
+          "latency_ms": {
+            "p50": 522.8,
+            "p95": 624.8,
+            "p99": 682.0,
+            "mean": 522.7,
+            "max": 682.0
+          },
+          "ttft_ms": {
+            "p50": 193.7,
+            "p95": 239.5,
+            "p99": 239.9,
+            "mean": 174.8,
+            "max": 239.9
+          },
+          "req_per_s": 7.51,
+          "out_tok_per_s": 525.1,
+          "valid_rate": 0.85,
+          "expected_valid_rate": 0.85,
+          "valid_regressions": 0,
+          "same_as_first": 0.95,
+          "error_rate": 0.0,
+          "errors": 0,
+          "timeouts": 0,
+          "stopped_early": false,
+          "error_examples": [],
+          "peak": {
+            "mem_mib": 84059.0,
+            "temp_c": 59.0,
+            "power_w": 432.48,
+            "util_pct": 99.0,
+            "samples": 3
+          }
+        },
+        {
+          "level": 8,
+          "n": 20,
+          "latency_ms": {
+            "p50": 817.8,
+            "p95": 1029.4,
+            "p99": 1120.5,
+            "mean": 766.1,
+            "max": 1120.5
+          },
+          "ttft_ms": {
+            "p50": 401.4,
+            "p95": 438.3,
+            "p99": 438.9,
+            "mean": 324.4,
+            "max": 438.9
+          },
+          "req_per_s": 9.32,
+          "out_tok_per_s": 641.5,
+          "valid_rate": 0.85,
+          "expected_valid_rate": 0.85,
+          "valid_regressions": 0,
+          "same_as_first": 0.95,
+          "error_rate": 0.0,
+          "errors": 0,
+          "timeouts": 0,
+          "stopped_early": false,
+          "error_examples": [],
+          "peak": {
+            "mem_mib": 84339.0,
+            "temp_c": 60.0,
+            "power_w": 432.48,
+            "util_pct": 100.0,
+            "samples": 2
+          }
+        },
+        {
+          "level": 16,
+          "n": 32,
+          "latency_ms": {
+            "p50": 1265.7,
+            "p95": 1513.3,
+            "p99": 1900.7,
+            "mean": 1264.5,
+            "max": 1900.7
+          },
+          "ttft_ms": {
+            "p50": 810.3,
+            "p95": 827.5,
+            "p99": 834.2,
+            "mean": 668.3,
+            "max": 834.2
+          },
+          "req_per_s": 12.17,
+          "out_tok_per_s": 813.9,
+          "valid_rate": 0.9062,
+          "expected_valid_rate": 0.9062,
+          "valid_regressions": 0,
+          "same_as_first": 0.9062,
+          "error_rate": 0.0,
+          "errors": 0,
+          "timeouts": 0,
+          "stopped_early": false,
+          "error_examples": [],
+          "peak": {
+            "mem_mib": 84339.0,
+            "temp_c": 61.0,
+            "power_w": 494.14,
+            "util_pct": 100.0,
+            "samples": 3
+          }
+        },
+        {
+          "level": 32,
+          "n": 64,
+          "latency_ms": {
+            "p50": 2056.1,
+            "p95": 3519.9,
+            "p99": 3580.6,
+            "mean": 2143.2,
+            "max": 3738.5
+          },
+          "ttft_ms": {
+            "p50": 1539.2,
+            "p95": 1603.4,
+            "p99": 1610.8,
+            "mean": 1094.0,
+            "max": 1611.5
+          },
+          "req_per_s": 14.27,
+          "out_tok_per_s": 937.1,
+          "valid_rate": 0.9219,
+          "expected_valid_rate": 0.9219,
+          "valid_regressions": 0,
+          "same_as_first": 0.9375,
+          "error_rate": 0.0,
+          "errors": 0,
+          "timeouts": 0,
+          "stopped_early": false,
+          "error_examples": [],
+          "peak": {
+            "mem_mib": 84339.0,
+            "temp_c": 62.0,
+            "power_w": 494.14,
+            "util_pct": 100.0,
+            "samples": 3
+          }
+        },
+        {
+          "level": 64,
+          "n": 128,
+          "latency_ms": {
+            "p50": 3731.9,
+            "p95": 6259.5,
+            "p99": 6955.9,
+            "mean": 3816.5,
+            "max": 7019.6
+          },
+          "ttft_ms": {
+            "p50": 1771.3,
+            "p95": 3136.2,
+            "p99": 3163.0,
+            "mean": 1904.6,
+            "max": 3163.8
+          },
+          "req_per_s": 16.19,
+          "out_tok_per_s": 1064.4,
+          "valid_rate": 0.9219,
+          "expected_valid_rate": 0.9219,
+          "valid_regressions": 0,
+          "same_as_first": 0.9375,
+          "error_rate": 0.0,
+          "errors": 0,
+          "timeouts": 0,
+          "stopped_early": false,
+          "error_examples": [],
+          "peak": {
+            "mem_mib": 84623.0,
+            "temp_c": 64.0,
+            "power_w": 501.15,
+            "util_pct": 100.0,
+            "samples": 4
+          }
+        }
+      ],
+      "max_concurrency_p95_under_500ms": 2,
+      "peak_req_per_s": 16.19,
+      "peak_out_tok_per_s": 1064.4,
+      "limit_level": 64,
+      "stop_reason": "level 64: p95 6260 ms > 5 s",
+      "safety_stop": null,
+      "valid_regressions_total": 0,
+      "peak_mem_mib": 84623.0,
+      "peak_temp_c": 64.0,
+      "peak_power_w": 501.15
+    }
+  ],
+  "restore": {
+    "experiment": "D",
+    "all_ready": true,
+    "safety_tests": "49 passed in 2.54s",
+    "safety_ok": true,
+    "mtp_on": false,
+    "mps_on": true,
+    "vllm_args": "nvidia/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-NVFP4 --host 127.0.0.1 --port 8001 --max-model-len 16384 --gpu-memory-utilization 0.55 --attention-backend TRITON_ATTN --enable-auto-tool-choice --tool-call-parser qwen3_coder --reasoning-parser nemotron_v3 --enable-prefix-caching --max-num-seqs 8",
+    "vllm_default_args": true,
+    "seconds": 47,
+    "ok": true
+  },
+  "gpu_trace": "serving/gpu_trace.csv"
+}

@@ -1,0 +1,58 @@
+{
+  "date": "2026-10-18 09:11:17",
+  "flag_on": {
+    "http": 200,
+    "body": {
+      "state": "ready",
+      "running": 0,
+      "waiting": 0,
+      "ttft_p50_ms": 107.5,
+      "ttft_window": "since start",
+      "kv_cache_usage_pct": 0.0,
+      "prefix_cache_hit_rate": 0.0,
+      "spec_decode_acceptance": null
+    },
+    "ok": true
+  },
+  "flag_off": {
+    "http": 404,
+    "ok": true
+  },
+  "vllm_down": {
+    "http": 200,
+    "body": {
+      "state": "unavailable",
+      "error": "ConnectError"
+    },
+    "health_http": 200,
+    "ok": true
+  },
+  "smoke_via_flag_on_gateway": {
+    "gateway": "http://127.0.0.1:8010",
+    "ok": true,
+    "checks": {
+      "health": {
+        "ok": true,
+        "detail": "not ready=[]"
+      },
+      "accepted": {
+        "ok": true,
+        "detail": "status=proposed spoken='I need water' by=demo_auto_spoken 133 ms"
+      },
+      "ambiguous_no": {
+        "ok": true,
+        "detail": "status=ambiguous waited=True after No: message=rejected spoken=0 plan_by=deterministic_fallback"
+      },
+      "yes": {
+        "ok": true,
+        "detail": "status=ambiguous spoken='Yes' by=accessible_button_confirmed audio=63644 B"
+      }
+    }
+  },
+  "safety_tests": "49 passed in 2.52s",
+  "panel_unit_tests": "4 passed in 0.28s",
+  "smoke_ok": true,
+  "safety_ok": true,
+  "unit_ok": true,
+  "works": true
+}

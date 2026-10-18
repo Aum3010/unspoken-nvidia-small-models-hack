@@ -159,8 +159,8 @@ The UI runs on the laptop (`cd web && npm run dev` → http://localhost:8800). E
 bash scripts/brev/sync_app.sh marginal-sapphire-whale
 # instance, once (~15-30 min): uv venvs /workspace/venv-app (torch cu128) + /workspace/venv-vllm, checkpoints, EEG decoders
 brev exec marginal-sapphire-whale 'cd ~/unspoken && nohup bash scripts/brev/setup_app.sh > .run/setup.log 2>&1 < /dev/null &'
-# laptop -> instance: the lip agent's enrollment data is not part of sync_app.sh
-git archive --format=tar.gz -o /tmp/enroll.tgz HEAD:data enroll && brev copy /tmp/enroll.tgz marginal-sapphire-whale:/home/shadeform/enroll.tgz
+# laptop -> instance: the lip agent's enrollment data is not in git or sync_app.sh (consent, docs/DATASETS_AND_CONSENT.md): ship the local folder
+tar -czf /tmp/enroll.tgz -C data enroll && brev copy /tmp/enroll.tgz marginal-sapphire-whale:/home/shadeform/enroll.tgz
 brev exec marginal-sapphire-whale 'cd ~/unspoken && rm -rf data/enroll && tar -xzf ~/enroll.tgz -C data'
 # instance: (re)start everything detached (NVIDIA MPS on; UNSPOKEN_MPS=0 for off); `status` shows each /health, GPU memory, MPS
 brev exec marginal-sapphire-whale 'bash ~/unspoken/scripts/brev/start_app.sh'

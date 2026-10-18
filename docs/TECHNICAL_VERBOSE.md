@@ -5,7 +5,9 @@ of `ui-speedups` + four flag-gated phases): what runs where, every agent and its
 logic, the browser, how it is served on the NVIDIA Brev GPU, every measured number, and every known shortfall,
 bug and pending task (§10). Where a number or behaviour differs on `ui`, the text says so. Shorter docs: [README](../README.md), [ARCHITECTURE](ARCHITECTURE.md),
 [SERVING](SERVING.md), [BREV](BREV.md), [EVALUATION](EVALUATION.md), [web/README](../web/README.md). Bounty
-write-ups (Nemotron Lightning, NeMo Gym, vLLM): [BOUNTIES](BOUNTIES.md).
+write-ups (Nemotron Lightning, NeMo Gym, vLLM): [BOUNTIES](BOUNTIES.md). Every agent against its baseline
+(branch `eval-consolidation`): [RESULTS](RESULTS.md). vLLM serving experiments (concurrency, capacity,
+isolation + MTP): `evaluations/results/serving/SUMMARY.md`.
 
 ---
 
@@ -518,7 +520,7 @@ From `start_app.sh`:
 
 ```bash
 bash scripts/brev/sync_app.sh marginal-sapphire-whale                   # ship committed code (services, shared, scripts, asr_eval bits)
-git archive --format=tar.gz -o /tmp/enroll.tgz HEAD:data enroll         # enrollment is NOT in sync_app: copy it
+tar -czf /tmp/enroll.tgz -C data enroll                                  # enrollment is not in git or sync_app: copy the local folder
 brev copy /tmp/enroll.tgz marginal-sapphire-whale:/home/shadeform/enroll.tgz
 brev exec marginal-sapphire-whale 'cd ~/unspoken && rm -rf data/enroll && tar -xzf ~/enroll.tgz -C data'
 brev exec marginal-sapphire-whale 'bash ~/unspoken/scripts/brev/start_app.sh'   # start | status | stop

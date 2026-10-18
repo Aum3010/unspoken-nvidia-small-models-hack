@@ -58,7 +58,7 @@ The full reference is [docs/TECHNICAL_VERBOSE.md](docs/TECHNICAL_VERBOSE.md). Th
 # laptop (Windows: brev runs inside WSL Ubuntu); commit first: sync ships the committed tree (HEAD)
 bash scripts/brev/sync_app.sh marginal-sapphire-whale
 # data that sync does not ship: lip enrollment (git) and the vision preview (gitignored, regenerate)
-git archive --format=tar.gz -o /tmp/enroll.tgz HEAD:data enroll && brev copy /tmp/enroll.tgz marginal-sapphire-whale:/home/shadeform/enroll.tgz
+tar -czf /tmp/enroll.tgz -C data enroll && brev copy /tmp/enroll.tgz marginal-sapphire-whale:/home/shadeform/enroll.tgz
 brev exec marginal-sapphire-whale 'cd ~/unspoken && rm -rf data/enroll && tar -xzf ~/enroll.tgz -C data'
 python scripts/vision/fetch_mimic_event.py        # only for the vision preview; then copy data/vision/ the same way
 # start (defaults: MPS on, MTP off, every new flag off); start | status | stop

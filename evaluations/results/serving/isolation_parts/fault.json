@@ -1,0 +1,43 @@
+{
+ "killed_engine_pid": "513577",
+ "checks": {
+  "voice_health_ready": {
+   "ok": true,
+   "s_after_kill": 0.1,
+   "detail": "ready"
+  },
+  "lips_health_ready": {
+   "ok": true,
+   "s_after_kill": 0.11,
+   "detail": "ready"
+  },
+  "tts_health_ready": {
+   "ok": true,
+   "s_after_kill": 0.11,
+   "detail": "ready"
+  },
+  "accepted_voice_auto_spoken": {
+   "ok": true,
+   "s_after_kill": 0.45,
+   "detail": "status=proposed spoken='I need water' by=demo_auto_spoken 85 ms"
+  },
+  "ambiguous_gets_rules_question": {
+   "ok": true,
+   "s_after_kill": 0.45,
+   "detail": "status=ambiguous question on screen after 87 ms: ask_confirmation ['cand_1559450f75b2', 'cand_5835e904090a', 'cand_f05ccbae9d6b']; final plan by=deterministic_fallback spoken=0"
+  }
+ },
+ "within_10_s": true,
+ "small_model_pids_alive": {
+  "508312": true,
+  "508313": true,
+  "508311": true
+ },
+ "gpu_processes": [
+  "475323, nvidia-cuda-mps-server, 58 MiB",
+  "508311, /workspace/venv-app/bin/python, 1384 MiB",
+  "508313, /workspace/venv-app/bin/python, 2166 MiB",
+  "508312, /workspace/venv-asr/bin/python, 6126 MiB"
+ ],
+ "pass": true
+}

@@ -74,9 +74,10 @@ For the ASR evaluation there are two recorders:
 - **What they are:** the lip agent's personal phrases. For 22 phrases there are 90 recordings, each stored as
   Auto-AVSR encoder features (`NNN.npy`, frames × 768, float16) with `phrase.txt`. There is no video, but the
   features are derived from one real person's mouth recordings.
-- **Status: committed to git and published (2026-10-18).** The person is a team member and agreed to keep them
-  in the repository and publish them under CC BY 4.0: https://huggingface.co/datasets/AumPandya01/unspoken-data
-  ([DATA_RELEASE.md](DATA_RELEASE.md)).
+- **Status: published (2026-10-18).** The person is a team member and agreed to publish them under CC BY 4.0:
+  `lip_enrollment/` in https://huggingface.co/datasets/AumPandya01/unspoken-data ([DATA_RELEASE.md](DATA_RELEASE.md)).
+- **Not tracked in git from `main` on** (`git rm --cached`; older branches and history still hold them, which is fine
+  now that they are public). Ship a local copy to the instance with `tar` (docs/BREV.md §4b).
 
 ## Vision preview: MIMIC-IV Clinical Database Demo v2.2 (`data/vision/`, flag `UNSPOKEN_CHECKIN`)
 

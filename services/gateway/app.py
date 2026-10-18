@@ -797,3 +797,92 @@ if CHECKIN:
     from services.gateway import checkin as _checkin
 
     _checkin.register(app, get_session, push)
+
+
+# ---- serving metrics card (UNSPOKEN_SERVING_PANEL=1, default off) ----------------------------------------------
+# A few numbers from vLLM's /metrics for the page's "Serving · vLLM" card. Off: the route does not exist (404).
+# vLLM down or slow (300 ms): {"state": "unavailable"}; nothing else reads this, so nothing else is affected.
+
+SERVING_PANEL = os.environ.get("UNSPOKEN_SERVING_PANEL", "0") != "0"
+VLLM_METRICS_URL = os.environ.get("UNSPOKEN_LLM_BASE_URL", "http://127.0.0.1:8001").rstrip("/") + "/metrics"
+TTFT_WINDOW_S = 60
+_serving_cache: dict = {"ts": 0.0, "data": None}
+_ttft_snapshots: list[tuple[float, dict[float, float]]] = []   # (time, cumulative TTFT histogram buckets)
+
+
+def parse_vllm_metrics(text: str) -> tuple[dict[str, float], dict[float, float]]:
+    """Counters and gauges by name (summed over label sets), and the TTFT histogram's cumulative buckets."""
+    vals: dict[str, float] = {}
+    ttft: dict[float, float] = {}
+    for line in text.splitlines():
+        if not line.startswith("vllm:"):
+            continue
+        name, _, v = line.rpartition(" ")
+        try:
+            x = float(v)
+        except ValueError:
+            continue
+        base = name.split("{", 1)[0][5:]
+        if base == "time_to_first_token_seconds_bucket":
+            le = re.search(r'le="([^"]+)"', name)
+            if le:
+                ttft[float(le.group(1))] = ttft.get(float(le.group(1)), 0.0) + x
+        elif not base.endswith(("_bucket", "_created")):
+            vals[base] = vals.get(base, 0.0) + x
+    return vals, ttft
+
+
+def _hist_p50_ms(buckets: dict[float, float]) -> float | None:
+    """Median of a cumulative histogram, interpolated inside its bucket."""
+    edges = sorted(buckets)
+    total = buckets.get(float("inf"), buckets[edges[-1]] if edges else 0.0)
+    if total <= 0:
+        return None
+    lo, below = 0.0, 0.0
+    for e in edges:
+        if buckets[e] >= total / 2:
+            if e == float("inf"):
+                return round(lo * 1000, 1)
+            inside = buckets[e] - below
+            return round(1000 * (lo + (e - lo) * ((total / 2 - below) / inside if inside else 1.0)), 1)
+        lo, below = e, buckets[e]
+    return None
+
+
+def summarize_vllm_metrics(text: str, now: float) -> dict:
+    vals, ttft = parse_vllm_metrics(text)
+    _ttft_snapshots.append((now, ttft))
+    while len(_ttft_snapshots) > 2 and now - _ttft_snapshots[1][0] >= TTFT_WINDOW_S:
+        _ttft_snapshots.pop(0)
+    old = _ttft_snapshots[0][1]
+    recent = {k: v - old.get(k, 0.0) for k, v in ttft.items()}
+    p50, window = _hist_p50_ms(recent), f"{TTFT_WINDOW_S} s"
+    if p50 is None:
+        p50, window = _hist_p50_ms(ttft), "since start"
+    kv = vals.get("kv_cache_usage_perc", vals.get("gpu_cache_usage_perc"))
+    q, hits = vals.get("prefix_cache_queries_total"), vals.get("prefix_cache_hits_total", 0.0)
+    drafts, accepted = vals.get("spec_decode_num_draft_tokens_total"), vals.get("spec_decode_num_accepted_tokens_total", 0.0)
+    return {"running": int(vals.get("num_requests_running", 0)), "waiting": int(vals.get("num_requests_waiting", 0)),
+            "ttft_p50_ms": p50, "ttft_window": window if p50 is not None else None,
+            "kv_cache_usage_pct": round(100 * kv, 1) if kv is not None else None,
+            "prefix_cache_hit_rate": round(hits / q, 4) if q else None,
+            "spec_decode_acceptance": round(accepted / drafts, 4) if drafts else None}
+
+
+async def serving_metrics():
+    now = time.time()
+    if _serving_cache["data"] is not None and now - _serving_cache["ts"] < 1.0:
+        return _serving_cache["data"]
+    try:
+        async with httpx.AsyncClient(timeout=0.3) as client:
+            r = await client.get(VLLM_METRICS_URL)
+        r.raise_for_status()
+        data = {"state": "ready", **summarize_vllm_metrics(r.text, now)}
+    except Exception as exc:
+        data = {"state": "unavailable", "error": type(exc).__name__}
+    _serving_cache.update(ts=now, data=data)
+    return data
+
+
+if SERVING_PANEL:
+    app.add_api_route("/api/serving_metrics", serving_metrics, methods=["GET"])

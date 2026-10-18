@@ -5,7 +5,7 @@
 //   top right: live agent activity from the gateway timeline, then the spoken history
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { api, sendLipPiece, useHealth, useSession, SESSION_ID } from '../lib/api'
+import { api, sendLipPiece, useHealth, useSession, SESSION_ID, type ServingMetrics } from '../lib/api'
 import { getCamera } from '../lib/capture'
 import { onBlink, trackVideo } from '../lib/face'
 import { gazeState, learnFromSelection, onGaze, saveCalibration, startGaze } from '../lib/gaze'
@@ -502,6 +502,7 @@ export function GlassApp() {
           <Feed timeline={state?.timeline ?? []} />
         </section>
         {checkinOn && <VisionPreview />}
+        <ServingCard />
         <section className="chat glass" aria-label="What you said">
           <header><div>History</div><span className="mono">{state?.spoken.length ? `${state.spoken.length} spoken` : 'today'}</span></header>
           <div className="history" ref={histRef}>
@@ -538,6 +539,38 @@ export function GlassApp() {
 
       {calibrating && <Calibration bind={bindCalib} onFocusMode={setFocusMode} onDone={doneCalib} remoteHost={remoteHost} />}
     </>
+  )
+}
+
+// Serving card (gateway flag UNSPOKEN_SERVING_PANEL): vLLM's load every 2 s. Hidden unless the route answers 200;
+// without the flag it is a 404, so it is then asked only every 30 s.
+function ServingCard() {
+  const [m, setM] = useState<ServingMetrics | null>(null)
+  useEffect(() => {
+    let alive = true, t = 0
+    const tick = async () => {
+      let next = 2000
+      try { setM(await api.servingMetrics()) } catch { setM(null); next = 30000 }
+      if (alive) t = window.setTimeout(tick, next)
+    }
+    tick()
+    return () => { alive = false; window.clearTimeout(t) }
+  }, [])
+  if (!m) return null
+  const pct = (x?: number | null, scale = 1) => (x == null ? '–' : `${Math.round(x * scale)} %`)
+  return (
+    <section className="vision serving glass" aria-label="Serving">
+      <header><div>Serving · vLLM</div><span className="mono">{m.state === 'ready' ? 'Nemotron 3.5 Lightning' : 'unavailable'}</span></header>
+      {m.state === 'ready' ? (
+        <div className="vrows">
+          <div><span>Running · waiting</span><b>{m.running} · {m.waiting}</b></div>
+          <div><span>TTFT p50{m.ttft_window ? ` · ${m.ttft_window}` : ''}</span><b>{m.ttft_p50_ms == null ? '–' : `${Math.round(m.ttft_p50_ms)} ms`}</b></div>
+          <div><span>KV cache in use</span><b>{pct(m.kv_cache_usage_pct)}</b></div>
+          <div><span>Prefix-cache hits</span><b>{pct(m.prefix_cache_hit_rate, 100)}</b></div>
+          {m.spec_decode_acceptance != null && <div><span>MTP drafts accepted</span><b>{pct(m.spec_decode_acceptance, 100)}</b></div>}
+        </div>
+      ) : <div className="vrows">vLLM is not answering · the coordinator uses its rules</div>}
+    </section>
   )
 }
 
