@@ -39,14 +39,21 @@ export interface Recording {
   stop: () => Promise<Blob>
   cancel: () => void
   startedAt: number
+  /** pieces recorded so far (each was passed to onChunk) */
+  chunks: () => number
 }
 
-export function record(stream: MediaStream, kind: 'video' | 'audio', maxMs = 10000): Recording {
+export function record(stream: MediaStream, kind: 'video' | 'audio', maxMs = 10000,
+  onChunk?: (piece: Blob, seq: number, mime: string) => void): Recording {
   const mimeType = pickMime(kind)
   const tracks = kind === 'video' ? stream.getVideoTracks() : stream.getAudioTracks()
   const rec = new MediaRecorder(new MediaStream(tracks), mimeType ? { mimeType, videoBitsPerSecond: 2_500_000 } : undefined)
   const chunks: Blob[] = []
-  rec.ondataavailable = (e) => e.data.size && chunks.push(e.data)
+  rec.ondataavailable = (e) => {
+    if (!e.data.size) return
+    chunks.push(e.data)
+    onChunk?.(e.data, chunks.length - 1, rec.mimeType || mimeType || '')
+  }
   let resolveStop: (b: Blob) => void = () => {}
   const done = new Promise<Blob>((r) => (resolveStop = r))
   rec.onstop = () => resolveStop(new Blob(chunks, { type: rec.mimeType || mimeType }))
@@ -54,6 +61,7 @@ export function record(stream: MediaStream, kind: 'video' | 'audio', maxMs = 100
   const timer = window.setTimeout(() => rec.state === 'recording' && rec.stop(), maxMs)
   return {
     startedAt: performance.now(),
+    chunks: () => chunks.length,
     stop: () => {
       window.clearTimeout(timer)
       if (rec.state === 'recording') rec.stop()

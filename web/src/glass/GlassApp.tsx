@@ -5,7 +5,7 @@
 //   top right: live agent activity from the gateway timeline, then the spoken history
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { api, useHealth, useSession, SESSION_ID } from '../lib/api'
+import { api, sendLipPiece, useHealth, useSession, SESSION_ID } from '../lib/api'
 import { getCamera } from '../lib/capture'
 import { onBlink, trackVideo } from '../lib/face'
 import { gazeState, learnFromSelection, onGaze, saveCalibration, startGaze } from '../lib/gaze'
@@ -105,6 +105,8 @@ export function GlassApp() {
   // one clip per agent at a time: always-on capture outpaces the lip model, and a queue of clips only
   // times out (each waits behind the others); a clip that starts while the last is read is skipped
   const inFlight = useRef<Record<string, boolean>>({})
+  // mouth clips being streamed: the pieces' send chain, and whether every piece went out
+  const lipStreams = useRef<Record<string, { chain: Promise<void>; ok: boolean }>>({})
   const canCapture = useCallback((svc: string) => {
     const { state: s, health: h, connected: c, calibrating: cal } = live.current
     return !!s && c && !cal && !inFlight.current[svc] && performance.now() > speakingUntil.current &&
@@ -171,7 +173,34 @@ export function GlassApp() {
           stream: s,
           canCapture: () => canCapture('vsr'),
           onMouthing: (on) => { if (on) E.fire('lips', .6, 'WATCHING') },
-          onClip: (b) => { E.fire('lips', 1, 'READING'); sendClip('vsr', () => api.captureLip(b)) },
+          onPiece: (id, piece, seq, mime) => {
+            // pieces are sent strictly in order: each waits for the one before it
+            const st = lipStreams.current[id] ??= { chain: Promise.resolve(), ok: true }
+            st.chain = st.chain.then(async () => {
+              if (st.ok) st.ok = sendLipPiece({ id, seq, mime }, await piece.arrayBuffer())
+            })
+          },
+          onDrop: (id) => {
+            const st = lipStreams.current[id]
+            delete lipStreams.current[id]
+            if (st) st.chain.then(() => { if (st.ok) sendLipPiece({ id, discard: true }) })
+          },
+          onClip: (b, _ms, { id, chunks }) => {
+            E.fire('lips', 1, 'READING')
+            const st = lipStreams.current[id]
+            delete lipStreams.current[id]
+            sendClip('vsr', async () => {
+              if (st) {
+                await st.chain
+                if (st.ok) {
+                  try { return await api.finishLipStream(id, chunks) } catch (e) {
+                    if (!/stream/.test((e as Error).message)) throw e  // 409: the stream broke, send the whole clip
+                  }
+                }
+              }
+              return api.captureLip(b)
+            })
+          },
         }))
       } catch {
         setCam('off')

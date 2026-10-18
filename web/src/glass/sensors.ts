@@ -117,7 +117,11 @@ interface LipOpts {
   stream: MediaStream
   canCapture: () => boolean
   onMouthing: (active: boolean) => void
-  onClip: (video: Blob, ms: number) => void
+  onClip: (video: Blob, ms: number, stream: { id: string; chunks: number }) => void
+  /** a piece of the clip being recorded (sent while the person is still mouthing) */
+  onPiece?: (id: string, piece: Blob, seq: number, mime: string) => void
+  /** the recording was dropped: its pieces will not be used */
+  onDrop?: (id: string) => void
 }
 
 const LIP_WINDOW_MS = 600
@@ -128,14 +132,14 @@ const LIP_MAX_MS = 8000
 
 export function startLips(o: LipOpts): () => void {
   const hist: { t: number; g: number }[] = []
-  let rec: Recording | null = null, recT0 = 0, movingSince = 0, stillSince = 0, confirmed = false
+  let rec: Recording | null = null, recT0 = 0, movingSince = 0, stillSince = 0, confirmed = false, recId = ''
   const stop = (send: boolean) => {
     const r = rec; if (!r) return
     rec = null
     if (confirmed) o.onMouthing(false)
-    const ms = performance.now() - recT0
-    if (send && confirmed && ms >= LIP_MIN_MS) r.stop().then((b) => o.onClip(b, ms))
-    else r.cancel()
+    const ms = performance.now() - recT0, id = recId
+    if (send && confirmed && ms >= LIP_MIN_MS) r.stop().then((b) => o.onClip(b, ms, { id, chunks: r.chunks() }))
+    else { r.cancel(); o.onDrop?.(id) }
     confirmed = false
   }
   const off = onFace((f: FaceFrame) => {
@@ -153,7 +157,11 @@ export function startLips(o: LipOpts): () => void {
       stillSince = 0
       if (!movingSince) movingSince = now
       // start recording at the first movement so the onset is kept; commit after 200 ms of it
-      if (!rec) { rec = record(o.stream, 'video', LIP_MAX_MS + 500); recT0 = performance.now() }
+      if (!rec) {
+        const id = recId = `lip${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`
+        rec = record(o.stream, 'video', LIP_MAX_MS + 500, o.onPiece && ((p, seq, mime) => o.onPiece!(id, p, seq, mime)))
+        recT0 = performance.now()
+      }
       if (!confirmed && now - movingSince > 200) { confirmed = true; o.onMouthing(true) }
     } else {
       movingSince = 0

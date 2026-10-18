@@ -9,6 +9,7 @@ from __future__ import annotations
 import asyncio
 import json
 import os
+import re
 import time
 
 import httpx
@@ -339,6 +340,91 @@ async def _forward_capture(s: Session, service: str, field: str, upload: UploadF
 @app.post("/api/{sid}/capture/lip")
 async def capture_lip(sid: str, video: UploadFile = File(...)):
     return await _forward_capture(get_session(sid), "vsr", "video", video, "Mouth clip")
+
+
+# Streamed mouth clips. While the person mouths, the browser sends the recording in 250 ms pieces over the
+# session WebSocket; they are passed on to the lip agent at once, which decodes them and finds the face as they
+# arrive. When the mouth has been still for the pause, the browser asks for the reading here; the upload and most
+# of the preparation are already done. A stream that broke (a piece lost, the agent restarted) answers 409 and
+# the browser sends the whole clip the usual way.
+_lip_streams: dict[str, dict] = {}
+LIP_STREAM_TTL_S = 60
+_vsr_client: httpx.AsyncClient | None = None
+
+
+def _lip_key(sid: str, stream_id: str) -> str:
+    return re.sub(r"[^A-Za-z0-9_.-]", "_", f"{sid}.{stream_id}")[:120]
+
+
+def _lip_stream(key: str) -> dict:
+    return _lip_streams.setdefault(key, {"n": 0, "broken": False, "t": time.time(), "cv": asyncio.Condition()})
+
+
+async def _lip_chunk(sid: str, header: dict, payload: bytes):
+    global _vsr_client
+    now = time.time()
+    for k in [k for k, v in _lip_streams.items() if now - v["t"] > LIP_STREAM_TTL_S]:
+        _lip_streams.pop(k)
+    key = _lip_key(sid, str(header.get("id", "")))
+    st = _lip_stream(key)
+    _vsr_client = _vsr_client or httpx.AsyncClient(timeout=10)
+    if header.get("discard"):
+        _lip_streams.pop(key, None)
+        try:
+            await _vsr_client.post(f"{service_url('vsr')}/stream/{key}/discard")
+        except Exception:
+            pass
+        return
+    if st["broken"] or header.get("seq") != st["n"]:
+        st["broken"] = True
+    else:
+        try:
+            r = await _vsr_client.post(f"{service_url('vsr')}/stream/{key}/chunk", content=payload,
+                                       params={"mime": str(header.get("mime", "video/webm"))})
+            st["broken"] = r.status_code != 200
+        except Exception:
+            st["broken"] = True
+    st["n"] += 1
+    st["t"] = now
+    async with st["cv"]:
+        st["cv"].notify_all()
+
+
+class LipStreamFinish(BaseModel):
+    stream_id: str
+    chunks: int
+
+
+@app.post("/api/{sid}/capture/lip/stream")
+async def capture_lip_stream(sid: str, req: LipStreamFinish):
+    s = get_session(sid)
+    key = _lip_key(sid, req.stream_id)
+    st = _lip_stream(key)  # the last pieces may still be on their way over the WebSocket
+    try:
+        async with st["cv"]:
+            await asyncio.wait_for(st["cv"].wait_for(lambda: st["n"] >= req.chunks or st["broken"]), 5)
+    except asyncio.TimeoutError:
+        st["broken"] = True
+    _lip_streams.pop(key, None)
+    if st["broken"]:
+        try:
+            await _vsr_client.post(f"{service_url('vsr')}/stream/{key}/discard")
+        except Exception:
+            pass
+        raise HTTPException(409, "stream incomplete: send the whole clip")
+    s.trace("vsr", "Mouth clip received", f"streamed in {req.chunks} pieces · processing", level="pending")
+    await push(s)
+    try:
+        async with httpx.AsyncClient(timeout=120) as client:
+            r = await client.post(f"{service_url('vsr')}/stream/{key}/finish", data={"session_id": s.id})
+    except Exception as exc:
+        await _unavailable(s, "vsr", exc)
+    if r.status_code == 404:
+        s.timeline = [t for t in s.timeline if t["level"] != "pending"]
+        raise HTTPException(409, "stream lost by the lip agent: send the whole clip")
+    if r.status_code != 200:
+        raise HTTPException(502, f"vsr error: {r.text[:200]}")
+    return await _apply_evidence(s, "vsr", Evidence(**r.json()), "Mouth clip")
 
 
 @app.post("/api/{sid}/capture/audio")
@@ -678,6 +764,15 @@ async def ws(websocket: WebSocket, sid: str):
     await websocket.send_json({"type": "state", "state": s.snapshot()})
     try:
         while True:
-            await websocket.receive_text()  # keepalive pings
+            msg = await websocket.receive()
+            if msg["type"] == "websocket.disconnect":
+                break
+            data = msg.get("bytes")
+            if data:  # a piece of a streamed mouth clip: 2-byte header length, JSON header, then the bytes
+                n = int.from_bytes(data[:2], "big")
+                await _lip_chunk(sid, json.loads(data[2:2 + n]), data[2 + n:])
+            # text messages are keepalive pings
     except WebSocketDisconnect:
+        pass
+    finally:
         sockets[sid].discard(websocket)

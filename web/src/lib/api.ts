@@ -12,6 +12,21 @@ export const SESSION_ID = (() => {
   }
 })()
 
+let liveWs: WebSocket | null = null
+
+/** Send one piece of a streamed mouth clip over the session WebSocket, in order. False if it cannot be sent. */
+export function sendLipPiece(header: { id: string; seq?: number; mime?: string; discard?: boolean }, piece?: ArrayBuffer): boolean {
+  if (!liveWs || liveWs.readyState !== WebSocket.OPEN) return false
+  const h = new TextEncoder().encode(JSON.stringify(header))
+  const out = new Uint8Array(2 + h.length + (piece?.byteLength ?? 0))
+  out[0] = h.length >> 8
+  out[1] = h.length & 255
+  out.set(h, 2)
+  if (piece) out.set(new Uint8Array(piece), 2 + h.length)
+  liveWs.send(out)
+  return true
+}
+
 async function req<T>(path: string, init?: RequestInit): Promise<T> {
   const r = await fetch(path, init)
   if (!r.ok) {
@@ -35,6 +50,9 @@ export const api = {
     f.append('video', blob, blob.type.includes('mp4') ? 'clip.mp4' : 'clip.webm')
     return req<{ event: any; state: SessionState }>(`${base}/capture/lip`, { method: 'POST', body: f })
   },
+  /** A mouth clip whose pieces already went over the WebSocket; 409 means send the whole clip instead. */
+  finishLipStream: (stream_id: string, chunks: number) =>
+    post<{ event: any; state: SessionState }>(`${base}/capture/lip/stream`, { stream_id, chunks }),
   captureAudio: (blob: Blob, enhance = true) => {
     const f = new FormData()
     f.append('audio', blob, blob.type.includes('wav') ? 'clip.wav' : blob.type.includes('mp4') ? 'clip.m4a' : 'clip.webm')
@@ -80,6 +98,8 @@ export function useSession() {
     const connect = () => {
       const proto = location.protocol === 'https:' ? 'wss' : 'ws'
       ws = new WebSocket(`${proto}://${location.host}/ws/${SESSION_ID}`)
+      ws.binaryType = 'arraybuffer'
+      liveWs = ws
       ws.onopen = () => {
         setConnected(true)
         retry.current = 0
