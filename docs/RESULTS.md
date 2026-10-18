@@ -16,6 +16,7 @@ they apply to, not in a footnote.
 | [EEG + gaze](#4-eeg--gaze-study-h) | Correct within 3 s at ~1% wrong: **2.9% → 29.1%** (+26.1 points, 95% CI 18.2 to 35.3) | bigP3BCI Study H, 16 participants, held-out runs | Participants do not have ALS: supports the mechanism, not ALS speed |
 | [Lips + voice](#6-lips--voice-on-the-same-utterances) | Babble at 0 dB, correct commits: voice **8.0%**, lips **53.5%**, together **76.0%**; at every noise level together beats both. Latency = the slower agent (348 ms p50), not the sum | GRID s1+s2, 200 utterances, real paired audio and video, neither speaker trained on | Fixed 51-word grammar; candidates differ in one word; wrong commits 2.9% overall vs a 2% target |
 | [Gym training, EEG decisions](#8-model-improvement-with-nemo-gym-training-on-neuro_comm) | Nemotron Nano 4B, LoRA on expected-reward labels from the Gym: vs Bayes, wrong **29 → 5** per 120 and EEG time **21.6 → 11.1 s**; reward 0.25 → 0.39 | `neuro_comm`, trained on Study F sessions 1-2, tested on session 3 (10 ALS participants) | Fewer correct (75.8% → 63.3%, abstains on 39); per-participant gain CI crosses 0; a 7-feature model alone does the same |
+| [Agents in a chain](#9-agents-coordinating-on-one-utterance-voice-lips-coordinator-eeg) | Right phrase spoken: best single agent **53.5%**, fused 85.3%, **voice → lips → EEG-when-unsure 92.1%** (+3 wrong of 1,400); EEG asked on 11.8%, mean latency 1.6 s instead of 11.1 s | GRID s1+s2 x 7 audio conditions; Study F session-3 selections | EEG step pairs a GRID utterance with another person's ALS selection; Nemotron 30B as coordinator ties on accuracy but speaks 15 more wrong |
 | [Coordinator](#5-coordinator-nemo-gym-unspoken_communication) | Right action **82% → 95%**, unsafe 0% → 0%, 278 ms p50 (Nemotron alone → Nemotron + validator) | NeMo Gym `unspoken_communication`, 44 held-out tasks | The gain is validator code, not a retrained model |
 
 ---
@@ -284,3 +285,71 @@ Reproduce: `scripts/benchmark/neuro_comm_student.py data | value_data | train [-
 The adapters and training labels are on the Brev box only, not published.
 
 The coordinator's gain (section 5) remains validator code, not training. Its task set's inputs repeat across seeds (49 of 60).
+
+
+## 9. Agents coordinating on one utterance: voice, lips, coordinator, EEG
+
+**Question.** Can the agents work as a chain? The cheap agents propose, a coordinator reads their outputs and decides,
+and the slow but independent EEG agent is asked to confirm only when the others are unsure. Does that beat every
+agent alone, and fusion, without paying the EEG's latency on every utterance?
+
+**Method.** `scripts/benchmark/coordinated_cascade.py`: 1,400 episodes (200 held-out GRID utterances x 7 audio
+conditions). Every agent output is a recorded one.
+- **Voice and lips:** phrase scores from section 6, calibrated on the other speaker.
+- **Coordinator:** sees the voice, lips and combined top-5 and chooses one action:
+  - commit a phrase;
+  - confirm: show 2-4 phrases plus "none of these" for the patient to select with EEG;
+  - abstain.
+- **EEG confirmation** replays a real held-out Study F session-3 selection made by the section 8 stopping policy: its
+  outcome and its EEG time. The EEG agent's numbers come from section 8's output.
+- **Fitting:** the cascade's k (the number of options shown) and the EEG rates quoted to the LLM come from the
+  calibration speaker and calibration sessions 1-2 only.
+- **Policies:**
+  - each agent alone;
+  - fused (section 6);
+  - always confirm;
+  - a rule cascade: commit above the fused 2% risk threshold, otherwise confirm the top k;
+  - Nemotron 3.5 Lightning 30B (vLLM, thinking off) as the coordinator, one call per utterance.
+
+| Policy | Right phrase spoken | Wrong spoken (of 1,400) | Nothing spoken | Sent to EEG | Latency mean / p95 |
+|---|---:|---:|---:|---:|---:|
+| Voice alone | 45.8% | 39 | 51.4% | 0 | 0.06 s / 0.06 s |
+| Lips alone | 53.5% | 42 | 43.5% | 0 | 0.36 s / 0.37 s |
+| Voice + lips fused | 85.3% | 41 | 11.8% | 0 | 0.36 s / 0.37 s |
+| Always confirm with EEG | 63.6% | 44 | 33.3% | 100% | 11.1 s / 30.3 s |
+| **Cascade: fused, EEG when unsure** | **92.1%** | 44 | **4.7%** | 11.8% | 1.6 s / 9.8 s |
+| **Nemotron 30B as coordinator** | **92.6%** | 59 | 3.1% | 8.4% | 2.0 s / 6.1 s |
+
+Right phrase spoken, by audio condition:
+
+| Audio | Voice | Lips | Fused | Cascade | Nemotron 30B |
+|---|---:|---:|---:|---:|---:|
+| clean | 93.5% | 53.5% | 97.0% | 98.5% | 98.0% |
+| white 0 dB | 43.0% | 53.5% | 88.5% | 93.5% | 94.0% |
+| white -5 dB | 19.5% | 53.5% | 84.5% | 90.5% | 93.0% |
+| babble 0 dB | 8.0% | 53.5% | 76.0% | 86.0% | 86.5% |
+| babble -5 dB | 0.0% | 53.5% | 65.0% | 82.0% | 80.5% |
+
+**Findings.**
+- **The chain beats every agent and fusion.** Cascade vs fused: +96 right of 1,400 (clip bootstrap 95% CI +70 to
+  +124) for +3 wrong (CI 0 to +7). In babble at -5 dB, where voice alone gets nothing, it speaks the right phrase 82%
+  of the time.
+- **It does not pay the EEG's latency on every utterance.** Confirming everything is right only 63.6% of the time and
+  takes 11.1 s on average. The cascade asks the EEG agent on 11.8% of utterances, so the mean is 1.6 s and the median
+  stays at the audio-visual 0.35 s.
+- **Nemotron 30B can be the coordinator.** It reads the agents' outputs and routes with 0 invalid replies in 1,400
+  calls, at 232 ms p50 per call (305 ms p95, one request at a time, measured through the ssh tunnel). Its accuracy
+  ties the rule (+7 right, CI -11 to +26), but it speaks 15 more wrong phrases (CI -1 to +30) because it sends less to
+  EEG. **For the patient-facing commit/confirm decision, the calibrated rule is the safer coordinator. The LLM is a
+  working, not better, alternative.**
+
+**Caveats.**
+- **Composite episodes:** the EEG confirmation is a recorded ALS selection paired with a GRID utterance from someone
+  else. The EEG agent's error rate is its 36-way rate, although it chooses from 3-5 options (conservative).
+- **Mixed hardware latency:** voice ran on H100 and lips on a Mac (MPS).
+- **GRID** is a fixed grammar; the candidates differ in one word.
+- **No tuning on the test set:** the LLM prompt was written once and not tuned on these results.
+
+Files: `evaluations/results/coordinated_cascade/` (`overall*.csv`, `by_condition*.csv`, `episodes*.csv`), plus
+`neuro_comm_student/eeg_calibration_rates.json`. Reproduce:
+`coordinated_cascade.py [--llm-url http://<vLLM>/v1 --llm-model big]`.
