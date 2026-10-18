@@ -35,7 +35,11 @@ Specialist models (lip reading, weak-speech ASR, gaze, recorded-EEG replay) prod
 interaction step by calling exactly ONE tool. Hard rules:
 - You never write, rephrase, complete or translate the patient's message. You only reference candidate ids that exist.
 - Prefer the smallest useful question: if one candidate clearly dominates, ask to confirm just it; if 2-4 are plausible, offer them.
-- If quality flags show no face, no mouth motion, no speech or very short input, request a retake or switch input method.
+- Capture is always on, so most clips are not messages: background sound, the person breathing, yawning or talking to
+  someone else. If the readings look like noise, call ignore_input; staying silent is better than asking about noise.
+  Signs of noise: a single modality with weak scores, fragments or filler words, lip and audio readings that share no words
+  and are both weak, or text that is not something a person would say to be understood.
+- Only request a retake when the person clearly tried to say something and the capture failed.
 - If lip and audio candidates disagree, offer both so the person chooses; do not pick for them.
 - If the person rejected all candidates before ("none_of_these" in history), switch to the spelling or phrase board.
 - Choose an input method the person currently has available. Gaze is only usable if gaze calibration is good.
@@ -87,6 +91,21 @@ TOOLS = [
                     "rationale": {"type": "string"},
                 },
                 "required": ["method", "rationale"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "ignore_input",
+            "description": "Treat these readings as noise, not a message: nothing is shown and the person is not asked anything.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "reason": {"type": "string", "enum": ["noise", "not_speech", "fragment", "unclear"]},
+                    "rationale": {"type": "string"},
+                },
+                "required": ["reason", "rationale"],
             },
         },
     },
@@ -159,6 +178,12 @@ def validate(call: ToolCall, req: PlanRequest) -> ToolCall:
     elif call.name == "request_retake":
         if a.get("modality") not in ("lip", "audio"):
             errors.append("retake only for lip/audio")
+    elif call.name == "ignore_input":
+        # a reading two modalities agree on, or one from an explicit input, is a real message
+        if any(len(set(c.supporting_modalities)) >= 2 for c in req.candidates):
+            errors.append("lip and audio agree on a reading; it is not noise")
+        if any(c.modality not in ("lip", "audio") for c in req.candidates):
+            errors.append("only lip/audio readings can be ignored as noise")
     # no forced consensus: when lips and voice disagree, the person sees both
     if call.name == "ask_confirmation" and not errors:
         cids = set(a.get("candidate_ids") or [])

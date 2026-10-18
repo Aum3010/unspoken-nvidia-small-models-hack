@@ -65,6 +65,11 @@ class Session:
         if m.status in ("confirmed", "spoken", "rejected"):
             self.new_message()
             m = self.message
+        elif self._new_utterance(ev):
+            # always-on capture: an unanswered reading is replaced by the next utterance, never stitched to it
+            self.log("policy", "message_superseded", {"message_id": m.id, "by_event_id": ev.event_id})
+            self.new_message()
+            m = self.message
         if ev.source_mode == "prerecorded":
             m.source_mode = "prerecorded"
         self.evidence[ev.event_id] = ev
@@ -88,6 +93,20 @@ class Session:
         if m.candidates:
             m.status = "ambiguous" if self.is_ambiguous() else "proposed"
         return added
+
+    UTTERANCE_GAP_MS = 10000   # lip and audio of one utterance arrive within this of each other
+
+    def _new_utterance(self, ev: Evidence) -> bool:
+        """A lip/audio clip starts a new message unless the person has acted on the current one or it pairs with it."""
+        m = self.message
+        if ev.modality not in ("lip", "audio") or m.status not in ("proposed", "ambiguous", "clarifying"):
+            return False
+        prior = [self.evidence[e] for e in m.evidence_ids]
+        if any(p.modality not in ("lip", "audio") for p in prior):
+            return False
+        if any(p.modality == ev.modality for p in prior):
+            return True
+        return any(abs(ev.capture_time_ms - p.capture_time_ms) > self.UTTERANCE_GAP_MS for p in prior)
 
     def is_ambiguous(self) -> bool:
         evs = [self.evidence[e] for e in self.message.evidence_ids]

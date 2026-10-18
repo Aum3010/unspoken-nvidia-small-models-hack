@@ -15,7 +15,7 @@ from fastapi import File, Form, HTTPException, UploadFile, WebSocket, WebSocketD
 from fastapi.responses import Response
 from pydantic import BaseModel
 
-from services.gateway.state import Session, TransitionError
+from services.gateway.state import Session, TransitionError, norm
 from shared.confirmation import PolicyViolation, authorize_speech
 from shared.provenance import MODEL_LEDGER, ROOT, service_url
 from shared.schemas import ALLOWED_CONFIRMATION_METHODS, Evidence, ToolCall
@@ -169,12 +169,46 @@ def apply_plan(s: Session, call: ToolCall, quiet: bool = False):
         s.history.append("retake")
         s.trace("coordinator", f"{who}: request_retake", f"{call.arguments.get('reason')} — {call.rationale}", latency_ms=call.latency_ms,
                 level="warn", data={"call": call.model_dump()})
+    elif call.name == "ignore_input":
+        # noise, not a message: drop the readings so they neither show nor pile up with the next clip
+        s.new_message()
+        s.last_plan = call
+        s.trace("coordinator", f"{who}: ignore_input", f"{call.arguments.get('reason')} — {call.rationale}",
+                latency_ms=call.latency_ms, data={"call": call.model_dump()})
     elif call.name == "switch_input_method":
         s.trace("coordinator", f"{who}: switch_input_method → {call.arguments.get('method')}", call.rationale,
                 latency_ms=call.latency_ms, data={"call": call.model_dump()})
 
 
 # ---- captures ---------------------------------------------------------------
+
+# Capture is always on, so most clips are not messages. Evidence the specialists themselves mark unusable,
+# or speech below Whisper's own confidence cut-off, is kept in the audit log but never becomes a candidate
+# and never prompts the person. A rule in code, not a model judgement.
+UNUSABLE_FLAGS = {"no_face", "low_mouth_motion", "too_short", "no_speech_detected"}
+WHISPER_MIN_LOGPROB = -1.0   # Whisper's logprob_threshold: below it a segment is treated as unreliable
+SILENCE_FILLERS = {"you", "thank you", "thanks", "thanks for watching", "thank you for watching", "bye", "so", "okay",
+                   "uh", "um", "hmm", "oh", "the", "i"}   # what Whisper invents on near-silence
+LOW_SPEECH_RATIO = 0.25
+
+
+def screen_evidence(ev: Evidence) -> str | None:
+    """Why this evidence should be ignored, or None to let it through (possibly with fewer hypotheses)."""
+    if ev.modality not in ("lip", "audio"):
+        return None
+    bad = UNUSABLE_FLAGS & set(ev.quality_flags)
+    if bad:
+        return ", ".join(sorted(f.replace("_", " ") for f in bad))
+    if ev.status == "unknown" or not ev.hypotheses:
+        return "no usable reading"
+    if ev.modality == "audio":
+        ev.hypotheses = [h for h in ev.hypotheses if h.score is None or h.score >= WHISPER_MIN_LOGPROB]
+        if not ev.hypotheses:
+            return "speech too unclear to transcribe reliably"
+        if (ev.quality.get("speech_ratio") or 0) < LOW_SPEECH_RATIO and all(
+                norm(h.text).strip(" .!?,") in SILENCE_FILLERS for h in ev.hypotheses):
+            return "mostly silence; a filler word Whisper invents on quiet input"
+    return None
 
 async def _forward_capture(s: Session, service: str, field: str, upload: UploadFile, label: str, extra: dict | None = None):
     data = await upload.read()
@@ -196,6 +230,15 @@ async def _forward_capture(s: Session, service: str, field: str, upload: UploadF
         await push(s)
         raise HTTPException(503, f"{service} unavailable")
     s.timeline = [t for t in s.timeline if t["level"] != "pending"]
+    ignored = screen_evidence(ev)
+    if ignored:
+        s.log("policy", "evidence_ignored", {"modality": ev.modality, "event_id": ev.event_id, "reason": ignored,
+                                             "raw_hypotheses": [h.model_dump() for h in ev.hypotheses],
+                                             "quality_flags": ev.quality_flags})
+        s.trace("policy", f"Ignored {label.lower()}", ignored, latency_ms=ev.provenance.latency_ms,
+                data={"event_id": ev.event_id})
+        await push(s)
+        return {"event": ev.model_dump(), "ignored": ignored, "state": s.snapshot()}
     s.add_evidence(ev)
     top = ev.hypotheses[0].text if ev.hypotheses else "—"
     s.trace(service, f"{len(ev.hypotheses)} raw hypothesis(es)", f"top: “{top}” · flags: {', '.join(ev.quality_flags) or 'none'}",

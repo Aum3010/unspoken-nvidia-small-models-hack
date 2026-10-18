@@ -144,6 +144,7 @@ class ToolCall(BaseModel):
         "append_confirmed_text",
         "speak_confirmed_text",
         "reset_or_undo",
+        "ignore_input",
     ]
     arguments: dict
     rationale: str = ""
