@@ -16,7 +16,7 @@ they apply to, not in a footnote.
 | [EEG + gaze](#4-eeg--gaze-study-h) | Correct within 3 s at ~1% wrong: **2.9% → 29.1%** (+26.1 points, 95% CI 18.2 to 35.3) | bigP3BCI Study H, 16 participants, held-out runs | Participants do not have ALS: supports the mechanism, not ALS speed |
 | [Lips + voice](#6-lips--voice-on-the-same-utterances) | Babble at 0 dB, correct commits: voice **8.0%**, lips **53.5%**, together **76.0%**; at every noise level together beats both. Latency = the slower agent (348 ms p50), not the sum | GRID s1+s2, 200 utterances, real paired audio and video, neither speaker trained on | Fixed 51-word grammar; candidates differ in one word; wrong commits 2.9% overall vs a 2% target |
 | [Gym training, EEG decisions](#8-model-improvement-with-nemo-gym-training-on-neuro_comm) | Nemotron Nano 4B, LoRA on expected-reward labels from the Gym: vs Bayes, wrong **29 → 5** per 120 and EEG time **21.6 → 11.1 s**; reward 0.25 → 0.39 | `neuro_comm`, trained on Study F sessions 1-2, tested on session 3 (10 ALS participants) | Fewer correct (75.8% → 63.3%, abstains on 39); per-participant gain CI crosses 0; a 7-feature model alone does the same |
-| [Agents in a chain](#9-agents-coordinating-on-one-utterance-voice-lips-coordinator-eeg) | Right phrase spoken: best single agent **53.5%**, fused 85.3%, **voice → lips → EEG-when-unsure 92.1%** (+3 wrong of 1,400); EEG asked on 11.8%, mean latency 1.6 s instead of 11.1 s | GRID s1+s2 x 7 audio conditions; Study F session-3 selections | EEG step pairs a GRID utterance with another person's ALS selection; Nemotron 30B as coordinator ties on accuracy but speaks 15 more wrong |
+| [Agents in a chain](#9-agents-coordinating-on-one-utterance-voice-lips-coordinator-eeg) | Right phrase spoken: best single agent **53.5%**, fused 85.3%, **voice → lips → EEG-when-unsure 92.1%** (+3 wrong of 1,400); EEG asked on 11.8%, mean latency 1.6 s instead of 11.1 s | GRID s1+s2 x 7 audio conditions; Study F session-3 selections | EEG step pairs a GRID utterance with another person's ALS selection; Nemotron 30B as coordinator ties on accuracy but speaks 15 more wrong; Nano 4B trained as coordinator: 93.1% right, 42 ms per call, but 26 more wrong |
 | [Coordinator](#5-coordinator-nemo-gym-unspoken_communication) | Right action **82% → 95%**, unsafe 0% → 0%, 278 ms p50 (Nemotron alone → Nemotron + validator) | NeMo Gym `unspoken_communication`, 44 held-out tasks | The gain is validator code, not a retrained model |
 
 ---
@@ -349,6 +349,31 @@ Right phrase spoken, by audio condition:
 - **Mixed hardware latency:** voice ran on H100 and lips on a Mac (MPS).
 - **GRID** is a fixed grammar; the candidates differ in one word.
 - **No tuning on the test set:** the LLM prompt was written once and not tuned on these results.
+
+**E7b: can a 4B replace the 30B as coordinator?** Nemotron Nano 4B, LoRA trained on one speaker's episodes (700)
+and tested on the other's, both folds (`scripts/benchmark/coordinator_student.py`, about 100 s of training per fold).
+Its input is the same text the 30B read; its labels are the rule cascade's decisions on the training speaker.
+
+| Coordinator | Right | Wrong (of 1,400) | Sent to EEG | Mean latency | Coordinator time per call |
+|---|---:|---:|---:|---:|---:|
+| Rule cascade | 92.1% | 44 | 11.8% | 1.6 s | 0 |
+| Nemotron 30B, untrained | 92.6% | 59 | 8.4% | 2.0 s | 232 ms (unloaded, via tunnel) |
+| Nano 4B, untrained | 62.9% | 41 | 100% | 11.1 s | 19 ms |
+| **Nano 4B, trained** | **93.1%** | 70 | 4.4% | **0.9 s** | **42 ms** (H100) |
+
+- **What worked.** The trained 4B coordinates as accurately as the rule and the 30B: right +13 vs the rule, CI -5 to +32.
+  It is about 5x faster per call than the 30B, and it agrees with the rule on 92.6% of utterances. Untrained, it sends
+  everything to EEG.
+- **What did not: safety.** It speaks 26 more wrong phrases than the rule (CI +11 to +43) because it confirms too
+  rarely.
+- **Why.** The cause is the training data, and the two folds show it.
+  - The fold *tested on s2* trained on 167 confirm examples and nearly matches the rule (13 vs 10 wrong).
+  - The fold *tested on s1* had only 30 confirm examples among 700. It confirms on 2.7% instead of 13.9%, giving 57
+    vs 34 wrong.
+- **Next step, not run:** more minority-class data, or a risk-calibrated threshold on the student's confirm
+  probability fitted on the training speaker. Not tuned on these results.
+- **Conclusion for now.** A small model can be the coordinator at a fraction of the latency, but not yet as safely as
+  the calibrated rule. The deployed commit/confirm gate stays the rule.
 
 Files: `evaluations/results/coordinated_cascade/` (`overall*.csv`, `by_condition*.csv`, `episodes*.csv`), plus
 `neuro_comm_student/eeg_calibration_rates.json`. Reproduce:

@@ -74,7 +74,8 @@ matches its 7-feature labeller, and the paired per-participant CI crosses 0.
 ### E7. Agents in a chain: voice → lips → coordinator → EEG when unsure
 `scripts/benchmark/coordinated_cascade.py` on recorded E1 scores plus replayed E6 EEG selections. Right spoken
 85.3% (fused) → 92.1% (cascade), +3 wrong of 1,400; EEG asked on 11.8%; mean 1.6 s. Nemotron 30B as coordinator:
-92.6% right, 59 wrong (vs 44), 0 invalid, 232 ms per call.
+92.6% right, 59 wrong (vs 44), 0 invalid, 232 ms per call. E7b, Nano 4B coordinator trained on one speaker and tested on the other: 93.1% right,
+42 ms per call, 70 wrong (confirms too rarely when the training speaker has few confirm examples).
 
 ## Box layout (2x H100 80GB, `breakable-tomato-hippopotamus`)
 
