@@ -1,0 +1,2 @@
+vllm:spec_decode_num_draft_tokens_total{engine="0",model_name="nvidia/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-NVFP4"} 2418.0
+vllm:spec_decode_num_accepted_tokens_total{engine="0",model_name="nvidia/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-NVFP4"} 2172.0

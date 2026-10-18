@@ -1,0 +1,12 @@
+{
+  "experiment": "C",
+  "all_ready": true,
+  "safety_tests": "49 passed in 2.52s",
+  "safety_ok": true,
+  "mtp_on": false,
+  "mps_on": true,
+  "vllm_args": "nvidia/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-NVFP4 --host 127.0.0.1 --port 8001 --max-model-len 16384 --gpu-memory-utilization 0.55 --attention-backend TRITON_ATTN --enable-auto-tool-choice --tool-call-parser qwen3_coder --reasoning-parser nemotron_v3 --enable-prefix-caching --max-num-seqs 8",
+  "vllm_default_args": true,
+  "seconds": 43,
+  "ok": true
+}
