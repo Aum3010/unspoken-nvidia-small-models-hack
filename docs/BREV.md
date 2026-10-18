@@ -1,6 +1,6 @@
 # Working with NVIDIA Brev
 
-Brev is where GPU work runs. Right now that is the **audio-only ASR evaluation** in `asr_eval/`. Nothing else in the app (coordinator, lip reading, EEG, TTS service) is started on Brev. This page covers the CLI, choosing an instance, the day-to-day loop, and the problems we already hit.
+Brev is where GPU work runs: the **whole Unspoken backend** (gateway, lip reading, voice, EEG replay, TTS, and the Nemotron coordinator on vLLM; see §4b), and the **audio-only ASR evaluation** in `asr_eval/`. The web UI stays on the laptop and reaches the backend through an SSH tunnel. This page covers the CLI, choosing an instance, the day-to-day loops, and the problems we already hit.
 
 ## 1. Install the CLI
 
@@ -141,6 +141,34 @@ brev port-forward marginal-sapphire-whale --port 8800:8800                      
 | `mirror_speed.sh` | instance | Measures OpenSLR mirror speeds |
 
 Other useful commands: `brev shell <inst>` (interactive shell), `brev port-forward <inst> --port 8888:8888` (e.g. Jupyter), `brev open <inst>` (VS Code/Cursor).
+
+## 4b. The whole app backend on Brev
+
+The UI runs on the laptop (`cd web && npm run dev` → http://localhost:8800). Every agent runs on the instance, bound to `127.0.0.1`, and the laptop reaches only the gateway, through `brev port-forward`.
+
+| Service | Mac | Brev (CUDA) |
+|---|---|---|
+| gateway :8000, eeg :8103 | CPU | CPU, unchanged |
+| audio :8102 | mlx-whisper base | faster-whisper base, float16 (`UNSPOKEN_ASR_BACKEND`) |
+| tts :8104 | mlx-audio Kokoro-82M | `kokoro` KPipeline on CUDA (`UNSPOKEN_TTS_BACKEND`) |
+| vsr :8101 | torch MPS | torch CUDA (`pick_device`, `UNSPOKEN_VSR_DEVICE`) |
+| coordinator :8105 | Ollama | vLLM on 127.0.0.1:8001 serving `nvidia/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-NVFP4` (`--gpu-memory-utilization 0.55`, so the agents and the asr_eval bench fit beside it) |
+
+```bash
+# laptop: commit first, then ship services/shared/scripts to ~/unspoken
+bash scripts/brev/sync_app.sh marginal-sapphire-whale
+# instance, once (~15-30 min): uv venvs /workspace/venv-app (torch cu128) + /workspace/venv-vllm, checkpoints, EEG decoders
+brev exec marginal-sapphire-whale 'cd ~/unspoken && nohup bash scripts/brev/setup_app.sh > .run/setup.log 2>&1 < /dev/null &'
+# instance: (re)start everything detached; `status` shows each /health and GPU memory; `stop` stops all
+brev exec marginal-sapphire-whale 'bash ~/unspoken/scripts/brev/start_app.sh'
+brev exec marginal-sapphire-whale 'bash ~/unspoken/scripts/brev/start_app.sh status'
+# laptop: stop any local gateway (port 8000), then tunnel and open the UI
+bash scripts/brev/connect.sh marginal-sapphire-whale
+```
+
+- **Privacy:** mouth video and voice clips now leave the laptop for the instance (over SSH). The gateway reports `host: "NVIDIA Brev"` and the UI's camera chip says *clips to NVIDIA Brev*. Clips are processed in memory and not stored.
+- **Ports:** the asr_eval bench also uses 8800 on the instance. The app's UI uses the laptop's 8800, so don't forward the bench to 8800 while the app UI is open.
+- Logs: `~/unspoken/.run/logs/<service>.log`; pinned versions: `~/unspoken/.run/requirements-cuda.lock`, `requirements-vllm.lock`.
 
 ## 5. Problems we hit, and the fixes
 

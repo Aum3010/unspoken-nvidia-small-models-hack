@@ -19,8 +19,9 @@ if ((${#need[@]})); then sudo -n apt-get update -qq && sudo -n apt-get install -
 echo "== app venv (Python 3.12, torch $TORCH + cu128)"
 [[ -x $APP/bin/python ]] || "$UV" venv -q --python 3.12 "$APP"
 "$UV" pip install -q --python "$APP/bin/python" "torch==$TORCH" "torchaudio==$TORCH" torchvision --index-url https://download.pytorch.org/whl/cu128
-"$UV" pip freeze --python "$APP/bin/python" | grep -E "^torch(audio|vision)?==" > /workspace/app-torch-constraint.txt
-"$UV" pip install -q --python "$APP/bin/python" -r requirements-cuda.txt -c /workspace/app-torch-constraint.txt
+"$UV" pip freeze --python "$APP/bin/python" | grep -E "^(torch|torchaudio|torchvision)==" > /workspace/app-torch-constraint.txt
+# the +cu128 builds only exist on PyTorch's index, so the resolver needs it to honour the constraint
+"$UV" pip install -q --python "$APP/bin/python" -r requirements-cuda.txt -c /workspace/app-torch-constraint.txt   --extra-index-url https://download.pytorch.org/whl/cu128 --index-strategy unsafe-best-match
 mkdir -p .run
 "$UV" pip freeze --python "$APP/bin/python" > .run/requirements-cuda.lock
 

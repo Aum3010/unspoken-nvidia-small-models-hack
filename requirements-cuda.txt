@@ -27,7 +27,7 @@ kokoro==0.9.4
 misaki[en]==0.9.4
 en_core_web_sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl
 # EEG replay
-mne==1.13.2
+mne==1.11.0             # newer mne needs numpy>=2, which mediapipe 0.10.21 and pyriemann 0.7 cannot take
 pyriemann==0.7
 pypdf
 # evaluation
