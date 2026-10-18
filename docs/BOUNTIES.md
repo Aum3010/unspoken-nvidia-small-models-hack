@@ -9,8 +9,8 @@ Unspoken helps people who cannot speak to be heard. Several small specialist mod
 A coordinator decides **how to ask** about what was read, and code decides **what may be spoken**. Everything
 runs on one NVIDIA RTX PRO 6000 Blackwell (Brev), and the browser UI runs on the laptop.
 
-Every number below was measured in this repo on 2026-10-18 and names its result file under
-`evaluations/results/`. Run-to-run spread is given wherever a number was measured more than once. Full system
+Every number below was measured in this repo on 2026-10-18 (branches `ui-speedups` / `demo-final`) and names
+its result file under `evaluations/results/`. Run-to-run spread is given wherever a number was measured more than once. Full system
 reference: [TECHNICAL_VERBOSE.md](TECHNICAL_VERBOSE.md).
 
 ---
@@ -84,6 +84,17 @@ Nemotron makes these calls. Code then checks every call, outside the model.
 | **Compact schema-constrained JSON** with numbered candidates | 272 → **84 ms** p50, 65 → 15 output tokens (`coordinator_compact_brev.json`) | **no**: held-out deployed reward 0.985 → 0.955, worse on ambiguous readings (`coordinator_heldout_compact_brev.json`) |
 
 We chose accuracy over speed every time the two disagreed.
+
+### Limits (what Nemotron does not do well here, measured)
+
+- **History-dependent steps.** On its own it re-asks after "none of these" (0.67) and goes silent after two failed
+  tries (`repeated_failure` 0.67). Code outside the model catches these (§2).
+- **Injected instructions next to a real request** are sometimes treated as noise: `prompt_injection` 0.83 on the
+  held-out set, not fixed by any rule yet. It never acted on the injection: 0 unsafe.
+- **Speed:** 272 ms per decision. That is why it is kept off the path of accepted readings. The two faster options
+  measured (MTP 229 ms, compact 84 ms) were not adopted, for stability and accuracy respectively.
+- **No fine-tuning.** Every improvement is in how the model is used (prompt, tools, validation, fallback), not in
+  its weights.
 
 ---
 
@@ -188,8 +199,40 @@ The 6 runs are today's Brev runs of the default prompt, including the MTP and ca
 - Files: `coordinator_compact_brev.json` (v2 rule) vs the A/B summary in [EVALUATION.md](EVALUATION.md) §4 (v1).
 - Compact mode as a whole was still not adopted: on held-out tasks it scores below the default prompt.
 
+**A third isolated change: two optional validator rules** (flags, **off by default** pending the team's decision).
+- `UNSPOKEN_VALIDATOR_IGNORE_HISTORY` rejects `ignore_input` after two failed tries, after a recent "none of
+  these", or on a reading a specialist accepted with no quality flags.
+- `UNSPOKEN_VALIDATOR_NEGATION` rejects a correction that adds or removes a negation.
+- Measured **paired**: one model call per task, then each setting re-validates that same call
+  (`evaluations/nemo_gym/validator_ab.py`). The differences are the rules' alone, not the model's run-to-run
+  variation. Deployed reward:
+
+| Setting | Eval (72) | Held-out (44) | Unsafe |
+|---|---:|---:|---:|
+| Nemotron alone | 0.926 | 0.932 | 0 |
+| Validator as deployed (flags off) | 0.954 | 0.977 | 0 |
+| + ignore-history rule | **0.995** | **0.985** | 0 |
+| + negation rule only | 0.954 | 0.977 | 0 |
+
+- **Isolated, eval:** `repeated_failure` **0.67 → 1.00**, `negation_kept` **0.89 → 1.00**, `misread` 0.94 → 1.00.
+- **Isolated, held-out:** `misread` 0.94 → 1.00.
+- **The negation rule** changed nothing: the model never dropped a negation in these runs, so it is a guard.
+- **The cost:** Nemotron decides 79% of eval tasks itself instead of 92%; the rest fall back to rules.
+- Files: `coordinator_validator_v2_paired_{eval,heldout}.json`; unpaired runs
+  `coordinator_validator_v2_{eval,heldout}_{off,on}.json`.
+
 **Caveat:** the deterministic policy was written to the same specification as the scorer, so its 1.0 is a
 ceiling, not an independent baseline.
+
+### Limits
+
+- **No model weights were trained.** The gains come from an environment-driven validator and fallback around the
+  same model.
+- **The held-out set comes from the same task generator** with another seed. 28 of its 72 tasks duplicated eval
+  tasks and were removed, leaving 44 tasks in 10 categories, with no `no_speech` or `repeated_failure`.
+- **Run-to-run spread** of the same configuration is about ±0.01 (Nemotron alone 0.912–0.931 on eval). Single
+  unpaired runs should be read with that in mind; the paired A/B removes it.
+- **`prompt_injection`** stays at 0.83 on held-out with every setting.
 
 ### How to run the scoring
 
@@ -209,6 +252,13 @@ gym eval run --no-serve --agent unspoken_communication_simple_agent \
 ```
 
 Regenerate `data/*.jsonl` with `python create_examples.py` after any coordinator prompt or tool change.
+
+Paired A/B of the optional validator rules (same environment variables as above):
+
+```bash
+python evaluations/nemo_gym/validator_ab.py --out coordinator_validator_v2_paired_eval.json
+python evaluations/nemo_gym/validator_ab.py --seed 2026 --distinct-from 7 --out coordinator_validator_v2_paired_heldout.json
+```
 
 ---
 
@@ -277,6 +327,18 @@ browser ── WebSocket/REST ──► gateway :8000 ──► coordinator clie
 - If vLLM is slow, down, or returns an invalid call, the coordinator falls back to rules. The person always gets a
   valid next step.
 - The gateway reports each service's health.
+
+### Limits
+
+- **Weight-only FP4.** On this GPU (sm_120) vLLM runs Marlin weight-only FP4, with activations in 16 bit. Native
+  FP4 needs a CUDA toolkit on the image and a NeMo Gym re-run first.
+- **Prefix caching cannot help** at this prompt size on this hybrid model (4,224-token cache blocks).
+- **MTP was not stable** under full load in one run (a CUDA fault that took every GPU process down under MPS), so
+  it is off.
+- **One GPU, one replica.** vLLM shares the card (0.55 of its memory) with four other models. There is no
+  multi-replica serving or GPU isolation yet, and under MPS one fault reaches every process.
+- **Concurrency:** tested up to 8 concurrent requests (240/240 succeeded, MTP build). Many users at once were
+  not measured.
 
 ### Reproduce
 

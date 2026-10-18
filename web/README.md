@@ -66,6 +66,13 @@ Confirmation methods are audited:
 
 ## Known issues
 
-- **Privacy text:** the camera chip says "on device" even when clips go to a remote gateway.
+- **Privacy text:** fixed on `demo-final`. With a remote gateway the camera chip says "Camera · clips to NVIDIA
+  Brev" and calibration says where clips are processed. On `ui` it still says "on device".
+- **Phrase-audio preload:** the request returns HTTP 500 (gateway audit actor bug), so audio is downloaded when
+  spoken (`docs/TECHNICAL_VERBOSE.md` §10, bug 1).
+- **Vite dev server:** it sometimes serves stale modules after edits made by scripts (a blank page or old text).
+  Touch the file or restart `npm run dev`.
+- **Checked only in headless Chrome:** the auto-speak countdown caption and the vision-preview panel, not with a
+  real camera.
 - **Unused code:** the `webgazer` dependency, the `speak` action and the `pick:` action.
 - **Lint:** 8 warnings.

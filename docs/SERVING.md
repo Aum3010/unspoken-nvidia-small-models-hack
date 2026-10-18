@@ -11,7 +11,7 @@ Inputs: Kokoro speaks the 20 voice phrases (and those clips feed the voice agent
 feed the lip agent; one BNCI letter feeds the EEG agent; a fixed two-candidate question feeds the coordinator.
 Run-to-run variation is about ±10% (the lip agent alone measured 501–619 ms p50 across runs).
 
-## Current: speedups on top of `ui` (local branch `ui-local`)
+## Current: speedups on top of `ui` (`ui-local`, pushed as `ui-speedups`; `demo-final` adds no speed changes)
 
 All measured on Brev with MPS on (`latency_brev_final2.json`, coordinator files in `evaluations/results/`). Accuracy
 was checked for each one before it was kept.

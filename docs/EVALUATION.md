@@ -215,6 +215,14 @@ Earlier runs (before the `ui` changes: free-text lip reading, confirm step): 1.0
 
 ## Not yet measured (honest gaps)
 
+- **End to end in a real browser:** what a person waits for (§7 adds up measured parts), and the streamed lip clip
+  with Chrome's own MediaRecorder (tested with synthesized live webm and a Python WebSocket client).
+- **Exactness of spoken audio with a free-text ASR:** today's phrase-only voice agent cannot re-transcribe free
+  text (§5).
+- **MTP under full load:** one unexplained CUDA fault, not reproduced (240/240 with MTP alone).
+- **The cause of the accepted-voice 105 → 71 ms drop** between runs: it is not the phrase cache, which is worth
+  about 2 ms.
+
 - Live webcam lip reading on unfamiliar, consenting people. This needs local opt-in recordings.
 - Gaze selection accuracy and false-selection rate across lighting and head motion, now with MediaPipe iris + MobileGaze. The calibration screen reports a per-session error on unseen dots, but no study has been done, and calibration with a real webcam is still being debugged (HANDOFF.md).
 - Clarification efficiency (selections per successful message) with real users.

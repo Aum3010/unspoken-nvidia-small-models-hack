@@ -120,8 +120,17 @@ docs/                   TECHNICAL_VERBOSE.md (everything in one place), architec
                         datasets & consent, evaluation, BREV.md, SERVING.md
 ```
 
+## Status and open issues
+
+The current branch is `demo-final` (local; pushed branches: `ui`, `ui-speedups`, `serving-mps`).
+- **Where to look:** what is on each branch, how to run it, and every open bug, shortfall and pending decision
+  are in [HANDOFF.md](HANDOFF.md); the full technical list is in
+  [docs/TECHNICAL_VERBOSE.md](docs/TECHNICAL_VERBOSE.md) §10.
+- **Flags:** new behaviour is behind flags, and the defaults reproduce the measured system; the table is in
+  TECHNICAL_VERBOSE §2.
+
 ## Product invariant
 
 **No unverified interpretation is ever spoken as the patient's intention.** This is enforced by code, not by prompting. See `shared/confirmation.py` and `evaluations/safety_tests/`.
 
-**Exception on branch `ui`: demo auto-speak.** With `UNSPOKEN_AUTO_SPEAK=1` (currently the default) the gateway speaks an **accepted** reading (the voice agent accepted it, or lips and voice agree) without the person's confirmation; ambiguous readings, lip-only matches and corrections still wait for Yes/No (`evaluations/safety_tests/test_auto_speak.py`). It is audited as `demo_auto_spoken` by the system, never as a user action, and the policy gate requires its own audited event for the exact text. The invariant above holds only with `UNSPOKEN_AUTO_SPEAK=0`. Risks are listed in `docs/TECHNICAL_VERBOSE.md` §10.
+**Exception on branches `ui`, `ui-speedups` and `demo-final`: demo auto-speak.** With `UNSPOKEN_AUTO_SPEAK=1` (currently the default) the gateway speaks an **accepted** reading (the voice agent accepted it, or lips and voice agree) without the person's confirmation; ambiguous readings, lip-only matches and corrections still wait for Yes/No (`evaluations/safety_tests/test_auto_speak.py`). It is audited as `demo_auto_spoken` by the system, never as a user action, and the policy gate requires its own audited event for the exact text. The invariant above holds only with `UNSPOKEN_AUTO_SPEAK=0`. Risks are listed in `docs/TECHNICAL_VERBOSE.md` §10.
