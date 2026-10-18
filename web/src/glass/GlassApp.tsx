@@ -67,6 +67,7 @@ export function GlassApp() {
   const [focusMode, setFocusMode] = useState(false)
   const [eyes, setEyes] = useState(false)
   const [cam, setCam] = useState<'starting' | 'on' | 'off'>('starting')
+  const [camErr, setCamErr] = useState('')
   const [mic, setMic] = useState<'starting' | 'on' | 'off'>('starting')
   const [hearing, setHearing] = useState(false)
   const [alarm, setAlarm] = useState(0)
@@ -130,7 +131,8 @@ export function GlassApp() {
           onMouthing: (on) => { if (on) E.fire('lips', .6, 'WATCHING') },
           onClip: (b) => { E.fire('lips', 1, 'READING'); run(api.captureLip(b)) },
         }))
-      } catch {
+      } catch (e) {
+        setCamErr((e as Error).name)
         setCam('off')
       }
     }
@@ -329,7 +331,7 @@ export function GlassApp() {
 
       <div className="brand">
         <div className="name"><span className="logo" /><span>unspoken<i>.</i></span></div>
-        <button className={`chip glass mono ${cam === 'on' ? 'live' : ''}`} data-a="camera"><b /><span>{cam === 'on' ? `Camera · ${remote ? `clips to ${remote}` : 'on device'}` : cam === 'off' ? 'Camera off · allow & reload' : 'Camera · starting'}</span></button>
+        <button className={`chip glass mono ${cam === 'on' ? 'live' : ''}`} data-a="camera"><b /><span>{cam === 'on' ? `Camera · ${remote ? `clips to ${remote}` : 'on device'}` : cam === 'off' ? (camErr === 'NotReadableError' ? 'Camera busy · in use by another app or tab' : 'Camera off · allow & reload') : 'Camera · starting'}</span></button>
         <span className={`chip glass mono ${mic === 'on' ? (hearing ? 'live' : 'ok') : ''}`}><b /><span>{mic === 'on' ? (health?.audio?.state !== 'ready' ? 'Mic · voice agent offline' : hearing ? 'Mic · hearing you' : 'Mic · listening') : mic === 'off' ? 'Mic off' : 'Mic · starting'}</span></span>
         <button className={`chip glass mono ${eyes ? 'ok' : 'warn'}`} data-a="calibrate"><b /><span>{eyes ? `Eyes · ≈${Math.round(gazeState.accuracyPx ?? 0)} px` : 'Eyes · pointer · calibrate'}</span></button>
       </div>
