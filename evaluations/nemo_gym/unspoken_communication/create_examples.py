@@ -26,8 +26,13 @@ def to_gym(task: dict) -> dict:
 
 
 if __name__ == "__main__":
-    # heldout: same categories and generator, new task instances; no prompt or validator change was tuned on it
+    # heldout: same generator, seed 2026, without the tasks that also occur in eval (44 of 72 remain, 10 categories);
+    # no prompt or validator change was tuned on it. run_local.py --seed 2026 --distinct-from 7 scores the same set.
+    def key(t):
+        return json.dumps({k: v for k, v in t["plan_request"].items() if k != "message_id"}, sort_keys=True)
+
+    in_eval = {key(t) for t in generate(6, 7)}
     for name, n, seed in (("example", 1, 1), ("eval", 6, 7), ("heldout", 6, 2026)):
-        rows = [to_gym(t) for t in generate(n, seed)]
+        rows = [to_gym(t) for t in generate(n, seed) if name != "heldout" or key(t) not in in_eval]
         (HERE / "data" / f"{name}.jsonl").write_text("\n".join(json.dumps(r) for r in rows) + "\n")
         print(name, len(rows))
