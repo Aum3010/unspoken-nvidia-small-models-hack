@@ -452,8 +452,9 @@ confirmations, speech.
 One liquid-glass page (`web/src/glass/`) over the live camera. Restyled on `eval-consolidation`:
 - **The name:** "Unspoken" is drawn at the top centre, in the same clay tube as the written sentence
   (`E.drawStatic`).
-- **Status chips removed:** the camera, mic and eyes chips no longer exist (see §10: the remote-processing
-  disclosure was on the camera chip). Only "Gateway offline · reconnecting" remains.
+- **Status chips removed (final decision):** the camera, mic and eyes chips no longer exist. Only "Gateway
+  offline · reconnecting" remains. The remote-processing disclosure that was on the camera chip is now on the
+  calibration screen only (§10, item 7).
 - **Smoked glass:** every glass surface has a dark tint, so text stays legible over a bright room.
 - **Hint removed:** the bottom-right controls hint is gone.
 - **Finished text dissolves:** a spoken message, or "nurse notified", stays 5 s and then disappears. A reading
@@ -546,7 +547,7 @@ All of these run at once.
   - `web/public/mediapipe/face_landmarker.task` and `mediapipe/wasm/`;
   - `web/public/models/mobileone_s0_gaze.onnx`.
 - **Known UI issues:**
-  - **Privacy text (open again on `main`):**
+  - **Privacy text (by decision on `main`):**
     - `demo-final` named the remote host on both the camera chip and the calibration screen.
     - `eval-consolidation` removed the chips, so only the calibration screen says "Mouth and voice clips are
       processed on the NVIDIA Brev GPU server".
@@ -857,17 +858,18 @@ An older, shorter version of this list (as of `demo-final`) is in [HANDOFF.md](.
      warming vLLM);
    - the comment on `auto_speak` in `services/gateway/state.py` still says "the coordinator's final reading";
    - lint warnings (`react-hooks/exhaustive-deps`) are unchanged.
-7. **The remote-processing disclosure is no longer always visible.**
-   - `eval-consolidation`'s restyle removed the status chips. On `demo-final` the camera chip read "Camera · clips
-     to NVIDIA Brev".
-   - Now only the calibration screen says that mouth and voice clips are processed on the GPU server, and that
-     screen is skipped when a saved calibration is reused.
-   - With the chips also went the camera / mic state prompts ("Camera off · allow & reload", "Mic · voice agent
-     offline").
-   - Not changed here, because `eval-consolidation` took precedence on the page. Tell the person yourself until a
-     visible disclosure is back (task 33).
-
 ### Product and safety shortfalls
+
+7. **The remote-processing disclosure is on the calibration screen only (final decision, 2026-10-18).**
+   - The status chips are gone **by decision**: `eval-consolidation`'s restyle removed them, and the page will not
+     change.
+   - On `demo-final` the camera chip read "Camera · clips to NVIDIA Brev". Now only the calibration screen says that
+     mouth and voice clips are processed on the GPU server, and that screen is skipped when a saved calibration is
+     reused.
+   - The camera / mic state prompts ("Camera off · allow & reload", "Mic · voice agent offline") went with the
+     chips.
+   - **So disclosure is a spoken step.** Tell the person, and get their opt-in, before using the Brev backend
+     (DATASETS_AND_CONSENT, "Cloud processing").
 
 8. **Auto-speak is on by default** (`UNSPOKEN_AUTO_SPEAK=1`).
    - It contradicts the README's product rule.
@@ -957,9 +959,7 @@ An older, shorter version of this list (as of `demo-final`) is in [HANDOFF.md](.
     - native FP4 for the coordinator (re-run NeMo Gym);
     - an instance closer to the users (120 ms round trip today).
 32. **The exactness check:** replace the re-transcription with a free-text ASR (bug 2).
-33. **Bring back a visible remote-processing disclosure** on the restyled page (bug 7). This is a design decision
-    for the `eval-consolidation` owners.
-34. **Housekeeping:**
+33. **Housekeeping:**
     - Brev bills $2.63/hr until deleted; a second instance, `unspoken-yash`, is also running;
     - rotate the Brev API key pasted in an earlier session;
     - back up and then delete the voice recordings after the hackathon;
