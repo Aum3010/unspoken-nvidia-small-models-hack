@@ -16,6 +16,7 @@ Other docs:
 - shorter: [README](../README.md), [ARCHITECTURE](ARCHITECTURE.md), [SERVING](SERVING.md), [BREV](BREV.md),
   [EVALUATION](EVALUATION.md), [web/README](../web/README.md);
 - bounty write-ups (Nemotron Lightning, NeMo Gym, vLLM): [BOUNTIES](BOUNTIES.md);
+- the data we made and published: [DATA_RELEASE](DATA_RELEASE.md);
 - every agent against its baseline: [RESULTS](RESULTS.md), with its experiment write-ups
   ([EXPERIMENT_PLAN](EXPERIMENT_PLAN.md), [LIP_READING](LIP_READING.md), [EEG_DATASET_AUDIT](EEG_DATASET_AUDIT.md),
   [EEG_STOPPING_BENCHMARK](EEG_STOPPING_BENCHMARK.md), [EEG_FAST_SELECTION](EEG_FAST_SELECTION.md),
@@ -157,8 +158,11 @@ The evaluation experiments of `eval-consolidation` ran on a separate box, not on
   1. **Personal enrollment** (`enroll.py`, `phrases.py`).
      - The person's own recordings are stored as encoder features in `data/enroll/<sha1>/NNN.npy` with
        `phrase.txt`: 22 phrases and 90 recordings. These are derived from a real person's recordings.
-     - **Not tracked in git on `main`** (consent pending, §10). They live on the laptop and on the instance, and
-       are shipped with `tar` (§6). Without them the lip agent has no enrolled phrases.
+     - **Not tracked in git on `main`, and published:** the person is a team member and agreed on 2026-10-18 to
+       publish them under CC BY 4.0 (`lip_enrollment/` in
+       [AumPandya01/unspoken-data](https://huggingface.co/datasets/AumPandya01/unspoken-data),
+       [DATA_RELEASE](DATA_RELEASE.md)).
+     - They are shipped to the instance with `tar` (§6). Without them the lip agent has no enrolled phrases.
      - A clip is matched by length-normalised DTW over cosine distance. Every recording is compared in one
        batched pass (`dtw_batch`): the recordings are zero-padded into one array and filled one anti-diagonal at a
        time. On 270 test queries, distances match the per-recording loop to within 3e-8, with 0 top-3 changes.
@@ -883,12 +887,13 @@ An older, shorter version of this list (as of `demo-final`) is in [HANDOFF.md](.
      0.83 held-out).
 10. **No negation check on corrections by default.** `UNSPOKEN_VALIDATOR_NEGATION=1` adds it. In these runs the
     model never dropped a negation, so it is a guard with no measured effect.
-11. **Personal lip data is still in git history.**
-    - `data/enroll/` holds encoder features of a real person's recordings, pending their written consent decision.
-    - On `main` it is **no longer tracked** (step 1 of the removal in
-      [DATASETS_AND_CONSENT.md](DATASETS_AND_CONSENT.md)). It stays on the laptop and the instance.
-    - It is still in git history and at the tip of older branches (`demo-final`, `eval-consolidation`, `ui`,
-      `ui-speedups`, …). Purging history is a team decision.
+11. **Personal data: resolved (2026-10-18).**
+    - Everyone recorded is on the team: the voice speakers p01–p03 and the lip-enrollment person. All of them
+      agreed to open publication under CC BY 4.0, replacing the earlier "delete after the hackathon" terms.
+    - Data: [AumPandya01/unspoken-data](https://huggingface.co/datasets/AumPandya01/unspoken-data). Method and
+      attribution: [DATA_RELEASE](DATA_RELEASE.md).
+    - `data/enroll/` is untracked on `main`. Older branches and history still hold it, which is fine now that it is
+      public.
 12. **The enrollment threshold is barely measured.** `ENROLL_MAX_DIST` 0.30 was set from 10 recordings, and
     strangers matched an enrolled phrase in about 12% of GRID clips.
 13. **Lip reading outside enrolled phrases is weak:** free-text WER 69.4% on unseen GRID speakers. Lip-only
@@ -945,8 +950,7 @@ An older, shorter version of this list (as of `demo-final`) is in [HANDOFF.md](.
 27. **Decide the Phase 3 flags.** Recommended: ignore-history on, negation on, and a countdown of about 2000 ms
     for the demo if a visible cancel is wanted (it adds that time to every accepted message).
 28. **Fix bug 1** and re-check the preload in the page.
-29. **Consent decision on `data/enroll/`.** It is untracked on `main`; whether to purge history and older branches
-    is the team's call (DATASETS_AND_CONSENT).
+29. **Consent for the recordings:** done. Published on 2026-10-18 (item 11); nothing to purge.
 30. **Branches.**
     - `main` now holds `demo-final` + `eval-consolidation` + `serving-experiments`. `serving-experiments` itself
       is not pushed.
@@ -962,6 +966,6 @@ An older, shorter version of this list (as of `demo-final`) is in [HANDOFF.md](.
 33. **Housekeeping:**
     - Brev bills $2.63/hr until deleted; a second instance, `unspoken-yash`, is also running;
     - rotate the Brev API key pasted in an earlier session;
-    - back up and then delete the voice recordings after the hackathon;
+    - the voice recordings are published (item 11), so the delete-after-the-hackathon rule no longer applies;
     - on the instance, the serving experiments left small files: `/tmp/serving_*` and
       `~/unspoken/.run/serving_self_windows.txt`.

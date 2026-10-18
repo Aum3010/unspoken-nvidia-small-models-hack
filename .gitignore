@@ -21,8 +21,8 @@ __pycache__/
 /responses_api_models/
 /outputs/
 
-# personal data: the lip enrollment features stay out of git (consent, docs/DATASETS_AND_CONSENT.md); /data/ covers
-# them, this line keeps them out if that rule ever changes
+# personal data: the lip enrollment features stay out of git (they are published separately on Hugging Face,
+# docs/DATA_RELEASE.md); /data/ covers them, this line keeps them out if that rule ever changes
 data/enroll/
 
 # secrets and local config
