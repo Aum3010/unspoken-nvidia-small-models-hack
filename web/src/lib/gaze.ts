@@ -99,14 +99,18 @@ class OneEuro {
 }
 const fx = new OneEuro(), fy = new OneEuro()
 
-// The fitted calibration is kept on this device (a few dozen numbers, no images) so it can be
-// reused after a reload. It is only valid for the same window size and camera position.
+// The calibration is kept on this device (eye features and dot positions, no images) so it can be
+// reused after a reload. It is only valid for the same window size and camera position. Its samples are
+// kept too: learning from a gaze selection refits on all of them, never on that one selection alone.
 const STORE = 'unspoken.gaze.v6'
-interface Saved { model: RidgeModel; appearance: boolean; accuracyPx: number; w: number; h: number; savedAt: number }
+type Sample = { f: number[]; x: number; y: number }
+interface Saved { model: RidgeModel; appearance: boolean; accuracyPx: number; w: number; h: number; savedAt: number; samples?: Sample[]; implicit?: Sample[] }
+const pack = (a: Sample[]) => a.map((s) => ({ f: s.f.map((v) => +v.toFixed(5)), x: Math.round(s.x), y: Math.round(s.y) }))
 
 export function saveCalibration() {
   if (!model || gazeState.accuracyPx == null || !gazeState.calibrated) return
-  const s: Saved = { model, appearance: gazeState.appearance, accuracyPx: gazeState.accuracyPx, w: window.innerWidth, h: window.innerHeight, savedAt: Date.now() }
+  const s: Saved = { model, appearance: gazeState.appearance, accuracyPx: gazeState.accuracyPx, w: window.innerWidth, h: window.innerHeight, savedAt: Date.now(),
+    samples: pack(samples), implicit: pack(implicit) }
   try { localStorage.setItem(STORE, JSON.stringify(s)) } catch { /* storage unavailable */ }
   gazeState.savedAt = s.savedAt
 }
@@ -116,6 +120,8 @@ function restoreCalibration() {
     const s: Saved | null = JSON.parse(localStorage.getItem(STORE) ?? 'null')
     if (!s || Math.abs(s.w - window.innerWidth) > 40 || Math.abs(s.h - window.innerHeight) > 40) return
     model = s.model
+    samples.push(...(s.samples ?? []))
+    implicit.push(...(s.implicit ?? []))
     gazeState.appearance = s.appearance
     gazeState.accuracyPx = s.accuracyPx
     gazeState.calibrated = s.accuracyPx < 220
@@ -145,9 +151,10 @@ function features(f: FaceFrame): number[] | null {
   const lm = f.landmarks
   if (!lm || lm.length < 478 || !f.pose) return null
   // appearance features: required when the calibration was made with them, so samples and
-  // predictions always have the same layout. A result counts as current for two model runs,
-  // so a slower backend (WebAssembly instead of WebGPU) still yields usable frames.
-  const app = gazeState.appearance ? currentAppearance(Math.max(250, 2 * appearanceState.ms + 100)) : null
+  // predictions always have the same layout. The eye-image angles change slowly while the eyes rest on
+  // something, so a result stays usable for a few model runs (at least 1 s): when the GPU is busy (the
+  // coordinator model shares it) the eye model slows down, and gaze must not drop out because of that.
+  const app = gazeState.appearance ? currentAppearance(Math.max(1000, 4 * appearanceState.ms + 200)) : null
   const [hR, vR, oR] = eye(lm, R)
   const [hL, vL, oL] = eye(lm, L)
   const p = f.pose
@@ -229,7 +236,8 @@ function onFrame(f: FaceFrame) {
   const avg = feat.map((_, j) => recent.reduce((a, r) => a + r[j], 0) / recent.length)
   current = { f: avg, t: f.t }
   history = [...history.filter((h) => f.t - h.t < 4000), current]
-  if (!gazeState.running || !model) return
+  if (!gazeState.running) return
+  if (!model) { emit(null); return }   // no calibration: say so, so the lens never freezes where it was
   const [px, py] = predictRidge(model, avg)
   const last = diag[diag.length - 1]
   if (last && last.t === Math.round(f.t)) last.pred = [Math.round(px), Math.round(py)]
@@ -256,7 +264,8 @@ function refit() {
     kept.push(...[...g].sort((a, b) => dist(a) - dist(b)).slice(0, Math.max(1, Math.ceil(g.length * KEEP))))
   }
   const all = [...kept, ...implicit]
-  model = all.length >= 20 ? fitRidge(all.map((s) => s.f), all.map((s) => [s.x, s.y]), LAMBDA) : null
+  // too few samples to fit: keep the model there is (a calibration in progress has none yet)
+  if (all.length >= 20) model = fitRidge(all.map((s) => s.f), all.map((s) => [s.x, s.y]), LAMBDA)
 }
 
 export async function startGaze(): Promise<void> {
@@ -307,7 +316,9 @@ export function recordCalibrationPoint(x: number, y: number) {
  * at the target, so its centre labels those frames. Skips the first third (eyes still arriving).
  */
 export function learnFromSelection(x: number, y: number, dwellMs: number) {
-  if (!model) return
+  // without the calibration's own samples (one saved before they were kept) a refit would rest on this
+  // single selection and point every look at it
+  if (!model || samples.length < 20) return
   const now = performance.now()
   const frames = history.filter((h) => now - h.t < dwellMs * 0.67)
   if (frames.length < 5) return

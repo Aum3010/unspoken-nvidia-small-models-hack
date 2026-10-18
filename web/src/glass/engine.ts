@@ -641,9 +641,18 @@ const onPointer = (ev: PointerEvent) => {
   if (!hasPointer) arrive()
 }
 /** A smoothed gaze estimate from the eye tracker (screen px), or null when the eyes are lost. */
+let lostTimer = 0
+const LOST_HOLD_MS = 900   // a short tracking gap (blink, busy eye model) keeps the lens and the dwell where they are
+/** The estimate is clamped to the screen: on its edge it means "somewhere off-screen", which must not choose the dock. */
+export const offScreen = (p: { x: number; y: number }) => p.x <= 1 || p.y <= 1 || p.x >= innerWidth - 1 || p.y >= innerHeight - 1
 export function feedGaze(p: { x: number; y: number } | null) {
   if (source !== 'eyes') return
-  if (!p) { gazeEl.classList.remove('on'); hasPointer = false; return }
+  if (p && offScreen(p)) p = null
+  if (!p) {
+    if (!lostTimer) lostTimer = window.setTimeout(() => { lostTimer = 0; gazeEl.classList.remove('on'); hasPointer = false }, LOST_HOLD_MS)
+    return
+  }
+  if (lostTimer) { window.clearTimeout(lostTimer); lostTimer = 0 }
   gx = p.x; gy = p.y
   if (!hasPointer) arrive()
 }
@@ -676,11 +685,14 @@ function zonePick(group: HTMLElement[], d: (el: HTMLElement) => number): HTMLEle
 function eyeTarget(x: number, y: number): HTMLElement | null {
   const rail = $<HTMLElement>('.rail'), answers = $<HTMLElement>('.answers'), side = $<HTMLElement>('.side')
   const sideLeft = side ? side.getBoundingClientRect().left : W
-  if (rail && x < rail.getBoundingClientRect().right + 90)
-    return zonePick($$('.rail [data-a]').filter(usable), (el) => Math.abs(y - centre(el)[1]))
-  if (answers && y < answers.getBoundingClientRect().bottom + 60 && x < sideLeft)
-    return zonePick($$('.answers [data-a]').filter(usable), (el) => Math.abs(x - centre(el)[0]))
+  // open phrase cards are what the person is choosing between: the dock and Yes/No keep only their own
+  // boxes then, not the wide margins around them, so a card next to the dock is not taken for it
   const open = bubbles.filter(usable)
+  const railM = open.length ? 0 : 90, answersM = open.length ? 0 : 60
+  if (rail && x < rail.getBoundingClientRect().right + railM)
+    return zonePick($$('.rail [data-a]').filter(usable), (el) => Math.abs(y - centre(el)[1]))
+  if (answers && y < answers.getBoundingClientRect().bottom + answersM && x < sideLeft)
+    return zonePick($$('.answers [data-a]').filter(usable), (el) => Math.abs(x - centre(el)[0]))
   if (open.length && x < sideLeft)
     return zonePick(open, (el) => { const [cx, cy] = centre(el); return Math.hypot(x - cx, y - cy) })
   // anything else (e.g. the calibration screen's buttons): the nearest within the gaze error
@@ -760,6 +772,7 @@ const onKey = (e: KeyboardEvent) => {
   if (k === ' ') { e.preventDefault(); (document.activeElement as HTMLElement | null)?.blur?.(); blink('space') }
   else if (k === 'p') handler('phrases', null, 'keyboard')
   else if (k === 'c') handler('clear', null, 'keyboard')
+  else if (k === 'e') handler('calibrate', null, 'keyboard')
   else if (k === 'escape') closeBubbles()
 }
 // clicks and touch still work for carers and testing
