@@ -17,8 +17,14 @@ scores each one, and the highest-reward trajectory (earliest on ties) gives one 
 Decision at test time. No sampling: the student scores the three words after the prompt and takes the most likely,
 so the base model and the fine-tuned model are compared on identical prompts.
 
+Value labels (second attempt). Hindsight best-of-N commits at the first repetition where the top candidate happens to
+be right, which taught the student to stop too early. `value_data` instead labels every repetition of every calibration
+episode with the action of highest *expected* reward under models fitted on the calibration sessions (ValueModel); the
+labeller itself is also evaluated as a policy, so the LLM's contribution is visible.
+
 Stages:
-  data   build data/student/train.jsonl from calibration episodes               (CPU)
+  data        hindsight labels: data/student/train.jsonl from calibration episodes  (CPU)
+  value_data  expected-reward labels: data/student/train_value.jsonl                (CPU)
   train  LoRA on the student, loss on the action word only                       (GPU)
   eval   base and fine-tuned student on session 3, through the Gym replay       (GPU)
 """
@@ -98,6 +104,99 @@ def data():
           f"step labels { {a: sum(x['action'] == a for x in rows) for a in ACTIONS} }")
 
 
+FEATS = ["repetition", "repetitions_remaining", "top_posterior", "second_posterior", "entropy_bits"]
+
+
+def _x(o: dict):
+    import numpy as np
+
+    p1, p2 = max(o["top_posterior"], 1e-6), max(o["second_posterior"], 1e-6)
+    return np.array([o[k] for k in FEATS] + [np.log(p1 / p2), np.log(p1 / (1 - p1 + 1e-6))], float)
+
+
+class ValueModel:
+    """Expected-reward labels fitted on calibration sessions only (no hindsight about the episode being labelled).
+
+    P(top candidate is right | state) by logistic regression; the value of waiting by fitted value iteration with
+    gradient boosting on the observed next state. Action = argmax of commit 2P-1, abstain -p_abstain, more E[V'] - cost.
+    """
+
+    def fit(self, states, cfg, iters: int = 6):
+        import numpy as np
+        from sklearn.ensemble import HistGradientBoostingRegressor
+        from sklearn.linear_model import LogisticRegression
+
+        X = np.stack([_x(o) for o, *_ in states])
+        right = np.array([ok for _, ok, _, _ in states])
+        nxt = np.array([n for *_, n, _ in states])
+        dt = np.array([d for *_, d in states])
+        self.clf = LogisticRegression(C=1.0, max_iter=2000).fit(X, right)
+        qc = 2 * self.clf.predict_proba(X)[:, 1] - 1
+        has = nxt >= 0
+        v = np.maximum(qc, -cfg.p_abstain)
+        for _ in range(iters):
+            y = v[nxt[has]] - cfg.c_sec * dt[has] - cfg.c_turn
+            self.reg = HistGradientBoostingRegressor(max_iter=200, learning_rate=0.05, min_samples_leaf=40,
+                                                     random_state=0).fit(X[has], y)
+            qm = np.full(len(X), -np.inf)
+            qm[has] = self.reg.predict(X[has])
+            v = np.maximum(np.maximum(qc, -cfg.p_abstain), qm)
+        self.cfg = cfg
+        return self
+
+    def action(self, o: dict) -> str:
+        x = _x(o)[None]
+        q = [-float("inf") if o["evidence_exhausted"] else float(self.reg.predict(x)[0]),
+             2 * float(self.clf.predict_proba(x)[0, 1]) - 1, -self.cfg.p_abstain]
+        return ACTIONS[max(range(3), key=q.__getitem__)]
+
+    def run(self, env) -> dict:
+        obs = env.call("get_state")["observation"]
+        n = 0
+        while not env.done:
+            a = self.action(obs)
+            n += 1
+            if a == "more":
+                obs = env.call("request_more_eeg")["observation"]
+            elif a == "commit":
+                env.call("commit_character", {"character": obs["top_candidate"]})
+            else:
+                env.call("abstain")
+        return {"policy": "value_labeller", "model_calls": 0, "model_latency_s": 0.0, "escalated": False}
+
+
+def _all_states(eps, truth, cfg):
+    """Every repetition of every calibration episode, with (right?, next index, seconds to next)."""
+    states = []
+    for sid, ev in eps.items():
+        env = LocalEnv(ev, cfg)
+        path = [env.call("get_state")["observation"]]
+        while not path[-1]["evidence_exhausted"]:
+            path.append(env.call("request_more_eeg")["observation"])
+        base = len(states)
+        for i, o in enumerate(path):
+            last = i == len(path) - 1
+            states.append((o, o["top_candidate"] == ev.chars[truth[sid]], -1 if last else base + i + 1,
+                           0.0 if last else path[i + 1]["acquisition_s_so_far"] - o["acquisition_s_so_far"]))
+    return states
+
+
+def value_data():
+    import pickle
+
+    cfg = replay.RewardConfig()
+    eps = replay.load_episodes(EVD, roles=("calibration",))
+    truth = replay.load_ground_truth(EVD)
+    states = _all_states(eps, truth, cfg)
+    vm = ValueModel().fit(states, cfg)
+    rows = [{"state": state_text(o), "action": vm.action(o)} for o, *_ in states]
+    WORK.mkdir(parents=True, exist_ok=True)
+    (WORK / "train_value.jsonl").write_text("\n".join(json.dumps(x) for x in rows) + "\n")
+    (WORK / "value_model.pkl").write_bytes(pickle.dumps(vm))
+    print(f"{len(eps)} calibration episodes -> {len(rows)} states; labels "
+          f"{ {a: sum(x['action'] == a for x in rows) for a in ACTIONS} }")
+
+
 def _load(adapter: str | None):
     import torch
     from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -121,7 +220,7 @@ def _action_ids(tok) -> list[int]:
     return [tok(a, add_special_tokens=False).input_ids[0] for a in ACTIONS]
 
 
-def train(epochs: int, lr: float, batch: int, rank: int):
+def train(epochs: int, lr: float, batch: int, rank: int, data_file: str, adapter: str):
     import torch
     from peft import LoraConfig, get_peft_model
 
@@ -130,7 +229,7 @@ def train(epochs: int, lr: float, batch: int, rank: int):
     model.train()
     model = get_peft_model(model, LoraConfig(r=rank, lora_alpha=2 * rank, lora_dropout=0.05, task_type="CAUSAL_LM",
                                              target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]))
-    rows = [json.loads(l) for l in (WORK / "train.jsonl").read_text().splitlines()]
+    rows = [json.loads(l) for l in (WORK / data_file).read_text().splitlines()]
     ids = _action_ids(tok)
     assert len(set(ids)) == 3, f"action words share a first token: {ids}"
     # no class weights: the labels are hindsight-optimal (commit exactly when the top candidate is right), so plain
@@ -156,8 +255,8 @@ def train(epochs: int, lr: float, batch: int, rank: int):
             step += 1
             if step % 50 == 0:
                 print(f"epoch {ep} step {step} loss {loss.item():.3f} {time.time() - t0:.0f}s", flush=True)
-    model.save_pretrained(WORK / "adapter")
-    print(f"saved {WORK / 'adapter'} after {step} steps, {time.time() - t0:.0f}s")
+    model.save_pretrained(WORK / adapter)
+    print(f"saved {WORK / adapter} after {step} steps, {time.time() - t0:.0f}s")
 
 
 class StudentPolicy:
@@ -193,7 +292,7 @@ class StudentPolicy:
         return {"policy": self.name, "model_calls": calls, "model_latency_s": lat, "escalated": True}
 
 
-def evaluate(which: list[str]):
+def evaluate(which: list[str], tag: str = ""):
     import importlib.util
 
     import pandas as pd
@@ -205,9 +304,14 @@ def evaluate(which: list[str]):
     eps = replay.load_episodes(EVD, roles=("evaluation",))
     truth = replay.load_ground_truth(EVD)
     rows = []
+    import pickle
+
     for w in which:
-        tok, model = _load(str(WORK / "adapter") if w == "finetuned" else None)
-        pol = StudentPolicy(tok, model, cfg, f"nano4b_{w}")
+        if w == "labeller":
+            pol, model = pickle.loads((WORK / "value_model.pkl").read_bytes()), None
+        else:
+            tok, model = _load({"finetuned": str(WORK / "adapter"), "value": str(WORK / "adapter_value")}.get(w))
+            pol = StudentPolicy(tok, model, cfg, f"nano4b_{w}")
         for sid in sorted(eps):
             r = nce.run_episode(eps[sid], truth[sid], pol, cfg)
             r.pop("events", None)
@@ -216,11 +320,11 @@ def evaluate(which: list[str]):
         del model
     df = pd.DataFrame(rows)
     OUT.mkdir(parents=True, exist_ok=True)
-    df.to_csv(OUT / "episodes.csv", index=False)
+    df.to_csv(OUT / f"episodes{tag}.csv", index=False)
     per = nce.summarize(df, 0.0)
-    per.to_csv(OUT / "per_participant.csv", index=False)
+    per.to_csv(OUT / f"per_participant{tag}.csv", index=False)
     agg = nce.aggregate(per)
-    agg.to_csv(OUT / "aggregate.csv", index=False)
+    agg.to_csv(OUT / f"aggregate{tag}.csv", index=False)
     print(agg[["policy", "mean_reward", "accuracy", "incorrect_commits", "abstentions", "mean_eeg_latency_s",
                "mean_model_latency_s"]].to_string(index=False))
 
@@ -229,17 +333,23 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     sub = ap.add_subparsers(dest="stage", required=True)
     sub.add_parser("data")
+    sub.add_parser("value_data")
     t = sub.add_parser("train")
     t.add_argument("--epochs", type=int, default=2)
     t.add_argument("--lr", type=float, default=2e-4)
     t.add_argument("--batch", type=int, default=16)
     t.add_argument("--rank", type=int, default=16)
+    t.add_argument("--data", default="train.jsonl")
+    t.add_argument("--adapter", default="adapter")
     e = sub.add_parser("eval")
     e.add_argument("--which", nargs="+", default=["base", "finetuned"])
+    e.add_argument("--tag", default="")
     a = ap.parse_args()
     if a.stage == "data":
         data()
+    elif a.stage == "value_data":
+        value_data()
     elif a.stage == "train":
-        train(a.epochs, a.lr, a.batch, a.rank)
+        train(a.epochs, a.lr, a.batch, a.rank, a.data, a.adapter)
     else:
-        evaluate(a.which)
+        evaluate(a.which, a.tag)
