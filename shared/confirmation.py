@@ -14,7 +14,7 @@ import os
 import secrets
 from pathlib import Path
 
-from shared.schemas import ALLOWED_CONFIRMATION_METHODS, AuditEvent, Message
+from shared.schemas import ALLOWED_CONFIRMATION_METHODS, DEMO_AUTO_METHOD, AuditEvent, Message
 
 def _load_secret() -> str:
     """Shared between gateway and TTS: env var, else a local file both processes read."""
@@ -48,10 +48,18 @@ def verify_token(message_id: str, text: str, token: str, key: str | None = None)
     return hmac.compare_digest(sign(message_id, text, key), token)
 
 
-def authorize_speech(message: Message, audit_log: list[AuditEvent], confirmation_event_id: str) -> str:
-    """Return a TTS token for exactly `message.confirmed_text`, or raise PolicyViolation."""
+def authorize_speech(message: Message, audit_log: list[AuditEvent], confirmation_event_id: str, demo_auto: bool = False) -> str:
+    """Return a TTS token for exactly `message.confirmed_text`, or raise PolicyViolation.
+
+    demo_auto: the gateway's demo auto-speak mode. Only the gateway passes it, the audit records
+    the message as spoken automatically (not by the person), and every other check still applies."""
     if message.status != "confirmed":
         raise PolicyViolation(f"message status is {message.status!r}, not 'confirmed'")
+    if demo_auto:
+        auto = [e for e in audit_log if e.id == confirmation_event_id and e.kind == "auto_confirmed" and e.message_id == message.id]
+        if message.confirmation_method != DEMO_AUTO_METHOD or not auto or auto[0].data.get("text") != message.confirmed_text:
+            raise PolicyViolation("auto-speak needs its own audited auto_confirmed event for this exact text")
+        return sign(message.id, message.confirmed_text)
     if message.confirmation_method not in ALLOWED_CONFIRMATION_METHODS:
         raise PolicyViolation(f"confirmation method {message.confirmation_method!r} is not an explicit user action")
     if not message.confirmed_text:

@@ -33,7 +33,7 @@ export interface Evidence {
 export interface Candidate {
   id: string
   text: string
-  origin: 'evidence' | 'user_edit' | 'board' | 'spelling' | 'eeg_replay'
+  origin: 'evidence' | 'user_edit' | 'board' | 'spelling' | 'eeg_replay' | 'correction'
   evidence_event_id?: string | null
   modality: Modality
   source_mode: SourceMode
@@ -104,6 +104,7 @@ export interface SessionState {
     use_llm: boolean
     voice: string
     speech_rate: number
+    auto_speak?: boolean
   }
   audit_count: number
 }

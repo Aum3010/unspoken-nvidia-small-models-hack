@@ -39,9 +39,11 @@ ConfirmationMethod = Literal[
     "accessible_button_confirmed",
     "keyboard_confirmed",
     "other_explicit_user_confirmed",
+    "demo_auto_spoken",   # demo auto-speak mode: no person confirmed it; recorded as such, never as a user action
 ]
 
-ALLOWED_CONFIRMATION_METHODS: frozenset[str] = frozenset(ConfirmationMethod.__args__)  # type: ignore[attr-defined]
+DEMO_AUTO_METHOD = "demo_auto_spoken"
+ALLOWED_CONFIRMATION_METHODS: frozenset[str] = frozenset(ConfirmationMethod.__args__) - {DEMO_AUTO_METHOD}  # type: ignore[attr-defined]
 
 
 def new_id(prefix: str) -> str:
@@ -91,7 +93,7 @@ class Candidate(BaseModel):
 
     id: str = Field(default_factory=lambda: new_id("cand"))
     text: str
-    origin: Literal["evidence", "user_edit", "board", "spelling", "eeg_replay"]
+    origin: Literal["evidence", "user_edit", "board", "spelling", "eeg_replay", "correction"]
     evidence_event_id: str | None = None
     hypothesis_id: str | None = None
     modality: Modality
@@ -145,6 +147,7 @@ class ToolCall(BaseModel):
         "speak_confirmed_text",
         "reset_or_undo",
         "ignore_input",
+        "propose_correction",
     ]
     arguments: dict
     rationale: str = ""

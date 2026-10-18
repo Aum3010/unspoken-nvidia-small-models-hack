@@ -9,10 +9,11 @@ only choose which existing candidates to show and which input method to use.
 
 from __future__ import annotations
 
+import os
 import re
 from dataclasses import dataclass, field
 
-from shared.schemas import AuditEvent, Candidate, Evidence, Message, ToolCall, new_id, now_ms
+from shared.schemas import DEMO_AUTO_METHOD, AuditEvent, Candidate, Evidence, Message, ToolCall, new_id, now_ms
 
 
 class TransitionError(Exception):
@@ -45,6 +46,8 @@ class Session:
         "use_llm": True,
         "voice": "af_heart",
         "speech_rate": 1.0,
+        # demo: speak the coordinator's final reading without a Yes (UNSPOKEN_AUTO_SPEAK=0 turns it off)
+        "auto_speak": os.environ.get("UNSPOKEN_AUTO_SPEAK", "1") != "0",
     })
     audio: dict[str, bytes] = field(default_factory=dict)
 
@@ -159,6 +162,18 @@ class Session:
         c.source_mode = original.source_mode
         self.log("user", "user_edited", {"from_candidate": candidate_id, "from_text": original.text, "to_text": c.text})
         return c
+
+    def auto_confirm(self, candidate_id: str) -> AuditEvent:
+        """Demo auto-speak: the system, not the person, confirms. Audited as exactly that."""
+        m = self.message
+        c = next(c for c in m.candidates if c.id == candidate_id)
+        m.selected_candidate_id = c.id
+        ev = self.log("system", "auto_confirmed", {"candidate_id": c.id, "text": c.text, "method": DEMO_AUTO_METHOD})
+        m.confirmed_text = c.text
+        m.confirmation_method = DEMO_AUTO_METHOD
+        m.confirmation_event_id = ev.id
+        m.status = "confirmed"
+        return ev
 
     def confirm(self, method: str, actor: str = "user") -> AuditEvent:
         m = self.message

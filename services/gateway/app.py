@@ -19,7 +19,7 @@ from pydantic import BaseModel
 from services.gateway.state import Session, TransitionError
 from shared.confirmation import PolicyViolation, authorize_speech
 from shared.provenance import MODEL_LEDGER, ROOT, service_url
-from shared.schemas import ALLOWED_CONFIRMATION_METHODS, Evidence, ToolCall
+from shared.schemas import ALLOWED_CONFIRMATION_METHODS, Candidate, Evidence, ToolCall
 from shared.service import make_app
 
 app = make_app("unspoken-gateway")
@@ -91,7 +91,7 @@ async def coordinate(s: Session):
     req = {
         "message_id": m.id,
         "candidates": [{"id": c.id, "text": c.text, "modality": c.modality, "score": c.score,
-                        "supporting_modalities": c.supporting_modalities} for c in m.candidates],
+                        "supporting_modalities": c.supporting_modalities, "origin": c.origin} for c in m.candidates],
         "evidence": [{"modality": e.modality, "status": e.status, "quality_flags": e.quality_flags,
                       "top2_margin": e.quality.get("top2_margin"), "n_hypotheses": len(e.hypotheses)}
                      for e in (s.evidence[i] for i in m.evidence_ids)],
@@ -117,6 +117,24 @@ async def coordinate(s: Session):
 _background: set[asyncio.Task] = set()
 
 
+def _schedule(coro):
+    task = asyncio.create_task(coro)
+    _background.add(task)
+    task.add_done_callback(_background.discard)
+
+
+async def _auto_speak(s: Session, message_id: str, candidate_id: str):
+    """Demo auto-speak: say the coordinator's final reading, unless the person moved on or said No meanwhile."""
+    m = s.message
+    if m.id != message_id or m.status not in ("proposed", "ambiguous", "clarifying"):
+        return
+    ev = s.auto_confirm(candidate_id)
+    try:
+        await _speak(s, ev, demo_auto=True)
+    except HTTPException:
+        pass  # blocked: the policy gate already traced why
+
+
 def _plan_version(s: Session) -> tuple:
     user_events = sum(1 for e in s.audit if e.actor in ("user", "operator") and e.message_id == s.message.id)
     return s.message.id, len(s.message.evidence_ids), user_events
@@ -130,6 +148,8 @@ async def _refine_with_model(s: Session, req: dict, plan_version: tuple):
     except Exception as exc:
         s.timeline = [t for t in s.timeline if t["level"] != "pending"]
         s.trace("coordinator", "Coordinator offline — deterministic policy kept", type(exc).__name__, level="warn")
+        if s.last_plan and _plan_version(s) == plan_version:
+            apply_plan(s, s.last_plan)
         await push(s)
         return
     s.timeline = [t for t in s.timeline if t["level"] != "pending"]
@@ -171,6 +191,20 @@ def apply_plan(s: Session, call: ToolCall, quiet: bool = False):
         s.history.append("retake")
         s.trace("coordinator", f"{who}: request_retake", f"{call.arguments.get('reason')} — {call.rationale}", latency_ms=call.latency_ms,
                 level="warn", data={"call": call.model_dump()})
+    elif call.name == "propose_correction":
+        # the corrected sentence becomes a candidate of its own, shown first; the readings stay in the audit
+        src = [c for c in m.candidates if c.id in call.arguments["source_candidate_ids"]]
+        c = Candidate(text=" ".join(str(call.arguments["text"]).split()), origin="correction", modality=src[0].modality,
+                      evidence_event_id=src[0].evidence_event_id, source_mode=src[0].source_mode,
+                      supporting_modalities=sorted({md for x in src for md in x.supporting_modalities}))
+        m.candidates.append(c)
+        s.shown_candidate_ids = [c.id, src[0].id]
+        if m.status in ("proposed", "ambiguous"):
+            m.status = "clarifying"
+        s.log("coordinator", "correction_proposed", {"candidate_id": c.id, "text": c.text,
+                                                       "from": [{"id": x.id, "text": x.text} for x in src]})
+        s.trace("coordinator", f"{who}: propose_correction", f"“{src[0].text}” → “{c.text}” — {call.rationale}",
+                latency_ms=call.latency_ms, data={"call": call.model_dump()})
     elif call.name == "ignore_input":
         # noise, not a message: drop the readings so they neither show nor pile up with the next clip
         s.new_message()
@@ -180,6 +214,8 @@ def apply_plan(s: Session, call: ToolCall, quiet: bool = False):
     elif call.name == "switch_input_method":
         s.trace("coordinator", f"{who}: switch_input_method → {call.arguments.get('method')}", call.rationale,
                 latency_ms=call.latency_ms, data={"call": call.model_dump()})
+    if call.name in ("ask_confirmation", "propose_correction") and s.settings["auto_speak"] and s.shown_candidate_ids:
+        _schedule(_auto_speak(s, m.id, s.shown_candidate_ids[0]))
 
 
 # ---- captures ---------------------------------------------------------------
@@ -340,16 +376,21 @@ async def confirm(sid: str, body: ConfirmBody):
     if body.method not in ALLOWED_CONFIRMATION_METHODS:
         raise HTTPException(400, "not an explicit confirmation method")
     ev = _guard(lambda: s.confirm(body.method))
-    m = s.message
+    return await _speak(s, ev)
+
+
+async def _speak(s: Session, ev, demo_auto: bool = False) -> dict:
+    sid, m = s.id, s.message
     try:
-        token = authorize_speech(m, s.audit, ev.id)
+        token = authorize_speech(m, s.audit, ev.id, demo_auto=demo_auto)
     except PolicyViolation as exc:
         s.trace("policy", "Speech blocked", str(exc), level="error")
         s.log("policy", "speech_blocked", {"reason": str(exc)})
         await push(s)
         raise HTTPException(403, str(exc))
     s.log("policy", "speech_authorized", {"confirmation_event_id": ev.id, "text": m.confirmed_text})
-    s.trace("policy", "Speech authorized", f"exact confirmed text · {body.method.replace('_', ' ')}")
+    s.trace("policy", "Speech authorized", "auto-speak (demo) · no confirmation asked" if demo_auto
+            else f"exact confirmed text · {m.confirmation_method.replace('_', ' ')}")
     await push(s)
     latency = None
     try:
@@ -360,7 +401,7 @@ async def confirm(sid: str, body: ConfirmBody):
         r.raise_for_status()
         s.audio[m.id] = r.content
         latency = int(r.headers.get("X-Latency-Ms", 0))
-        s.trace("tts", "Spoke confirmed message", f"“{m.confirmed_text}”", latency_ms=latency)
+        s.trace("tts", "Spoke automatically" if demo_auto else "Spoke confirmed message", f"“{m.confirmed_text}”", latency_ms=latency)
     except Exception as exc:
         s.trace("tts", "TTS unavailable — browser voice used", type(exc).__name__, level="warn")
     s.mark_spoken(latency)

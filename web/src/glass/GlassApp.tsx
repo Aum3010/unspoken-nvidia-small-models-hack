@@ -5,7 +5,7 @@
 //   top right: live agent activity from the gateway timeline, then the spoken history
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { api, useHealth, useSession } from '../lib/api'
+import { api, useHealth, useSession, SESSION_ID } from '../lib/api'
 import { getCamera } from '../lib/capture'
 import { onBlink, trackVideo } from '../lib/face'
 import { gazeState, learnFromSelection, onGaze, saveCalibration, startGaze } from '../lib/gaze'
@@ -28,7 +28,7 @@ const METHOD_NODE: Record<string, E.NodeId | undefined> = {
 }
 const METHOD_TEXT: Record<string, string> = {
   gaze_dwell_confirmed: 'gaze', deliberate_blink_confirmed: 'blink', accessible_button_confirmed: 'button',
-  keyboard_confirmed: 'keyboard', other_explicit_user_confirmed: 'dwell / nod',
+  keyboard_confirmed: 'keyboard', other_explicit_user_confirmed: 'dwell / nod', demo_auto_spoken: 'auto-speak (demo)',
 }
 // modality -> its input's colour in the room
 const MOD_NODE: Partial<Record<Modality, E.NodeId>> = { audio: 'voice', lip: 'lips', gaze: 'gaze', eeg_replay: 'eeg', gesture: 'head' }
@@ -82,7 +82,19 @@ export function GlassApp() {
   useEffect(() => E.mount(), [])
   useEffect(() => { E.setPaused(focusMode) }, [focusMode])
   useEffect(() => { E.setGazeSource(eyes ? 'eyes' : 'pointer'); E.setGazeError(gazeState.accuracyPx) }, [eyes])
-  useEffect(() => onGaze((p) => E.feedGaze(p)), [])
+  // a calibration made in another sitting position can put the estimate off-screen: say so, instead of
+  // leaving the person stuck on whatever sits at that edge
+  const offSince = useRef(0)
+  useEffect(() => onGaze((p) => {
+    E.feedGaze(p)
+    const off = !!p && E.offScreen(p)
+    if (!off) { offSince.current = 0; return }
+    offSince.current ||= performance.now()
+    if (performance.now() - offSince.current > 2500) {
+      offSince.current = performance.now() + 8000   // repeat the hint at most every ~10 s
+      E.caption('Your eyes are off the calibration', 'sit as you did when calibrating, or calibrate again (Eyes chip, or the E key)')
+    }
+  }), [])
   useEffect(() => {
     if (!gazeState.calibrated) return
     void startGaze().then(() => saveCalibration())   // keep what this session has learned, too
@@ -200,6 +212,7 @@ export function GlassApp() {
           : /ask_confirmation/.test(t.title) ? 'Asking which you meant'
             : /request_retake/.test(t.title) ? 'Asking for one more try'
               : /ignore_input/.test(t.title) ? 'Ignored as noise'
+                : /propose_correction/.test(t.title) ? 'Fixed a misread word'
               : /switch_input_method/.test(t.title) ? 'Suggesting another way'
                 : /offline|fallback/i.test(t.title) ? 'Deterministic policy' : t.title, 5000)
       } else if (t.agent === 'policy') {
@@ -226,11 +239,16 @@ export function GlassApp() {
     } else if (PENDING.includes(m.status) && shown.length) {
       // only the best reading, written in ink; Yes/blink/nod chooses it, No/shake rejects it
       E.setTranscript(words(shown[0].text), [])
-      E.caption('Did you mean this?', 'Yes, blink or nod to choose it · No or shake if it is wrong')
+      const read = shown[0].origin === 'correction' ? shown[1]?.text : null
+      const from = read ? `corrected from “${read}” · ` : ''
+      if (state.settings.auto_speak) E.caption('Understanding you…', `${from}it will be spoken automatically · No or shake to stop it`)
+      else E.caption('Did you mean this?', `${from}Yes, blink or nod to choose it · No or shake if it is wrong`)
     } else if (m.status === 'spoken') {
       const sp = state.spoken[state.spoken.length - 1]
       if (sp && sp.message_id !== lastSpoken.current) {
         lastSpoken.current = sp.message_id
+        // auto-spoken by the gateway: this page did not start it, so it plays it now
+        if (sp.method === 'demo_auto_spoken' && Date.now() - sp.ts < 15000) play(`/api/${SESSION_ID}/audio/${sp.message_id}`, sp.text)
         E.setTranscript(words(sp.text), [])
         E.caption(`Spoken · confirmed by ${METHOD_TEXT[sp.method] ?? sp.method}`)
       }
@@ -264,9 +282,10 @@ export function GlassApp() {
     const m = s.message
     // a phrase card is the person's own explicit choice (held with the eyes, or clicked), not a model's
     // reading, so choosing it is the confirmation: it is spoken straight away, through the same policy gate
+    const sayNow = (text: string) => run(api.board(text, 'board').then(() => api.confirm(METHOD[how])).then((r) => play(r.audio_url, r.text)))
     if (a.startsWith('say:')) {
       E.closeBubbles()
-      run(api.board(a.slice(4), 'board').then(() => api.confirm(METHOD[how])).then((r) => play(r.audio_url, r.text)))
+      sayNow(a.slice(4))
       return
     }
     if (a.startsWith('pick:')) { E.closeBubbles(); run(api.select(a.slice(5), METHOD[how])); return }
@@ -277,8 +296,9 @@ export function GlassApp() {
         break
       case 'yes':
         if (m.status === 'selected') confirm(how)
-        else if (PENDING.includes(m.status) && shownCandidates(s)[0]) run(api.select(shownCandidates(s)[0].id, METHOD[how]))
-        else { E.closeBubbles(); run(api.board('Yes', 'board')) }
+        else if (PENDING.includes(m.status) && shownCandidates(s)[0])
+          run(api.select(shownCandidates(s)[0].id, METHOD[how]).then(() => api.confirm(METHOD[how])).then((r) => play(r.audio_url, r.text)))
+        else { E.closeBubbles(); sayNow('Yes') }
         break
       case 'no': case 'shake':
         // a phrase you picked yourself is simply dropped; a model's reading goes back to the choices
@@ -287,7 +307,7 @@ export function GlassApp() {
           run(c && c.origin !== 'evidence' && c.origin !== 'eeg_replay' && m.candidates.length === 1 ? api.undo().then(api.undo) : api.undo())
         }
         else if (PENDING.includes(m.status)) { E.closeBubbles(); run(api.reject()) }
-        else if (a === 'no') { E.closeBubbles(); run(api.board('No', 'board')) }
+        else if (a === 'no') { E.closeBubbles(); sayNow('No') }
         break
       case 'speak': {
         const sp = s.spoken[s.spoken.length - 1]
@@ -302,12 +322,13 @@ export function GlassApp() {
         break
       case 'help':
         E.closeBubbles(); setAlarm(Date.now())
-        run(api.board(HELP_TEXT, 'board'))
+        sayNow(HELP_TEXT)
         break
       // a blink with nothing under the eyes, or a nod: confirms what is waiting
       case 'blink': case 'nod':
         if (m.status === 'selected') confirm(how)
-        else if (PENDING.includes(m.status) && shownCandidates(s)[0]) run(api.select(shownCandidates(s)[0].id, METHOD[how]))
+        else if (PENDING.includes(m.status) && shownCandidates(s)[0])
+          run(api.select(shownCandidates(s)[0].id, METHOD[how]).then(() => api.confirm(METHOD[how])).then((r) => play(r.audio_url, r.text)))
         break
     }
     if (['yes', 'speak', 'blink', 'nod'].includes(a) && m.status === 'selected') E.caption(`Confirmed by ${HOW_TEXT[how]}`, 'policy gate checks the exact text')

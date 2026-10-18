@@ -14,7 +14,9 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import time
+from difflib import SequenceMatcher
 
 import httpx
 from pydantic import BaseModel, Field
@@ -33,7 +35,11 @@ app = make_app("unspoken-coordinator")
 SYSTEM_PROMPT = """You are the coordination agent inside Unspoken, an assistive communication system for people who cannot speak.
 Specialist models (lip reading, weak-speech ASR, gaze, recorded-EEG replay) produced candidate messages. You decide the next
 interaction step by calling exactly ONE tool. Hard rules:
-- You never write, rephrase, complete or translate the patient's message. You only reference candidate ids that exist.
+- Lip reading and weak speech often get a word or two wrong ("i wore my family" for "i want my family", "i need wader"
+  for "i need water"). When the best reading is close to a short, sensible thing a patient would say, call
+  propose_correction with that sentence: keep the person's words, only fix the misread ones, never add new meaning.
+  If the reading already makes sense, do not correct it. The person still confirms before anything is spoken.
+- Otherwise you only reference candidate ids that exist.
 - Prefer the smallest useful question: if one candidate clearly dominates, ask to confirm just it; if 2-4 are plausible, offer them.
 - Capture is always on, so most clips are not messages: background sound, the person breathing, yawning or talking to
   someone else. If the readings look like noise, call ignore_input; staying silent is better than asking about noise.
@@ -97,6 +103,23 @@ TOOLS = [
     {
         "type": "function",
         "function": {
+            "name": "propose_correction",
+            "description": "Offer a corrected version of a misread candidate (same words, misread ones fixed) for the person to confirm.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "source_candidate_ids": {"type": "array", "items": {"type": "string"}, "minItems": 1, "maxItems": 3},
+                    "text": {"type": "string", "description": "The corrected sentence, at most 12 words."},
+                    "input_method": {"type": "string", "enum": ["gaze", "blink", "button", "keyboard"]},
+                    "rationale": {"type": "string"},
+                },
+                "required": ["source_candidate_ids", "text", "input_method", "rationale"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
             "name": "ignore_input",
             "description": "Treat these readings as noise, not a message: nothing is shown and the person is not asked anything.",
             "parameters": {
@@ -131,6 +154,7 @@ class CandidateSummary(BaseModel):
     modality: str
     score: float | None = None
     supporting_modalities: list[str] = Field(default_factory=list)
+    origin: str = "evidence"
 
 
 class EvidenceSummary(BaseModel):
@@ -178,6 +202,8 @@ def validate(call: ToolCall, req: PlanRequest) -> ToolCall:
     elif call.name == "request_retake":
         if a.get("modality") not in ("lip", "audio"):
             errors.append("retake only for lip/audio")
+    elif call.name == "propose_correction":
+        errors += correction_errors(a, req)
     elif call.name == "ignore_input":
         # a reading two modalities agree on, or one from an explicit input, is a real message
         if any(len(set(c.supporting_modalities)) >= 2 for c in req.candidates):
@@ -205,6 +231,44 @@ def validate(call: ToolCall, req: PlanRequest) -> ToolCall:
     call.valid = not errors
     call.validation_errors = errors
     return call
+
+
+CORRECTION_MAX_WORDS = 12
+WORD_MATCH = 0.6   # a corrected word "comes from" the reading if it is this similar to one of its words
+
+
+def _words(t: str) -> list[str]:
+    return re.sub(r"[^a-z0-9' ]", " ", t.lower()).split()
+
+
+def correction_errors(a: dict, req: PlanRequest) -> list[str]:
+    """A correction may fix misread words, never say something else: it stays anchored to what was read."""
+    errors: list[str] = []
+    by_id = {c.id: c for c in req.candidates}
+    src = [by_id[i] for i in (a.get("source_candidate_ids") or []) if i in by_id]
+    if not src or len(src) != len(a.get("source_candidate_ids") or []):
+        errors.append("correction must name existing source candidates")
+        return errors
+    if any(c.modality not in ("lip", "audio") or c.origin != "evidence" for c in src):
+        errors.append("only lip/audio readings are corrected; the person's own choices are not")
+    words = _words(str(a.get("text", "")))
+    if not words or len(words) > CORRECTION_MAX_WORDS:
+        errors.append("correction must be 1-12 words")
+        return errors
+    read = {w for c in src for w in _words(c.text)}
+    if any(" ".join(words) == " ".join(_words(c.text)) for c in src):
+        errors.append("correction repeats the reading; ask_confirmation instead")
+    kept = sum(1 for w in words if any(SequenceMatcher(None, w, r).ratio() >= WORD_MATCH for r in read))
+    if kept < max(1, round(0.5 * len(words))):
+        errors.append(f"correction strays from what was read ({kept}/{len(words)} words anchored)")
+    if min(abs(len(words) - len(_words(c.text))) for c in src) > 2:
+        errors.append("correction changes the length too much")
+    method = a.get("input_method")
+    if method not in req.available_inputs:
+        errors.append(f"input method {method!r} not available")
+    if method == "gaze" and not req.gaze_calibrated:
+        errors.append("gaze not calibrated")
+    return errors
 
 
 def deterministic_plan(req: PlanRequest, why: str = "") -> ToolCall:
