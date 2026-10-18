@@ -82,7 +82,14 @@ def main():
                 md.append(f"| | **WARNING: {m['valid_regressions_total']} call(s) valid alone were invalid under load** | | | | | |")
         md += ["", "Per-level tables (p50/p95/p99 latency and TTFT, req/s, tok/s, valid rate, errors, peak memory/temperature/power): "
                "`max_capacity.md`; plot `max_capacity.png`; GPU every 2 s: `gpu_trace.csv`. Levels 1, 2, 4 were added below the "
-               "8→128 ramp because p95 already passes 500 ms at 4 concurrent requests in A.", ""]
+               "8→128 ramp because p95 already passes 500 ms at 4 concurrent requests in A.",
+               "- Shared and dedicated are the same within noise: in shared mode the voice, lip and TTS agents were loaded but idle, "
+               "so both measure vLLM alone. KV memory was not the limit: 64 requests x ~1.9k tokens is ~120k tokens against a 3.76M-token "
+               "KV cache already at util 0.55 (vllm.log), so the extra memory of the dedicated mode went unused; latency grows with the batch "
+               "(per-step compute). Level 128 did not run: both ramps stopped at 64 on p95.",
+               "- Valid-call regressions under load (valid alone, invalid under load): " +
+               ", ".join(f"{m['mode']} {m['valid_regressions_total']}" for m in D["modes"] if "missing" not in m) +
+               "; no safety stop fired (no CUDA error, OOM or Traceback; memory and temperature under the limits).", ""]
     else:
         md += [f"Not run: {(D or {}).get('reason', 'max_capacity.json missing')}.", ""]
 
@@ -119,8 +126,9 @@ def main():
         rows = {r["what"]: r for r in (C.get("latency") or {}).get("rows", [])}
         def row(k):
             r = rows.get(k)
-            return f"{r['all_mps'][0]} → {r['isolated_mtp'][0]} ms ({r['p50_change_pct']:+.0f}%)" if r else "-"
-        md.append(f"- Latency vs all-MPS (p50, n 10 vs 20): coordinator alone {row('coordinator alone')}, with every agent busy "
+            return (f"{r['all_mps'][0]}/{r['all_mps'][1]} → {r['isolated_mtp'][0]}/{r['isolated_mtp'][1]} ms ({r['p50_change_pct']:+.0f}% p50)"
+                    if r else "-")
+        md.append(f"- Latency vs all-MPS (p50/p95, n 10 vs 20): coordinator alone {row('coordinator alone')}, with every agent busy "
                   f"{row('coordinator, every agent busy')}; voice {row('voice, every agent busy')}; Kokoro {row('Kokoro, every agent busy')}; "
                   f"lips {row('lips, every agent busy')}; one message end to end {row('one message end to end')}.")
         sd = C.get("spec_decode_counters") or ""
@@ -132,7 +140,8 @@ def main():
         if "isolated_mtp" in h:
             md.append(f"- MTP held-out reward (guarded, {h['n_tasks']} tasks): **{h['isolated_mtp']:.3f}** vs 0.985; unsafe {h['unsafe']:.2f}; "
                       f"within one task: {h['unchanged']}; moved: {h['by_category_diff'] or 'nothing'}.")
-        md += [f"- **Recommendation: {rec.get('choice')}.** {rec.get('why')}. Defaults unchanged.", ""]
+        why = rec.get("why", "")
+        md += [f"- **Recommendation: {rec.get('choice')}.** {why[:1].upper() + why[1:]}. Defaults unchanged.", ""]
     else:
         md += [f"Not run: {(C or {}).get('reason', 'isolation.json missing')}.", ""]
 

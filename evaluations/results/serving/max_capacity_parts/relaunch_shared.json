@@ -1,0 +1,32 @@
+{
+ "ok": true,
+ "pid": 516850,
+ "exit_code": null,
+ "ready_s": 98.0,
+ "argv": [
+  "/workspace/venv-vllm/bin/python",
+  "/workspace/venv-vllm/bin/vllm",
+  "serve",
+  "nvidia/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-NVFP4",
+  "--host",
+  "127.0.0.1",
+  "--port",
+  "8001",
+  "--max-model-len",
+  "16384",
+  "--gpu-memory-utilization",
+  "0.55",
+  "--attention-backend",
+  "TRITON_ATTN",
+  "--enable-auto-tool-choice",
+  "--tool-call-parser",
+  "qwen3_coder",
+  "--reasoning-parser",
+  "nemotron_v3",
+  "--enable-prefix-caching",
+  "--max-num-seqs",
+  "64"
+ ],
+ "env_changes": [],
+ "log": ".run/logs/vllm_serving_D.log"
+}

@@ -1,0 +1,35 @@
+{
+  "date": "2026-10-18 09:36:39",
+  "all_ready": true,
+  "safety_tests": "49 passed in 2.51s",
+  "safety_ok": true,
+  "mps_on": true,
+  "mtp_on": false,
+  "vllm_args": "nvidia/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-NVFP4 --host 127.0.0.1 --port 8001 --max-model-len 16384 --gpu-memory-utilization 0.55 --attention-backend TRITON_ATTN --enable-auto-tool-choice --tool-call-parser qwen3_coder --reasoning-parser nemotron_v3 --enable-prefix-caching --max-num-seqs 8",
+  "vllm_default_args": true,
+  "non_default_flags": [],
+  "smoke": {
+    "gateway": "http://127.0.0.1:8000",
+    "ok": true,
+    "checks": {
+      "health": {
+        "ok": true,
+        "detail": "not ready=[]"
+      },
+      "accepted": {
+        "ok": true,
+        "detail": "status=proposed spoken='I need water' by=demo_auto_spoken 285 ms"
+      },
+      "ambiguous_no": {
+        "ok": true,
+        "detail": "status=ambiguous waited=True after No: message=rejected spoken=0 plan_by=deterministic_fallback"
+      },
+      "yes": {
+        "ok": true,
+        "detail": "status=ambiguous spoken='Yes' by=accessible_button_confirmed audio=63644 B"
+      }
+    }
+  },
+  "smoke_ok": true,
+  "ok": true
+}

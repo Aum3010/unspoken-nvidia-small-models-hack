@@ -84,6 +84,7 @@ def plot(modes: list[dict], path: Path):
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
+    import matplotlib.ticker
     colors = {"shared": "#2a78d6", "dedicated": "#eb6834"}
     fig, (a, b) = plt.subplots(1, 2, figsize=(11, 4.2), dpi=150)
     ticks = set()
@@ -102,6 +103,8 @@ def plot(modes: list[dict], path: Path):
     a.set(xscale="log", yscale="log", xlabel="concurrent requests", ylabel="latency, ms", title="Coordinator latency vs concurrency")
     b.set(xscale="log", xlabel="concurrent requests", ylabel="requests / s", title="Throughput vs concurrency")
     b.set_ylim(bottom=0)
+    a.yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda v, _: f"{v:,.0f}"))
+    a.yaxis.set_minor_formatter(matplotlib.ticker.NullFormatter())
     for ax in (a, b):
         ax.set_xticks(sorted(ticks), [str(t) for t in sorted(ticks)])
         ax.grid(alpha=.25)
