@@ -31,20 +31,20 @@
 
 | Agent | Input | Output | May not |
 |---|---|---|---|
-| Lip-reading (vsr) | mouth video clip | n-best raw transcripts, beam scores, face/mouth-motion quality | rewrite or "correct" text (Chaplin's LLM correction is deliberately not used) |
+| Lip-reading (vsr) | mouth video clip | up to 3 of the person's enrolled phrases (DTW distance ≤ 0.30 over encoder features), or nothing; free-text n-best only with `UNSPOKEN_VSR_FREE_TEXT=1`; face/mouth-motion quality | rewrite or "correct" text (Chaplin's LLM correction is deliberately not used) |
 | Voice (audio) | microphone clip | one of 20 fixed phrases with its raw `forced_llr` score (confident accept), the top 3 (uncertain), or nothing (no speech / no words heard); transcript and decision reason in `quality` | propose free text, or a phrase when Silero finds no speech or the model heard no words |
 | EEG replay (eeg) | recorded BNCI2014-008 trials | per-flash P300 scores, decoded row/column/letter | read ground-truth labels before predicting; claim live brain input |
 | Gaze / blink / head (browser) | webcam | selection events with method + dwell; nod / shake | count as confirmation unless the person dwells on a confirm target (1.5× longer), blinks, or nods while a message waits |
-| Coordinator | structured evidence summary (no media) | exactly one typed tool call: `ask_confirmation`, `request_retake`, `switch_input_method`, (`speak_confirmed_text`, always rejected without a confirmation event) | write, rephrase or choose the patient's message |
+| Coordinator | structured evidence summary (no media) | exactly one typed tool call: `ask_confirmation`, `request_retake`, `switch_input_method`, `propose_correction` (fix misread words, validated to stay anchored to the reading), `ignore_input` (treat as noise), (`speak_confirmed_text`, always rejected without a confirmation event) | invent a new message: a correction must keep at least half the words read and the length within ±2 words (negations are not checked: [TECHNICAL_VERBOSE](TECHNICAL_VERBOSE.md) §10) |
 | Policy gate (code) | message + audit log | TTS token or `PolicyViolation` | — |
 | TTS | token + text | audio of exactly that text | speak anything without a matching token |
 
 ## Coordination timeline for one message
 
-1. A specialist returns `Evidence` (shared/schemas.py). The gateway adds candidates, records raw hypotheses in the audit log, and runs the **deterministic policy instantly**, so options appear at once.
+1. A specialist returns `Evidence` (shared/schemas.py). Evidence the specialist marked unusable (no face, no mouth motion, too short, no speech, no reading) is logged and dropped, never shown. Otherwise the gateway adds candidates (a new lip/audio clip replaces an unanswered reading unless it pairs with it within 10 s), records raw hypotheses in the audit log, and runs the **deterministic policy instantly**, so options appear at once.
 2. The coordinator model is called in the background with a summary. Its tool call is validated outside the model (ids exist, method available, gaze calibrated, no speech). A valid call refines what is shown, unless the person has already acted. An invalid call is logged as rejected and the fallback stays.
-3. The person selects (click, keyboard, dwell, blink), optionally corrects the text (the original is kept), then confirms with a separate action. Confirm targets need a longer dwell than select targets.
-4. `authorize_speech` checks status, the explicit method, that the confirmation event is in the audit log and was made by a person, and that the text has not changed since confirmation. It then signs `(message_id, text)`.
+3. **Confirm mode** (`UNSPOKEN_AUTO_SPEAK=0`): the person confirms with Yes, a blink or a nod (a phrase card is its own confirmation). **Demo auto-speak** (`UNSPOKEN_AUTO_SPEAK=1`, the default on `ui`): only for an **accepted** reading (the voice agent accepted it, or lips and voice agree), the rules' plan is applied at once, without Nemotron, and the gateway confirms that reading itself, audited as `auto_confirmed` by `system`. Ambiguous readings, lip-only matches, disagreements and corrections go to Nemotron and then wait for Yes/No.
+4. `authorize_speech` checks status, the explicit method, that the confirmation event is in the audit log and was made by a person, and that the text has not changed since confirmation (in auto-speak: its own audited `auto_confirmed` event for the exact text). It then signs `(message_id, text)`.
 5. The TTS service verifies the signature and speaks the exact string.
 
 ## Graceful degradation
@@ -87,6 +87,7 @@ manifest.csv ─► Silero VAD ─► model (own process) ─► rankers ─► 
                                                                 coordinator 8105 → vLLM 8001 (Nemotron NVFP4)
 ```
 
-- **Brev:** one RTX PRO 6000 holds everything (about 72 GB with the asr_eval bench). The gateway reports `host: "NVIDIA Brev"` in `/api/health`, and the UI's camera chip then says clips go to Brev.
+- **Brev:** one RTX PRO 6000 holds everything (about 63 GB peak), with NVIDIA MPS so the GPU processes run concurrently, and early voice decode (the clip is sent at 350 ms of silence and committed at 700 ms). The gateway reports `host: "NVIDIA Brev"` in `/api/health`; the UI on `ui` does not currently show it.
+- **Every detail** of the system and its serving: [TECHNICAL_VERBOSE.md](TECHNICAL_VERBOSE.md).
 - **Same code on both.** Device selection goes through `shared.service.pick_device` (cuda > mps > cpu). The ASR and TTS backends are picked by platform: MLX on a Mac, PyTorch/NeMo on CUDA.
 - **Latency** with every model running together, and how to serve it faster: [SERVING.md](SERVING.md).

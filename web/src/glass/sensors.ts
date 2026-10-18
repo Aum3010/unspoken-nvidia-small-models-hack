@@ -13,7 +13,12 @@ import { onFace, type FaceFrame } from '../lib/face'
 interface VoiceOpts {
   canCapture: () => boolean
   onSpeech: (active: boolean) => void
-  onClip: (wav: Blob, ms: number) => void
+  /** The utterance is over (700 ms of quiet). `early` says the same clip was already sent by onEarly. */
+  onClip: (wav: Blob, ms: number, early: boolean) => void
+  /** 350 ms of quiet: the utterance has probably ended, so its decode can start while we wait to be sure. */
+  onEarly?: (wav: Blob) => void
+  /** Speech resumed (or capture was cancelled) after onEarly: that clip will not be used. */
+  onEarlyCancel?: () => void
 }
 
 const TAP = `class Tap extends AudioWorkletProcessor {
@@ -28,7 +33,8 @@ registerProcessor('unspoken-tap', Tap)`
 
 const PRE_BLOCKS = 8          // ≈350 ms of audio before the onset
 const ONSET_BLOCKS = 3        // ≈130 ms above threshold to start
-const HANG_BLOCKS = 16        // ≈700 ms of quiet to end
+const HANG_BLOCKS = 16        // ≈700 ms of quiet to end (unchanged: pauses inside a phrase must not split it)
+const EARLY_BLOCKS = 8        // ≈350 ms of quiet: start decoding early; the clip then keeps exactly this audio
 const MIN_VOICED_BLOCKS = 8   // ≈350 ms of voice, or the clip is dropped
 const MAX_MS = 10000
 
@@ -46,9 +52,16 @@ export async function startVoice(o: VoiceOpts): Promise<() => void> {
 
   let floor = -60, above = 0, quiet = 0, voiced = 0
   let clip: Float32Array[] | null = null
+  let early: { wav: Blob; blocks: number } | null = null   // the clip as sent at EARLY_BLOCKS of quiet
   const pre: Float32Array[] = []
+  const cancelEarly = () => { if (early) { early = null; o.onEarlyCancel?.() } }
   const end = (keep: boolean) => {
-    if (clip && keep && voiced >= MIN_VOICED_BLOCKS) o.onClip(toWav(clip, sr), clip.length * blockMs)
+    if (clip && keep && voiced >= MIN_VOICED_BLOCKS) {
+      // committed clip = the early one, so the decode already running is for exactly what is submitted
+      if (early) o.onClip(early.wav, early.blocks * blockMs, true)
+      else o.onClip(toWav(clip, sr), clip.length * blockMs, false)
+      early = null
+    } else cancelEarly()
     if (clip) o.onSpeech(false)
     clip = null; voiced = 0; quiet = 0
   }
@@ -67,8 +80,13 @@ export async function startVoice(o: VoiceOpts): Promise<() => void> {
     }
     if (!o.canCapture()) { end(false); return }
     clip.push(b)
-    if (db > floor + 7) { quiet = 0; voiced++ } else quiet++
-    if (quiet >= HANG_BLOCKS || clip.length * blockMs >= MAX_MS) end(true)
+    if (db > floor + 7) { quiet = 0; voiced++; cancelEarly() } else quiet++
+    if (quiet === EARLY_BLOCKS && !early && voiced >= MIN_VOICED_BLOCKS && o.onEarly) {
+      early = { wav: toWav(clip, sr), blocks: clip.length }
+      o.onEarly(early.wav)
+    }
+    if (clip.length * blockMs >= MAX_MS) { cancelEarly(); end(true) }
+    else if (quiet >= HANG_BLOCKS) end(true)
   }
   return () => { end(false); tap.port.onmessage = null; src.disconnect(); ac.close() }
 }
@@ -99,7 +117,11 @@ interface LipOpts {
   stream: MediaStream
   canCapture: () => boolean
   onMouthing: (active: boolean) => void
-  onClip: (video: Blob, ms: number) => void
+  onClip: (video: Blob, ms: number, stream: { id: string; chunks: number }) => void
+  /** a piece of the clip being recorded (sent while the person is still mouthing) */
+  onPiece?: (id: string, piece: Blob, seq: number, mime: string) => void
+  /** the recording was dropped: its pieces will not be used */
+  onDrop?: (id: string) => void
 }
 
 const LIP_WINDOW_MS = 600
@@ -110,14 +132,14 @@ const LIP_MAX_MS = 8000
 
 export function startLips(o: LipOpts): () => void {
   const hist: { t: number; g: number }[] = []
-  let rec: Recording | null = null, recT0 = 0, movingSince = 0, stillSince = 0, confirmed = false
+  let rec: Recording | null = null, recT0 = 0, movingSince = 0, stillSince = 0, confirmed = false, recId = ''
   const stop = (send: boolean) => {
     const r = rec; if (!r) return
     rec = null
     if (confirmed) o.onMouthing(false)
-    const ms = performance.now() - recT0
-    if (send && confirmed && ms >= LIP_MIN_MS) r.stop().then((b) => o.onClip(b, ms))
-    else r.cancel()
+    const ms = performance.now() - recT0, id = recId
+    if (send && confirmed && ms >= LIP_MIN_MS) r.stop().then((b) => o.onClip(b, ms, { id, chunks: r.chunks() }))
+    else { r.cancel(); o.onDrop?.(id) }
     confirmed = false
   }
   const off = onFace((f: FaceFrame) => {
@@ -135,7 +157,11 @@ export function startLips(o: LipOpts): () => void {
       stillSince = 0
       if (!movingSince) movingSince = now
       // start recording at the first movement so the onset is kept; commit after 200 ms of it
-      if (!rec) { rec = record(o.stream, 'video', LIP_MAX_MS + 500); recT0 = performance.now() }
+      if (!rec) {
+        const id = recId = `lip${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`
+        rec = record(o.stream, 'video', LIP_MAX_MS + 500, o.onPiece && ((p, seq, mime) => o.onPiece!(id, p, seq, mime)))
+        recT0 = performance.now()
+      }
       if (!confirmed && now - movingSince > 200) { confirmed = true; o.onMouthing(true) }
     } else {
       movingSince = 0

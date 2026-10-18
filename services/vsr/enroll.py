@@ -16,7 +16,7 @@ from pathlib import Path
 
 import numpy as np
 
-from services.vsr.phrases import dtw
+from services.vsr.phrases import dtw_batch
 from shared.provenance import ROOT
 
 ENROLL_DIR = Path(os.environ.get("UNSPOKEN_ENROLL_DIR", ROOT / "data" / "enroll"))
@@ -31,10 +31,11 @@ class EnrollmentStore:
         self.root = root
         self.lock = threading.Lock()
         self._cache: dict[str, list[np.ndarray]] | None = None
+        self._packed: tuple[list[str], np.ndarray, np.ndarray] | None = None
 
     def _load(self) -> dict[str, list[np.ndarray]]:
         if self._cache is None:
-            self._cache = {}
+            self._cache, self._packed = {}, None
             for d in sorted(self.root.glob("*/")) if self.root.exists() else []:
                 name = d / "phrase.txt"
                 if name.exists():
@@ -64,9 +65,27 @@ class EnrollmentStore:
             shutil.rmtree(self.root / _slug(" ".join(phrase.split())), ignore_errors=True)
             self._cache = None
 
+    def _pack(self) -> tuple[list[str], np.ndarray, np.ndarray]:
+        """Every recording zero-padded into one array, so a clip is compared with all of them at once."""
+        cache = self._load()
+        if self._packed is None:
+            names = [p for p, clips in cache.items() for _ in clips]
+            clips = [c for cs in cache.values() for c in cs]
+            lens = np.array([len(c) for c in clips])
+            bs = np.zeros((len(clips), lens.max(initial=0), clips[0].shape[1] if clips else 0), np.float32)
+            for k, c in enumerate(clips):
+                bs[k, :len(c)] = c
+            self._packed = names, bs, lens
+        return self._packed
+
     def match(self, feats: np.ndarray, top: int = 3) -> list[tuple[str, float]]:
         """Phrases ranked by their closest recording (smaller DTW distance is better)."""
         x = feats / (np.linalg.norm(feats, axis=1, keepdims=True) + 1e-8)
         with self.lock:
-            dist = [(p, min(dtw(x, c) for c in clips)) for p, clips in self._load().items()]
-        return sorted(dist, key=lambda t: t[1])[:top]
+            names, bs, lens = self._pack()
+            if not names:
+                return []
+            best: dict[str, float] = {}
+            for p, dist in zip(names, dtw_batch(x, bs, lens).tolist()):
+                best[p] = min(dist, best.get(p, np.inf))
+        return sorted(best.items(), key=lambda t: t[1])[:top]

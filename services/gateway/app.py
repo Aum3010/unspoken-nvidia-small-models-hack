@@ -9,6 +9,7 @@ from __future__ import annotations
 import asyncio
 import json
 import os
+import re
 import time
 
 import httpx
@@ -17,7 +18,7 @@ from fastapi.responses import Response
 from pydantic import BaseModel
 
 from services.gateway.state import Session, TransitionError
-from shared.confirmation import PolicyViolation, authorize_speech
+from shared.confirmation import PolicyViolation, authorize_speech, phrase_preload_token, sign
 from shared.provenance import MODEL_LEDGER, ROOT, service_url
 from shared.schemas import ALLOWED_CONFIRMATION_METHODS, Candidate, Evidence, ToolCall
 from shared.service import make_app
@@ -119,7 +120,16 @@ async def coordinate(s: Session):
     if not s.settings["use_llm"]:
         apply_plan(s, validate(deterministic_plan(pr), pr))
         return
-    apply_plan(s, validate(deterministic_plan(pr), pr), quiet=True)
+    plan = validate(deterministic_plan(pr), pr)
+    accepted = _accepted_reading(s)
+    if accepted and not LLM_FOR_ACCEPTED and plan.valid and plan.name == "ask_confirmation" \
+            and plan.arguments.get("candidate_ids") == [accepted.id]:
+        # nothing for the model to resolve: act on the rules' plan now instead of waiting ~0.3 s for Nemotron
+        apply_plan(s, plan)
+        s.trace("coordinator", "Accepted reading: rules decide, Nemotron not needed",
+                f"“{accepted.text}” · {' + '.join(accepted.supporting_modalities)}")
+        return
+    apply_plan(s, plan, quiet=True)
     s.trace("coordinator", "Nemotron is planning the next question", f"{len(m.candidates)} candidate(s) · {len(m.evidence_ids)} evidence event(s)", level="pending")
     task = asyncio.create_task(_refine_with_model(s, req, _plan_version(s)))
     _background.add(task)
@@ -127,6 +137,24 @@ async def coordinate(s: Session):
 
 
 _background: set[asyncio.Task] = set()
+
+# Nemotron is for ambiguous and unknown readings. When the specialists have already settled the reading (the voice
+# agent accepted it, or lips and voice agree on it) the rules decide that case exactly as Nemotron is asked to, so the
+# person does not wait for the model and the GPU does not run it. UNSPOKEN_LLM_FOR_ACCEPTED=1 restores the model call.
+LLM_FOR_ACCEPTED = os.environ.get("UNSPOKEN_LLM_FOR_ACCEPTED", "0") != "0"
+
+
+def _accepted_reading(s: Session):
+    """The message's only candidate, if the specialists accepted it: every evidence event is `proposed` (no
+    ambiguity, no lip/voice disagreement) and the voice agent supports it. A lip-only match still goes to the model."""
+    m = s.message
+    if m.status not in ("proposed", "clarifying") or len(m.candidates) != 1:
+        return None
+    c = m.candidates[0]
+    evs = [s.evidence[e] for e in m.evidence_ids]
+    if c.origin != "evidence" or not evs or any(e.status != "proposed" for e in evs):
+        return None
+    return c if "audio" in c.supporting_modalities else None
 
 
 def _schedule(coro):
@@ -178,6 +206,7 @@ async def _refine_with_model(s: Session, req: dict, plan_version: tuple):
 
 def apply_plan(s: Session, call: ToolCall, quiet: bool = False):
     m = s.message
+    accepted = _accepted_reading(s)
     s.last_plan = call
     who = "Nemotron coordinator" if call.by == "llm" else "Deterministic policy"
     rejected = (call.raw or {}).get("rejected_llm_call")
@@ -226,8 +255,11 @@ def apply_plan(s: Session, call: ToolCall, quiet: bool = False):
     elif call.name == "switch_input_method":
         s.trace("coordinator", f"{who}: switch_input_method → {call.arguments.get('method')}", call.rationale,
                 latency_ms=call.latency_ms, data={"call": call.model_dump()})
-    if call.name in ("ask_confirmation", "propose_correction") and s.settings["auto_speak"] and s.shown_candidate_ids:
-        _schedule(_auto_speak(s, m.id, s.shown_candidate_ids[0]))
+    # Demo auto-speak covers accepted readings only. Ambiguous readings, lip-only matches and corrections always wait
+    # for the person's Yes/No.
+    if call.name == "ask_confirmation" and s.settings["auto_speak"] and accepted and s.shown_candidate_ids == [accepted.id]:
+        s.auto_speak_candidate_id = accepted.id
+        _schedule(_auto_speak(s, m.id, accepted.id))
 
 
 # ---- captures ---------------------------------------------------------------
@@ -250,25 +282,23 @@ def screen_evidence(ev: Evidence) -> str | None:
     return None
 
 
-async def _forward_capture(s: Session, service: str, field: str, upload: UploadFile, label: str, extra: dict | None = None):
-    data = await upload.read()
-    s.trace(service, f"{label} received", f"{len(data) / 1024:.0f} KB · processing", level="pending")
+async def _infer(s: Session, service: str, field: str, filename: str, data: bytes, content_type: str, extra: dict | None = None) -> Evidence:
+    async with httpx.AsyncClient(timeout=120) as client:
+        r = await client.post(f"{service_url(service)}/infer", files={field: (filename, data, content_type)},
+                              data={"session_id": s.id, **(extra or {})})
+    if r.status_code != 200:
+        raise HTTPException(502, f"{service} error: {r.text[:200]}")
+    return Evidence(**r.json())
+
+
+async def _unavailable(s: Session, service: str, exc: Exception):
+    s.timeline = [t for t in s.timeline if t["level"] != "pending"]
+    s.trace(service, f"{service} unavailable", f"{type(exc).__name__}. The board is still available.", level="error")
     await push(s)
-    try:
-        async with httpx.AsyncClient(timeout=120) as client:
-            r = await client.post(f"{service_url(service)}/infer",
-                                  files={field: (upload.filename or field, data, upload.content_type or "application/octet-stream")},
-                                  data={"session_id": s.id, **(extra or {})})
-        if r.status_code != 200:
-            raise HTTPException(502, f"{service} error: {r.text[:200]}")
-        ev = Evidence(**r.json())
-    except HTTPException:
-        raise
-    except Exception as exc:
-        s.timeline = [t for t in s.timeline if t["level"] != "pending"]
-        s.trace(service, f"{service} unavailable", f"{type(exc).__name__}. The board is still available.", level="error")
-        await push(s)
-        raise HTTPException(503, f"{service} unavailable")
+    raise HTTPException(503, f"{service} unavailable")
+
+
+async def _apply_evidence(s: Session, service: str, ev: Evidence, label: str) -> dict:
     s.timeline = [t for t in s.timeline if t["level"] != "pending"]
     ignored = screen_evidence(ev)
     if ignored:
@@ -294,14 +324,163 @@ async def _forward_capture(s: Session, service: str, field: str, upload: UploadF
     return {"event": ev.model_dump(), "state": s.snapshot()}
 
 
+async def _forward_capture(s: Session, service: str, field: str, upload: UploadFile, label: str, extra: dict | None = None):
+    data = await upload.read()
+    s.trace(service, f"{label} received", f"{len(data) / 1024:.0f} KB · processing", level="pending")
+    await push(s)
+    try:
+        ev = await _infer(s, service, field, upload.filename or field, data, upload.content_type or "application/octet-stream", extra)
+    except HTTPException:
+        raise
+    except Exception as exc:
+        await _unavailable(s, service, exc)
+    return await _apply_evidence(s, service, ev, label)
+
+
 @app.post("/api/{sid}/capture/lip")
 async def capture_lip(sid: str, video: UploadFile = File(...)):
     return await _forward_capture(get_session(sid), "vsr", "video", video, "Mouth clip")
 
 
+# Streamed mouth clips. While the person mouths, the browser sends the recording in 250 ms pieces over the
+# session WebSocket; they are passed on to the lip agent at once, which decodes them and finds the face as they
+# arrive. When the mouth has been still for the pause, the browser asks for the reading here; the upload and most
+# of the preparation are already done. A stream that broke (a piece lost, the agent restarted) answers 409 and
+# the browser sends the whole clip the usual way.
+_lip_streams: dict[str, dict] = {}
+LIP_STREAM_TTL_S = 60
+_vsr_client: httpx.AsyncClient | None = None
+
+
+def _lip_key(sid: str, stream_id: str) -> str:
+    return re.sub(r"[^A-Za-z0-9_.-]", "_", f"{sid}.{stream_id}")[:120]
+
+
+def _lip_stream(key: str) -> dict:
+    return _lip_streams.setdefault(key, {"n": 0, "broken": False, "t": time.time(), "cv": asyncio.Condition()})
+
+
+async def _lip_chunk(sid: str, header: dict, payload: bytes):
+    global _vsr_client
+    now = time.time()
+    for k in [k for k, v in _lip_streams.items() if now - v["t"] > LIP_STREAM_TTL_S]:
+        _lip_streams.pop(k)
+    key = _lip_key(sid, str(header.get("id", "")))
+    st = _lip_stream(key)
+    _vsr_client = _vsr_client or httpx.AsyncClient(timeout=10)
+    if header.get("discard"):
+        _lip_streams.pop(key, None)
+        try:
+            await _vsr_client.post(f"{service_url('vsr')}/stream/{key}/discard")
+        except Exception:
+            pass
+        return
+    if st["broken"] or header.get("seq") != st["n"]:
+        st["broken"] = True
+    else:
+        try:
+            r = await _vsr_client.post(f"{service_url('vsr')}/stream/{key}/chunk", content=payload,
+                                       params={"mime": str(header.get("mime", "video/webm"))})
+            st["broken"] = r.status_code != 200
+        except Exception:
+            st["broken"] = True
+    st["n"] += 1
+    st["t"] = now
+    async with st["cv"]:
+        st["cv"].notify_all()
+
+
+class LipStreamFinish(BaseModel):
+    stream_id: str
+    chunks: int
+
+
+@app.post("/api/{sid}/capture/lip/stream")
+async def capture_lip_stream(sid: str, req: LipStreamFinish):
+    s = get_session(sid)
+    key = _lip_key(sid, req.stream_id)
+    st = _lip_stream(key)  # the last pieces may still be on their way over the WebSocket
+    try:
+        async with st["cv"]:
+            await asyncio.wait_for(st["cv"].wait_for(lambda: st["n"] >= req.chunks or st["broken"]), 5)
+    except asyncio.TimeoutError:
+        st["broken"] = True
+    _lip_streams.pop(key, None)
+    if st["broken"]:
+        try:
+            await _vsr_client.post(f"{service_url('vsr')}/stream/{key}/discard")
+        except Exception:
+            pass
+        raise HTTPException(409, "stream incomplete: send the whole clip")
+    s.trace("vsr", "Mouth clip received", f"streamed in {req.chunks} pieces · processing", level="pending")
+    await push(s)
+    try:
+        async with httpx.AsyncClient(timeout=120) as client:
+            r = await client.post(f"{service_url('vsr')}/stream/{key}/finish", data={"session_id": s.id})
+    except Exception as exc:
+        await _unavailable(s, "vsr", exc)
+    if r.status_code == 404:
+        s.timeline = [t for t in s.timeline if t["level"] != "pending"]
+        raise HTTPException(409, "stream lost by the lip agent: send the whole clip")
+    if r.status_code != 200:
+        raise HTTPException(502, f"vsr error: {r.text[:200]}")
+    return await _apply_evidence(s, "vsr", Evidence(**r.json()), "Mouth clip")
+
+
 @app.post("/api/{sid}/capture/audio")
 async def capture_audio(sid: str, audio: UploadFile = File(...), enhance: bool = Form(True)):
     return await _forward_capture(get_session(sid), "audio", "audio", audio, "Voice clip", {"enhance": str(enhance).lower()})
+
+
+# Early voice decode. The browser cuts an utterance after 700 ms of silence; at 350 ms it sends the clip here
+# and the voice agent starts decoding it *without* touching the session. If the person speaks again, the browser
+# discards it and keeps recording (the utterance is never split differently than before). At 700 ms it commits,
+# and the result, usually already finished, is applied exactly like a normal capture (same noise screening).
+# The decode and the upload overlap the silence the person waits through anyway, instead of following it.
+_early: dict[str, dict[str, asyncio.Task]] = {}
+EARLY_MAX = 4  # per session; older ones are dropped
+
+
+@app.post("/api/{sid}/capture/audio/early")
+async def capture_audio_early(sid: str, audio: UploadFile = File(...)):
+    s = get_session(sid)
+    data = await audio.read()
+    pending = _early.setdefault(sid, {})
+    while len(pending) >= EARLY_MAX:
+        pending.pop(next(iter(pending))).cancel()
+    early_id = f"early_{time.time_ns():x}"
+    pending[early_id] = asyncio.create_task(_infer(s, "audio", "audio", audio.filename or "clip.wav", data, audio.content_type or "audio/wav"))
+    return {"early_id": early_id}
+
+
+class EarlyBody(BaseModel):
+    early_id: str
+
+
+@app.post("/api/{sid}/capture/audio/commit")
+async def capture_audio_commit(sid: str, body: EarlyBody):
+    s = get_session(sid)
+    task = _early.get(sid, {}).pop(body.early_id, None)
+    if task is None:
+        raise HTTPException(404, "unknown or expired early clip")
+    if not task.done():
+        s.trace("audio", "Voice clip received", "decoding (started during the pause)", level="pending")
+        await push(s)
+    try:
+        ev = await task
+    except HTTPException:
+        raise
+    except Exception as exc:
+        await _unavailable(s, "audio", exc)
+    return await _apply_evidence(s, "audio", ev, "Voice clip")
+
+
+@app.post("/api/{sid}/capture/audio/discard")
+async def capture_audio_discard(sid: str, body: EarlyBody):
+    task = _early.get(sid, {}).pop(body.early_id, None)
+    if task:
+        task.cancel()
+    return {"discarded": task is not None}
 
 
 class EegCapture(BaseModel):
@@ -405,22 +584,94 @@ async def _speak(s: Session, ev, demo_auto: bool = False) -> dict:
             else f"exact confirmed text · {m.confirmation_method.replace('_', ' ')}")
     await push(s)
     latency = None
-    try:
-        async with httpx.AsyncClient(timeout=60) as client:
-            r = await client.post(f"{service_url('tts')}/speak", json={
-                "message_id": m.id, "text": m.confirmed_text, "token": token,
-                "voice": s.settings["voice"], "speed": s.settings["speech_rate"]})
-        r.raise_for_status()
-        s.audio[m.id] = r.content
-        latency = int(r.headers.get("X-Latency-Ms", 0))
-        s.trace("tts", "Spoke automatically" if demo_auto else "Spoke confirmed message", f"“{m.confirmed_text}”", latency_ms=latency)
-    except Exception as exc:
-        s.trace("tts", "TTS unavailable — browser voice used", type(exc).__name__, level="warn")
+    pre = _phrase_audio.get((m.confirmed_text, s.settings["voice"], s.settings["speech_rate"]))
+    if pre:
+        # the exact confirmed text is a pre-rendered phrase: the browser already holds this audio
+        s.audio[m.id] = pre[1]
+        s.trace("tts", "Spoke automatically" if demo_auto else "Spoke confirmed message",
+                f"“{m.confirmed_text}” · pre-rendered phrase audio", latency_ms=0)
+    else:
+        try:
+            async with httpx.AsyncClient(timeout=60) as client:
+                r = await client.post(f"{service_url('tts')}/speak", json={
+                    "message_id": m.id, "text": m.confirmed_text, "token": token,
+                    "voice": s.settings["voice"], "speed": s.settings["speech_rate"]})
+            r.raise_for_status()
+            s.audio[m.id] = r.content
+            latency = int(r.headers.get("X-Latency-Ms", 0))
+            s.trace("tts", "Spoke automatically" if demo_auto else "Spoke confirmed message", f"“{m.confirmed_text}”", latency_ms=latency)
+        except Exception as exc:
+            s.trace("tts", "TTS unavailable — browser voice used", type(exc).__name__, level="warn")
     s.mark_spoken(latency)
+    if pre:
+        s.spoken[-1]["phrase_audio_id"] = pre[0]
     msg_id = m.id
     await push(s)
     return {"message_id": msg_id, "audio_url": f"/api/{sid}/audio/{msg_id}" if msg_id in s.audio else None,
-            "text": s.spoken[-1]["text"], "state": s.snapshot()}
+            "phrase_audio_id": pre[0] if pre else None, "text": s.spoken[-1]["text"], "state": s.snapshot()}
+
+
+# ---- pre-rendered phrase audio ------------------------------------------------
+# The fixed phrases (the voice agent's list, the person's recorded lip phrases, the board and Help) are rendered
+# once and preloaded by the browser, so speaking one of them skips Kokoro and the audio download. Rendering is
+# not speaking: the browser plays a phrase only when the gateway reports it spoken, which happens only after
+# authorize_speech passed for exactly that text. Anything else (edited, spelled, corrected) still goes to Kokoro.
+_phrase_audio: dict[tuple[str, str, float], tuple[str, bytes]] = {}
+_phrase_audio_by_id: dict[str, bytes] = {}
+_phrase_lock = asyncio.Lock()
+PRELOAD_MAX, PRELOAD_TEXT_MAX = 64, 80
+
+
+async def _fixed_phrases(client: httpx.AsyncClient) -> list[str]:
+    texts = []
+    try:
+        import yaml
+        texts += list(yaml.safe_load((ROOT / "asr_eval" / "configs" / "eval.yaml").read_text())["phrases"].values())
+    except Exception:
+        pass
+    try:
+        r = await client.get(f"{service_url('vsr')}/enroll", timeout=3)
+        texts += [p["phrase"] for p in r.json().get("phrases", []) if not p["phrase"].startswith("[unknown]")]
+    except Exception:
+        pass
+    return texts
+
+
+class PreloadRequest(BaseModel):
+    texts: list[str] = []
+
+
+@app.post("/api/{sid}/phrase_audio")
+async def phrase_audio_manifest(sid: str, req: PreloadRequest):
+    """Render the fixed phrases for this session's voice and rate; returns their ids for the browser to fetch."""
+    s = get_session(sid)
+    voice, speed = s.settings["voice"], s.settings["speech_rate"]
+    out = []
+    async with _phrase_lock, httpx.AsyncClient(timeout=30) as client:
+        texts = await _fixed_phrases(client) + [t for t in req.texts if len(t) <= PRELOAD_TEXT_MAX]
+        for text in list(dict.fromkeys(" ".join(t.split()) for t in texts if t.strip()))[:PRELOAD_MAX]:
+            key = (text, voice, speed)
+            if key not in _phrase_audio:
+                pid = sign("phrase-audio", f"{text}|{voice}|{speed}")[:16]
+                try:
+                    r = await client.post(f"{service_url('tts')}/speak", json={
+                        "message_id": f"preload-{pid}", "text": text, "token": phrase_preload_token(pid, text),
+                        "voice": voice, "speed": speed})
+                    r.raise_for_status()
+                except Exception:
+                    continue
+                _phrase_audio[key] = (pid, r.content)
+                _phrase_audio_by_id[pid] = r.content
+            out.append({"id": _phrase_audio[key][0], "text": text})
+    s.log("gateway", "phrase_audio_preloaded", {"count": len(out), "voice": voice, "speed": speed})
+    return {"phrases": out}
+
+
+@app.get("/api/phrase_audio/{pid}")
+async def phrase_audio(pid: str):
+    if pid not in _phrase_audio_by_id:
+        raise HTTPException(404)
+    return Response(_phrase_audio_by_id[pid], media_type="audio/wav", headers={"Cache-Control": "private, max-age=86400"})
 
 
 @app.get("/api/{sid}/audio/{message_id}")
@@ -513,6 +764,15 @@ async def ws(websocket: WebSocket, sid: str):
     await websocket.send_json({"type": "state", "state": s.snapshot()})
     try:
         while True:
-            await websocket.receive_text()  # keepalive pings
+            msg = await websocket.receive()
+            if msg["type"] == "websocket.disconnect":
+                break
+            data = msg.get("bytes")
+            if data:  # a piece of a streamed mouth clip: 2-byte header length, JSON header, then the bytes
+                n = int.from_bytes(data[:2], "big")
+                await _lip_chunk(sid, json.loads(data[2:2 + n]), data[2 + n:])
+            # text messages are keepalive pings
     except WebSocketDisconnect:
+        pass
+    finally:
         sockets[sid].discard(websocket)

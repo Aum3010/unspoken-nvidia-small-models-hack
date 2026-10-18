@@ -5,7 +5,7 @@
 //   top right: live agent activity from the gateway timeline, then the spoken history
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { api, useHealth, useSession, SESSION_ID } from '../lib/api'
+import { api, sendLipPiece, useHealth, useSession, SESSION_ID } from '../lib/api'
 import { getCamera } from '../lib/capture'
 import { onBlink, trackVideo } from '../lib/face'
 import { gazeState, learnFromSelection, onGaze, saveCalibration, startGaze } from '../lib/gaze'
@@ -105,19 +105,24 @@ export function GlassApp() {
   // one clip per agent at a time: always-on capture outpaces the lip model, and a queue of clips only
   // times out (each waits behind the others); a clip that starts while the last is read is skipped
   const inFlight = useRef<Record<string, boolean>>({})
+  // mouth clips being streamed: the pieces' send chain, and whether every piece went out
+  const lipStreams = useRef<Record<string, { chain: Promise<void>; ok: boolean }>>({})
   const canCapture = useCallback((svc: string) => {
     const { state: s, health: h, connected: c, calibrating: cal } = live.current
     return !!s && c && !cal && !inFlight.current[svc] && performance.now() > speakingUntil.current &&
       !['selected', 'confirmed'].includes(s.message.status) && h?.[svc]?.state === 'ready'
   }, [])
 
-  const play = useCallback((url: string | null, text: string) => {
+  // preloaded audio of the fixed phrases (object URLs by id); played only when the gateway says it was spoken
+  const phraseAudio = useRef<Record<string, string>>({})
+  const play = useCallback((url: string | null, text: string, phraseId?: string | null) => {
     speakingUntil.current = performance.now() + 60000
     E.fireOut()
     const done = () => { speakingUntil.current = performance.now() + 700 }
     const fallback = () => { const u = new SpeechSynthesisUtterance(text); u.onend = done; u.onerror = done; speechSynthesis.speak(u) }
-    if (url) {
-      const a = new Audio(url)
+    const src = (phraseId && phraseAudio.current[phraseId]) || url
+    if (src) {
+      const a = new Audio(src)
       a.onended = done
       a.onerror = fallback
       a.play().catch(fallback)
@@ -125,6 +130,22 @@ export function GlassApp() {
   }, [])
 
   const run = useCallback((p: Promise<unknown>) => p.catch((e: Error) => E.caption(e.message || 'Something went wrong', 'the gateway refused that')), [])
+
+  // fetch the fixed phrases' audio once per voice and rate, so speaking one does not wait for TTS or a download
+  const voice = state?.settings.voice, rate = state?.settings.speech_rate, ttsReady = health?.tts?.state === 'ready'
+  useEffect(() => {
+    if (!connected || !ttsReady || voice === undefined) return
+    let stale = false
+    api.phraseAudio([...PHRASES.map(([t]) => t), HELP_TEXT]).then(async ({ phrases }) => {
+      for (const { id } of phrases) {
+        if (stale) return
+        if (phraseAudio.current[id]) continue
+        const r = await fetch(`/api/phrase_audio/${id}`)
+        if (r.ok) phraseAudio.current[id] = URL.createObjectURL(await r.blob())
+      }
+    }).catch(() => undefined)
+    return () => { stale = true }
+  }, [connected, ttsReady, voice, rate])
   const sendClip = useCallback((svc: string, req: () => Promise<unknown>) => {
     inFlight.current[svc] = true
     run(req().finally(() => { inFlight.current[svc] = false }))
@@ -152,7 +173,34 @@ export function GlassApp() {
           stream: s,
           canCapture: () => canCapture('vsr'),
           onMouthing: (on) => { if (on) E.fire('lips', .6, 'WATCHING') },
-          onClip: (b) => { E.fire('lips', 1, 'READING'); sendClip('vsr', () => api.captureLip(b)) },
+          onPiece: (id, piece, seq, mime) => {
+            // pieces are sent strictly in order: each waits for the one before it
+            const st = lipStreams.current[id] ??= { chain: Promise.resolve(), ok: true }
+            st.chain = st.chain.then(async () => {
+              if (st.ok) st.ok = sendLipPiece({ id, seq, mime }, await piece.arrayBuffer())
+            })
+          },
+          onDrop: (id) => {
+            const st = lipStreams.current[id]
+            delete lipStreams.current[id]
+            if (st) st.chain.then(() => { if (st.ok) sendLipPiece({ id, discard: true }) })
+          },
+          onClip: (b, _ms, { id, chunks }) => {
+            E.fire('lips', 1, 'READING')
+            const st = lipStreams.current[id]
+            delete lipStreams.current[id]
+            sendClip('vsr', async () => {
+              if (st) {
+                await st.chain
+                if (st.ok) {
+                  try { return await api.finishLipStream(id, chunks) } catch (e) {
+                    if (!/stream/.test((e as Error).message)) throw e  // 409: the stream broke, send the whole clip
+                  }
+                }
+              }
+              return api.captureLip(b)
+            })
+          },
         }))
       } catch {
         setCam('off')
@@ -166,10 +214,20 @@ export function GlassApp() {
   useEffect(() => {
     let stop: (() => void) | null = null
     let alive = true
+    // early decode: the clip goes out at 350 ms of quiet and is committed at the usual 700 ms
+    let early: Promise<string | null> | null = null
     startVoice({
       canCapture: () => canCapture('audio'),
       onSpeech: (on) => { setHearing(on); if (on) E.fire('voice', .7, 'HEARING') },
-      onClip: (b) => { E.fire('voice', 1, 'DECODING'); sendClip('audio', () => api.captureAudio(b, true)) },
+      onEarly: (b) => { early = api.captureAudioEarly(b).then((r) => r.early_id).catch(() => null) },
+      onEarlyCancel: () => { const p = early; early = null; p?.then((id) => { if (id) api.discardAudio(id).catch(() => undefined) }) },
+      onClip: (b, _ms, wasEarly) => {
+        E.fire('voice', 1, 'DECODING')
+        const p = wasEarly ? early : null
+        early = null
+        // the commit is the voice agent's one clip in flight, like a normal capture
+        sendClip('audio', () => (p ? p.then((id) => (id ? api.commitAudio(id) : api.captureAudio(b, true))) : api.captureAudio(b, true)))
+      },
     }).then((f) => { if (alive) { stop = f; setMic('on') } else f() }).catch(() => setMic('off'))
     return () => { alive = false; stop?.() }
   }, [run, canCapture])
@@ -248,14 +306,15 @@ export function GlassApp() {
       E.setTranscript(words(shown[0].text), [])
       const read = shown[0].origin === 'correction' ? shown[1]?.text : null
       const from = read ? `corrected from “${read}” · ` : ''
-      if (state.settings.auto_speak) E.caption('Understanding you…', `${from}it will be spoken automatically · No or shake to stop it`)
+      // auto-speak covers accepted readings only; ambiguous readings and corrections wait for Yes/No
+      if (state.auto_speak_candidate_id === shown[0].id) E.caption('Understanding you…', `${from}it will be spoken automatically · No or shake to stop it`)
       else E.caption('Did you mean this?', `${from}Yes, blink or nod to choose it · No or shake if it is wrong`)
     } else if (m.status === 'spoken') {
       const sp = state.spoken[state.spoken.length - 1]
       if (sp && sp.message_id !== lastSpoken.current) {
         lastSpoken.current = sp.message_id
         // auto-spoken by the gateway: this page did not start it, so it plays it now
-        if (sp.method === 'demo_auto_spoken' && Date.now() - sp.ts < 15000) play(`/api/${SESSION_ID}/audio/${sp.message_id}`, sp.text)
+        if (sp.method === 'demo_auto_spoken' && Date.now() - sp.ts < 15000) play(`/api/${SESSION_ID}/audio/${sp.message_id}`, sp.text, sp.phrase_audio_id)
         E.setTranscript(words(sp.text), [])
         E.caption(`Spoken · confirmed by ${METHOD_TEXT[sp.method] ?? sp.method}`)
       }
@@ -273,7 +332,7 @@ export function GlassApp() {
   }, [state, calibrating])
 
   /* ---------- actions: from the rail, bubbles, blinks, nods and keys ---------- */
-  const confirm = useCallback((how: E.How) => run(api.confirm(METHOD[how]).then((r) => play(r.audio_url, r.text))), [run, play])
+  const confirm = useCallback((how: E.How) => run(api.confirm(METHOD[how]).then((r) => play(r.audio_url, r.text, r.phrase_audio_id))), [run, play])
   const act = (a: string, el: HTMLElement | null, how: E.How) => {
     // a completed eye dwell means the person was looking at that target: refine the calibration with it
     if (how === 'eyes' && el) {
@@ -289,7 +348,7 @@ export function GlassApp() {
     const m = s.message
     // a phrase card is the person's own explicit choice (held with the eyes, or clicked), not a model's
     // reading, so choosing it is the confirmation: it is spoken straight away, through the same policy gate
-    const sayNow = (text: string) => run(api.board(text, 'board').then(() => api.confirm(METHOD[how])).then((r) => play(r.audio_url, r.text)))
+    const sayNow = (text: string) => run(api.board(text, 'board').then(() => api.confirm(METHOD[how])).then((r) => play(r.audio_url, r.text, r.phrase_audio_id)))
     if (a.startsWith('say:')) {
       E.closeBubbles()
       sayNow(a.slice(4))
@@ -304,7 +363,7 @@ export function GlassApp() {
       case 'yes':
         if (m.status === 'selected') confirm(how)
         else if (PENDING.includes(m.status) && shownCandidates(s)[0])
-          run(api.select(shownCandidates(s)[0].id, METHOD[how]).then(() => api.confirm(METHOD[how])).then((r) => play(r.audio_url, r.text)))
+          run(api.select(shownCandidates(s)[0].id, METHOD[how]).then(() => api.confirm(METHOD[how])).then((r) => play(r.audio_url, r.text, r.phrase_audio_id)))
         else { E.closeBubbles(); sayNow('Yes') }
         break
       case 'no': case 'shake':
@@ -319,7 +378,7 @@ export function GlassApp() {
       case 'speak': {
         const sp = s.spoken[s.spoken.length - 1]
         if (m.status === 'selected') confirm(how)
-        else if (m.status === 'spoken' && sp) play(`/api/${s.session_id}/audio/${sp.message_id}`, sp.text)
+        else if (m.status === 'spoken' && sp) play(`/api/${s.session_id}/audio/${sp.message_id}`, sp.text, sp.phrase_audio_id)
         else E.caption('Nothing chosen yet', 'choose a phrase, or mouth, say or spell it')
         break
       }
@@ -335,7 +394,7 @@ export function GlassApp() {
       case 'blink': case 'nod':
         if (m.status === 'selected') confirm(how)
         else if (PENDING.includes(m.status) && shownCandidates(s)[0])
-          run(api.select(shownCandidates(s)[0].id, METHOD[how]).then(() => api.confirm(METHOD[how])).then((r) => play(r.audio_url, r.text)))
+          run(api.select(shownCandidates(s)[0].id, METHOD[how]).then(() => api.confirm(METHOD[how])).then((r) => play(r.audio_url, r.text, r.phrase_audio_id)))
         break
     }
     if (['yes', 'speak', 'blink', 'nod'].includes(a) && m.status === 'selected') E.caption(`Confirmed by ${HOW_TEXT[how]}`, 'policy gate checks the exact text')
@@ -389,7 +448,7 @@ export function GlassApp() {
               const names = [...sp.supporting_modalities.map((x) => MOD_LABEL[x] ?? x), METHOD_TEXT[sp.method] ?? sp.method].join(' · ')
               return (
                 <div key={sp.message_id} className="msg" title="Click to hear it again" style={{ cursor: 'pointer' }}
-                  onClick={() => play(`/api/${state.session_id}/audio/${sp.message_id}`, sp.text)}>
+                  onClick={() => play(`/api/${state.session_id}/audio/${sp.message_id}`, sp.text, sp.phrase_audio_id)}>
                   <div className="b">{sp.text}</div>
                   <div className="meta">{[...new Set(via)].map((v) => <i key={v} style={{ ['--c' as string]: E.COL[v].join(',') }} />)}<span>{names} · {new Date(sp.ts).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}</span></div>
                 </div>

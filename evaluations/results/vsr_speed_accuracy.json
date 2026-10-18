@@ -1,0 +1,5339 @@
+{
+ "date": "2026-10-18",
+ "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+ "baseline": "beam12_fp32",
+ "clips": 132,
+ "prep_ms_p50 (decode video + face detection + mouth crop, shared)": 250,
+ "summary": {
+  "beam12_fp32": {
+   "n": 132,
+   "wer": 0.6944,
+   "cer": 0.4732,
+   "oracle_wer": 0.6086,
+   "same_top1_as_baseline": "132/132",
+   "encode_ms_p50": 10,
+   "beam_ms_p50": 271,
+   "decode_ms_p50": 282
+  },
+  "beam12_fp16": {
+   "n": 132,
+   "wer": 0.6944,
+   "cer": 0.4732,
+   "oracle_wer": 0.6073,
+   "same_top1_as_baseline": "132/132",
+   "encode_ms_p50": 11,
+   "beam_ms_p50": 283,
+   "decode_ms_p50": 295
+  },
+  "beam6_fp32": {
+   "n": 132,
+   "wer": 0.7109,
+   "cer": 0.4813,
+   "oracle_wer": 0.6452,
+   "same_top1_as_baseline": "87/132",
+   "encode_ms_p50": 9,
+   "beam_ms_p50": 222,
+   "decode_ms_p50": 231
+  },
+  "beam6_fp16": {
+   "n": 132,
+   "wer": 0.7134,
+   "cer": 0.4836,
+   "oracle_wer": 0.6465,
+   "same_top1_as_baseline": "85/132",
+   "encode_ms_p50": 10,
+   "beam_ms_p50": 236,
+   "decode_ms_p50": 248
+  }
+ },
+ "rows": {
+  "beam12_fp32": [
+   {
+    "clip": "s1/bbaf2n.mpg",
+    "truth": "bin blue at f two now",
+    "top1": "people have to now",
+    "wer": 0.8333333333333334,
+    "cer": 0.5238095238095238,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 16.39481999882264,
+    "beam_ms": 435.4561630025273
+   },
+   {
+    "clip": "s1/lbaq6p.mpg",
+    "truth": "lay blue at q six please",
+    "top1": "label acoustics please",
+    "wer": 0.8333333333333334,
+    "cer": 0.5,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 9.275813004933298,
+    "beam_ms": 260.25180199940223
+   },
+   {
+    "clip": "s1/pbav2n.mpg",
+    "truth": "place blue at v two now",
+    "top1": "plays beautifully too now",
+    "wer": 0.8333333333333334,
+    "cer": 0.5217391304347826,
+    "oracle_wer": 0.5,
+    "encode_ms": 10.940140004095156,
+    "beam_ms": 240.76618300023256
+   },
+   {
+    "clip": "s1/sbah1a.mpg",
+    "truth": "set blue at h one again",
+    "top1": "temple age one again",
+    "wer": 0.6666666666666666,
+    "cer": 0.34782608695652173,
+    "oracle_wer": 0.5,
+    "encode_ms": 11.54250300169224,
+    "beam_ms": 240.72276299557416
+   },
+   {
+    "clip": "s2/bbaf1n.mpg",
+    "truth": "bin blue at f one now",
+    "top1": "been blew in f one now",
+    "wer": 0.5,
+    "cer": 0.2857142857142857,
+    "oracle_wer": 0.5,
+    "encode_ms": 10.631764002027921,
+    "beam_ms": 282.6633739969111
+   },
+   {
+    "clip": "s2/lbaq5p.mpg",
+    "truth": "lay blue at q five please",
+    "top1": "i'll let it blow into you five please",
+    "wer": 1.0,
+    "cer": 0.72,
+    "oracle_wer": 0.5,
+    "encode_ms": 11.208297000848688,
+    "beam_ms": 304.679307002516
+   },
+   {
+    "clip": "s2/pbapza.mpg",
+    "truth": "place blue at p zero again",
+    "top1": "it's brewing b zero again",
+    "wer": 0.6666666666666666,
+    "cer": 0.46153846153846156,
+    "oracle_wer": 0.5,
+    "encode_ms": 10.63393399817869,
+    "beam_ms": 294.19796699949075
+   },
+   {
+    "clip": "s2/sbag8s.mpg",
+    "truth": "set blue at g eight soon",
+    "top1": "it's dead blue and gigantic",
+    "wer": 1.0,
+    "cer": 0.75,
+    "oracle_wer": 1.0,
+    "encode_ms": 11.920222001208458,
+    "beam_ms": 279.53092499956256
+   },
+   {
+    "clip": "s3/bbaf1s.mpg",
+    "truth": "bin blue at f one soon",
+    "top1": "beat blue at f one two",
+    "wer": 0.3333333333333333,
+    "cer": 0.2727272727272727,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 9.37044599413639,
+    "beam_ms": 193.34995000099298
+   },
+   {
+    "clip": "s3/lbaq4p.mpg",
+    "truth": "lay blue at q four please",
+    "top1": "light blue and q four please",
+    "wer": 0.3333333333333333,
+    "cer": 0.24,
+    "oracle_wer": 0.16666666666666666,
+    "encode_ms": 9.93183800164843,
+    "beam_ms": 335.86932299658656
+   },
+   {
+    "clip": "s3/pbao8p.mpg",
+    "truth": "place blue at o eight please",
+    "top1": "place blue at o eight place",
+    "wer": 0.16666666666666666,
+    "cer": 0.07142857142857142,
+    "oracle_wer": 0.16666666666666666,
+    "encode_ms": 9.216773003572598,
+    "beam_ms": 230.18193999450887
+   },
+   {
+    "clip": "s3/sbag6n.mpg",
+    "truth": "set blue at g six now",
+    "top1": "er said blue i had a gcse now",
+    "wer": 1.0,
+    "cer": 0.7142857142857143,
+    "oracle_wer": 1.0,
+    "encode_ms": 9.261063001758885,
+    "beam_ms": 317.0348399944487
+   },
+   {
+    "clip": "s4/bbae9n.mpg",
+    "truth": "bin blue at e nine now",
+    "top1": "i've been boasting day now",
+    "wer": 0.8333333333333334,
+    "cer": 0.7727272727272727,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 11.486512994451914,
+    "beam_ms": 345.49241499917116
+   },
+   {
+    "clip": "s4/lbaq3p.mpg",
+    "truth": "lay blue at q three please",
+    "top1": "i'll keep you at q three please",
+    "wer": 0.5,
+    "cer": 0.4230769230769231,
+    "oracle_wer": 0.5,
+    "encode_ms": 11.446182004874572,
+    "beam_ms": 302.59338099858724
+   },
+   {
+    "clip": "s4/pbao6s.mpg",
+    "truth": "place blue at o six soon",
+    "top1": "placebo et cetera",
+    "wer": 1.0,
+    "cer": 0.625,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 9.409948004758917,
+    "beam_ms": 303.5346920005395
+   },
+   {
+    "clip": "s4/sbaa4a.mpg",
+    "truth": "set blue at a four again",
+    "top1": "and he blew it out for her again",
+    "wer": 1.1666666666666667,
+    "cer": 0.6666666666666666,
+    "oracle_wer": 1.0,
+    "encode_ms": 10.565451993898023,
+    "beam_ms": 287.3406470025657
+   },
+   {
+    "clip": "s5/bbae7n.mpg",
+    "truth": "bin blue at e seven now",
+    "top1": "been blew in e seven now",
+    "wer": 0.5,
+    "cer": 0.2608695652173913,
+    "oracle_wer": 0.5,
+    "encode_ms": 10.781557000882458,
+    "beam_ms": 292.2749650024343
+   },
+   {
+    "clip": "s5/lbaq2a.mpg",
+    "truth": "lay blue at q two again",
+    "top1": "i'd like a blooming coat to you again",
+    "wer": 1.1666666666666667,
+    "cer": 0.9565217391304348,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 10.138224002730567,
+    "beam_ms": 384.0579030002118
+   },
+   {
+    "clip": "s5/pbaizs.mpg",
+    "truth": "place blue at i zero soon",
+    "top1": "but let's put it where it's hiding around you",
+    "wer": 1.5,
+    "cer": 1.4,
+    "oracle_wer": 1.5,
+    "encode_ms": 10.238686001684982,
+    "beam_ms": 333.0993219933589
+   },
+   {
+    "clip": "s5/sbaa2a.mpg",
+    "truth": "set blue at a two again",
+    "top1": "it's had a blue and a two again",
+    "wer": 0.6666666666666666,
+    "cer": 0.4782608695652174,
+    "oracle_wer": 0.5,
+    "encode_ms": 10.487291001481935,
+    "beam_ms": 297.37118600314716
+   },
+   {
+    "clip": "s6/bbae8n.mpg",
+    "truth": "bin blue at e eight now",
+    "top1": "big blue as he is now",
+    "wer": 0.6666666666666666,
+    "cer": 0.30434782608695654,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 9.277424003812484,
+    "beam_ms": 219.6738889979315
+   },
+   {
+    "clip": "s6/lbaq3a.mpg",
+    "truth": "lay blue at q three again",
+    "top1": "late blooming q three again",
+    "wer": 0.5,
+    "cer": 0.32,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 9.614360998966731,
+    "beam_ms": 272.72889600135386
+   },
+   {
+    "clip": "s6/pbao4n.mpg",
+    "truth": "place blue at o four now",
+    "top1": "place blue is over now",
+    "wer": 0.5,
+    "cer": 0.25,
+    "oracle_wer": 0.5,
+    "encode_ms": 11.126174998935312,
+    "beam_ms": 237.79719800222665
+   },
+   {
+    "clip": "s6/sbaa3a.mpg",
+    "truth": "set blue at a three again",
+    "top1": "simple u s a three again",
+    "wer": 0.5,
+    "cer": 0.32,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 10.326796997105703,
+    "beam_ms": 238.2302680052817
+   },
+   {
+    "clip": "s7/bbae6n.mpg",
+    "truth": "bin blue at e six now",
+    "top1": "ben and bill were six now",
+    "wer": 0.6666666666666666,
+    "cer": 0.5238095238095238,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 11.670285995933227,
+    "beam_ms": 242.22545500379056
+   },
+   {
+    "clip": "s7/lbaq1a.mpg",
+    "truth": "lay blue at q one again",
+    "top1": "let it blow away are you wearing it",
+    "wer": 1.3333333333333333,
+    "cer": 1.0,
+    "oracle_wer": 1.1666666666666667,
+    "encode_ms": 11.223216999496799,
+    "beam_ms": 278.7495980010135
+   },
+   {
+    "clip": "s7/pbai1a.mpg",
+    "truth": "place blue at i one again",
+    "top1": "please blue i want it",
+    "wer": 0.6666666666666666,
+    "cer": 0.48,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 10.794576999614947,
+    "beam_ms": 281.27546299947426
+   },
+   {
+    "clip": "s7/sbaa1a.mpg",
+    "truth": "set blue at a one again",
+    "top1": "that blooming day one again",
+    "wer": 0.6666666666666666,
+    "cer": 0.4782608695652174,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 10.8098280034028,
+    "beam_ms": 282.24835499713663
+   },
+   {
+    "clip": "s8/bbae5n.mpg",
+    "truth": "bin blue at e five now",
+    "top1": "ben and blue who has e five now",
+    "wer": 0.6666666666666666,
+    "cer": 0.5,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 9.523759006697219,
+    "beam_ms": 281.69498299394036
+   },
+   {
+    "clip": "s8/lbap9p.mpg",
+    "truth": "lay blue at p nine please",
+    "top1": "light blue and pink dye please",
+    "wer": 0.6666666666666666,
+    "cer": 0.44,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 9.370325999043416,
+    "beam_ms": 219.2442489977111
+   },
+   {
+    "clip": "s8/pbah8s.mpg",
+    "truth": "place blue at h eight soon",
+    "top1": "place blue at age eight soon",
+    "wer": 0.16666666666666666,
+    "cer": 0.11538461538461539,
+    "oracle_wer": 0.16666666666666666,
+    "encode_ms": 9.571349997713696,
+    "beam_ms": 247.06654100009473
+   },
+   {
+    "clip": "s8/pwwx8a.mpg",
+    "truth": "place white with x eight again",
+    "top1": "place white with x eight again",
+    "wer": 0.0,
+    "cer": 0.0,
+    "oracle_wer": 0.0,
+    "encode_ms": 9.316294999734964,
+    "beam_ms": 206.252725001832
+   },
+   {
+    "clip": "s9/bbae4n.mpg",
+    "truth": "bin blue at e four now",
+    "top1": "i'm being blue i need four now",
+    "wer": 0.6666666666666666,
+    "cer": 0.5,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 10.08531099796528,
+    "beam_ms": 280.51532700192183
+   },
+   {
+    "clip": "s9/lbap8p.mpg",
+    "truth": "lay blue at p eight please",
+    "top1": "lady bloom unpaid please",
+    "wer": 0.8333333333333334,
+    "cer": 0.46153846153846156,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 10.306055999535602,
+    "beam_ms": 293.4985130050336
+   },
+   {
+    "clip": "s9/pbah6n.mpg",
+    "truth": "place blue at h six now",
+    "top1": "please blew i can't see anything",
+    "wer": 1.0,
+    "cer": 0.8260869565217391,
+    "oracle_wer": 1.0,
+    "encode_ms": 9.351485001388937,
+    "beam_ms": 304.65705799724674
+   },
+   {
+    "clip": "s9/pwwx6p.mpg",
+    "truth": "place white with x six please",
+    "top1": "plus one we've had six plus",
+    "wer": 0.8333333333333334,
+    "cer": 0.5517241379310345,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 9.846455999650061,
+    "beam_ms": 239.94810500153108
+   },
+   {
+    "clip": "s10/bbab8n.mpg",
+    "truth": "bin blue at b eight now",
+    "top1": "blew up again now",
+    "wer": 0.8333333333333334,
+    "cer": 0.6086956521739131,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 9.600182005669922,
+    "beam_ms": 260.9282649937086
+   },
+   {
+    "clip": "s10/bwwq8p.mpg",
+    "truth": "bin white with q eight please",
+    "top1": "i've been right with you ah please",
+    "wer": 0.8333333333333334,
+    "cer": 0.6206896551724138,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 10.81919799617026,
+    "beam_ms": 316.1100580036873
+   },
+   {
+    "clip": "s10/lwwi8p.mpg",
+    "truth": "lay white with i eight please",
+    "top1": "lynn why don't we try it",
+    "wer": 1.0,
+    "cer": 0.7586206896551724,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 9.906216997478623,
+    "beam_ms": 311.47136700019473
+   },
+   {
+    "clip": "s10/sbad4n.mpg",
+    "truth": "set blue at d four now",
+    "top1": "it's temperamental for now",
+    "wer": 0.8333333333333334,
+    "cer": 0.6818181818181818,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 9.342154997284524,
+    "beam_ms": 346.7918339956668
+   },
+   {
+    "clip": "s11/bbae2n.mpg",
+    "truth": "bin blue at e two now",
+    "top1": "people who hate you now",
+    "wer": 0.8333333333333334,
+    "cer": 0.7142857142857143,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 10.15049300622195,
+    "beam_ms": 256.247313998756
+   },
+   {
+    "clip": "s11/lbap4n.mpg",
+    "truth": "lay blue at p four now",
+    "top1": "they blew a bit of food now",
+    "wer": 1.0,
+    "cer": 0.5454545454545454,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 10.879939000005834,
+    "beam_ms": 292.7799760000198
+   },
+   {
+    "clip": "s11/pbab3a.mpg",
+    "truth": "place blue at b three again",
+    "top1": "place bloom in b three again",
+    "wer": 0.3333333333333333,
+    "cer": 0.18518518518518517,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 11.31300900306087,
+    "beam_ms": 263.6165150033776
+   },
+   {
+    "clip": "s11/pwwx2n.mpg",
+    "truth": "place white with x two now",
+    "top1": "please why would that do now",
+    "wer": 0.8333333333333334,
+    "cer": 0.5384615384615384,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 10.719165999034885,
+    "beam_ms": 236.92653800389962
+   },
+   {
+    "clip": "s12/bbae1n.mpg",
+    "truth": "bin blue at e one now",
+    "top1": "pin blue is a one now",
+    "wer": 0.5,
+    "cer": 0.19047619047619047,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 9.300824996898882,
+    "beam_ms": 201.13334100460634
+   },
+   {
+    "clip": "s12/lbajzs.mpg",
+    "truth": "lay blue at j zero soon",
+    "top1": "late bloomer and jay savoy",
+    "wer": 1.0,
+    "cer": 0.6956521739130435,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 10.82678899547318,
+    "beam_ms": 361.24203100189334
+   },
+   {
+    "clip": "s12/pbab1p.mpg",
+    "truth": "place blue at b one please",
+    "top1": "place blue is b one please",
+    "wer": 0.16666666666666666,
+    "cer": 0.07692307692307693,
+    "oracle_wer": 0.16666666666666666,
+    "encode_ms": 11.497572995722294,
+    "beam_ms": 351.90111600240925
+   },
+   {
+    "clip": "s12/pwwqza.mpg",
+    "truth": "place white with q zero again",
+    "top1": "plays wise with q zero again",
+    "wer": 0.3333333333333333,
+    "cer": 0.13793103448275862,
+    "oracle_wer": 0.16666666666666666,
+    "encode_ms": 10.947770002530888,
+    "beam_ms": 246.5778309997404
+   },
+   {
+    "clip": "s13/bbae1s.mpg",
+    "truth": "bin blue at e one soon",
+    "top1": "but blue is he once",
+    "wer": 0.8333333333333334,
+    "cer": 0.5,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 10.553592001087964,
+    "beam_ms": 238.9204430000973
+   },
+   {
+    "clip": "s13/lbaj1a.mpg",
+    "truth": "lay blue at j one again",
+    "top1": "it blew and jay won again",
+    "wer": 0.8333333333333334,
+    "cer": 0.4782608695652174,
+    "oracle_wer": 0.5,
+    "encode_ms": 10.812767999595962,
+    "beam_ms": 264.1896679997444
+   },
+   {
+    "clip": "s13/pbaa8n.mpg",
+    "truth": "place blue at a eight now",
+    "top1": "plus blue as a h now",
+    "wer": 0.5,
+    "cer": 0.32,
+    "oracle_wer": 0.5,
+    "encode_ms": 10.493522000615485,
+    "beam_ms": 267.0695800043177
+   },
+   {
+    "clip": "s13/pwwp8p.mpg",
+    "truth": "place white with p eight please",
+    "top1": "plus one would be eight please",
+    "wer": 0.6666666666666666,
+    "cer": 0.41935483870967744,
+    "oracle_wer": 0.5,
+    "encode_ms": 10.866029995668214,
+    "beam_ms": 232.09060200315434
+   },
+   {
+    "clip": "s14/bbad9n.mpg",
+    "truth": "bin blue at d nine now",
+    "top1": "it's been blue as he died now",
+    "wer": 0.8333333333333334,
+    "cer": 0.5909090909090909,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 10.605103001580574,
+    "beam_ms": 286.0227369965287
+   },
+   {
+    "clip": "s14/lbai8s.mpg",
+    "truth": "lay blue at i eight soon",
+    "top1": "a bloom at i s two",
+    "wer": 0.6666666666666666,
+    "cer": 0.5416666666666666,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 10.720666003180668,
+    "beam_ms": 252.5033700003405
+   },
+   {
+    "clip": "s14/lwwy8a.mpg",
+    "truth": "lay white with y eight again",
+    "top1": "likewise with y a t",
+    "wer": 0.6666666666666666,
+    "cer": 0.5357142857142857,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 10.487100000318605,
+    "beam_ms": 383.06212200404843
+   },
+   {
+    "clip": "s14/pwwp6s.mpg",
+    "truth": "place white with p six soon",
+    "top1": "plays white with bc two",
+    "wer": 0.6666666666666666,
+    "cer": 0.37037037037037035,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 9.525979003228713,
+    "beam_ms": 224.85025400237646
+   },
+   {
+    "clip": "s15/bbad8n.mpg",
+    "truth": "bin blue at d eight now",
+    "top1": "big blue and decay now",
+    "wer": 0.6666666666666666,
+    "cer": 0.34782608695652173,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 9.507038004812784,
+    "beam_ms": 227.74230699724285
+   },
+   {
+    "clip": "s15/lbai6n.mpg",
+    "truth": "lay blue at i six now",
+    "top1": "they blue and i sticks down",
+    "wer": 0.6666666666666666,
+    "cer": 0.5238095238095238,
+    "oracle_wer": 0.5,
+    "encode_ms": 9.665491998021025,
+    "beam_ms": 238.98694500530837
+   },
+   {
+    "clip": "s15/lwwy6p.mpg",
+    "truth": "lay white with y six please",
+    "top1": "let it white with a white six piece",
+    "wer": 0.8333333333333334,
+    "cer": 0.5555555555555556,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 9.575279997079633,
+    "beam_ms": 277.81357699859655
+   },
+   {
+    "clip": "s15/pwwp4n.mpg",
+    "truth": "place white with p four now",
+    "top1": "it's what it's worth being for now",
+    "wer": 1.0,
+    "cer": 0.6666666666666666,
+    "oracle_wer": 1.0,
+    "encode_ms": 11.425010998209473,
+    "beam_ms": 337.90729899919825
+   },
+   {
+    "clip": "s16/bbad7n.mpg",
+    "truth": "bin blue at d seven now",
+    "top1": "bamboo is like seven now",
+    "wer": 0.6666666666666666,
+    "cer": 0.5217391304347826,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 9.364686004118994,
+    "beam_ms": 263.9979229934397
+   },
+   {
+    "clip": "s16/lbac4a.mpg",
+    "truth": "lay blue at c four again",
+    "top1": "and i'll keep it all safe for her again",
+    "wer": 1.3333333333333333,
+    "cer": 0.9583333333333334,
+    "oracle_wer": 1.3333333333333333,
+    "encode_ms": 11.013372000888921,
+    "beam_ms": 295.57336699508596
+   },
+   {
+    "clip": "s16/lwwy4s.mpg",
+    "truth": "lay white with y four soon",
+    "top1": "why would one of those two",
+    "wer": 1.0,
+    "cer": 0.7307692307692307,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 9.389857004862279,
+    "beam_ms": 268.8948819995858
+   },
+   {
+    "clip": "s16/pwwjzs.mpg",
+    "truth": "place white with j zero soon",
+    "top1": "plays white with j c r o two",
+    "wer": 0.8333333333333334,
+    "cer": 0.2857142857142857,
+    "oracle_wer": 0.5,
+    "encode_ms": 9.557030003634281,
+    "beam_ms": 282.64796399889747
+   },
+   {
+    "clip": "s17/bbad6n.mpg",
+    "truth": "bin blue at d six now",
+    "top1": "blew and he's here now",
+    "wer": 0.8333333333333334,
+    "cer": 0.7142857142857143,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 10.225964004348498,
+    "beam_ms": 291.2535939976806
+   },
+   {
+    "clip": "s17/lbac3a.mpg",
+    "truth": "lay blue at c three again",
+    "top1": "i'll let you know when i see three again",
+    "wer": 1.1666666666666667,
+    "cer": 0.92,
+    "oracle_wer": 1.1666666666666667,
+    "encode_ms": 9.305363993917126,
+    "beam_ms": 291.396156004339
+   },
+   {
+    "clip": "s17/lwwy2n.mpg",
+    "truth": "lay white with y two now",
+    "top1": "y with y two now",
+    "wer": 0.3333333333333333,
+    "cer": 0.3333333333333333,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 9.544679000100587,
+    "beam_ms": 256.5058289983426
+   },
+   {
+    "clip": "s17/pwwj1a.mpg",
+    "truth": "place white with j one again",
+    "top1": "please wind with the g one again",
+    "wer": 0.6666666666666666,
+    "cer": 0.35714285714285715,
+    "oracle_wer": 0.5,
+    "encode_ms": 9.664692996011581,
+    "beam_ms": 241.43858800380258
+   },
+   {
+    "clip": "s18/bbad5n.mpg",
+    "truth": "bin blue at d five now",
+    "top1": "i've been blue at c5 now",
+    "wer": 0.6666666666666666,
+    "cer": 0.5909090909090909,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 10.817777998454403,
+    "beam_ms": 289.4493630010402
+   },
+   {
+    "clip": "s18/lbac1p.mpg",
+    "truth": "lay blue at c one please",
+    "top1": "there'd be no one to see one please",
+    "wer": 1.0,
+    "cer": 0.7916666666666666,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 10.590063000563532,
+    "beam_ms": 261.4866189978784
+   },
+   {
+    "clip": "s18/lwwrza.mpg",
+    "truth": "lay white with r zero again",
+    "top1": "lynn why don't we ask you a year",
+    "wer": 1.3333333333333333,
+    "cer": 0.8518518518518519,
+    "oracle_wer": 1.3333333333333333,
+    "encode_ms": 10.007149998273235,
+    "beam_ms": 442.4114759967779
+   },
+   {
+    "clip": "s18/pwwi9p.mpg",
+    "truth": "place white with i nine please",
+    "top1": "plus what's with hina please",
+    "wer": 0.6666666666666666,
+    "cer": 0.3333333333333333,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 9.980579998227768,
+    "beam_ms": 285.0921270000981
+   },
+   {
+    "clip": "s19/bbad4n.mpg",
+    "truth": "bin blue at d four now",
+    "top1": "ben blue let's see four now",
+    "wer": 0.5,
+    "cer": 0.36363636363636365,
+    "oracle_wer": 0.5,
+    "encode_ms": 9.864487001323141,
+    "beam_ms": 276.0014189989306
+   },
+   {
+    "clip": "s19/lbab8n.mpg",
+    "truth": "lay blue at b eight now",
+    "top1": "like blue it's b eight now",
+    "wer": 0.3333333333333333,
+    "cer": 0.2608695652173913,
+    "oracle_wer": 0.16666666666666666,
+    "encode_ms": 9.5647199996165,
+    "beam_ms": 296.4290570016601
+   },
+   {
+    "clip": "s19/lwwq8p.mpg",
+    "truth": "lay white with q eight please",
+    "top1": "lay white with you as please",
+    "wer": 0.3333333333333333,
+    "cer": 0.2413793103448276,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 9.376357003930025,
+    "beam_ms": 234.68062799656764
+   },
+   {
+    "clip": "s19/pwwi8p.mpg",
+    "truth": "place white with i eight please",
+    "top1": "but it's white with high hats",
+    "wer": 0.8333333333333334,
+    "cer": 0.5483870967741935,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 9.989631005737465,
+    "beam_ms": 291.9842479968793
+   },
+   {
+    "clip": "s20/bbad3n.mpg",
+    "truth": "bin blue at d three now",
+    "top1": "i'm blowing the teeth right now",
+    "wer": 0.8333333333333334,
+    "cer": 0.8260869565217391,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 10.554792002949398,
+    "beam_ms": 278.2864580003661
+   },
+   {
+    "clip": "s20/bwwz8a.mpg",
+    "truth": "bin white with z eight again",
+    "top1": "big white with dead eyes again",
+    "wer": 0.5,
+    "cer": 0.32142857142857145,
+    "oracle_wer": 0.5,
+    "encode_ms": 9.39673699758714,
+    "beam_ms": 235.8863450062927
+   },
+   {
+    "clip": "s20/lwwq6s.mpg",
+    "truth": "lay white with q six soon",
+    "top1": "i'll get away with you six too",
+    "wer": 0.8333333333333334,
+    "cer": 0.68,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 10.25840500369668,
+    "beam_ms": 286.44576799706556
+   },
+   {
+    "clip": "s20/pwwi7p.mpg",
+    "truth": "place white with i seven please",
+    "top1": "place wise with i seven please",
+    "wer": 0.16666666666666666,
+    "cer": 0.06451612903225806,
+    "oracle_wer": 0.16666666666666666,
+    "encode_ms": 11.71839699964039,
+    "beam_ms": 241.28903500240995
+   },
+   {
+    "clip": "s22/bbad1n.mpg",
+    "truth": "bin blue at d one now",
+    "top1": "but i'm going to see one now",
+    "wer": 0.8333333333333334,
+    "cer": 0.7142857142857143,
+    "oracle_wer": 0.5,
+    "encode_ms": 9.999879002862144,
+    "beam_ms": 252.30530700355303
+   },
+   {
+    "clip": "s22/bwwz4s.mpg",
+    "truth": "bin white with z four soon",
+    "top1": "one one one six four two",
+    "wer": 0.8333333333333334,
+    "cer": 0.6538461538461539,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 9.733243998198304,
+    "beam_ms": 223.40832200279692
+   },
+   {
+    "clip": "s22/lwwkzs.mpg",
+    "truth": "lay white with k zero soon",
+    "top1": "likewise with kaiser aren't you",
+    "wer": 0.8333333333333334,
+    "cer": 0.6923076923076923,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 9.561468999891076,
+    "beam_ms": 314.7603609977523
+   },
+   {
+    "clip": "s22/pwwi5p.mpg",
+    "truth": "place white with i five please",
+    "top1": "blades wise with high five please",
+    "wer": 0.5,
+    "cer": 0.26666666666666666,
+    "oracle_wer": 0.5,
+    "encode_ms": 9.290945003158413,
+    "beam_ms": 256.7493349997676
+   },
+   {
+    "clip": "s23/bbad1s.mpg",
+    "truth": "bin blue at d one soon",
+    "top1": "pin blue and d one two",
+    "wer": 0.5,
+    "cer": 0.2727272727272727,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 9.698213005322032,
+    "beam_ms": 194.93305499781854
+   },
+   {
+    "clip": "s23/bwwz2n.mpg",
+    "truth": "bin white with z two now",
+    "top1": "but why do we send you now",
+    "wer": 1.0,
+    "cer": 0.625,
+    "oracle_wer": 1.0,
+    "encode_ms": 9.394595996127464,
+    "beam_ms": 253.54213399987202
+   },
+   {
+    "clip": "s23/lwwk1a.mpg",
+    "truth": "lay white with k one again",
+    "top1": "lay wise with k one again",
+    "wer": 0.16666666666666666,
+    "cer": 0.07692307692307693,
+    "oracle_wer": 0.16666666666666666,
+    "encode_ms": 9.69153200276196,
+    "beam_ms": 222.39276999607682
+   },
+   {
+    "clip": "s23/pwwi4p.mpg",
+    "truth": "place white with i four please",
+    "top1": "place wise with i four please",
+    "wer": 0.16666666666666666,
+    "cer": 0.06666666666666667,
+    "oracle_wer": 0.16666666666666666,
+    "encode_ms": 9.970539998903405,
+    "beam_ms": 222.83675800281344
+   },
+   {
+    "clip": "s24/bbac9n.mpg",
+    "truth": "bin blue at c nine now",
+    "top1": "big blue is seen high now",
+    "wer": 0.6666666666666666,
+    "cer": 0.45454545454545453,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 11.989432998234406,
+    "beam_ms": 282.4729310013936
+   },
+   {
+    "clip": "s24/bwwsza.mpg",
+    "truth": "bin white with s zero again",
+    "top1": "beat wise when they're zero again",
+    "wer": 0.6666666666666666,
+    "cer": 0.5185185185185185,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 10.517800001252908,
+    "beam_ms": 283.7870200019097
+   },
+   {
+    "clip": "s24/lwwj8s.mpg",
+    "truth": "lay white with j eight soon",
+    "top1": "lay wise with j k s two",
+    "wer": 0.6666666666666666,
+    "cer": 0.37037037037037035,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 10.451320995343849,
+    "beam_ms": 244.01071399915963
+   },
+   {
+    "clip": "s24/pwwi3p.mpg",
+    "truth": "place white with i three please",
+    "top1": "plus why is one the i three plus",
+    "wer": 1.0,
+    "cer": 0.4838709677419355,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 10.841287999937776,
+    "beam_ms": 309.91989299946
+   },
+   {
+    "clip": "s25/bbac8n.mpg",
+    "truth": "bin blue at c eight now",
+    "top1": "big blue is the gate now",
+    "wer": 0.6666666666666666,
+    "cer": 0.34782608695652173,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 10.183864003920462,
+    "beam_ms": 257.8702089958824
+   },
+   {
+    "clip": "s25/bwwr8p.mpg",
+    "truth": "bin white with r eight please",
+    "top1": "being white with r a please",
+    "wer": 0.3333333333333333,
+    "cer": 0.2413793103448276,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 10.832668005605228,
+    "beam_ms": 243.8267609977629
+   },
+   {
+    "clip": "s25/lwwj6n.mpg",
+    "truth": "lay white with j six now",
+    "top1": "like why would j six now",
+    "wer": 0.5,
+    "cer": 0.4166666666666667,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 9.925938000378665,
+    "beam_ms": 257.18424500519177
+   },
+   {
+    "clip": "s25/pwwi3a.mpg",
+    "truth": "place white with i three again",
+    "top1": "black's white with i three again",
+    "wer": 0.16666666666666666,
+    "cer": 0.13333333333333333,
+    "oracle_wer": 0.16666666666666666,
+    "encode_ms": 10.483340003702324,
+    "beam_ms": 243.04884400044102
+   },
+   {
+    "clip": "s26/bbac7n.mpg",
+    "truth": "bin blue at c seven now",
+    "top1": "big blue at six seven now",
+    "wer": 0.3333333333333333,
+    "cer": 0.17391304347826086,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 9.51006000104826,
+    "beam_ms": 255.91608499962604
+   },
+   {
+    "clip": "s26/bwwr7p.mpg",
+    "truth": "bin white with r seven please",
+    "top1": "been wet with our seven please",
+    "wer": 0.5,
+    "cer": 0.2413793103448276,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 9.833606003667228,
+    "beam_ms": 243.5511849980685
+   },
+   {
+    "clip": "s26/lwwj5n.mpg",
+    "truth": "lay white with j five now",
+    "top1": "let's wait with the g five though",
+    "wer": 0.8333333333333334,
+    "cer": 0.64,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 9.541159997752402,
+    "beam_ms": 262.2004650038434
+   },
+   {
+    "clip": "s26/pwwizs.mpg",
+    "truth": "place white with i zero soon",
+    "top1": "please wait with us in your suit",
+    "wer": 1.0,
+    "cer": 0.5357142857142857,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 9.64115200622473,
+    "beam_ms": 236.08076999516925
+   },
+   {
+    "clip": "s27/bbac6n.mpg",
+    "truth": "bin blue at c six now",
+    "top1": "big bloke sees things now",
+    "wer": 0.8333333333333334,
+    "cer": 0.5714285714285714,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 9.254283999325708,
+    "beam_ms": 275.03112600243185
+   },
+   {
+    "clip": "s27/bwwr6p.mpg",
+    "truth": "bin white with r six please",
+    "top1": "being wise with us is pleasant",
+    "wer": 0.8333333333333334,
+    "cer": 0.4074074074074074,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 9.201062995998655,
+    "beam_ms": 274.69334899797104
+   },
+   {
+    "clip": "s27/lwwj4n.mpg",
+    "truth": "lay white with j four now",
+    "top1": "likewise with j four now",
+    "wer": 0.3333333333333333,
+    "cer": 0.2,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 9.6275730029447,
+    "beam_ms": 332.83005699922796
+   },
+   {
+    "clip": "s27/pwwo2n.mpg",
+    "truth": "place white with o two now",
+    "top1": "place wise with o two now",
+    "wer": 0.16666666666666666,
+    "cer": 0.07692307692307693,
+    "oracle_wer": 0.16666666666666666,
+    "encode_ms": 9.231242998794187,
+    "beam_ms": 219.6972099991399
+   },
+   {
+    "clip": "s28/bbac5n.mpg",
+    "truth": "bin blue at c five now",
+    "top1": "i don't know how you're going to do it but i've no",
+    "wer": 2.0,
+    "cer": 1.6818181818181819,
+    "oracle_wer": 2.0,
+    "encode_ms": 9.647590995882638,
+    "beam_ms": 419.9015819976921
+   },
+   {
+    "clip": "s28/bwwr5p.mpg",
+    "truth": "bin white with r five please",
+    "top1": "i'd be away with the heart five please",
+    "wer": 0.8333333333333334,
+    "cer": 0.6428571428571429,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 10.598392997053452,
+    "beam_ms": 351.0785000034957
+   },
+   {
+    "clip": "s28/lwwj3n.mpg",
+    "truth": "lay white with j three now",
+    "top1": "he went with jessica",
+    "wer": 0.8333333333333334,
+    "cer": 0.5769230769230769,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 9.806975001993123,
+    "beam_ms": 270.9282979994896
+   },
+   {
+    "clip": "s28/pwwo2s.mpg",
+    "truth": "place white with o two soon",
+    "top1": "i'm pleased with all you do",
+    "wer": 0.8333333333333334,
+    "cer": 0.7407407407407407,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 9.382766998896841,
+    "beam_ms": 294.5203639974352
+   },
+   {
+    "clip": "s29/bbac4n.mpg",
+    "truth": "bin blue at c four now",
+    "top1": "big blue and c four now",
+    "wer": 0.3333333333333333,
+    "cer": 0.13636363636363635,
+    "oracle_wer": 0.16666666666666666,
+    "encode_ms": 9.32435599679593,
+    "beam_ms": 192.77357799728634
+   },
+   {
+    "clip": "s29/bwwr4p.mpg",
+    "truth": "bin white with r four please",
+    "top1": "been white with a four please",
+    "wer": 0.3333333333333333,
+    "cer": 0.10714285714285714,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 9.257952995540109,
+    "beam_ms": 202.06602200050838
+   },
+   {
+    "clip": "s29/lwwj2n.mpg",
+    "truth": "lay white with j two now",
+    "top1": "lay white with j two now",
+    "wer": 0.0,
+    "cer": 0.0,
+    "oracle_wer": 0.0,
+    "encode_ms": 9.359135998238344,
+    "beam_ms": 221.0612589988159
+   },
+   {
+    "clip": "s29/pwwo3a.mpg",
+    "truth": "place white with o three again",
+    "top1": "plays white with o three again",
+    "wer": 0.16666666666666666,
+    "cer": 0.06666666666666667,
+    "oracle_wer": 0.0,
+    "encode_ms": 10.328785996534862,
+    "beam_ms": 206.5988130052574
+   },
+   {
+    "clip": "s30/bbac3n.mpg",
+    "truth": "bin blue at c three now",
+    "top1": "it's a big bloke i see three now",
+    "wer": 1.0,
+    "cer": 0.6521739130434783,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 9.311793997767381,
+    "beam_ms": 299.89628399926005
+   },
+   {
+    "clip": "s30/bwwr3p.mpg",
+    "truth": "bin white with r three please",
+    "top1": "i'm being wedged with all three bees",
+    "wer": 0.8333333333333334,
+    "cer": 0.5862068965517241,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 9.98915999662131,
+    "beam_ms": 332.5703610025812
+   },
+   {
+    "clip": "s30/lwwj1n.mpg",
+    "truth": "lay white with j one now",
+    "top1": "i'm going to say one now",
+    "wer": 0.6666666666666666,
+    "cer": 0.5416666666666666,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 9.527859001536854,
+    "beam_ms": 276.596260999213
+   },
+   {
+    "clip": "s30/pwwozs.mpg",
+    "truth": "place white with o zero soon",
+    "top1": "plus we'll go zero to two",
+    "wer": 1.0,
+    "cer": 0.6071428571428571,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 9.215663005306851,
+    "beam_ms": 299.34253099781927
+   },
+   {
+    "clip": "s31/bbac2n.mpg",
+    "truth": "bin blue at c two now",
+    "top1": "big blue i see you now",
+    "wer": 0.6666666666666666,
+    "cer": 0.42857142857142855,
+    "oracle_wer": 0.5,
+    "encode_ms": 15.687933999288362,
+    "beam_ms": 266.1889130031341
+   },
+   {
+    "clip": "s31/bwwr3a.mpg",
+    "truth": "bin white with r three again",
+    "top1": "beware with arthritis",
+    "wer": 0.8333333333333334,
+    "cer": 0.5357142857142857,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 9.561658996972255,
+    "beam_ms": 259.08556699869223
+   },
+   {
+    "clip": "s31/lwwj1s.mpg",
+    "truth": "lay white with j one soon",
+    "top1": "lee white with jay one two",
+    "wer": 0.5,
+    "cer": 0.28,
+    "oracle_wer": 0.5,
+    "encode_ms": 10.40813800500473,
+    "beam_ms": 271.7037039983552
+   },
+   {
+    "clip": "s31/pwwu2n.mpg",
+    "truth": "place white with u two now",
+    "top1": "please wear it with you too now",
+    "wer": 0.8333333333333334,
+    "cer": 0.38461538461538464,
+    "oracle_wer": 0.5,
+    "encode_ms": 9.244472996215336,
+    "beam_ms": 223.08156600047369
+   },
+   {
+    "clip": "s32/bbac1n.mpg",
+    "truth": "bin blue at c one now",
+    "top1": "big blue and c one now",
+    "wer": 0.3333333333333333,
+    "cer": 0.14285714285714285,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 9.26076399628073,
+    "beam_ms": 206.42030800081557
+   },
+   {
+    "clip": "s32/bwwr2a.mpg",
+    "truth": "bin white with r two again",
+    "top1": "be one without two again",
+    "wer": 0.6666666666666666,
+    "cer": 0.34615384615384615,
+    "oracle_wer": 0.5,
+    "encode_ms": 9.914768997987267,
+    "beam_ms": 223.55562400480267
+   },
+   {
+    "clip": "s32/lwwi9n.mpg",
+    "truth": "lay white with i nine now",
+    "top1": "he went with eye lighting now",
+    "wer": 0.6666666666666666,
+    "cer": 0.6,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 9.586562002368737,
+    "beam_ms": 266.0113179954351
+   },
+   {
+    "clip": "s32/pwwu2s.mpg",
+    "truth": "place white with u two soon",
+    "top1": "but he's right with you too soon",
+    "wer": 0.8333333333333334,
+    "cer": 0.5555555555555556,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 11.100904004706535,
+    "beam_ms": 297.6865349992295
+   },
+   {
+    "clip": "s33/bbac1s.mpg",
+    "truth": "bin blue at c one soon",
+    "top1": "mimics he went to",
+    "wer": 1.0,
+    "cer": 0.7272727272727273,
+    "oracle_wer": 1.0,
+    "encode_ms": 11.215646998607554,
+    "beam_ms": 281.25711300526746
+   },
+   {
+    "clip": "s33/bwwr1a.mpg",
+    "truth": "bin white with r one again",
+    "top1": "midway without one again",
+    "wer": 0.6666666666666666,
+    "cer": 0.38461538461538464,
+    "oracle_wer": 0.5,
+    "encode_ms": 9.721604001242667,
+    "beam_ms": 231.44301799766254
+   },
+   {
+    "clip": "s33/lwwi8n.mpg",
+    "truth": "lay white with i eight now",
+    "top1": "he went with ian now",
+    "wer": 0.6666666666666666,
+    "cer": 0.46153846153846156,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 11.432819999754429,
+    "beam_ms": 296.8370969974785
+   },
+   {
+    "clip": "s33/pwwu3a.mpg",
+    "truth": "place white with u three again",
+    "top1": "please wait with your three again",
+    "wer": 0.5,
+    "cer": 0.23333333333333334,
+    "oracle_wer": 0.5,
+    "encode_ms": 10.050771001260728,
+    "beam_ms": 227.4704820010811
+   },
+   {
+    "clip": "s34/bbab9n.mpg",
+    "truth": "bin blue at b nine now",
+    "top1": "i'm bimbo and p nine now",
+    "wer": 0.6666666666666666,
+    "cer": 0.45454545454545453,
+    "oracle_wer": 0.5,
+    "encode_ms": 9.718004002934322,
+    "beam_ms": 331.3481149962172
+   },
+   {
+    "clip": "s34/bwwq9p.mpg",
+    "truth": "bin white with q nine please",
+    "top1": "pinwheels with you nine please",
+    "wer": 0.5,
+    "cer": 0.32142857142857145,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 9.648831997765228,
+    "beam_ms": 283.97088299971074
+   },
+   {
+    "clip": "s34/lwwi8s.mpg",
+    "truth": "lay white with i eight soon",
+    "top1": "clay wine with i ate too",
+    "wer": 0.6666666666666666,
+    "cer": 0.37037037037037035,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 12.333150996710174,
+    "beam_ms": 288.00927299744217
+   },
+   {
+    "clip": "s34/pwwuzs.mpg",
+    "truth": "place white with u zero soon",
+    "top1": "place words with two zero two",
+    "wer": 0.5,
+    "cer": 0.35714285714285715,
+    "oracle_wer": 0.5,
+    "encode_ms": 12.265600002137944,
+    "beam_ms": 232.96534099790733
+   }
+  ],
+  "beam12_fp16": [
+   {
+    "clip": "s1/bbaf2n.mpg",
+    "truth": "bin blue at f two now",
+    "top1": "people have to now",
+    "wer": 0.8333333333333334,
+    "cer": 0.5238095238095238,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 192.47340099536814,
+    "beam_ms": 242.15464300505118
+   },
+   {
+    "clip": "s1/lbaq6p.mpg",
+    "truth": "lay blue at q six please",
+    "top1": "label acoustics please",
+    "wer": 0.8333333333333334,
+    "cer": 0.5,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 11.411660998419393,
+    "beam_ms": 284.9038729982567
+   },
+   {
+    "clip": "s1/pbav2n.mpg",
+    "truth": "place blue at v two now",
+    "top1": "plays beautifully too now",
+    "wer": 0.8333333333333334,
+    "cer": 0.5217391304347826,
+    "oracle_wer": 0.5,
+    "encode_ms": 10.264984994137194,
+    "beam_ms": 251.15913100307807
+   },
+   {
+    "clip": "s1/sbah1a.mpg",
+    "truth": "set blue at h one again",
+    "top1": "temple age one again",
+    "wer": 0.6666666666666666,
+    "cer": 0.34782608695652173,
+    "oracle_wer": 0.5,
+    "encode_ms": 10.12292299856199,
+    "beam_ms": 253.99445299990475
+   },
+   {
+    "clip": "s2/bbaf1n.mpg",
+    "truth": "bin blue at f one now",
+    "top1": "been blew in f one now",
+    "wer": 0.5,
+    "cer": 0.2857142857142857,
+    "oracle_wer": 0.5,
+    "encode_ms": 10.122981999302283,
+    "beam_ms": 295.0313149995054
+   },
+   {
+    "clip": "s2/lbaq5p.mpg",
+    "truth": "lay blue at q five please",
+    "top1": "i'll let it blow into you five please",
+    "wer": 1.0,
+    "cer": 0.72,
+    "oracle_wer": 0.5,
+    "encode_ms": 10.379667997767683,
+    "beam_ms": 325.28265099972486
+   },
+   {
+    "clip": "s2/pbapza.mpg",
+    "truth": "place blue at p zero again",
+    "top1": "it's brewing b zero again",
+    "wer": 0.6666666666666666,
+    "cer": 0.46153846153846156,
+    "oracle_wer": 0.5,
+    "encode_ms": 10.16164300381206,
+    "beam_ms": 358.80618800001685
+   },
+   {
+    "clip": "s2/sbag8s.mpg",
+    "truth": "set blue at g eight soon",
+    "top1": "it's dead blue and gigantic",
+    "wer": 1.0,
+    "cer": 0.75,
+    "oracle_wer": 1.0,
+    "encode_ms": 10.834628003067337,
+    "beam_ms": 291.4112459984608
+   },
+   {
+    "clip": "s3/bbaf1s.mpg",
+    "truth": "bin blue at f one soon",
+    "top1": "beat blue at f one two",
+    "wer": 0.3333333333333333,
+    "cer": 0.2727272727272727,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 10.415069002192467,
+    "beam_ms": 203.37916100106668
+   },
+   {
+    "clip": "s3/lbaq4p.mpg",
+    "truth": "lay blue at q four please",
+    "top1": "light blue and q four please",
+    "wer": 0.3333333333333333,
+    "cer": 0.24,
+    "oracle_wer": 0.16666666666666666,
+    "encode_ms": 12.74851100606611,
+    "beam_ms": 265.2999909987557
+   },
+   {
+    "clip": "s3/pbao8p.mpg",
+    "truth": "place blue at o eight please",
+    "top1": "place blue at o eight place",
+    "wer": 0.16666666666666666,
+    "cer": 0.07142857142857142,
+    "oracle_wer": 0.16666666666666666,
+    "encode_ms": 10.90323999960674,
+    "beam_ms": 249.32168999657733
+   },
+   {
+    "clip": "s3/sbag6n.mpg",
+    "truth": "set blue at g six now",
+    "top1": "er said blue i had a gcse now",
+    "wer": 1.0,
+    "cer": 0.7142857142857143,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 10.277085995767266,
+    "beam_ms": 344.2405370005872
+   },
+   {
+    "clip": "s4/bbae9n.mpg",
+    "truth": "bin blue at e nine now",
+    "top1": "i've been boasting day now",
+    "wer": 0.8333333333333334,
+    "cer": 0.7727272727272727,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 11.939231997530442,
+    "beam_ms": 359.51860299974214
+   },
+   {
+    "clip": "s4/lbaq3p.mpg",
+    "truth": "lay blue at q three please",
+    "top1": "i'll keep you at q three please",
+    "wer": 0.5,
+    "cer": 0.4230769230769231,
+    "oracle_wer": 0.5,
+    "encode_ms": 10.5109009964508,
+    "beam_ms": 321.91593600146007
+   },
+   {
+    "clip": "s4/pbao6s.mpg",
+    "truth": "place blue at o six soon",
+    "top1": "placebo et cetera",
+    "wer": 1.0,
+    "cer": 0.625,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 10.216484995908104,
+    "beam_ms": 316.24827200721484
+   },
+   {
+    "clip": "s4/sbaa4a.mpg",
+    "truth": "set blue at a four again",
+    "top1": "and he blew it out for her again",
+    "wer": 1.1666666666666667,
+    "cer": 0.6666666666666666,
+    "oracle_wer": 1.0,
+    "encode_ms": 10.50726100220345,
+    "beam_ms": 308.7679169984767
+   },
+   {
+    "clip": "s5/bbae7n.mpg",
+    "truth": "bin blue at e seven now",
+    "top1": "been blew in e seven now",
+    "wer": 0.5,
+    "cer": 0.2608695652173913,
+    "oracle_wer": 0.5,
+    "encode_ms": 42.89162200439023,
+    "beam_ms": 365.14541799988365
+   },
+   {
+    "clip": "s5/lbaq2a.mpg",
+    "truth": "lay blue at q two again",
+    "top1": "i'd like a blooming coat to you again",
+    "wer": 1.1666666666666667,
+    "cer": 0.9565217391304348,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 10.291605998645537,
+    "beam_ms": 401.89015500072856
+   },
+   {
+    "clip": "s5/pbaizs.mpg",
+    "truth": "place blue at i zero soon",
+    "top1": "but let's put it where it's hiding around you",
+    "wer": 1.5,
+    "cer": 1.4,
+    "oracle_wer": 1.5,
+    "encode_ms": 11.208987001737114,
+    "beam_ms": 347.6643619942479
+   },
+   {
+    "clip": "s5/sbaa2a.mpg",
+    "truth": "set blue at a two again",
+    "top1": "it's had a blue and a two again",
+    "wer": 0.6666666666666666,
+    "cer": 0.4782608695652174,
+    "oracle_wer": 0.5,
+    "encode_ms": 10.282437004207168,
+    "beam_ms": 309.93358200066723
+   },
+   {
+    "clip": "s6/bbae8n.mpg",
+    "truth": "bin blue at e eight now",
+    "top1": "big blue as he is now",
+    "wer": 0.6666666666666666,
+    "cer": 0.30434782608695654,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 10.108471004059538,
+    "beam_ms": 235.13595000258647
+   },
+   {
+    "clip": "s6/lbaq3a.mpg",
+    "truth": "lay blue at q three again",
+    "top1": "late blooming q three again",
+    "wer": 0.5,
+    "cer": 0.32,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 10.518902003241237,
+    "beam_ms": 285.29109100054484
+   },
+   {
+    "clip": "s6/pbao4n.mpg",
+    "truth": "place blue at o four now",
+    "top1": "place blue is over now",
+    "wer": 0.5,
+    "cer": 0.25,
+    "oracle_wer": 0.5,
+    "encode_ms": 10.121302999323234,
+    "beam_ms": 253.57958400127245
+   },
+   {
+    "clip": "s6/sbaa3a.mpg",
+    "truth": "set blue at a three again",
+    "top1": "simple u s a three again",
+    "wer": 0.5,
+    "cer": 0.32,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 10.29879699490266,
+    "beam_ms": 250.26945200079354
+   },
+   {
+    "clip": "s7/bbae6n.mpg",
+    "truth": "bin blue at e six now",
+    "top1": "ben and bill were six now",
+    "wer": 0.6666666666666666,
+    "cer": 0.5238095238095238,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 10.27430700196419,
+    "beam_ms": 258.7617070021224
+   },
+   {
+    "clip": "s7/lbaq1a.mpg",
+    "truth": "lay blue at q one again",
+    "top1": "let it blow away are you wearing it",
+    "wer": 1.3333333333333333,
+    "cer": 1.0,
+    "oracle_wer": 1.1666666666666667,
+    "encode_ms": 11.385610996512696,
+    "beam_ms": 290.0301560002845
+   },
+   {
+    "clip": "s7/pbai1a.mpg",
+    "truth": "place blue at i one again",
+    "top1": "please blue i want it",
+    "wer": 0.6666666666666666,
+    "cer": 0.48,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 11.011152004357427,
+    "beam_ms": 298.31775699858554
+   },
+   {
+    "clip": "s7/sbaa1a.mpg",
+    "truth": "set blue at a one again",
+    "top1": "that blooming day one again",
+    "wer": 0.6666666666666666,
+    "cer": 0.4782608695652174,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 10.783447003632318,
+    "beam_ms": 291.80579500098247
+   },
+   {
+    "clip": "s8/bbae5n.mpg",
+    "truth": "bin blue at e five now",
+    "top1": "ben and blue who has e five now",
+    "wer": 0.6666666666666666,
+    "cer": 0.5,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 10.3876590001164,
+    "beam_ms": 298.59544299688423
+   },
+   {
+    "clip": "s8/lbap9p.mpg",
+    "truth": "lay blue at p nine please",
+    "top1": "light blue and pink dye please",
+    "wer": 0.6666666666666666,
+    "cer": 0.44,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 9.977860005164985,
+    "beam_ms": 233.03817299893126
+   },
+   {
+    "clip": "s8/pbah8s.mpg",
+    "truth": "place blue at h eight soon",
+    "top1": "place blue at age eight soon",
+    "wer": 0.16666666666666666,
+    "cer": 0.11538461538461539,
+    "oracle_wer": 0.16666666666666666,
+    "encode_ms": 9.94517799699679,
+    "beam_ms": 260.3155740071088
+   },
+   {
+    "clip": "s8/pwwx8a.mpg",
+    "truth": "place white with x eight again",
+    "top1": "place white with x eight again",
+    "wer": 0.0,
+    "cer": 0.0,
+    "oracle_wer": 0.0,
+    "encode_ms": 10.211044995230623,
+    "beam_ms": 228.45695200521732
+   },
+   {
+    "clip": "s9/bbae4n.mpg",
+    "truth": "bin blue at e four now",
+    "top1": "i'm being blue i need four now",
+    "wer": 0.6666666666666666,
+    "cer": 0.5,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 10.121671999513637,
+    "beam_ms": 319.632835999073
+   },
+   {
+    "clip": "s9/lbap8p.mpg",
+    "truth": "lay blue at p eight please",
+    "top1": "lady bloom unpaid please",
+    "wer": 0.8333333333333334,
+    "cer": 0.46153846153846156,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 11.062692996347323,
+    "beam_ms": 307.92786899837665
+   },
+   {
+    "clip": "s9/pbah6n.mpg",
+    "truth": "place blue at h six now",
+    "top1": "please blew i can't see anything",
+    "wer": 1.0,
+    "cer": 0.8260869565217391,
+    "oracle_wer": 1.0,
+    "encode_ms": 10.25608600320993,
+    "beam_ms": 324.51431400113506
+   },
+   {
+    "clip": "s9/pwwx6p.mpg",
+    "truth": "place white with x six please",
+    "top1": "plus one we've had six plus",
+    "wer": 0.8333333333333334,
+    "cer": 0.5517241379310345,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 12.784949998604134,
+    "beam_ms": 253.48906299768714
+   },
+   {
+    "clip": "s10/bbab8n.mpg",
+    "truth": "bin blue at b eight now",
+    "top1": "blew up again now",
+    "wer": 0.8333333333333334,
+    "cer": 0.6086956521739131,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 11.69124800071586,
+    "beam_ms": 271.42070599802537
+   },
+   {
+    "clip": "s10/bwwq8p.mpg",
+    "truth": "bin white with q eight please",
+    "top1": "i've been right with you ah please",
+    "wer": 0.8333333333333334,
+    "cer": 0.6206896551724138,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 11.085644000559114,
+    "beam_ms": 323.44507000379963
+   },
+   {
+    "clip": "s10/lwwi8p.mpg",
+    "truth": "lay white with i eight please",
+    "top1": "lynn why don't we try it",
+    "wer": 1.0,
+    "cer": 0.7586206896551724,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 11.071562999859452,
+    "beam_ms": 327.7755259987316
+   },
+   {
+    "clip": "s10/sbad4n.mpg",
+    "truth": "set blue at d four now",
+    "top1": "it's temperamental for now",
+    "wer": 0.8333333333333334,
+    "cer": 0.6818181818181818,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 10.292585997376591,
+    "beam_ms": 358.2830169980298
+   },
+   {
+    "clip": "s11/bbae2n.mpg",
+    "truth": "bin blue at e two now",
+    "top1": "people who hate you now",
+    "wer": 0.8333333333333334,
+    "cer": 0.7142857142857143,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 10.380359999544453,
+    "beam_ms": 264.93142300023464
+   },
+   {
+    "clip": "s11/lbap4n.mpg",
+    "truth": "lay blue at p four now",
+    "top1": "they blew a bit of food now",
+    "wer": 1.0,
+    "cer": 0.5454545454545454,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 10.493229994608555,
+    "beam_ms": 307.28808600542834
+   },
+   {
+    "clip": "s11/pbab3a.mpg",
+    "truth": "place blue at b three again",
+    "top1": "place bloom in b three again",
+    "wer": 0.3333333333333333,
+    "cer": 0.18518518518518517,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 10.332187004678417,
+    "beam_ms": 274.4466439980897
+   },
+   {
+    "clip": "s11/pwwx2n.mpg",
+    "truth": "place white with x two now",
+    "top1": "please why would that do now",
+    "wer": 0.8333333333333334,
+    "cer": 0.5384615384615384,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 10.338906999095343,
+    "beam_ms": 248.9468929998111
+   },
+   {
+    "clip": "s12/bbae1n.mpg",
+    "truth": "bin blue at e one now",
+    "top1": "pin blue is a one now",
+    "wer": 0.5,
+    "cer": 0.19047619047619047,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 10.178143005759921,
+    "beam_ms": 438.3743569997023
+   },
+   {
+    "clip": "s12/lbajzs.mpg",
+    "truth": "lay blue at j zero soon",
+    "top1": "late bloomer and jay savoy",
+    "wer": 1.0,
+    "cer": 0.6956521739130435,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 10.651404001691844,
+    "beam_ms": 383.81107799796155
+   },
+   {
+    "clip": "s12/pbab1p.mpg",
+    "truth": "place blue at b one please",
+    "top1": "place blue is b one please",
+    "wer": 0.16666666666666666,
+    "cer": 0.07692307692307693,
+    "oracle_wer": 0.16666666666666666,
+    "encode_ms": 12.785910999809857,
+    "beam_ms": 262.294047002797
+   },
+   {
+    "clip": "s12/pwwqza.mpg",
+    "truth": "place white with q zero again",
+    "top1": "plays wise with q zero again",
+    "wer": 0.3333333333333333,
+    "cer": 0.13793103448275862,
+    "oracle_wer": 0.16666666666666666,
+    "encode_ms": 10.27807599894004,
+    "beam_ms": 257.0465899989358
+   },
+   {
+    "clip": "s13/bbae1s.mpg",
+    "truth": "bin blue at e one soon",
+    "top1": "but blue is he once",
+    "wer": 0.8333333333333334,
+    "cer": 0.5,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 11.177606000273954,
+    "beam_ms": 252.04450100136455
+   },
+   {
+    "clip": "s13/lbaj1a.mpg",
+    "truth": "lay blue at j one again",
+    "top1": "it blew and jay won again",
+    "wer": 0.8333333333333334,
+    "cer": 0.4782608695652174,
+    "oracle_wer": 0.5,
+    "encode_ms": 10.99991200317163,
+    "beam_ms": 278.3594189968426
+   },
+   {
+    "clip": "s13/pbaa8n.mpg",
+    "truth": "place blue at a eight now",
+    "top1": "plus blue as a h now",
+    "wer": 0.5,
+    "cer": 0.32,
+    "oracle_wer": 0.5,
+    "encode_ms": 11.104562996479217,
+    "beam_ms": 281.4479480002774
+   },
+   {
+    "clip": "s13/pwwp8p.mpg",
+    "truth": "place white with p eight please",
+    "top1": "plus one would be eight please",
+    "wer": 0.6666666666666666,
+    "cer": 0.41935483870967744,
+    "oracle_wer": 0.5,
+    "encode_ms": 10.26059500145493,
+    "beam_ms": 243.2516190019669
+   },
+   {
+    "clip": "s14/bbad9n.mpg",
+    "truth": "bin blue at d nine now",
+    "top1": "it's been blue as he died now",
+    "wer": 0.8333333333333334,
+    "cer": 0.5909090909090909,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 11.242086999118328,
+    "beam_ms": 300.47028500121087
+   },
+   {
+    "clip": "s14/lbai8s.mpg",
+    "truth": "lay blue at i eight soon",
+    "top1": "a bloom at i s two",
+    "wer": 0.6666666666666666,
+    "cer": 0.5416666666666666,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 10.622142995998729,
+    "beam_ms": 260.1166980020935
+   },
+   {
+    "clip": "s14/lwwy8a.mpg",
+    "truth": "lay white with y eight again",
+    "top1": "likewise with y a t",
+    "wer": 0.6666666666666666,
+    "cer": 0.5357142857142857,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 12.897693995910231,
+    "beam_ms": 271.8407970023691
+   },
+   {
+    "clip": "s14/pwwp6s.mpg",
+    "truth": "place white with p six soon",
+    "top1": "plays white with bc two",
+    "wer": 0.6666666666666666,
+    "cer": 0.37037037037037035,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 10.904470000241417,
+    "beam_ms": 238.78577900177334
+   },
+   {
+    "clip": "s15/bbad8n.mpg",
+    "truth": "bin blue at d eight now",
+    "top1": "big blue and decay now",
+    "wer": 0.6666666666666666,
+    "cer": 0.34782608695652173,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 10.296616004779935,
+    "beam_ms": 235.88825699698646
+   },
+   {
+    "clip": "s15/lbai6n.mpg",
+    "truth": "lay blue at i six now",
+    "top1": "they blue and i sticks down",
+    "wer": 0.6666666666666666,
+    "cer": 0.5238095238095238,
+    "oracle_wer": 0.5,
+    "encode_ms": 10.24022600176977,
+    "beam_ms": 245.6880110039492
+   },
+   {
+    "clip": "s15/lwwy6p.mpg",
+    "truth": "lay white with y six please",
+    "top1": "let it white with a white six piece",
+    "wer": 0.8333333333333334,
+    "cer": 0.5555555555555556,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 11.121865005407017,
+    "beam_ms": 289.82668099342845
+   },
+   {
+    "clip": "s15/pwwp4n.mpg",
+    "truth": "place white with p four now",
+    "top1": "it's what it's worth being for now",
+    "wer": 1.0,
+    "cer": 0.6666666666666666,
+    "oracle_wer": 1.0,
+    "encode_ms": 10.794356996484566,
+    "beam_ms": 360.33739100093953
+   },
+   {
+    "clip": "s16/bbad7n.mpg",
+    "truth": "bin blue at d seven now",
+    "top1": "bamboo is like seven now",
+    "wer": 0.6666666666666666,
+    "cer": 0.5217391304347826,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 10.839347996807192,
+    "beam_ms": 279.36029199918266
+   },
+   {
+    "clip": "s16/lbac4a.mpg",
+    "truth": "lay blue at c four again",
+    "top1": "and i'll keep it all safe for her again",
+    "wer": 1.3333333333333333,
+    "cer": 0.9583333333333334,
+    "oracle_wer": 1.3333333333333333,
+    "encode_ms": 10.159933000977617,
+    "beam_ms": 307.47015999804717
+   },
+   {
+    "clip": "s16/lwwy4s.mpg",
+    "truth": "lay white with y four soon",
+    "top1": "why would one of those two",
+    "wer": 1.0,
+    "cer": 0.7307692307692307,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 10.280586997396313,
+    "beam_ms": 288.8261389962281
+   },
+   {
+    "clip": "s16/pwwjzs.mpg",
+    "truth": "place white with j zero soon",
+    "top1": "plays white with j c r o two",
+    "wer": 0.8333333333333334,
+    "cer": 0.2857142857142857,
+    "oracle_wer": 0.5,
+    "encode_ms": 10.11657300114166,
+    "beam_ms": 293.75997700117296
+   },
+   {
+    "clip": "s17/bbad6n.mpg",
+    "truth": "bin blue at d six now",
+    "top1": "blew and he's here now",
+    "wer": 0.8333333333333334,
+    "cer": 0.7142857142857143,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 9.945527999661863,
+    "beam_ms": 305.12185800034786
+   },
+   {
+    "clip": "s17/lbac3a.mpg",
+    "truth": "lay blue at c three again",
+    "top1": "i'll let you know when i see three again",
+    "wer": 1.1666666666666667,
+    "cer": 0.92,
+    "oracle_wer": 1.1666666666666667,
+    "encode_ms": 10.486999999557156,
+    "beam_ms": 305.5111370049417
+   },
+   {
+    "clip": "s17/lwwy2n.mpg",
+    "truth": "lay white with y two now",
+    "top1": "y with y two now",
+    "wer": 0.3333333333333333,
+    "cer": 0.3333333333333333,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 10.354286998335738,
+    "beam_ms": 265.6826810052735
+   },
+   {
+    "clip": "s17/pwwj1a.mpg",
+    "truth": "place white with j one again",
+    "top1": "please wind with the g one again",
+    "wer": 0.6666666666666666,
+    "cer": 0.35714285714285715,
+    "oracle_wer": 0.5,
+    "encode_ms": 10.504201003641356,
+    "beam_ms": 248.6471160009387
+   },
+   {
+    "clip": "s18/bbad5n.mpg",
+    "truth": "bin blue at d five now",
+    "top1": "i've been blue at c5 now",
+    "wer": 0.6666666666666666,
+    "cer": 0.5909090909090909,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 11.0873840021668,
+    "beam_ms": 307.5420320019475
+   },
+   {
+    "clip": "s18/lbac1p.mpg",
+    "truth": "lay blue at c one please",
+    "top1": "there'd be no one to see one please",
+    "wer": 1.0,
+    "cer": 0.7916666666666666,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 10.825148005096707,
+    "beam_ms": 277.14425299927825
+   },
+   {
+    "clip": "s18/lwwrza.mpg",
+    "truth": "lay white with r zero again",
+    "top1": "lynn why don't we ask you a year",
+    "wer": 1.3333333333333333,
+    "cer": 0.8518518518518519,
+    "oracle_wer": 1.3333333333333333,
+    "encode_ms": 12.388871997245587,
+    "beam_ms": 393.9744509989396
+   },
+   {
+    "clip": "s18/pwwi9p.mpg",
+    "truth": "place white with i nine please",
+    "top1": "plus what's with hina please",
+    "wer": 0.6666666666666666,
+    "cer": 0.3333333333333333,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 10.997530996974092,
+    "beam_ms": 290.0449970038608
+   },
+   {
+    "clip": "s19/bbad4n.mpg",
+    "truth": "bin blue at d four now",
+    "top1": "ben blue let's see four now",
+    "wer": 0.5,
+    "cer": 0.36363636363636365,
+    "oracle_wer": 0.5,
+    "encode_ms": 10.589953002636321,
+    "beam_ms": 291.561569996702
+   },
+   {
+    "clip": "s19/lbab8n.mpg",
+    "truth": "lay blue at b eight now",
+    "top1": "like blue it's b eight now",
+    "wer": 0.3333333333333333,
+    "cer": 0.2608695652173913,
+    "oracle_wer": 0.16666666666666666,
+    "encode_ms": 10.509291001653764,
+    "beam_ms": 306.27517299581086
+   },
+   {
+    "clip": "s19/lwwq8p.mpg",
+    "truth": "lay white with q eight please",
+    "top1": "lay white with you as please",
+    "wer": 0.3333333333333333,
+    "cer": 0.2413793103448276,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 10.164343999349512,
+    "beam_ms": 250.9731269965414
+   },
+   {
+    "clip": "s19/pwwi8p.mpg",
+    "truth": "place white with i eight please",
+    "top1": "but it's white with high hats",
+    "wer": 0.8333333333333334,
+    "cer": 0.5483870967741935,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 9.89282699447358,
+    "beam_ms": 306.2782540000626
+   },
+   {
+    "clip": "s20/bbad3n.mpg",
+    "truth": "bin blue at d three now",
+    "top1": "i'm blowing the teeth right now",
+    "wer": 0.8333333333333334,
+    "cer": 0.8260869565217391,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 10.944460998871364,
+    "beam_ms": 294.6914989952347
+   },
+   {
+    "clip": "s20/bwwz8a.mpg",
+    "truth": "bin white with z eight again",
+    "top1": "big white with dead eyes again",
+    "wer": 0.5,
+    "cer": 0.32142857142857145,
+    "oracle_wer": 0.5,
+    "encode_ms": 10.007029995904304,
+    "beam_ms": 244.2911400066805
+   },
+   {
+    "clip": "s20/lwwq6s.mpg",
+    "truth": "lay white with q six soon",
+    "top1": "i'll get away with you six too",
+    "wer": 0.8333333333333334,
+    "cer": 0.68,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 10.426280001411214,
+    "beam_ms": 310.7502909988398
+   },
+   {
+    "clip": "s20/pwwi7p.mpg",
+    "truth": "place white with i seven please",
+    "top1": "place wise with i seven please",
+    "wer": 0.16666666666666666,
+    "cer": 0.06451612903225806,
+    "oracle_wer": 0.16666666666666666,
+    "encode_ms": 10.294806001184043,
+    "beam_ms": 260.36108400148805
+   },
+   {
+    "clip": "s22/bbad1n.mpg",
+    "truth": "bin blue at d one now",
+    "top1": "but i'm going to see one now",
+    "wer": 0.8333333333333334,
+    "cer": 0.7142857142857143,
+    "oracle_wer": 0.5,
+    "encode_ms": 10.451140995428432,
+    "beam_ms": 261.7379540024558
+   },
+   {
+    "clip": "s22/bwwz4s.mpg",
+    "truth": "bin white with z four soon",
+    "top1": "one one one six four two",
+    "wer": 0.8333333333333334,
+    "cer": 0.6538461538461539,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 10.361439002736006,
+    "beam_ms": 240.0460569988354
+   },
+   {
+    "clip": "s22/lwwkzs.mpg",
+    "truth": "lay white with k zero soon",
+    "top1": "likewise with kaiser aren't you",
+    "wer": 0.8333333333333334,
+    "cer": 0.6923076923076923,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 10.803958000906277,
+    "beam_ms": 330.42339499661466
+   },
+   {
+    "clip": "s22/pwwi5p.mpg",
+    "truth": "place white with i five please",
+    "top1": "blades wise with high five please",
+    "wer": 0.5,
+    "cer": 0.26666666666666666,
+    "oracle_wer": 0.5,
+    "encode_ms": 10.523411998292431,
+    "beam_ms": 262.72648599842796
+   },
+   {
+    "clip": "s23/bbad1s.mpg",
+    "truth": "bin blue at d one soon",
+    "top1": "pin blue and d one two",
+    "wer": 0.5,
+    "cer": 0.2727272727272727,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 10.438198994961567,
+    "beam_ms": 203.02138400438707
+   },
+   {
+    "clip": "s23/bwwz2n.mpg",
+    "truth": "bin white with z two now",
+    "top1": "but why do we send you now",
+    "wer": 1.0,
+    "cer": 0.625,
+    "oracle_wer": 1.0,
+    "encode_ms": 11.328269996738527,
+    "beam_ms": 266.62419099739054
+   },
+   {
+    "clip": "s23/lwwk1a.mpg",
+    "truth": "lay white with k one again",
+    "top1": "lay wise with k one again",
+    "wer": 0.16666666666666666,
+    "cer": 0.07692307692307693,
+    "oracle_wer": 0.16666666666666666,
+    "encode_ms": 11.290558002656326,
+    "beam_ms": 236.34413599938853
+   },
+   {
+    "clip": "s23/pwwi4p.mpg",
+    "truth": "place white with i four please",
+    "top1": "place wise with i four please",
+    "wer": 0.16666666666666666,
+    "cer": 0.06666666666666667,
+    "oracle_wer": 0.16666666666666666,
+    "encode_ms": 11.353869995218702,
+    "beam_ms": 467.1876619977411
+   },
+   {
+    "clip": "s24/bbac9n.mpg",
+    "truth": "bin blue at c nine now",
+    "top1": "big blue is seen high now",
+    "wer": 0.6666666666666666,
+    "cer": 0.45454545454545453,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 12.433001997123938,
+    "beam_ms": 310.4961370045203
+   },
+   {
+    "clip": "s24/bwwsza.mpg",
+    "truth": "bin white with s zero again",
+    "top1": "beat wise when they're zero again",
+    "wer": 0.6666666666666666,
+    "cer": 0.5185185185185185,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 12.433192998287268,
+    "beam_ms": 299.34457200579345
+   },
+   {
+    "clip": "s24/lwwj8s.mpg",
+    "truth": "lay white with j eight soon",
+    "top1": "lay wise with j k s two",
+    "wer": 0.6666666666666666,
+    "cer": 0.37037037037037035,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 10.839588998351246,
+    "beam_ms": 261.5672000029008
+   },
+   {
+    "clip": "s24/pwwi3p.mpg",
+    "truth": "place white with i three please",
+    "top1": "plus why is one the i three plus",
+    "wer": 1.0,
+    "cer": 0.4838709677419355,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 10.481779994734097,
+    "beam_ms": 324.2003570048837
+   },
+   {
+    "clip": "s25/bbac8n.mpg",
+    "truth": "bin blue at c eight now",
+    "top1": "big blue is the gate now",
+    "wer": 0.6666666666666666,
+    "cer": 0.34782608695652173,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 10.617054002068471,
+    "beam_ms": 271.6973839997081
+   },
+   {
+    "clip": "s25/bwwr8p.mpg",
+    "truth": "bin white with r eight please",
+    "top1": "being white with r a please",
+    "wer": 0.3333333333333333,
+    "cer": 0.2413793103448276,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 10.17644400417339,
+    "beam_ms": 256.04112899600295
+   },
+   {
+    "clip": "s25/lwwj6n.mpg",
+    "truth": "lay white with j six now",
+    "top1": "like why would j six now",
+    "wer": 0.5,
+    "cer": 0.4166666666666667,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 12.437732999387663,
+    "beam_ms": 269.3372809953871
+   },
+   {
+    "clip": "s25/pwwi3a.mpg",
+    "truth": "place white with i three again",
+    "top1": "black's white with i three again",
+    "wer": 0.16666666666666666,
+    "cer": 0.13333333333333333,
+    "oracle_wer": 0.16666666666666666,
+    "encode_ms": 10.396488003607374,
+    "beam_ms": 251.62137199367862
+   },
+   {
+    "clip": "s26/bbac7n.mpg",
+    "truth": "bin blue at c seven now",
+    "top1": "big blue at six seven now",
+    "wer": 0.3333333333333333,
+    "cer": 0.17391304347826086,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 10.550732004048768,
+    "beam_ms": 270.55957799893804
+   },
+   {
+    "clip": "s26/bwwr7p.mpg",
+    "truth": "bin white with r seven please",
+    "top1": "been wet with our seven please",
+    "wer": 0.5,
+    "cer": 0.2413793103448276,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 11.340598997776397,
+    "beam_ms": 253.51611399673857
+   },
+   {
+    "clip": "s26/lwwj5n.mpg",
+    "truth": "lay white with j five now",
+    "top1": "let's wait with the g five though",
+    "wer": 0.8333333333333334,
+    "cer": 0.64,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 10.986881999997422,
+    "beam_ms": 275.60433900362113
+   },
+   {
+    "clip": "s26/pwwizs.mpg",
+    "truth": "place white with i zero soon",
+    "top1": "please wait with us in your suit",
+    "wer": 1.0,
+    "cer": 0.5357142857142857,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 10.186954998061992,
+    "beam_ms": 245.75342200114392
+   },
+   {
+    "clip": "s27/bbac6n.mpg",
+    "truth": "bin blue at c six now",
+    "top1": "big bloke sees things now",
+    "wer": 0.8333333333333334,
+    "cer": 0.5714285714285714,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 10.056910999992397,
+    "beam_ms": 284.7745600010967
+   },
+   {
+    "clip": "s27/bwwr6p.mpg",
+    "truth": "bin white with r six please",
+    "top1": "being wise with us is pleasant",
+    "wer": 0.8333333333333334,
+    "cer": 0.4074074074074074,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 9.928898994985502,
+    "beam_ms": 292.7486359985778
+   },
+   {
+    "clip": "s27/lwwj4n.mpg",
+    "truth": "lay white with j four now",
+    "top1": "likewise with j four now",
+    "wer": 0.3333333333333333,
+    "cer": 0.2,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 12.403952998283785,
+    "beam_ms": 294.62042699742597
+   },
+   {
+    "clip": "s27/pwwo2n.mpg",
+    "truth": "place white with o two now",
+    "top1": "place wise with o two now",
+    "wer": 0.16666666666666666,
+    "cer": 0.07692307692307693,
+    "oracle_wer": 0.16666666666666666,
+    "encode_ms": 10.891049001656938,
+    "beam_ms": 231.6784729991923
+   },
+   {
+    "clip": "s28/bbac5n.mpg",
+    "truth": "bin blue at c five now",
+    "top1": "i don't know how you're going to do it but i've no",
+    "wer": 2.0,
+    "cer": 1.6818181818181819,
+    "oracle_wer": 2.0,
+    "encode_ms": 9.977389003324788,
+    "beam_ms": 450.83598099881783
+   },
+   {
+    "clip": "s28/bwwr5p.mpg",
+    "truth": "bin white with r five please",
+    "top1": "i'd be away with the heart five please",
+    "wer": 0.8333333333333334,
+    "cer": 0.6428571428571429,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 11.756619001971558,
+    "beam_ms": 379.54434499988565
+   },
+   {
+    "clip": "s28/lwwj3n.mpg",
+    "truth": "lay white with j three now",
+    "top1": "he went with jessica",
+    "wer": 0.8333333333333334,
+    "cer": 0.5769230769230769,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 11.24996600265149,
+    "beam_ms": 308.3733800012851
+   },
+   {
+    "clip": "s28/pwwo2s.mpg",
+    "truth": "place white with o two soon",
+    "top1": "i'm pleased with all you do",
+    "wer": 0.8333333333333334,
+    "cer": 0.7407407407407407,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 10.272155006532557,
+    "beam_ms": 310.86702500033425
+   },
+   {
+    "clip": "s29/bbac4n.mpg",
+    "truth": "bin blue at c four now",
+    "top1": "big blue and c four now",
+    "wer": 0.3333333333333333,
+    "cer": 0.13636363636363635,
+    "oracle_wer": 0.16666666666666666,
+    "encode_ms": 10.07995299733011,
+    "beam_ms": 200.7357930051512
+   },
+   {
+    "clip": "s29/bwwr4p.mpg",
+    "truth": "bin white with r four please",
+    "top1": "been white with a four please",
+    "wer": 0.3333333333333333,
+    "cer": 0.10714285714285714,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 10.146902997803409,
+    "beam_ms": 232.2182950010756
+   },
+   {
+    "clip": "s29/lwwj2n.mpg",
+    "truth": "lay white with j two now",
+    "top1": "lay white with j two now",
+    "wer": 0.0,
+    "cer": 0.0,
+    "oracle_wer": 0.0,
+    "encode_ms": 10.423379004350863,
+    "beam_ms": 237.11264199664583
+   },
+   {
+    "clip": "s29/pwwo3a.mpg",
+    "truth": "place white with o three again",
+    "top1": "plays white with o three again",
+    "wer": 0.16666666666666666,
+    "cer": 0.06666666666666667,
+    "oracle_wer": 0.0,
+    "encode_ms": 10.027249998529442,
+    "beam_ms": 216.80000700143864
+   },
+   {
+    "clip": "s30/bbac3n.mpg",
+    "truth": "bin blue at c three now",
+    "top1": "it's a big bloke i see three now",
+    "wer": 1.0,
+    "cer": 0.6521739130434783,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 10.218774004897568,
+    "beam_ms": 317.27395599591546
+   },
+   {
+    "clip": "s30/bwwr3p.mpg",
+    "truth": "bin white with r three please",
+    "top1": "i'm being wedged with all three bees",
+    "wer": 0.8333333333333334,
+    "cer": 0.5862068965517241,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 10.131583003385458,
+    "beam_ms": 347.9776899985154
+   },
+   {
+    "clip": "s30/lwwj1n.mpg",
+    "truth": "lay white with j one now",
+    "top1": "i'm going to say one now",
+    "wer": 0.6666666666666666,
+    "cer": 0.5416666666666666,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 10.089411996887065,
+    "beam_ms": 289.09300600207644
+   },
+   {
+    "clip": "s30/pwwozs.mpg",
+    "truth": "place white with o zero soon",
+    "top1": "plus we'll go zero to two",
+    "wer": 1.0,
+    "cer": 0.6071428571428571,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 10.309985998901539,
+    "beam_ms": 314.65052800194826
+   },
+   {
+    "clip": "s31/bbac2n.mpg",
+    "truth": "bin blue at c two now",
+    "top1": "big blue i see you now",
+    "wer": 0.6666666666666666,
+    "cer": 0.42857142857142855,
+    "oracle_wer": 0.5,
+    "encode_ms": 11.575224001717288,
+    "beam_ms": 266.0179689992219
+   },
+   {
+    "clip": "s31/bwwr3a.mpg",
+    "truth": "bin white with r three again",
+    "top1": "beware with arthritis",
+    "wer": 0.8333333333333334,
+    "cer": 0.5357142857142857,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 11.284359003184363,
+    "beam_ms": 265.15822899818886
+   },
+   {
+    "clip": "s31/lwwj1s.mpg",
+    "truth": "lay white with j one soon",
+    "top1": "lee white with jay one two",
+    "wer": 0.5,
+    "cer": 0.28,
+    "oracle_wer": 0.5,
+    "encode_ms": 11.397961003240198,
+    "beam_ms": 287.9005899958429
+   },
+   {
+    "clip": "s31/pwwu2n.mpg",
+    "truth": "place white with u two now",
+    "top1": "please wear it with you too now",
+    "wer": 0.8333333333333334,
+    "cer": 0.38461538461538464,
+    "oracle_wer": 0.5,
+    "encode_ms": 11.42365100531606,
+    "beam_ms": 231.97044999687932
+   },
+   {
+    "clip": "s32/bbac1n.mpg",
+    "truth": "bin blue at c one now",
+    "top1": "big blue and c one now",
+    "wer": 0.3333333333333333,
+    "cer": 0.14285714285714285,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 10.254746004648041,
+    "beam_ms": 217.57513299962739
+   },
+   {
+    "clip": "s32/bwwr2a.mpg",
+    "truth": "bin white with r two again",
+    "top1": "be one without two again",
+    "wer": 0.6666666666666666,
+    "cer": 0.34615384615384615,
+    "oracle_wer": 0.5,
+    "encode_ms": 14.101740998739842,
+    "beam_ms": 234.27929999888875
+   },
+   {
+    "clip": "s32/lwwi9n.mpg",
+    "truth": "lay white with i nine now",
+    "top1": "he went with eye lighting now",
+    "wer": 0.6666666666666666,
+    "cer": 0.6,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 11.15150500118034,
+    "beam_ms": 277.3143070007791
+   },
+   {
+    "clip": "s32/pwwu2s.mpg",
+    "truth": "place white with u two soon",
+    "top1": "but he's right with you too soon",
+    "wer": 0.8333333333333334,
+    "cer": 0.5555555555555556,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 10.442669001349714,
+    "beam_ms": 313.7677479971899
+   },
+   {
+    "clip": "s33/bbac1s.mpg",
+    "truth": "bin blue at c one soon",
+    "top1": "mimics he went to",
+    "wer": 1.0,
+    "cer": 0.7272727272727273,
+    "oracle_wer": 1.0,
+    "encode_ms": 12.557166002807207,
+    "beam_ms": 318.32753799972124
+   },
+   {
+    "clip": "s33/bwwr1a.mpg",
+    "truth": "bin white with r one again",
+    "top1": "midway without one again",
+    "wer": 0.6666666666666666,
+    "cer": 0.38461538461538464,
+    "oracle_wer": 0.5,
+    "encode_ms": 11.22187700093491,
+    "beam_ms": 233.84910100139678
+   },
+   {
+    "clip": "s33/lwwi8n.mpg",
+    "truth": "lay white with i eight now",
+    "top1": "he went with ian now",
+    "wer": 0.6666666666666666,
+    "cer": 0.46153846153846156,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 14.0921209967928,
+    "beam_ms": 278.784619004
+   },
+   {
+    "clip": "s33/pwwu3a.mpg",
+    "truth": "place white with u three again",
+    "top1": "please wait with your three again",
+    "wer": 0.5,
+    "cer": 0.23333333333333334,
+    "oracle_wer": 0.5,
+    "encode_ms": 10.255045999656431,
+    "beam_ms": 239.33034099900397
+   },
+   {
+    "clip": "s34/bbab9n.mpg",
+    "truth": "bin blue at b nine now",
+    "top1": "i'm bimbo and p nine now",
+    "wer": 0.6666666666666666,
+    "cer": 0.45454545454545453,
+    "oracle_wer": 0.5,
+    "encode_ms": 11.593684001127258,
+    "beam_ms": 428.74204599502264
+   },
+   {
+    "clip": "s34/bwwq9p.mpg",
+    "truth": "bin white with q nine please",
+    "top1": "pinwheels with you nine please",
+    "wer": 0.5,
+    "cer": 0.32142857142857145,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 11.550523995538242,
+    "beam_ms": 303.12346500431886
+   },
+   {
+    "clip": "s34/lwwi8s.mpg",
+    "truth": "lay white with i eight soon",
+    "top1": "clay wine with i ate too",
+    "wer": 0.6666666666666666,
+    "cer": 0.37037037037037035,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 12.2182380000595,
+    "beam_ms": 296.30181500397157
+   },
+   {
+    "clip": "s34/pwwuzs.mpg",
+    "truth": "place white with u zero soon",
+    "top1": "place words with two zero two",
+    "wer": 0.5,
+    "cer": 0.35714285714285715,
+    "oracle_wer": 0.5,
+    "encode_ms": 10.737595999671612,
+    "beam_ms": 243.06278400035808
+   }
+  ],
+  "beam6_fp32": [
+   {
+    "clip": "s1/bbaf2n.mpg",
+    "truth": "bin blue at f two now",
+    "top1": "pimp you have two now",
+    "wer": 0.6666666666666666,
+    "cer": 0.47619047619047616,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 28.386634003254585,
+    "beam_ms": 98.62310699827503
+   },
+   {
+    "clip": "s1/lbaq6p.mpg",
+    "truth": "lay blue at q six please",
+    "top1": "late blue acoustics please",
+    "wer": 0.6666666666666666,
+    "cer": 0.375,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 10.054639998998027,
+    "beam_ms": 316.88119700265815
+   },
+   {
+    "clip": "s1/pbav2n.mpg",
+    "truth": "place blue at v two now",
+    "top1": "plays beautifully too now",
+    "wer": 0.8333333333333334,
+    "cer": 0.5217391304347826,
+    "oracle_wer": 0.5,
+    "encode_ms": 9.265414002584293,
+    "beam_ms": 229.83703199861338
+   },
+   {
+    "clip": "s1/sbah1a.mpg",
+    "truth": "set blue at h one again",
+    "top1": "temple age one again",
+    "wer": 0.6666666666666666,
+    "cer": 0.34782608695652173,
+    "oracle_wer": 0.5,
+    "encode_ms": 8.693821000633761,
+    "beam_ms": 202.09156200144207
+   },
+   {
+    "clip": "s2/bbaf1n.mpg",
+    "truth": "bin blue at f one now",
+    "top1": "been blew in f one now",
+    "wer": 0.5,
+    "cer": 0.2857142857142857,
+    "oracle_wer": 0.5,
+    "encode_ms": 8.706351000000723,
+    "beam_ms": 240.08243800199125
+   },
+   {
+    "clip": "s2/lbaq5p.mpg",
+    "truth": "lay blue at q five please",
+    "top1": "i'll let it blow into you five please",
+    "wer": 1.0,
+    "cer": 0.72,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 8.66513999790186,
+    "beam_ms": 259.7523310032557
+   },
+   {
+    "clip": "s2/pbapza.mpg",
+    "truth": "place blue at p zero again",
+    "top1": "plus brewing b zero again",
+    "wer": 0.6666666666666666,
+    "cer": 0.38461538461538464,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 8.669362003274728,
+    "beam_ms": 231.47538799821632
+   },
+   {
+    "clip": "s2/sbag8s.mpg",
+    "truth": "set blue at g eight soon",
+    "top1": "it's dead blue it's gigantic",
+    "wer": 1.0,
+    "cer": 0.75,
+    "oracle_wer": 1.0,
+    "encode_ms": 8.690950999152847,
+    "beam_ms": 272.74813600524794
+   },
+   {
+    "clip": "s3/bbaf1s.mpg",
+    "truth": "bin blue at f one soon",
+    "top1": "beat blue at f one two",
+    "wer": 0.3333333333333333,
+    "cer": 0.2727272727272727,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 8.642919994599652,
+    "beam_ms": 163.96760500356322
+   },
+   {
+    "clip": "s3/lbaq4p.mpg",
+    "truth": "lay blue at q four please",
+    "top1": "light blue and q four please",
+    "wer": 0.3333333333333333,
+    "cer": 0.24,
+    "oracle_wer": 0.16666666666666666,
+    "encode_ms": 8.642560002044775,
+    "beam_ms": 187.7152169981855
+   },
+   {
+    "clip": "s3/pbao8p.mpg",
+    "truth": "place blue at o eight please",
+    "top1": "place blue at o eight place",
+    "wer": 0.16666666666666666,
+    "cer": 0.07142857142857142,
+    "oracle_wer": 0.16666666666666666,
+    "encode_ms": 8.664259999932256,
+    "beam_ms": 184.89780499658082
+   },
+   {
+    "clip": "s3/sbag6n.mpg",
+    "truth": "set blue at g six now",
+    "top1": "erm said bloom had a gcse now",
+    "wer": 1.0,
+    "cer": 0.8095238095238095,
+    "oracle_wer": 1.0,
+    "encode_ms": 9.927369006618392,
+    "beam_ms": 306.3427739980398
+   },
+   {
+    "clip": "s4/bbae9n.mpg",
+    "truth": "bin blue at e nine now",
+    "top1": "i've been boasting day now",
+    "wer": 0.8333333333333334,
+    "cer": 0.7727272727272727,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 9.506059002887923,
+    "beam_ms": 291.3440249976702
+   },
+   {
+    "clip": "s4/lbaq3p.mpg",
+    "truth": "lay blue at q three please",
+    "top1": "i'll keep you at q three please",
+    "wer": 0.5,
+    "cer": 0.4230769230769231,
+    "oracle_wer": 0.5,
+    "encode_ms": 10.566422999545466,
+    "beam_ms": 253.7560180062428
+   },
+   {
+    "clip": "s4/pbao6s.mpg",
+    "truth": "place blue at o six soon",
+    "top1": "placebo et cetera",
+    "wer": 1.0,
+    "cer": 0.625,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 8.623629000794608,
+    "beam_ms": 250.25025099603226
+   },
+   {
+    "clip": "s4/sbaa4a.mpg",
+    "truth": "set blue at a four again",
+    "top1": "and he blew it out for her again",
+    "wer": 1.1666666666666667,
+    "cer": 0.6666666666666666,
+    "oracle_wer": 1.0,
+    "encode_ms": 8.78628299687989,
+    "beam_ms": 233.10974400374107
+   },
+   {
+    "clip": "s5/bbae7n.mpg",
+    "truth": "bin blue at e seven now",
+    "top1": "big blooming e seven now",
+    "wer": 0.5,
+    "cer": 0.30434782608695654,
+    "oracle_wer": 0.5,
+    "encode_ms": 9.75801500317175,
+    "beam_ms": 246.09641000279225
+   },
+   {
+    "clip": "s5/lbaq2a.mpg",
+    "truth": "lay blue at q two again",
+    "top1": "i'd like a blooming coat to you again",
+    "wer": 1.1666666666666667,
+    "cer": 0.9565217391304348,
+    "oracle_wer": 1.0,
+    "encode_ms": 8.785063000686932,
+    "beam_ms": 322.15354299842147
+   },
+   {
+    "clip": "s5/pbaizs.mpg",
+    "truth": "place blue at i zero soon",
+    "top1": "but let's put you in as i see around you",
+    "wer": 1.5,
+    "cer": 1.12,
+    "oracle_wer": 1.5,
+    "encode_ms": 8.696030999999493,
+    "beam_ms": 259.97391500277445
+   },
+   {
+    "clip": "s5/sbaa2a.mpg",
+    "truth": "set blue at a two again",
+    "top1": "it's had a blue and a two again",
+    "wer": 0.6666666666666666,
+    "cer": 0.4782608695652174,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 8.660430001327768,
+    "beam_ms": 245.67879100504797
+   },
+   {
+    "clip": "s6/bbae8n.mpg",
+    "truth": "bin blue at e eight now",
+    "top1": "been blew as he is now",
+    "wer": 0.8333333333333334,
+    "cer": 0.43478260869565216,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 8.94516699918313,
+    "beam_ms": 185.11594899609918
+   },
+   {
+    "clip": "s6/lbaq3a.mpg",
+    "truth": "lay blue at q three again",
+    "top1": "late blooming q three again",
+    "wer": 0.5,
+    "cer": 0.32,
+    "oracle_wer": 0.5,
+    "encode_ms": 8.689170994330198,
+    "beam_ms": 247.14896300429245
+   },
+   {
+    "clip": "s6/pbao4n.mpg",
+    "truth": "place blue at o four now",
+    "top1": "please blue is over now",
+    "wer": 0.6666666666666666,
+    "cer": 0.3333333333333333,
+    "oracle_wer": 0.5,
+    "encode_ms": 8.686032000696287,
+    "beam_ms": 186.65143299585907
+   },
+   {
+    "clip": "s6/sbaa3a.mpg",
+    "truth": "set blue at a three again",
+    "top1": "said blue is a three again",
+    "wer": 0.3333333333333333,
+    "cer": 0.2,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 8.73311200120952,
+    "beam_ms": 264.0003449996584
+   },
+   {
+    "clip": "s7/bbae6n.mpg",
+    "truth": "bin blue at e six now",
+    "top1": "ben and bill were six now",
+    "wer": 0.6666666666666666,
+    "cer": 0.5238095238095238,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 8.64717999502318,
+    "beam_ms": 205.24610200664029
+   },
+   {
+    "clip": "s7/lbaq1a.mpg",
+    "truth": "lay blue at q one again",
+    "top1": "let it blow away are you wearing it",
+    "wer": 1.3333333333333333,
+    "cer": 1.0,
+    "oracle_wer": 1.1666666666666667,
+    "encode_ms": 8.800112998869736,
+    "beam_ms": 233.8530310007627
+   },
+   {
+    "clip": "s7/pbai1a.mpg",
+    "truth": "place blue at i one again",
+    "top1": "please blue i want to get in",
+    "wer": 1.0,
+    "cer": 0.56,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 8.669361006468534,
+    "beam_ms": 232.70985599810956
+   },
+   {
+    "clip": "s7/sbaa1a.mpg",
+    "truth": "set blue at a one again",
+    "top1": "that blooming day one again",
+    "wer": 0.6666666666666666,
+    "cer": 0.4782608695652174,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 9.369156003231183,
+    "beam_ms": 234.6480190026341
+   },
+   {
+    "clip": "s8/bbae5n.mpg",
+    "truth": "bin blue at e five now",
+    "top1": "bennett blue has e five now",
+    "wer": 0.3333333333333333,
+    "cer": 0.3181818181818182,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 8.912577002774924,
+    "beam_ms": 232.49296999711078
+   },
+   {
+    "clip": "s8/lbap9p.mpg",
+    "truth": "lay blue at p nine please",
+    "top1": "light blue and pink dye please",
+    "wer": 0.6666666666666666,
+    "cer": 0.44,
+    "oracle_wer": 0.5,
+    "encode_ms": 8.588558994233608,
+    "beam_ms": 208.54205499927048
+   },
+   {
+    "clip": "s8/pbah8s.mpg",
+    "truth": "place blue at h eight soon",
+    "top1": "place bloom at asia ada soon",
+    "wer": 0.5,
+    "cer": 0.4230769230769231,
+    "oracle_wer": 0.5,
+    "encode_ms": 8.59902900265297,
+    "beam_ms": 241.791934997309
+   },
+   {
+    "clip": "s8/pwwx8a.mpg",
+    "truth": "place white with x eight again",
+    "top1": "place white with x eight again",
+    "wer": 0.0,
+    "cer": 0.0,
+    "oracle_wer": 0.0,
+    "encode_ms": 9.533499003737234,
+    "beam_ms": 254.9214539976674
+   },
+   {
+    "clip": "s9/bbae4n.mpg",
+    "truth": "bin blue at e four now",
+    "top1": "i'm being blue i need four now",
+    "wer": 0.6666666666666666,
+    "cer": 0.5,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 8.893835998605937,
+    "beam_ms": 258.9106920058839
+   },
+   {
+    "clip": "s9/lbap8p.mpg",
+    "truth": "lay blue at p eight please",
+    "top1": "lady bloom unpaid please",
+    "wer": 0.8333333333333334,
+    "cer": 0.46153846153846156,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 8.674081000208389,
+    "beam_ms": 250.27278199559078
+   },
+   {
+    "clip": "s9/pbah6n.mpg",
+    "truth": "place blue at h six now",
+    "top1": "please blew i can't see anything",
+    "wer": 1.0,
+    "cer": 0.8260869565217391,
+    "oracle_wer": 1.0,
+    "encode_ms": 8.712422000826336,
+    "beam_ms": 243.44633200234966
+   },
+   {
+    "clip": "s9/pwwx6p.mpg",
+    "truth": "place white with x six please",
+    "top1": "plus one we've had six plus",
+    "wer": 0.8333333333333334,
+    "cer": 0.5517241379310345,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 8.742122001422103,
+    "beam_ms": 202.5447330015595
+   },
+   {
+    "clip": "s10/bbab8n.mpg",
+    "truth": "bin blue at b eight now",
+    "top1": "blew up again now",
+    "wer": 0.8333333333333334,
+    "cer": 0.6086956521739131,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 8.769161999225616,
+    "beam_ms": 211.88314900064142
+   },
+   {
+    "clip": "s10/bwwq8p.mpg",
+    "truth": "bin white with q eight please",
+    "top1": "i've been right with you ah please",
+    "wer": 0.8333333333333334,
+    "cer": 0.6206896551724138,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 8.795873000053689,
+    "beam_ms": 265.4046049938188
+   },
+   {
+    "clip": "s10/lwwi8p.mpg",
+    "truth": "lay white with i eight please",
+    "top1": "lynn why didn't i get beat",
+    "wer": 0.8333333333333334,
+    "cer": 0.6206896551724138,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 8.963796994066797,
+    "beam_ms": 249.0073540029698
+   },
+   {
+    "clip": "s10/sbad4n.mpg",
+    "truth": "set blue at d four now",
+    "top1": "it's temperamental for now",
+    "wer": 0.8333333333333334,
+    "cer": 0.6818181818181818,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 10.234104003757238,
+    "beam_ms": 285.82838299917057
+   },
+   {
+    "clip": "s11/bbae2n.mpg",
+    "truth": "bin blue at e two now",
+    "top1": "people who hate you now",
+    "wer": 0.8333333333333334,
+    "cer": 0.7142857142857143,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 9.976199995435309,
+    "beam_ms": 186.65078400226776
+   },
+   {
+    "clip": "s11/lbap4n.mpg",
+    "truth": "lay blue at p four now",
+    "top1": "they blew a bit of food now",
+    "wer": 1.0,
+    "cer": 0.5454545454545454,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 9.249813003407326,
+    "beam_ms": 234.9026239971863
+   },
+   {
+    "clip": "s11/pbab3a.mpg",
+    "truth": "place blue at b three again",
+    "top1": "that's bloom b three again",
+    "wer": 0.5,
+    "cer": 0.37037037037037035,
+    "oracle_wer": 0.5,
+    "encode_ms": 8.71461299539078,
+    "beam_ms": 215.9304860033444
+   },
+   {
+    "clip": "s11/pwwx2n.mpg",
+    "truth": "place white with x two now",
+    "top1": "please why would that do now",
+    "wer": 0.8333333333333334,
+    "cer": 0.5384615384615384,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 8.636391001346055,
+    "beam_ms": 197.07067199487938
+   },
+   {
+    "clip": "s12/bbae1n.mpg",
+    "truth": "bin blue at e one now",
+    "top1": "pin blue is a one now",
+    "wer": 0.5,
+    "cer": 0.19047619047619047,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 9.293493996665347,
+    "beam_ms": 162.06589299690677
+   },
+   {
+    "clip": "s12/lbajzs.mpg",
+    "truth": "lay blue at j zero soon",
+    "top1": "late bloomer and jay savoy",
+    "wer": 1.0,
+    "cer": 0.6956521739130435,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 8.681010993313976,
+    "beam_ms": 302.9615300038131
+   },
+   {
+    "clip": "s12/pbab1p.mpg",
+    "truth": "place blue at b one please",
+    "top1": "place blue is b one please",
+    "wer": 0.16666666666666666,
+    "cer": 0.07692307692307693,
+    "oracle_wer": 0.16666666666666666,
+    "encode_ms": 8.994017000077292,
+    "beam_ms": 197.9073309994419
+   },
+   {
+    "clip": "s12/pwwqza.mpg",
+    "truth": "place white with q zero again",
+    "top1": "plays wise with q zero again",
+    "wer": 0.3333333333333333,
+    "cer": 0.13793103448275862,
+    "oracle_wer": 0.16666666666666666,
+    "encode_ms": 8.630568998341914,
+    "beam_ms": 209.9904470014735
+   },
+   {
+    "clip": "s13/bbae1s.mpg",
+    "truth": "bin blue at e one soon",
+    "top1": "but blue is he once",
+    "wer": 0.8333333333333334,
+    "cer": 0.5,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 9.2110820041853,
+    "beam_ms": 199.41590399685083
+   },
+   {
+    "clip": "s13/lbaj1a.mpg",
+    "truth": "lay blue at j one again",
+    "top1": "it blew and jay won again",
+    "wer": 0.8333333333333334,
+    "cer": 0.4782608695652174,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 8.699851998244412,
+    "beam_ms": 227.48904000036418
+   },
+   {
+    "clip": "s13/pbaa8n.mpg",
+    "truth": "place blue at a eight now",
+    "top1": "but it's blue at a h now",
+    "wer": 0.5,
+    "cer": 0.48,
+    "oracle_wer": 0.5,
+    "encode_ms": 9.483828995143995,
+    "beam_ms": 212.09505300066667
+   },
+   {
+    "clip": "s13/pwwp8p.mpg",
+    "truth": "place white with p eight please",
+    "top1": "plus one would be eight please",
+    "wer": 0.6666666666666666,
+    "cer": 0.41935483870967744,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 8.723181999812368,
+    "beam_ms": 200.5246190019534
+   },
+   {
+    "clip": "s14/bbad9n.mpg",
+    "truth": "bin blue at d nine now",
+    "top1": "it's been blue as he died now",
+    "wer": 0.8333333333333334,
+    "cer": 0.5909090909090909,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 8.774453002843075,
+    "beam_ms": 221.78213599545415
+   },
+   {
+    "clip": "s14/lbai8s.mpg",
+    "truth": "lay blue at i eight soon",
+    "top1": "a bloom at i s",
+    "wer": 0.6666666666666666,
+    "cer": 0.5833333333333334,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 8.868294993590098,
+    "beam_ms": 195.574180004769
+   },
+   {
+    "clip": "s14/lwwy8a.mpg",
+    "truth": "lay white with y eight again",
+    "top1": "likewise with y a t",
+    "wer": 0.6666666666666666,
+    "cer": 0.5357142857142857,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 8.80075399618363,
+    "beam_ms": 209.14420800545486
+   },
+   {
+    "clip": "s14/pwwp6s.mpg",
+    "truth": "place white with p six soon",
+    "top1": "he plays white with bc two",
+    "wer": 0.8333333333333334,
+    "cer": 0.48148148148148145,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 8.64646999980323,
+    "beam_ms": 112.08304399769986
+   },
+   {
+    "clip": "s15/bbad8n.mpg",
+    "truth": "bin blue at d eight now",
+    "top1": "big blue and decay now",
+    "wer": 0.6666666666666666,
+    "cer": 0.34782608695652173,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 9.023608996358234,
+    "beam_ms": 175.4533769999398
+   },
+   {
+    "clip": "s15/lbai6n.mpg",
+    "truth": "lay blue at i six now",
+    "top1": "they blue and i sticks down",
+    "wer": 0.6666666666666666,
+    "cer": 0.5238095238095238,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 8.66902000416303,
+    "beam_ms": 203.07517400215147
+   },
+   {
+    "clip": "s15/lwwy6p.mpg",
+    "truth": "lay white with y six please",
+    "top1": "let it white with a white six piece",
+    "wer": 0.8333333333333334,
+    "cer": 0.5555555555555556,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 8.666120003908873,
+    "beam_ms": 209.41016399592627
+   },
+   {
+    "clip": "s15/pwwp4n.mpg",
+    "truth": "place white with p four now",
+    "top1": "but it's what it's worth being for now",
+    "wer": 1.1666666666666667,
+    "cer": 0.7777777777777778,
+    "oracle_wer": 1.0,
+    "encode_ms": 9.157350999885239,
+    "beam_ms": 321.3531250003143
+   },
+   {
+    "clip": "s16/bbad7n.mpg",
+    "truth": "bin blue at d seven now",
+    "top1": "bamboo is a seven year old",
+    "wer": 1.0,
+    "cer": 0.6956521739130435,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 8.671971001604106,
+    "beam_ms": 196.83081699622562
+   },
+   {
+    "clip": "s16/lbac4a.mpg",
+    "truth": "lay blue at c four again",
+    "top1": "and i'll keep it all safe for her again",
+    "wer": 1.3333333333333333,
+    "cer": 0.9583333333333334,
+    "oracle_wer": 1.0,
+    "encode_ms": 8.628978997876402,
+    "beam_ms": 232.98152200004552
+   },
+   {
+    "clip": "s16/lwwy4s.mpg",
+    "truth": "lay white with y four soon",
+    "top1": "why would one of those two",
+    "wer": 1.0,
+    "cer": 0.7307692307692307,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 8.658052000100724,
+    "beam_ms": 199.7778009972535
+   },
+   {
+    "clip": "s16/pwwjzs.mpg",
+    "truth": "place white with j zero soon",
+    "top1": "plays white with j c r o two",
+    "wer": 0.8333333333333334,
+    "cer": 0.2857142857142857,
+    "oracle_wer": 0.5,
+    "encode_ms": 8.672660995216575,
+    "beam_ms": 274.00941400264855
+   },
+   {
+    "clip": "s17/bbad6n.mpg",
+    "truth": "bin blue at d six now",
+    "top1": "blew and he's here now",
+    "wer": 0.8333333333333334,
+    "cer": 0.7142857142857143,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 9.091610001632944,
+    "beam_ms": 245.54210899805184
+   },
+   {
+    "clip": "s17/lbac3a.mpg",
+    "truth": "lay blue at c three again",
+    "top1": "i'll let you know when i'll see three again",
+    "wer": 1.1666666666666667,
+    "cer": 1.0,
+    "oracle_wer": 1.1666666666666667,
+    "encode_ms": 8.688241003255825,
+    "beam_ms": 170.19461099698674
+   },
+   {
+    "clip": "s17/lwwy2n.mpg",
+    "truth": "lay white with y two now",
+    "top1": "y with y two now",
+    "wer": 0.3333333333333333,
+    "cer": 0.3333333333333333,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 8.652090000396129,
+    "beam_ms": 215.30734399857465
+   },
+   {
+    "clip": "s17/pwwj1a.mpg",
+    "truth": "place white with j one again",
+    "top1": "please wind with the g one again",
+    "wer": 0.6666666666666666,
+    "cer": 0.35714285714285715,
+    "oracle_wer": 0.5,
+    "encode_ms": 8.784393001405988,
+    "beam_ms": 200.221072002023
+   },
+   {
+    "clip": "s18/bbad5n.mpg",
+    "truth": "bin blue at d five now",
+    "top1": "i've been blue at c5 now",
+    "wer": 0.6666666666666666,
+    "cer": 0.5909090909090909,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 9.522049003862776,
+    "beam_ms": 244.84853299509268
+   },
+   {
+    "clip": "s18/lbac1p.mpg",
+    "truth": "lay blue at c one please",
+    "top1": "there brewer's the one please",
+    "wer": 0.6666666666666666,
+    "cer": 0.5833333333333334,
+    "oracle_wer": 0.5,
+    "encode_ms": 8.816043002298102,
+    "beam_ms": 248.20581699896138
+   },
+   {
+    "clip": "s18/lwwrza.mpg",
+    "truth": "lay white with r zero again",
+    "top1": "lynn why don't we ask you a year",
+    "wer": 1.3333333333333333,
+    "cer": 0.8518518518518519,
+    "oracle_wer": 1.3333333333333333,
+    "encode_ms": 9.176891995593905,
+    "beam_ms": 267.8876889985986
+   },
+   {
+    "clip": "s18/pwwi9p.mpg",
+    "truth": "place white with i nine please",
+    "top1": "plus what's with hina please",
+    "wer": 0.6666666666666666,
+    "cer": 0.3333333333333333,
+    "oracle_wer": 0.5,
+    "encode_ms": 8.71350200031884,
+    "beam_ms": 240.2342220011633
+   },
+   {
+    "clip": "s19/bbad4n.mpg",
+    "truth": "bin blue at d four now",
+    "top1": "ben blue let's see four now",
+    "wer": 0.5,
+    "cer": 0.36363636363636365,
+    "oracle_wer": 0.5,
+    "encode_ms": 8.736192001379095,
+    "beam_ms": 226.74575400014874
+   },
+   {
+    "clip": "s19/lbab8n.mpg",
+    "truth": "lay blue at b eight now",
+    "top1": "like blue it's b eight now",
+    "wer": 0.3333333333333333,
+    "cer": 0.2608695652173913,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 8.814464003080502,
+    "beam_ms": 203.7646989992936
+   },
+   {
+    "clip": "s19/lwwq8p.mpg",
+    "truth": "lay white with q eight please",
+    "top1": "lay white with you as a place",
+    "wer": 0.6666666666666666,
+    "cer": 0.3448275862068966,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 8.696760996826924,
+    "beam_ms": 207.88062999781687
+   },
+   {
+    "clip": "s19/pwwi8p.mpg",
+    "truth": "place white with i eight please",
+    "top1": "blazed white with high hat buttons",
+    "wer": 0.6666666666666666,
+    "cer": 0.5161290322580645,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 8.666419998917263,
+    "beam_ms": 220.66627199819777
+   },
+   {
+    "clip": "s20/bbad3n.mpg",
+    "truth": "bin blue at d three now",
+    "top1": "i'm blowing the teeth right now",
+    "wer": 0.8333333333333334,
+    "cer": 0.8260869565217391,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 8.680680999532342,
+    "beam_ms": 233.93763299827697
+   },
+   {
+    "clip": "s20/bwwz8a.mpg",
+    "truth": "bin white with z eight again",
+    "top1": "midwives will set eggs again",
+    "wer": 0.8333333333333334,
+    "cer": 0.5,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 8.656609999889042,
+    "beam_ms": 198.5441249998985
+   },
+   {
+    "clip": "s20/lwwq6s.mpg",
+    "truth": "lay white with q six soon",
+    "top1": "i'll get away with you six too",
+    "wer": 0.8333333333333334,
+    "cer": 0.68,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 56.20200500561623,
+    "beam_ms": 299.1227159945993
+   },
+   {
+    "clip": "s20/pwwi7p.mpg",
+    "truth": "place white with i seven please",
+    "top1": "place wise with i seven please",
+    "wer": 0.16666666666666666,
+    "cer": 0.06451612903225806,
+    "oracle_wer": 0.16666666666666666,
+    "encode_ms": 8.683940999617334,
+    "beam_ms": 184.87158499920042
+   },
+   {
+    "clip": "s22/bbad1n.mpg",
+    "truth": "bin blue at d one now",
+    "top1": "but i'm going to see one now",
+    "wer": 0.8333333333333334,
+    "cer": 0.7142857142857143,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 9.140421003394295,
+    "beam_ms": 210.1557790010702
+   },
+   {
+    "clip": "s22/bwwz4s.mpg",
+    "truth": "bin white with z four soon",
+    "top1": "midwife one six four two",
+    "wer": 0.8333333333333334,
+    "cer": 0.5769230769230769,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 8.723551000002772,
+    "beam_ms": 185.76174500049092
+   },
+   {
+    "clip": "s22/lwwkzs.mpg",
+    "truth": "lay white with k zero soon",
+    "top1": "likewise with kaiser aren't you",
+    "wer": 0.8333333333333334,
+    "cer": 0.6923076923076923,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 8.717523000086658,
+    "beam_ms": 263.01224299822934
+   },
+   {
+    "clip": "s22/pwwi5p.mpg",
+    "truth": "place white with i five please",
+    "top1": "blades wise with high five please",
+    "wer": 0.5,
+    "cer": 0.26666666666666666,
+    "oracle_wer": 0.5,
+    "encode_ms": 8.657890000904445,
+    "beam_ms": 207.06648199848132
+   },
+   {
+    "clip": "s23/bbad1s.mpg",
+    "truth": "bin blue at d one soon",
+    "top1": "pin blue and d one two",
+    "wer": 0.5,
+    "cer": 0.2727272727272727,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 8.67108999955235,
+    "beam_ms": 163.62625700276112
+   },
+   {
+    "clip": "s23/bwwz2n.mpg",
+    "truth": "bin white with z two now",
+    "top1": "but why do we send you now",
+    "wer": 1.0,
+    "cer": 0.625,
+    "oracle_wer": 1.0,
+    "encode_ms": 8.684389998961706,
+    "beam_ms": 174.96519700216595
+   },
+   {
+    "clip": "s23/lwwk1a.mpg",
+    "truth": "lay white with k one again",
+    "top1": "likewise with k one again",
+    "wer": 0.3333333333333333,
+    "cer": 0.19230769230769232,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 8.852783998008817,
+    "beam_ms": 188.0695250001736
+   },
+   {
+    "clip": "s23/pwwi4p.mpg",
+    "truth": "place white with i four please",
+    "top1": "place wise with i four please",
+    "wer": 0.16666666666666666,
+    "cer": 0.06666666666666667,
+    "oracle_wer": 0.16666666666666666,
+    "encode_ms": 8.665128996653948,
+    "beam_ms": 163.8702429991099
+   },
+   {
+    "clip": "s24/bbac9n.mpg",
+    "truth": "bin blue at c nine now",
+    "top1": "big blue is seen high now",
+    "wer": 0.6666666666666666,
+    "cer": 0.45454545454545453,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 9.5213300010073,
+    "beam_ms": 239.42224300117232
+   },
+   {
+    "clip": "s24/bwwsza.mpg",
+    "truth": "bin white with s zero again",
+    "top1": "beat wise when they're zero again",
+    "wer": 0.6666666666666666,
+    "cer": 0.5185185185185185,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 9.341445998870768,
+    "beam_ms": 236.874007001461
+   },
+   {
+    "clip": "s24/lwwj8s.mpg",
+    "truth": "lay white with j eight soon",
+    "top1": "lay wise with j k s two",
+    "wer": 0.6666666666666666,
+    "cer": 0.37037037037037035,
+    "oracle_wer": 0.5,
+    "encode_ms": 11.940543001401238,
+    "beam_ms": 293.7262780033052
+   },
+   {
+    "clip": "s24/pwwi3p.mpg",
+    "truth": "place white with i three please",
+    "top1": "plus why is one the i three please",
+    "wer": 0.8333333333333334,
+    "cer": 0.3870967741935484,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 9.58556099794805,
+    "beam_ms": 213.66296699852683
+   },
+   {
+    "clip": "s25/bbac8n.mpg",
+    "truth": "bin blue at c eight now",
+    "top1": "big blue is the gate now",
+    "wer": 0.6666666666666666,
+    "cer": 0.34782608695652173,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 9.208552997733932,
+    "beam_ms": 227.47587999765528
+   },
+   {
+    "clip": "s25/bwwr8p.mpg",
+    "truth": "bin white with r eight please",
+    "top1": "being white with r a please",
+    "wer": 0.3333333333333333,
+    "cer": 0.2413793103448276,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 8.648700000776444,
+    "beam_ms": 208.8319520044024
+   },
+   {
+    "clip": "s25/lwwj6n.mpg",
+    "truth": "lay white with j six now",
+    "top1": "like white with jay six now",
+    "wer": 0.3333333333333333,
+    "cer": 0.20833333333333334,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 8.713041002920363,
+    "beam_ms": 201.3212259989814
+   },
+   {
+    "clip": "s25/pwwi3a.mpg",
+    "truth": "place white with i three again",
+    "top1": "black's white with i three again",
+    "wer": 0.16666666666666666,
+    "cer": 0.13333333333333333,
+    "oracle_wer": 0.16666666666666666,
+    "encode_ms": 8.914217003621161,
+    "beam_ms": 190.47856699762633
+   },
+   {
+    "clip": "s26/bbac7n.mpg",
+    "truth": "bin blue at c seven now",
+    "top1": "big blue at six seven now",
+    "wer": 0.3333333333333333,
+    "cer": 0.17391304347826086,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 8.676231002027635,
+    "beam_ms": 201.97762000316288
+   },
+   {
+    "clip": "s26/bwwr7p.mpg",
+    "truth": "bin white with r seven please",
+    "top1": "been wet with our seven please",
+    "wer": 0.5,
+    "cer": 0.2413793103448276,
+    "oracle_wer": 0.5,
+    "encode_ms": 8.690451002621558,
+    "beam_ms": 213.95016399765154
+   },
+   {
+    "clip": "s26/lwwj5n.mpg",
+    "truth": "lay white with j five now",
+    "top1": "let it wait with the shelf five no",
+    "wer": 1.0,
+    "cer": 0.68,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 8.62529000005452,
+    "beam_ms": 228.64919700077735
+   },
+   {
+    "clip": "s26/pwwizs.mpg",
+    "truth": "place white with i zero soon",
+    "top1": "please wait with us in your suit",
+    "wer": 1.0,
+    "cer": 0.5357142857142857,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 8.696200995473191,
+    "beam_ms": 238.22174800443463
+   },
+   {
+    "clip": "s27/bbac6n.mpg",
+    "truth": "bin blue at c six now",
+    "top1": "big bloomers these days now",
+    "wer": 0.8333333333333334,
+    "cer": 0.7142857142857143,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 8.640869993541855,
+    "beam_ms": 227.4523500018404
+   },
+   {
+    "clip": "s27/bwwr6p.mpg",
+    "truth": "bin white with r six please",
+    "top1": "being wise with us is pleasant",
+    "wer": 0.8333333333333334,
+    "cer": 0.4074074074074074,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 8.645060996059328,
+    "beam_ms": 218.28097799880197
+   },
+   {
+    "clip": "s27/lwwj4n.mpg",
+    "truth": "lay white with j four now",
+    "top1": "clay was with jay ford now",
+    "wer": 0.6666666666666666,
+    "cer": 0.36,
+    "oracle_wer": 0.5,
+    "encode_ms": 8.652589996927418,
+    "beam_ms": 210.06356900034007
+   },
+   {
+    "clip": "s27/pwwo2n.mpg",
+    "truth": "place white with o two now",
+    "top1": "place wise with o two now",
+    "wer": 0.16666666666666666,
+    "cer": 0.07692307692307693,
+    "oracle_wer": 0.16666666666666666,
+    "encode_ms": 8.876245003193617,
+    "beam_ms": 174.13355800090358
+   },
+   {
+    "clip": "s28/bbac5n.mpg",
+    "truth": "bin blue at c five now",
+    "top1": "i don't know how you're going to do it but i've known you",
+    "wer": 2.1666666666666665,
+    "cer": 1.9090909090909092,
+    "oracle_wer": 2.1666666666666665,
+    "encode_ms": 8.644929999718443,
+    "beam_ms": 354.34675100259483
+   },
+   {
+    "clip": "s28/bwwr5p.mpg",
+    "truth": "bin white with r five please",
+    "top1": "i'd be away with the heart five please",
+    "wer": 0.8333333333333334,
+    "cer": 0.6428571428571429,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 9.300145000452176,
+    "beam_ms": 312.09085100272205
+   },
+   {
+    "clip": "s28/lwwj3n.mpg",
+    "truth": "lay white with j three now",
+    "top1": "he went with jessica now",
+    "wer": 0.6666666666666666,
+    "cer": 0.46153846153846156,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 10.618934000376612,
+    "beam_ms": 243.6936070007505
+   },
+   {
+    "clip": "s28/pwwo2s.mpg",
+    "truth": "place white with o two soon",
+    "top1": "please wait with the orders",
+    "wer": 0.8333333333333334,
+    "cer": 0.48148148148148145,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 10.453408998728264,
+    "beam_ms": 202.35884900466772
+   },
+   {
+    "clip": "s29/bbac4n.mpg",
+    "truth": "bin blue at c four now",
+    "top1": "big blue and c four now",
+    "wer": 0.3333333333333333,
+    "cer": 0.13636363636363635,
+    "oracle_wer": 0.16666666666666666,
+    "encode_ms": 8.922496002924163,
+    "beam_ms": 185.71866399724968
+   },
+   {
+    "clip": "s29/bwwr4p.mpg",
+    "truth": "bin white with r four please",
+    "top1": "bit of white with a four please",
+    "wer": 0.5,
+    "cer": 0.17857142857142858,
+    "oracle_wer": 0.5,
+    "encode_ms": 59.559319000982214,
+    "beam_ms": 226.32385699398583
+   },
+   {
+    "clip": "s29/lwwj2n.mpg",
+    "truth": "lay white with j two now",
+    "top1": "lay white with j two now",
+    "wer": 0.0,
+    "cer": 0.0,
+    "oracle_wer": 0.0,
+    "encode_ms": 8.663979999255389,
+    "beam_ms": 223.71741900133202
+   },
+   {
+    "clip": "s29/pwwo3a.mpg",
+    "truth": "place white with o three again",
+    "top1": "plays white with o three again",
+    "wer": 0.16666666666666666,
+    "cer": 0.06666666666666667,
+    "oracle_wer": 0.0,
+    "encode_ms": 8.655208999698516,
+    "beam_ms": 160.19148300256347
+   },
+   {
+    "clip": "s30/bbac3n.mpg",
+    "truth": "bin blue at c three now",
+    "top1": "a big bloke i see three now",
+    "wer": 0.8333333333333334,
+    "cer": 0.43478260869565216,
+    "oracle_wer": 0.5,
+    "encode_ms": 8.637740000267513,
+    "beam_ms": 228.65269699832425
+   },
+   {
+    "clip": "s30/bwwr3p.mpg",
+    "truth": "bin white with r three please",
+    "top1": "it's been wedged with our three bees",
+    "wer": 0.8333333333333334,
+    "cer": 0.5862068965517241,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 8.624229005363304,
+    "beam_ms": 268.72489899687935
+   },
+   {
+    "clip": "s30/lwwj1n.mpg",
+    "truth": "lay white with j one now",
+    "top1": "i'm going to say one now",
+    "wer": 0.6666666666666666,
+    "cer": 0.5416666666666666,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 8.651429998280946,
+    "beam_ms": 231.74008400383173
+   },
+   {
+    "clip": "s30/pwwozs.mpg",
+    "truth": "place white with o zero soon",
+    "top1": "plus what we'll go zero two",
+    "wer": 0.8333333333333334,
+    "cer": 0.4642857142857143,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 8.629628995549865,
+    "beam_ms": 216.93270000105258
+   },
+   {
+    "clip": "s31/bbac2n.mpg",
+    "truth": "bin blue at c two now",
+    "top1": "big blue i see you now",
+    "wer": 0.6666666666666666,
+    "cer": 0.42857142857142855,
+    "oracle_wer": 0.5,
+    "encode_ms": 10.192993999226019,
+    "beam_ms": 183.16689699713606
+   },
+   {
+    "clip": "s31/bwwr3a.mpg",
+    "truth": "bin white with r three again",
+    "top1": "beware with arthritis",
+    "wer": 0.8333333333333334,
+    "cer": 0.5357142857142857,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 8.713062001334038,
+    "beam_ms": 211.94285999808926
+   },
+   {
+    "clip": "s31/lwwj1s.mpg",
+    "truth": "lay white with j one soon",
+    "top1": "lee white with jay one two",
+    "wer": 0.5,
+    "cer": 0.28,
+    "oracle_wer": 0.5,
+    "encode_ms": 8.97476799582364,
+    "beam_ms": 221.60268200241262
+   },
+   {
+    "clip": "s31/pwwu2n.mpg",
+    "truth": "place white with u two now",
+    "top1": "please wear it with you too now",
+    "wer": 0.8333333333333334,
+    "cer": 0.38461538461538464,
+    "oracle_wer": 0.5,
+    "encode_ms": 8.686510998813901,
+    "beam_ms": 184.5751970031415
+   },
+   {
+    "clip": "s32/bbac1n.mpg",
+    "truth": "bin blue at c one now",
+    "top1": "big blue and c one now",
+    "wer": 0.3333333333333333,
+    "cer": 0.14285714285714285,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 8.716160999028943,
+    "beam_ms": 181.91092900087824
+   },
+   {
+    "clip": "s32/bwwr2a.mpg",
+    "truth": "bin white with r two again",
+    "top1": "be one without two again",
+    "wer": 0.6666666666666666,
+    "cer": 0.34615384615384615,
+    "oracle_wer": 0.5,
+    "encode_ms": 8.984338004665915,
+    "beam_ms": 226.3492359998054
+   },
+   {
+    "clip": "s32/lwwi9n.mpg",
+    "truth": "lay white with i nine now",
+    "top1": "he went out with eyeliner",
+    "wer": 1.0,
+    "cer": 0.68,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 8.69194100232562,
+    "beam_ms": 187.04506300127832
+   },
+   {
+    "clip": "s32/pwwu2s.mpg",
+    "truth": "place white with u two soon",
+    "top1": "but that's why we don't talk to um",
+    "wer": 1.3333333333333333,
+    "cer": 0.9259259259259259,
+    "oracle_wer": 1.3333333333333333,
+    "encode_ms": 8.700411999598145,
+    "beam_ms": 247.03911100368714
+   },
+   {
+    "clip": "s33/bbac1s.mpg",
+    "truth": "bin blue at c one soon",
+    "top1": "i've been employed and he went to the",
+    "wer": 1.3333333333333333,
+    "cer": 1.1363636363636365,
+    "oracle_wer": 1.1666666666666667,
+    "encode_ms": 8.876134997990448,
+    "beam_ms": 277.4585100050899
+   },
+   {
+    "clip": "s33/bwwr1a.mpg",
+    "truth": "bin white with r one again",
+    "top1": "midway with our one again",
+    "wer": 0.5,
+    "cer": 0.34615384615384615,
+    "oracle_wer": 0.5,
+    "encode_ms": 8.895156002836302,
+    "beam_ms": 179.931664999458
+   },
+   {
+    "clip": "s33/lwwi8n.mpg",
+    "truth": "lay white with i eight now",
+    "top1": "he went with ian now",
+    "wer": 0.6666666666666666,
+    "cer": 0.46153846153846156,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 9.48201899882406,
+    "beam_ms": 221.76574500190327
+   },
+   {
+    "clip": "s33/pwwu3a.mpg",
+    "truth": "place white with u three again",
+    "top1": "please wait with your three again",
+    "wer": 0.5,
+    "cer": 0.23333333333333334,
+    "oracle_wer": 0.5,
+    "encode_ms": 8.833843996399082,
+    "beam_ms": 202.92837200395297
+   },
+   {
+    "clip": "s34/bbab9n.mpg",
+    "truth": "bin blue at b nine now",
+    "top1": "i'm bimbo and p nine now",
+    "wer": 0.6666666666666666,
+    "cer": 0.45454545454545453,
+    "oracle_wer": 0.5,
+    "encode_ms": 14.519229996949434,
+    "beam_ms": 315.2656410020427
+   },
+   {
+    "clip": "s34/bwwq9p.mpg",
+    "truth": "bin white with q nine please",
+    "top1": "pinwheels with q nine please",
+    "wer": 0.3333333333333333,
+    "cer": 0.21428571428571427,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 12.424202999682166,
+    "beam_ms": 295.2781830026652
+   },
+   {
+    "clip": "s34/lwwi8s.mpg",
+    "truth": "lay white with i eight soon",
+    "top1": "clay wine with the i ate too",
+    "wer": 0.8333333333333334,
+    "cer": 0.4074074074074074,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 9.523020002234261,
+    "beam_ms": 251.57324099563994
+   },
+   {
+    "clip": "s34/pwwuzs.mpg",
+    "truth": "place white with u zero soon",
+    "top1": "place words with two zero two",
+    "wer": 0.5,
+    "cer": 0.35714285714285715,
+    "oracle_wer": 0.5,
+    "encode_ms": 10.6732540007215,
+    "beam_ms": 179.59695900208317
+   }
+  ],
+  "beam6_fp16": [
+   {
+    "clip": "s1/bbaf2n.mpg",
+    "truth": "bin blue at f two now",
+    "top1": "pimp you have two now",
+    "wer": 0.6666666666666666,
+    "cer": 0.47619047619047616,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 10.816367997904308,
+    "beam_ms": 105.97074899851577
+   },
+   {
+    "clip": "s1/lbaq6p.mpg",
+    "truth": "lay blue at q six please",
+    "top1": "late blue acoustics please",
+    "wer": 0.6666666666666666,
+    "cer": 0.375,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 13.016076001804322,
+    "beam_ms": 252.15609400038375
+   },
+   {
+    "clip": "s1/pbav2n.mpg",
+    "truth": "place blue at v two now",
+    "top1": "plays beautifully too now",
+    "wer": 0.8333333333333334,
+    "cer": 0.5217391304347826,
+    "oracle_wer": 0.5,
+    "encode_ms": 10.394477998488583,
+    "beam_ms": 244.20661800104426
+   },
+   {
+    "clip": "s1/sbah1a.mpg",
+    "truth": "set blue at h one again",
+    "top1": "temple age one again",
+    "wer": 0.6666666666666666,
+    "cer": 0.34782608695652173,
+    "oracle_wer": 0.5,
+    "encode_ms": 10.695044999010861,
+    "beam_ms": 215.2707229979569
+   },
+   {
+    "clip": "s2/bbaf1n.mpg",
+    "truth": "bin blue at f one now",
+    "top1": "been blew in f one now",
+    "wer": 0.5,
+    "cer": 0.2857142857142857,
+    "oracle_wer": 0.5,
+    "encode_ms": 10.554191998380702,
+    "beam_ms": 261.65323099849047
+   },
+   {
+    "clip": "s2/lbaq5p.mpg",
+    "truth": "lay blue at q five please",
+    "top1": "i'll let it blow into you five please",
+    "wer": 1.0,
+    "cer": 0.72,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 10.538360998907592,
+    "beam_ms": 279.8201510013314
+   },
+   {
+    "clip": "s2/pbapza.mpg",
+    "truth": "place blue at p zero again",
+    "top1": "plus brewing b zero again",
+    "wer": 0.6666666666666666,
+    "cer": 0.38461538461538464,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 11.324719002004713,
+    "beam_ms": 241.05933900136733
+   },
+   {
+    "clip": "s2/sbag8s.mpg",
+    "truth": "set blue at g eight soon",
+    "top1": "it's dead blue it's gigantic",
+    "wer": 1.0,
+    "cer": 0.75,
+    "oracle_wer": 1.0,
+    "encode_ms": 10.0688309976249,
+    "beam_ms": 291.1690510009066
+   },
+   {
+    "clip": "s3/bbaf1s.mpg",
+    "truth": "bin blue at f one soon",
+    "top1": "beat blue at f one two",
+    "wer": 0.3333333333333333,
+    "cer": 0.2727272727272727,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 9.84714699734468,
+    "beam_ms": 172.8278099981253
+   },
+   {
+    "clip": "s3/lbaq4p.mpg",
+    "truth": "lay blue at q four please",
+    "top1": "light blue and q four please",
+    "wer": 0.3333333333333333,
+    "cer": 0.24,
+    "oracle_wer": 0.16666666666666666,
+    "encode_ms": 10.804727004142478,
+    "beam_ms": 197.34950899874093
+   },
+   {
+    "clip": "s3/pbao8p.mpg",
+    "truth": "place blue at o eight please",
+    "top1": "place blue at o eight place",
+    "wer": 0.16666666666666666,
+    "cer": 0.07142857142857142,
+    "oracle_wer": 0.16666666666666666,
+    "encode_ms": 13.475616004143376,
+    "beam_ms": 201.14098100020783
+   },
+   {
+    "clip": "s3/sbag6n.mpg",
+    "truth": "set blue at g six now",
+    "top1": "erm said bloom had a gcse now",
+    "wer": 1.0,
+    "cer": 0.8095238095238095,
+    "oracle_wer": 1.0,
+    "encode_ms": 11.317527998471633,
+    "beam_ms": 325.44322500325507
+   },
+   {
+    "clip": "s4/bbae9n.mpg",
+    "truth": "bin blue at e nine now",
+    "top1": "i've been boasting day now",
+    "wer": 0.8333333333333334,
+    "cer": 0.7727272727272727,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 10.681974999897648,
+    "beam_ms": 310.6713689994649
+   },
+   {
+    "clip": "s4/lbaq3p.mpg",
+    "truth": "lay blue at q three please",
+    "top1": "i'll keep you at q three please",
+    "wer": 0.5,
+    "cer": 0.4230769230769231,
+    "oracle_wer": 0.5,
+    "encode_ms": 10.975532000884414,
+    "beam_ms": 269.7634599971934
+   },
+   {
+    "clip": "s4/pbao6s.mpg",
+    "truth": "place blue at o six soon",
+    "top1": "placebo et cetera",
+    "wer": 1.0,
+    "cer": 0.625,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 9.756804000062402,
+    "beam_ms": 271.88896699954057
+   },
+   {
+    "clip": "s4/sbaa4a.mpg",
+    "truth": "set blue at a four again",
+    "top1": "and he blew it out for her again",
+    "wer": 1.1666666666666667,
+    "cer": 0.6666666666666666,
+    "oracle_wer": 1.0,
+    "encode_ms": 10.278057001414709,
+    "beam_ms": 247.0263889990747
+   },
+   {
+    "clip": "s5/bbae7n.mpg",
+    "truth": "bin blue at e seven now",
+    "top1": "big blooming e seven now",
+    "wer": 0.5,
+    "cer": 0.30434782608695654,
+    "oracle_wer": 0.5,
+    "encode_ms": 10.492080000403803,
+    "beam_ms": 251.5271290030796
+   },
+   {
+    "clip": "s5/lbaq2a.mpg",
+    "truth": "lay blue at q two again",
+    "top1": "i'd like a blooming coat to you again",
+    "wer": 1.1666666666666667,
+    "cer": 0.9565217391304348,
+    "oracle_wer": 1.0,
+    "encode_ms": 10.832929001480807,
+    "beam_ms": 348.67539499828126
+   },
+   {
+    "clip": "s5/pbaizs.mpg",
+    "truth": "place blue at i zero soon",
+    "top1": "but let's put you in as i see around you",
+    "wer": 1.5,
+    "cer": 1.12,
+    "oracle_wer": 1.5,
+    "encode_ms": 10.042470996268094,
+    "beam_ms": 276.14546100085136
+   },
+   {
+    "clip": "s5/sbaa2a.mpg",
+    "truth": "set blue at a two again",
+    "top1": "it's had a blue and a two again",
+    "wer": 0.6666666666666666,
+    "cer": 0.4782608695652174,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 10.08437099517323,
+    "beam_ms": 269.43905300140614
+   },
+   {
+    "clip": "s6/bbae8n.mpg",
+    "truth": "bin blue at e eight now",
+    "top1": "been blew as he is now",
+    "wer": 0.8333333333333334,
+    "cer": 0.43478260869565216,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 9.789405004994478,
+    "beam_ms": 197.79866799945012
+   },
+   {
+    "clip": "s6/lbaq3a.mpg",
+    "truth": "lay blue at q three again",
+    "top1": "late blooming q three again",
+    "wer": 0.5,
+    "cer": 0.32,
+    "oracle_wer": 0.5,
+    "encode_ms": 10.117311001522467,
+    "beam_ms": 271.61710200016387
+   },
+   {
+    "clip": "s6/pbao4n.mpg",
+    "truth": "place blue at o four now",
+    "top1": "please blue is over now",
+    "wer": 0.6666666666666666,
+    "cer": 0.3333333333333333,
+    "oracle_wer": 0.5,
+    "encode_ms": 9.908997999446001,
+    "beam_ms": 204.32517199515132
+   },
+   {
+    "clip": "s6/sbaa3a.mpg",
+    "truth": "set blue at a three again",
+    "top1": "said blue is a three again",
+    "wer": 0.3333333333333333,
+    "cer": 0.2,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 12.23729900084436,
+    "beam_ms": 234.3168310035253
+   },
+   {
+    "clip": "s7/bbae6n.mpg",
+    "truth": "bin blue at e six now",
+    "top1": "ben and bill were six now",
+    "wer": 0.6666666666666666,
+    "cer": 0.5238095238095238,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 9.856286997091956,
+    "beam_ms": 220.568329001253
+   },
+   {
+    "clip": "s7/lbaq1a.mpg",
+    "truth": "lay blue at q one again",
+    "top1": "let it blow away are you wearing it",
+    "wer": 1.3333333333333333,
+    "cer": 1.0,
+    "oracle_wer": 1.1666666666666667,
+    "encode_ms": 11.098925002443139,
+    "beam_ms": 249.70463899808237
+   },
+   {
+    "clip": "s7/pbai1a.mpg",
+    "truth": "place blue at i one again",
+    "top1": "please blue i want to get in",
+    "wer": 1.0,
+    "cer": 0.56,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 9.987010002078023,
+    "beam_ms": 250.40716500370763
+   },
+   {
+    "clip": "s7/sbaa1a.mpg",
+    "truth": "set blue at a one again",
+    "top1": "that blooming day one again",
+    "wer": 0.6666666666666666,
+    "cer": 0.4782608695652174,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 9.888508000585716,
+    "beam_ms": 251.978259999305
+   },
+   {
+    "clip": "s8/bbae5n.mpg",
+    "truth": "bin blue at e five now",
+    "top1": "bennett blue has e five now",
+    "wer": 0.3333333333333333,
+    "cer": 0.3181818181818182,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 10.805158002767712,
+    "beam_ms": 252.5572619997547
+   },
+   {
+    "clip": "s8/lbap9p.mpg",
+    "truth": "lay blue at p nine please",
+    "top1": "light blue and pink dye please",
+    "wer": 0.6666666666666666,
+    "cer": 0.44,
+    "oracle_wer": 0.5,
+    "encode_ms": 9.55125100153964,
+    "beam_ms": 223.33712899853708
+   },
+   {
+    "clip": "s8/pbah8s.mpg",
+    "truth": "place blue at h eight soon",
+    "top1": "place bloom at asia ada soon",
+    "wer": 0.5,
+    "cer": 0.4230769230769231,
+    "oracle_wer": 0.5,
+    "encode_ms": 10.027340002125129,
+    "beam_ms": 264.198128003045
+   },
+   {
+    "clip": "s8/pwwx8a.mpg",
+    "truth": "place white with x eight again",
+    "top1": "place white with x eight again",
+    "wer": 0.0,
+    "cer": 0.0,
+    "oracle_wer": 0.0,
+    "encode_ms": 12.443202998838387,
+    "beam_ms": 201.62846200400963
+   },
+   {
+    "clip": "s9/bbae4n.mpg",
+    "truth": "bin blue at e four now",
+    "top1": "i'm being blue i need four now",
+    "wer": 0.6666666666666666,
+    "cer": 0.5,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 12.470674002543092,
+    "beam_ms": 249.9927859971649
+   },
+   {
+    "clip": "s9/lbap8p.mpg",
+    "truth": "lay blue at p eight please",
+    "top1": "lady bloom unpaid please",
+    "wer": 0.8333333333333334,
+    "cer": 0.46153846153846156,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 11.417621994041838,
+    "beam_ms": 265.4604650015244
+   },
+   {
+    "clip": "s9/pbah6n.mpg",
+    "truth": "place blue at h six now",
+    "top1": "please blew i can't see anything",
+    "wer": 1.0,
+    "cer": 0.8260869565217391,
+    "oracle_wer": 1.0,
+    "encode_ms": 10.66886399348732,
+    "beam_ms": 264.2368700035149
+   },
+   {
+    "clip": "s9/pwwx6p.mpg",
+    "truth": "place white with x six please",
+    "top1": "plus one we've had six plus",
+    "wer": 0.8333333333333334,
+    "cer": 0.5517241379310345,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 10.42476899601752,
+    "beam_ms": 218.26773900102125
+   },
+   {
+    "clip": "s10/bbab8n.mpg",
+    "truth": "bin blue at b eight now",
+    "top1": "blew up again now",
+    "wer": 0.8333333333333334,
+    "cer": 0.6086956521739131,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 10.214444999292027,
+    "beam_ms": 223.32356900005834
+   },
+   {
+    "clip": "s10/bwwq8p.mpg",
+    "truth": "bin white with q eight please",
+    "top1": "i've been right with you ah please",
+    "wer": 0.8333333333333334,
+    "cer": 0.6206896551724138,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 9.94613800139632,
+    "beam_ms": 281.2923730016337
+   },
+   {
+    "clip": "s10/lwwi8p.mpg",
+    "truth": "lay white with i eight please",
+    "top1": "lynn why didn't i get beat",
+    "wer": 0.8333333333333334,
+    "cer": 0.6206896551724138,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 10.3520069969818,
+    "beam_ms": 342.85501800331986
+   },
+   {
+    "clip": "s10/sbad4n.mpg",
+    "truth": "set blue at d four now",
+    "top1": "it's temperamental for now",
+    "wer": 0.8333333333333334,
+    "cer": 0.6818181818181818,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 12.799210999219213,
+    "beam_ms": 307.4434590016608
+   },
+   {
+    "clip": "s11/bbae2n.mpg",
+    "truth": "bin blue at e two now",
+    "top1": "people who hate you now",
+    "wer": 0.8333333333333334,
+    "cer": 0.7142857142857143,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 12.643918002140708,
+    "beam_ms": 206.96500099438708
+   },
+   {
+    "clip": "s11/lbap4n.mpg",
+    "truth": "lay blue at p four now",
+    "top1": "they blew a bit of food now",
+    "wer": 1.0,
+    "cer": 0.5454545454545454,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 9.99331099592382,
+    "beam_ms": 251.25736300105928
+   },
+   {
+    "clip": "s11/pbab3a.mpg",
+    "truth": "place blue at b three again",
+    "top1": "that's bloom b three again",
+    "wer": 0.5,
+    "cer": 0.37037037037037035,
+    "oracle_wer": 0.5,
+    "encode_ms": 10.032571000920143,
+    "beam_ms": 235.65673000121024
+   },
+   {
+    "clip": "s11/pwwx2n.mpg",
+    "truth": "place white with x two now",
+    "top1": "please why would that do now",
+    "wer": 0.8333333333333334,
+    "cer": 0.5384615384615384,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 10.198964999290183,
+    "beam_ms": 212.16799299872946
+   },
+   {
+    "clip": "s12/bbae1n.mpg",
+    "truth": "bin blue at e one now",
+    "top1": "pin blue is a one now",
+    "wer": 0.5,
+    "cer": 0.19047619047619047,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 11.799428997619543,
+    "beam_ms": 180.1597320009023
+   },
+   {
+    "clip": "s12/lbajzs.mpg",
+    "truth": "lay blue at j zero soon",
+    "top1": "late bloomer and jay savoy",
+    "wer": 1.0,
+    "cer": 0.6956521739130435,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 10.076471000502352,
+    "beam_ms": 327.46131000021705
+   },
+   {
+    "clip": "s12/pbab1p.mpg",
+    "truth": "place blue at b one please",
+    "top1": "place blue is b one please",
+    "wer": 0.16666666666666666,
+    "cer": 0.07692307692307693,
+    "oracle_wer": 0.16666666666666666,
+    "encode_ms": 10.113721997186076,
+    "beam_ms": 210.9113670012448
+   },
+   {
+    "clip": "s12/pwwqza.mpg",
+    "truth": "place white with q zero again",
+    "top1": "plays wise with q zero again",
+    "wer": 0.3333333333333333,
+    "cer": 0.13793103448275862,
+    "oracle_wer": 0.16666666666666666,
+    "encode_ms": 10.058220999781042,
+    "beam_ms": 223.87577200424857
+   },
+   {
+    "clip": "s13/bbae1s.mpg",
+    "truth": "bin blue at e one soon",
+    "top1": "but blue is he once",
+    "wer": 0.8333333333333334,
+    "cer": 0.5,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 9.95550900552189,
+    "beam_ms": 215.53728800063254
+   },
+   {
+    "clip": "s13/lbaj1a.mpg",
+    "truth": "lay blue at j one again",
+    "top1": "it blew and jay won again",
+    "wer": 0.8333333333333334,
+    "cer": 0.4782608695652174,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 11.328268999932334,
+    "beam_ms": 237.19854399678297
+   },
+   {
+    "clip": "s13/pbaa8n.mpg",
+    "truth": "place blue at a eight now",
+    "top1": "but it's blue at a h now",
+    "wer": 0.5,
+    "cer": 0.48,
+    "oracle_wer": 0.5,
+    "encode_ms": 10.95965100103058,
+    "beam_ms": 225.93602699635085
+   },
+   {
+    "clip": "s13/pwwp8p.mpg",
+    "truth": "place white with p eight please",
+    "top1": "plus one would be eight please",
+    "wer": 0.6666666666666666,
+    "cer": 0.41935483870967744,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 10.144623003725428,
+    "beam_ms": 210.4368569998769
+   },
+   {
+    "clip": "s14/bbad9n.mpg",
+    "truth": "bin blue at d nine now",
+    "top1": "it's been blue as he died now",
+    "wer": 0.8333333333333334,
+    "cer": 0.5909090909090909,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 10.930158998235129,
+    "beam_ms": 248.28639900078997
+   },
+   {
+    "clip": "s14/lbai8s.mpg",
+    "truth": "lay blue at i eight soon",
+    "top1": "a bloom at i s",
+    "wer": 0.6666666666666666,
+    "cer": 0.5833333333333334,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 10.469560998899397,
+    "beam_ms": 210.67959100037115
+   },
+   {
+    "clip": "s14/lwwy8a.mpg",
+    "truth": "lay white with y eight again",
+    "top1": "likewise with y a t",
+    "wer": 0.6666666666666666,
+    "cer": 0.5357142857142857,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 10.184804996242747,
+    "beam_ms": 224.12179600360105
+   },
+   {
+    "clip": "s14/pwwp6s.mpg",
+    "truth": "place white with p six soon",
+    "top1": "he plays white with bc two",
+    "wer": 0.8333333333333334,
+    "cer": 0.48148148148148145,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 9.588430999428965,
+    "beam_ms": 120.63755299459444
+   },
+   {
+    "clip": "s15/bbad8n.mpg",
+    "truth": "bin blue at d eight now",
+    "top1": "big blue and decay now",
+    "wer": 0.6666666666666666,
+    "cer": 0.34782608695652173,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 10.572922001301777,
+    "beam_ms": 184.50817700068
+   },
+   {
+    "clip": "s15/lbai6n.mpg",
+    "truth": "lay blue at i six now",
+    "top1": "they blue and i sticks down",
+    "wer": 0.6666666666666666,
+    "cer": 0.5238095238095238,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 9.815215998969506,
+    "beam_ms": 211.0615389974555
+   },
+   {
+    "clip": "s15/lwwy6p.mpg",
+    "truth": "lay white with y six please",
+    "top1": "let it white with a white six piece",
+    "wer": 0.8333333333333334,
+    "cer": 0.5555555555555556,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 9.591972004272975,
+    "beam_ms": 227.76945599616738
+   },
+   {
+    "clip": "s15/pwwp4n.mpg",
+    "truth": "place white with p four now",
+    "top1": "but it's what it's worth being for now",
+    "wer": 1.1666666666666667,
+    "cer": 0.7777777777777778,
+    "oracle_wer": 1.0,
+    "encode_ms": 10.149533998628613,
+    "beam_ms": 343.28851600002963
+   },
+   {
+    "clip": "s16/bbad7n.mpg",
+    "truth": "bin blue at d seven now",
+    "top1": "bamboo is a seven year old",
+    "wer": 1.0,
+    "cer": 0.6956521739130435,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 9.880056997644715,
+    "beam_ms": 212.89462000277126
+   },
+   {
+    "clip": "s16/lbac4a.mpg",
+    "truth": "lay blue at c four again",
+    "top1": "and i'll keep it all safe for her again",
+    "wer": 1.3333333333333333,
+    "cer": 0.9583333333333334,
+    "oracle_wer": 1.0,
+    "encode_ms": 10.10241200128803,
+    "beam_ms": 250.0802379945526
+   },
+   {
+    "clip": "s16/lwwy4s.mpg",
+    "truth": "lay white with y four soon",
+    "top1": "why would one of those two",
+    "wer": 1.0,
+    "cer": 0.7307692307692307,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 9.931209002388641,
+    "beam_ms": 288.5808039936819
+   },
+   {
+    "clip": "s16/pwwjzs.mpg",
+    "truth": "place white with j zero soon",
+    "top1": "plays white with j c r o two",
+    "wer": 0.8333333333333334,
+    "cer": 0.2857142857142857,
+    "oracle_wer": 0.5,
+    "encode_ms": 9.992230996431317,
+    "beam_ms": 290.62709899881156
+   },
+   {
+    "clip": "s17/bbad6n.mpg",
+    "truth": "bin blue at d six now",
+    "top1": "blew and he's here now",
+    "wer": 0.8333333333333334,
+    "cer": 0.7142857142857143,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 10.544961995037738,
+    "beam_ms": 264.2432389984606
+   },
+   {
+    "clip": "s17/lbac3a.mpg",
+    "truth": "lay blue at c three again",
+    "top1": "i'll let you know when i'll see three again",
+    "wer": 1.1666666666666667,
+    "cer": 1.0,
+    "oracle_wer": 1.1666666666666667,
+    "encode_ms": 9.485018003033474,
+    "beam_ms": 181.9848710001679
+   },
+   {
+    "clip": "s17/lwwy2n.mpg",
+    "truth": "lay white with y two now",
+    "top1": "y with y two now",
+    "wer": 0.3333333333333333,
+    "cer": 0.3333333333333333,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 9.7928260001936,
+    "beam_ms": 225.10398799931863
+   },
+   {
+    "clip": "s17/pwwj1a.mpg",
+    "truth": "place white with j one again",
+    "top1": "please wind with the g one again",
+    "wer": 0.6666666666666666,
+    "cer": 0.35714285714285715,
+    "oracle_wer": 0.5,
+    "encode_ms": 10.735666000982746,
+    "beam_ms": 213.09725500032073
+   },
+   {
+    "clip": "s18/bbad5n.mpg",
+    "truth": "bin blue at d five now",
+    "top1": "i've been blue at c5 now",
+    "wer": 0.6666666666666666,
+    "cer": 0.5909090909090909,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 10.74869699368719,
+    "beam_ms": 264.61845700396225
+   },
+   {
+    "clip": "s18/lbac1p.mpg",
+    "truth": "lay blue at c one please",
+    "top1": "there brewer's the one please",
+    "wer": 0.6666666666666666,
+    "cer": 0.5833333333333334,
+    "oracle_wer": 0.5,
+    "encode_ms": 11.139993999677245,
+    "beam_ms": 240.75526399974478
+   },
+   {
+    "clip": "s18/lwwrza.mpg",
+    "truth": "lay white with r zero again",
+    "top1": "lynn why don't we ask you a year",
+    "wer": 1.3333333333333333,
+    "cer": 0.8518518518518519,
+    "oracle_wer": 1.3333333333333333,
+    "encode_ms": 10.067140996397939,
+    "beam_ms": 287.2567450031056
+   },
+   {
+    "clip": "s18/pwwi9p.mpg",
+    "truth": "place white with i nine please",
+    "top1": "plus what's with hina please",
+    "wer": 0.6666666666666666,
+    "cer": 0.3333333333333333,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 10.373458004323766,
+    "beam_ms": 262.3776589971385
+   },
+   {
+    "clip": "s19/bbad4n.mpg",
+    "truth": "bin blue at d four now",
+    "top1": "ben blue let's see four now",
+    "wer": 0.5,
+    "cer": 0.36363636363636365,
+    "oracle_wer": 0.5,
+    "encode_ms": 10.090972005855292,
+    "beam_ms": 246.14974099677056
+   },
+   {
+    "clip": "s19/lbab8n.mpg",
+    "truth": "lay blue at b eight now",
+    "top1": "like blue it's b eight now",
+    "wer": 0.3333333333333333,
+    "cer": 0.2608695652173913,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 12.09155600372469,
+    "beam_ms": 218.32233000168344
+   },
+   {
+    "clip": "s19/lwwq8p.mpg",
+    "truth": "lay white with q eight please",
+    "top1": "lay white with you as a place",
+    "wer": 0.6666666666666666,
+    "cer": 0.3448275862068966,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 9.58421200630255,
+    "beam_ms": 224.96396499627735
+   },
+   {
+    "clip": "s19/pwwi8p.mpg",
+    "truth": "place white with i eight please",
+    "top1": "blazed white with high hat buttons",
+    "wer": 0.6666666666666666,
+    "cer": 0.5161290322580645,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 10.033180005848408,
+    "beam_ms": 236.24460399878444
+   },
+   {
+    "clip": "s20/bbad3n.mpg",
+    "truth": "bin blue at d three now",
+    "top1": "i'm blowing the teeth right now",
+    "wer": 0.8333333333333334,
+    "cer": 0.8260869565217391,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 9.776584003702737,
+    "beam_ms": 249.70722099533305
+   },
+   {
+    "clip": "s20/bwwz8a.mpg",
+    "truth": "bin white with z eight again",
+    "top1": "midwives will set eggs again",
+    "wer": 0.8333333333333334,
+    "cer": 0.5,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 10.883709001063835,
+    "beam_ms": 212.9724120022729
+   },
+   {
+    "clip": "s20/lwwq6s.mpg",
+    "truth": "lay white with q six soon",
+    "top1": "i'll get away with you six too",
+    "wer": 0.8333333333333334,
+    "cer": 0.68,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 12.399952996929642,
+    "beam_ms": 263.86577200173633
+   },
+   {
+    "clip": "s20/pwwi7p.mpg",
+    "truth": "place white with i seven please",
+    "top1": "place wise with i seven please",
+    "wer": 0.16666666666666666,
+    "cer": 0.06451612903225806,
+    "oracle_wer": 0.16666666666666666,
+    "encode_ms": 10.029719996964559,
+    "beam_ms": 205.18239000375615
+   },
+   {
+    "clip": "s22/bbad1n.mpg",
+    "truth": "bin blue at d one now",
+    "top1": "but i'm going to see one now",
+    "wer": 0.8333333333333334,
+    "cer": 0.7142857142857143,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 10.822497999470215,
+    "beam_ms": 245.07326699676923
+   },
+   {
+    "clip": "s22/bwwz4s.mpg",
+    "truth": "bin white with z four soon",
+    "top1": "midwife one six four two",
+    "wer": 0.8333333333333334,
+    "cer": 0.5769230769230769,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 10.875308995309751,
+    "beam_ms": 197.71650699840393
+   },
+   {
+    "clip": "s22/lwwkzs.mpg",
+    "truth": "lay white with k zero soon",
+    "top1": "likewise with caesar are two",
+    "wer": 0.8333333333333334,
+    "cer": 0.6538461538461539,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 10.048531003121752,
+    "beam_ms": 249.3945639944286
+   },
+   {
+    "clip": "s22/pwwi5p.mpg",
+    "truth": "place white with i five please",
+    "top1": "blades wise with high five please",
+    "wer": 0.5,
+    "cer": 0.26666666666666666,
+    "oracle_wer": 0.5,
+    "encode_ms": 9.711373997561168,
+    "beam_ms": 225.46929599775467
+   },
+   {
+    "clip": "s23/bbad1s.mpg",
+    "truth": "bin blue at d one soon",
+    "top1": "pin blue and d one two",
+    "wer": 0.5,
+    "cer": 0.2727272727272727,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 10.481880002771504,
+    "beam_ms": 171.8440689946874
+   },
+   {
+    "clip": "s23/bwwz2n.mpg",
+    "truth": "bin white with z two now",
+    "top1": "but why do we send you now",
+    "wer": 1.0,
+    "cer": 0.625,
+    "oracle_wer": 1.0,
+    "encode_ms": 9.908027997880708,
+    "beam_ms": 184.3921740000951
+   },
+   {
+    "clip": "s23/lwwk1a.mpg",
+    "truth": "lay white with k one again",
+    "top1": "likewise with k one again",
+    "wer": 0.3333333333333333,
+    "cer": 0.19230769230769232,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 11.08582299639238,
+    "beam_ms": 204.5241670057294
+   },
+   {
+    "clip": "s23/pwwi4p.mpg",
+    "truth": "place white with i four please",
+    "top1": "place wise with i four please",
+    "wer": 0.16666666666666666,
+    "cer": 0.06666666666666667,
+    "oracle_wer": 0.16666666666666666,
+    "encode_ms": 10.37882800301304,
+    "beam_ms": 201.33342699409695
+   },
+   {
+    "clip": "s24/bbac9n.mpg",
+    "truth": "bin blue at c nine now",
+    "top1": "big blue is seen high now",
+    "wer": 0.6666666666666666,
+    "cer": 0.45454545454545453,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 11.8483810001635,
+    "beam_ms": 254.10478599951603
+   },
+   {
+    "clip": "s24/bwwsza.mpg",
+    "truth": "bin white with s zero again",
+    "top1": "beat wise when they're zero again",
+    "wer": 0.6666666666666666,
+    "cer": 0.5185185185185185,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 11.987573001533747,
+    "beam_ms": 230.9464179998031
+   },
+   {
+    "clip": "s24/lwwj8s.mpg",
+    "truth": "lay white with j eight soon",
+    "top1": "lay wise with j k s two",
+    "wer": 0.6666666666666666,
+    "cer": 0.37037037037037035,
+    "oracle_wer": 0.5,
+    "encode_ms": 12.713819000055082,
+    "beam_ms": 227.1694250011933
+   },
+   {
+    "clip": "s24/pwwi3p.mpg",
+    "truth": "place white with i three please",
+    "top1": "plus why is one the i three please",
+    "wer": 0.8333333333333334,
+    "cer": 0.3870967741935484,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 11.649315994873177,
+    "beam_ms": 214.27499100536807
+   },
+   {
+    "clip": "s25/bbac8n.mpg",
+    "truth": "bin blue at c eight now",
+    "top1": "big blue is the gate now",
+    "wer": 0.6666666666666666,
+    "cer": 0.34782608695652173,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 12.077356994268484,
+    "beam_ms": 240.55962800048292
+   },
+   {
+    "clip": "s25/bwwr8p.mpg",
+    "truth": "bin white with r eight please",
+    "top1": "being white with r a please",
+    "wer": 0.3333333333333333,
+    "cer": 0.2413793103448276,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 10.980732004099991,
+    "beam_ms": 217.08748299715808
+   },
+   {
+    "clip": "s25/lwwj6n.mpg",
+    "truth": "lay white with j six now",
+    "top1": "like white with jay six now",
+    "wer": 0.3333333333333333,
+    "cer": 0.20833333333333334,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 11.626586005149875,
+    "beam_ms": 219.64788799959933
+   },
+   {
+    "clip": "s25/pwwi3a.mpg",
+    "truth": "place white with i three again",
+    "top1": "black's white with i three again",
+    "wer": 0.16666666666666666,
+    "cer": 0.13333333333333333,
+    "oracle_wer": 0.16666666666666666,
+    "encode_ms": 11.705877004715148,
+    "beam_ms": 201.00849899608875
+   },
+   {
+    "clip": "s26/bbac7n.mpg",
+    "truth": "bin blue at c seven now",
+    "top1": "big blue at six seven now",
+    "wer": 0.3333333333333333,
+    "cer": 0.17391304347826086,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 9.79471600294346,
+    "beam_ms": 214.74950099946
+   },
+   {
+    "clip": "s26/bwwr7p.mpg",
+    "truth": "bin white with r seven please",
+    "top1": "been wet with our seven police",
+    "wer": 0.6666666666666666,
+    "cer": 0.3793103448275862,
+    "oracle_wer": 0.5,
+    "encode_ms": 10.595742998702917,
+    "beam_ms": 222.83444899949245
+   },
+   {
+    "clip": "s26/lwwj5n.mpg",
+    "truth": "lay white with j five now",
+    "top1": "let it wait with the shelf life though",
+    "wer": 1.1666666666666667,
+    "cer": 0.88,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 9.544771004584618,
+    "beam_ms": 247.77713799994672
+   },
+   {
+    "clip": "s26/pwwizs.mpg",
+    "truth": "place white with i zero soon",
+    "top1": "please wait with us in your suit",
+    "wer": 1.0,
+    "cer": 0.5357142857142857,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 9.836715995334089,
+    "beam_ms": 251.2943539986736
+   },
+   {
+    "clip": "s27/bbac6n.mpg",
+    "truth": "bin blue at c six now",
+    "top1": "big bloomers these days now",
+    "wer": 0.8333333333333334,
+    "cer": 0.7142857142857143,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 9.512447999441065,
+    "beam_ms": 249.89851399732288
+   },
+   {
+    "clip": "s27/bwwr6p.mpg",
+    "truth": "bin white with r six please",
+    "top1": "being wise with us is pleasant",
+    "wer": 0.8333333333333334,
+    "cer": 0.4074074074074074,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 10.329956996429246,
+    "beam_ms": 235.8451550026075
+   },
+   {
+    "clip": "s27/lwwj4n.mpg",
+    "truth": "lay white with j four now",
+    "top1": "clay was with jay ford now",
+    "wer": 0.6666666666666666,
+    "cer": 0.36,
+    "oracle_wer": 0.5,
+    "encode_ms": 9.700213995529339,
+    "beam_ms": 220.2060400013579
+   },
+   {
+    "clip": "s27/pwwo2n.mpg",
+    "truth": "place white with o two now",
+    "top1": "place wise with o two now",
+    "wer": 0.16666666666666666,
+    "cer": 0.07692307692307693,
+    "oracle_wer": 0.16666666666666666,
+    "encode_ms": 9.700091999548022,
+    "beam_ms": 183.611918000679
+   },
+   {
+    "clip": "s28/bbac5n.mpg",
+    "truth": "bin blue at c five now",
+    "top1": "i don't know how you're going to do it but i've known you",
+    "wer": 2.1666666666666665,
+    "cer": 1.9090909090909092,
+    "oracle_wer": 2.1666666666666665,
+    "encode_ms": 9.967229001631495,
+    "beam_ms": 400.29415000026347
+   },
+   {
+    "clip": "s28/bwwr5p.mpg",
+    "truth": "bin white with r five please",
+    "top1": "i'd be away with the heart five please",
+    "wer": 0.8333333333333334,
+    "cer": 0.6428571428571429,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 13.107507998938672,
+    "beam_ms": 312.5575320009375
+   },
+   {
+    "clip": "s28/lwwj3n.mpg",
+    "truth": "lay white with j three now",
+    "top1": "he went with jessica now",
+    "wer": 0.6666666666666666,
+    "cer": 0.46153846153846156,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 11.453082006482873,
+    "beam_ms": 237.2284649973153
+   },
+   {
+    "clip": "s28/pwwo2s.mpg",
+    "truth": "place white with o two soon",
+    "top1": "please wait with the orders",
+    "wer": 0.8333333333333334,
+    "cer": 0.48148148148148145,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 10.31115600198973,
+    "beam_ms": 212.34514800016768
+   },
+   {
+    "clip": "s29/bbac4n.mpg",
+    "truth": "bin blue at c four now",
+    "top1": "big blue and c four now",
+    "wer": 0.3333333333333333,
+    "cer": 0.13636363636363635,
+    "oracle_wer": 0.16666666666666666,
+    "encode_ms": 9.704482996312436,
+    "beam_ms": 197.27207800315227
+   },
+   {
+    "clip": "s29/bwwr4p.mpg",
+    "truth": "bin white with r four please",
+    "top1": "bit of white with a four please",
+    "wer": 0.5,
+    "cer": 0.17857142857142858,
+    "oracle_wer": 0.5,
+    "encode_ms": 12.712079995253589,
+    "beam_ms": 202.33129800180905
+   },
+   {
+    "clip": "s29/lwwj2n.mpg",
+    "truth": "lay white with j two now",
+    "top1": "lay white with j two now",
+    "wer": 0.0,
+    "cer": 0.0,
+    "oracle_wer": 0.0,
+    "encode_ms": 9.690501996374223,
+    "beam_ms": 239.13742900185753
+   },
+   {
+    "clip": "s29/pwwo3a.mpg",
+    "truth": "place white with o three again",
+    "top1": "plays white with o three again",
+    "wer": 0.16666666666666666,
+    "cer": 0.06666666666666667,
+    "oracle_wer": 0.0,
+    "encode_ms": 9.717463995912112,
+    "beam_ms": 174.29714200261515
+   },
+   {
+    "clip": "s30/bbac3n.mpg",
+    "truth": "bin blue at c three now",
+    "top1": "a big bloke i see three now",
+    "wer": 0.8333333333333334,
+    "cer": 0.43478260869565216,
+    "oracle_wer": 0.5,
+    "encode_ms": 10.538182003074326,
+    "beam_ms": 247.25607599975774
+   },
+   {
+    "clip": "s30/bwwr3p.mpg",
+    "truth": "bin white with r three please",
+    "top1": "it's been wedged with our three bees",
+    "wer": 0.8333333333333334,
+    "cer": 0.5862068965517241,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 10.076990001834929,
+    "beam_ms": 286.2725140003022
+   },
+   {
+    "clip": "s30/lwwj1n.mpg",
+    "truth": "lay white with j one now",
+    "top1": "i'm going to say one now",
+    "wer": 0.6666666666666666,
+    "cer": 0.5416666666666666,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 10.0395120025496,
+    "beam_ms": 248.29074699664488
+   },
+   {
+    "clip": "s30/pwwozs.mpg",
+    "truth": "place white with o zero soon",
+    "top1": "plus what we'll go zero two",
+    "wer": 0.8333333333333334,
+    "cer": 0.4642857142857143,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 9.877247000986245,
+    "beam_ms": 278.2358969998313
+   },
+   {
+    "clip": "s31/bbac2n.mpg",
+    "truth": "bin blue at c two now",
+    "top1": "big blue i see you now",
+    "wer": 0.6666666666666666,
+    "cer": 0.42857142857142855,
+    "oracle_wer": 0.5,
+    "encode_ms": 11.032782000256702,
+    "beam_ms": 194.84289400134003
+   },
+   {
+    "clip": "s31/bwwr3a.mpg",
+    "truth": "bin white with r three again",
+    "top1": "beware with arthritis",
+    "wer": 0.8333333333333334,
+    "cer": 0.5357142857142857,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 10.105802000907715,
+    "beam_ms": 222.39763000106905
+   },
+   {
+    "clip": "s31/lwwj1s.mpg",
+    "truth": "lay white with j one soon",
+    "top1": "lee white with jay one two",
+    "wer": 0.5,
+    "cer": 0.28,
+    "oracle_wer": 0.5,
+    "encode_ms": 10.50038100220263,
+    "beam_ms": 234.98825599381234
+   },
+   {
+    "clip": "s31/pwwu2n.mpg",
+    "truth": "place white with u two now",
+    "top1": "please wear it with you too now",
+    "wer": 0.8333333333333334,
+    "cer": 0.38461538461538464,
+    "oracle_wer": 0.5,
+    "encode_ms": 9.983640004065819,
+    "beam_ms": 198.12645499769133
+   },
+   {
+    "clip": "s32/bbac1n.mpg",
+    "truth": "bin blue at c one now",
+    "top1": "big blue and c one now",
+    "wer": 0.3333333333333333,
+    "cer": 0.14285714285714285,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 10.092742995766457,
+    "beam_ms": 206.24350400612457
+   },
+   {
+    "clip": "s32/bwwr2a.mpg",
+    "truth": "bin white with r two again",
+    "top1": "be one without two again",
+    "wer": 0.6666666666666666,
+    "cer": 0.34615384615384615,
+    "oracle_wer": 0.5,
+    "encode_ms": 11.880630998348352,
+    "beam_ms": 238.00714199751383
+   },
+   {
+    "clip": "s32/lwwi9n.mpg",
+    "truth": "lay white with i nine now",
+    "top1": "he went out with eyeliner",
+    "wer": 1.0,
+    "cer": 0.68,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 10.54582199867582,
+    "beam_ms": 206.48239000001922
+   },
+   {
+    "clip": "s32/pwwu2s.mpg",
+    "truth": "place white with u two soon",
+    "top1": "but that's why we don't talk to um",
+    "wer": 1.3333333333333333,
+    "cer": 0.9259259259259259,
+    "oracle_wer": 1.3333333333333333,
+    "encode_ms": 10.21488499827683,
+    "beam_ms": 262.3256669976399
+   },
+   {
+    "clip": "s33/bbac1s.mpg",
+    "truth": "bin blue at c one soon",
+    "top1": "i've been employed and he went to the",
+    "wer": 1.3333333333333333,
+    "cer": 1.1363636363636365,
+    "oracle_wer": 1.1666666666666667,
+    "encode_ms": 10.87740900402423,
+    "beam_ms": 291.99511899787467
+   },
+   {
+    "clip": "s33/bwwr1a.mpg",
+    "truth": "bin white with r one again",
+    "top1": "midway with our one again",
+    "wer": 0.5,
+    "cer": 0.34615384615384615,
+    "oracle_wer": 0.5,
+    "encode_ms": 13.29244199587265,
+    "beam_ms": 274.937405003584
+   },
+   {
+    "clip": "s33/lwwi8n.mpg",
+    "truth": "lay white with i eight now",
+    "top1": "he went with ian now",
+    "wer": 0.6666666666666666,
+    "cer": 0.46153846153846156,
+    "oracle_wer": 0.6666666666666666,
+    "encode_ms": 11.953911998716649,
+    "beam_ms": 228.98876500403276
+   },
+   {
+    "clip": "s33/pwwu3a.mpg",
+    "truth": "place white with u three again",
+    "top1": "please wait with your three again",
+    "wer": 0.5,
+    "cer": 0.23333333333333334,
+    "oracle_wer": 0.5,
+    "encode_ms": 13.91626600525342,
+    "beam_ms": 236.54810099833412
+   },
+   {
+    "clip": "s34/bbab9n.mpg",
+    "truth": "bin blue at b nine now",
+    "top1": "i'm bimbo and p nine now",
+    "wer": 0.6666666666666666,
+    "cer": 0.45454545454545453,
+    "oracle_wer": 0.5,
+    "encode_ms": 11.547093999979552,
+    "beam_ms": 288.6525259964401
+   },
+   {
+    "clip": "s34/bwwq9p.mpg",
+    "truth": "bin white with q nine please",
+    "top1": "pinwheels with q nine please",
+    "wer": 0.3333333333333333,
+    "cer": 0.21428571428571427,
+    "oracle_wer": 0.3333333333333333,
+    "encode_ms": 14.029808997293003,
+    "beam_ms": 313.6629759974312
+   },
+   {
+    "clip": "s34/lwwi8s.mpg",
+    "truth": "lay white with i eight soon",
+    "top1": "clay wine with the i ate too",
+    "wer": 0.8333333333333334,
+    "cer": 0.4074074074074074,
+    "oracle_wer": 0.8333333333333334,
+    "encode_ms": 11.433521001890767,
+    "beam_ms": 268.68551799998386
+   },
+   {
+    "clip": "s34/pwwuzs.mpg",
+    "truth": "place white with u zero soon",
+    "top1": "place words with two zero two",
+    "wer": 0.5,
+    "cer": 0.35714285714285715,
+    "oracle_wer": 0.5,
+    "encode_ms": 11.503632995299995,
+    "beam_ms": 212.82870000140974
+   }
+  ]
+ }
+}

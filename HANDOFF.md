@@ -1,101 +1,105 @@
-# Handoff: glass UI, the whole backend on Brev, Nemotron voice, MobileGaze
+# Handoff: branch `ui` (2026-10-18)
 
-Branch `ui`, 2026-10-18. It builds on `asr-eval` (the voice model selection, summarised at the end).
+The full reference is [docs/TECHNICAL_VERBOSE.md](docs/TECHNICAL_VERBOSE.md). This page is the short version:
+what is on the branch, how to run it, and what is open.
 
 ## TL;DR
 
-- **The app is one liquid-glass page** (`web/src/glass/`) at http://localhost:8800, following the design
-  `unspoken_liquid_glass_3.html` without its bottom dock.
-  - Every input runs at once: voice, lips, gaze, blink, head nod/shake.
-  - Readings appear as faint ink and bubbles; nothing is spoken until the person confirms.
-  - Top right: live agent activity, then history.
-  - Eye calibration has its own plain black screen.
-- **The whole backend runs on the Brev GPU** (`scripts/brev/`). The laptop runs only the UI and reaches the gateway
-  through an SSH tunnel. All six services plus vLLM run on one RTX PRO 6000.
-- **Voice agent = Nemotron Speech Streaming en 0.6B** with forced phrase scoring. It uses the evaluated
-  decision code and frozen thresholds (`asr_eval/harness/live.py`). Whisper and RNNoise are gone.
-- **Gaze = MediaPipe iris + MobileGaze** (from `yash-gaze-v3`) with per-user ridge calibration. WebGazer is gone.
-- **Budget 31.01B of 33B.** The coordinator is counted at its nominal 30B; with its weight-file count of 31.58B the
-  total is 32.59B, also within budget.
-- **Latency on Brev:** one message end to end in 1.03 s p50. Every agent slows down when all run at once; see
-  [docs/SERVING.md](docs/SERVING.md) for the numbers and how to serve faster.
+- **App:** one liquid-glass page (`web/src/glass/`) at http://localhost:8800.
+  - Voice, lips, gaze, blink and head run at once.
+  - Phrase cards; big Yes / No targets.
+  - Agent activity and history on the right.
+  - Eye calibration on its own black screen, saved and reused.
+- **Backend:** all six services plus vLLM run on one Brev RTX PRO 6000 (`scripts/brev/`). NVIDIA MPS is on by
+  default. The laptop reaches the gateway through an SSH tunnel.
+- **Agents:**
 
-## What was built (branch `ui`)
+  | Role | Model |
+  |---|---|
+  | Voice | Nemotron Speech en 0.6B, 20 fixed phrases, the evaluated decision code |
+  | Lips | Auto-AVSR matched against the person's own enrolled phrases (22 phrases, `data/enroll/`) |
+  | Coordinator | Nemotron 3.5 Lightning on vLLM, now with `propose_correction` and `ignore_input` |
+  | Speech out | Kokoro |
+  | EEG replay | P300 decoder |
+  | Gaze | MediaPipe iris + MobileGaze |
 
-| Piece | Where | Notes |
-|---|---|---|
-| Glass UI | `web/src/glass/` ([web/README.md](web/README.md)) | Ink engine, agent nucleus, bubbles, gaze dwell ported from the design; React controller wired to the gateway; old views removed |
-| Always-on sensors | `web/src/glass/sensors.ts`, `web/src/lib/face.ts` | Voice VAD → 16 kHz WAV clips; mouth-motion → webm clips; nod/shake; one face-tracking loop; capture pauses while a message waits or speech plays |
-| Calibration | `web/src/glass/Calibration.tsx` | Black screen; 18 dots in two passes + 5 unseen test dots; saved calibration; live status; measured failure reason |
-| Gaze engine | `web/src/lib/gaze.ts`, `ridge.ts`, `appearance.ts` | From `yash-gaze-v3`; one TypeScript fix (constructor parameter properties are not allowed by this tsconfig); frame counters added (`gazeDebug`) |
-| CUDA port | `services/{audio,tts,vsr}`, `shared/service.py` | `pick_device` (cuda > mps > cpu); Kokoro via `kokoro` on CUDA; ASR/TTS backend chosen by platform |
-| Voice agent | `services/audio/app.py`, `asr_eval/harness/live.py` | Candidate → proposed (one phrase); unknown → ambiguous (top 3); no speech / no words → unknown |
-| Brev scripts | `scripts/brev/` | `setup_app.sh` (uv venvs, torch cu128, vLLM), `start_app.sh` (start / status / stop), `sync_app.sh`, `connect.sh`, `bench_latency.py` |
-| Ledger | `scripts/verify_weights.py`, `evaluations/results/weights.json`, `shared/provenance.py` | Nemotron Speech + Silero VAD, MobileGaze; coordinator at the nominal 30B |
-| Docs | README, ARCHITECTURE, BREV (§4b, §5), SERVING (new), EVALUATION (§6, §7), MODEL_CARDS, DATASETS_AND_CONSENT, web/README, asr_eval/README | |
+- **Speech:** **demo auto-speak is the default** (`UNSPOKEN_AUTO_SPEAK=1`). An accepted reading (the voice agent
+  accepted it, or lips and voice agree) is spoken without the person's Yes, and audited as such. Ambiguous readings,
+  lip-only matches and corrections wait for Yes/No. Set `UNSPOKEN_AUTO_SPEAK=0` to restore "nothing is spoken
+  until confirmed".
+- **Latency** (Brev, MPS on):
+  - an accepted voice message is spoken 71 ms after its clip arrives (on the box); about 0.85–0.9 s for the person,
+    most of it the 0.7 s pause;
+  - the voice result is ready 64 ms after the end-of-utterance pause, seen from the laptop (early decode);
+  - a lip reading is ready 0.41 s after the mouth stops, seen from the laptop (streamed clip; 0.9 s before).
+- **Coordinator (NeMo Gym, 72 tasks):** deployed 0.940 with **0 unsafe actions**; runs only for ambiguous and
+  unknown readings. Most wrong moves are `ignore_input` on real input.
+- **Budget:** 31.01B of 33B (32.59B with the coordinator's weight-file count).
 
 ## How to run
 
 ```bash
-# laptop (Windows: brev runs inside WSL Ubuntu)
-bash scripts/brev/sync_app.sh marginal-sapphire-whale                          # after every commit
-brev exec marginal-sapphire-whale 'bash ~/unspoken/scripts/brev/start_app.sh'   # restart; `status` / `stop`
-bash scripts/brev/connect.sh marginal-sapphire-whale                           # tunnel the gateway to localhost:8000
-cd web && npm run dev                                                          # http://localhost:8800
+# laptop (Windows: brev runs inside WSL Ubuntu); commit first: sync ships the committed tree
+bash scripts/brev/sync_app.sh marginal-sapphire-whale
+git archive --format=tar.gz -o /tmp/enroll.tgz HEAD:data enroll && brev copy /tmp/enroll.tgz marginal-sapphire-whale:/home/shadeform/enroll.tgz
+brev exec marginal-sapphire-whale 'cd ~/unspoken && rm -rf data/enroll && tar -xzf ~/enroll.tgz -C data'
+brev exec marginal-sapphire-whale 'bash ~/unspoken/scripts/brev/start_app.sh'      # start | status | stop; UNSPOKEN_MPS=0 for no MPS
+bash scripts/brev/connect.sh marginal-sapphire-whale                               # tunnel :8000
+cd web && npm run dev                                                              # http://localhost:8800
 ```
 
-- **First time on a new instance:** run `scripts/brev/setup_app.sh` once (about 15–30 min). The voice agent also
-  needs the NeMo venv from `asr_eval/scripts/setup_brev.sh`.
-- **On a Mac:** `./scripts/run_all.sh` still works, but the voice agent now needs NeMo in the backend venv
-  (not wired or tested yet; see open items).
+A fresh instance needs `scripts/brev/setup_app.sh` once. The voice agent also needs the NeMo venv from
+`asr_eval/scripts/setup_brev.sh`.
 
-## Where things are
+## What changed on `ui` recently
 
-| Item | Location |
-|---|---|
-| Code | branch `ui` on `origin` |
-| Backend on Brev | `~/unspoken` on `marginal-sapphire-whale`; logs in `~/unspoken/.run/logs/`; pinned versions in `~/unspoken/.run/requirements-*.lock` |
-| Venvs on Brev | `/workspace/venv-app` (agents), `/workspace/venv-vllm` (vLLM), `/workspace/venv-asr` (NeMo: voice agent + asr_eval) |
-| Latency results | `evaluations/results/latency_brev.json`, [docs/SERVING.md](docs/SERVING.md) |
-| Browser model files | `web/public/mediapipe/`, `web/public/models/mobileone_s0_gaze.onnx` (gitignored; `setup_models.sh` fetches them) |
+**From the team** (Aum3010, 2026-10-17/18):
+- the patient UI: Yes/No targets, zone gaze targeting, layout calibration;
+- lip enrollment (from `yash-lipreading-v2`);
+- the coordinator's two new tools;
+- auto-speak;
+- evidence noise screening in the gateway, and utterance replacement;
+- one clip in flight per agent;
+- OpenBLAS limited to 1 thread.
 
-## Open items
+**Added on top** (local commits, not pushed yet):
+- **MPS:** on by default, plus a fix so `UNSPOKEN_MPS=0` really stops it.
+- **Early voice decode:** fed through the team's noise screening and one-clip rule.
+- **NeMo Gym:** knows the two new tools; misread and negation cases added (72 tasks; data regenerated).
+- **Result files:** latency, lip speed vs accuracy, and the early-decode check.
+- **Docs:** this page, TECHNICAL_VERBOSE, SERVING, EVALUATION, ARCHITECTURE, BREV, README, web/README, model
+  cards, consent.
 
-1. **Gaze calibration with a real webcam is not verified.** Two causes found and fixed:
-   - Parallel camera requests stalled on a slow USB camera (12 s first open), so calibration hung on "Starting camera".
-   - A camera held by another app or tab was reported as a permission problem.
+## Open items (for the team)
 
-   Still to do: run a full calibration with a person in front of the camera and read the reason line, or the
-   `window.__gaze` counters, if it fails.
-2. **Negations.** "I don't need water" is correctly *not* accepted, but as specified (unknown → offer the top 3) the
-   offered list can include "I need water". Decide whether a negation mismatch should offer nothing instead.
-3. **Mac path for the voice agent.** It needs NeMo; `run_all.sh` should start `services/audio` from a NeMo venv
-   (as `start_app.sh` does on Brev).
-4. **Serve faster.** Try NVIDIA MPS first, then stop the duplicate asr_eval bench, then native FP4 for the
-   coordinator (needs a CUDA 13 toolkit for FlashInfer). Details in [docs/SERVING.md](docs/SERVING.md).
-5. **Not ported from `yash-gaze-v3`:** the Gaze cards page (card snap, gaze lock), the look-then-blink setting,
-   the head-assist settings UI, and the diagnostics export button.
-6. **The phrase list.** The voice agent knows 20 phrases (`asr_eval/configs/eval.yaml`); the rail's Phrases
-   bubbles show 6 of their own. Unify them into one list.
+1. **Auto-speak by default.** It contradicts the README's product rule.
+   - It now covers accepted readings only (`evaluations/safety_tests/test_auto_speak.py`).
+   - It is scheduled at once, so a No rarely lands in time.
+2. **`ignore_input` overuse.** It drops a person who failed twice, a genuine request next to an injection, and
+   clear negated readings. **The validator is intentionally unchanged.**
+3. **The correction validator does not check negations.** It would accept "I don't need water" → "I need water".
+4. **`data/enroll/` is personal data in git.** These are encoder features of a real person's recordings.
+5. **The UI no longer discloses** that clips go to Brev.
+6. **The enrollment threshold is unmeasured.** It was set from 10 recordings, and strangers matched about 12% of
+   the time.
+7. **Speed:**
+   - lip video bitrate (needs an accuracy check);
+   - coordinator output length;
+   - vLLM prefix cache at 0%;
+   - GPU isolation for vLLM (do last);
+   - native FP4 for the coordinator: not now, see SERVING.md.
+8. **Smaller items:**
+   - `zero_infinity=True` in `services/vsr/phrases.py`;
+   - the camera-open sharing and single tracking loop were reverted;
+   - the Mac path needs NeMo for the voice agent;
+   - unused `webgazer` dependency;
+   - 8 lint warnings.
 
-## Voice model selection (from `asr-eval`, still valid)
+## Housekeeping
 
-- Nemotron Speech Streaming en 0.6B with forced RNNT phrase scoring (`forced_llr`).
-  - 3 recorded speakers, leave-one-speaker-out: 71.5% accepted correctly, 0.4% wrong, 90.2% resolved within one
-    gaze question, 0/45 near-miss false accepts, 43 ms per clip.
-- **Not adopted:** Parakeet-CTC (3–5× more wrong and false accepts), Whisper (hallucinates on silence, lower
-  one-question resolution), multilingual Nemotron 3.5 (less accurate and slower on English).
-- Thresholds: `asr_eval/results/thresholds.json`. The app uses the balanced point because every candidate is
-  confirmed; strict is the headline.
-- **Next for the data:** more noisy/muffled/whisper recordings and negatives from p02/p03 and new speakers, then
-  `run_stage.sh all`. Full details: `asr_eval/README.md`, [docs/EVALUATION.md](docs/EVALUATION.md) §6.
-
-## Housekeeping (please do)
-
-- **Billing.** `marginal-sapphire-whale` bills $2.63/hr until deleted; it is not stoppable.
+- **Billing.** `marginal-sapphire-whale` bills $2.63/hr until deleted.
   - `start_app.sh stop` frees the GPU but does not stop billing.
-  - Before deleting, back up the recordings (`brev copy marginal-sapphire-whale:/workspace/asr_eval_data/own/ asr_eval/data/own/`).
-- **Rotate the Brev API key** that was pasted into an earlier chat session (it is not in any file or commit).
-- **Recordings are personal voice data.** Keep them out of git, and delete both copies (Brev and laptop) after the hackathon.
-- **Privacy.** With the backend on Brev, mouth and voice clips leave the laptop ([docs/DATASETS_AND_CONSENT.md](docs/DATASETS_AND_CONSENT.md)).
-  The UI's camera chip says so; tell the person and get their OK first.
+  - Back up the recordings first:
+    `brev copy marginal-sapphire-whale:/workspace/asr_eval_data/own/ asr_eval/data/own/`.
+- **Rotate the Brev API key** that was pasted into an earlier chat session.
+- **Voice recordings are personal data.** Keep them out of git, and delete both copies after the hackathon.

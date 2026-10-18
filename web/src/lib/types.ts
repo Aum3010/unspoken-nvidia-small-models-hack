@@ -86,6 +86,7 @@ export interface SpokenItem {
   source_mode: SourceMode
   supporting_modalities: Modality[]
   tts_latency_ms?: number | null
+  phrase_audio_id?: string | null
   raw: { modality: Modality; hypotheses: string[] }[]
 }
 
@@ -96,6 +97,7 @@ export interface SessionState {
   agreement: { lip: string; audio: string; word_overlap: number } | null
   plan: ToolCall | null
   shown_candidate_ids: string[]
+  auto_speak_candidate_id?: string | null
   spoken: SpokenItem[]
   timeline: TimelineItem[]
   settings: {

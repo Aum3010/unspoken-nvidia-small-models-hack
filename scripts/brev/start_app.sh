@@ -17,6 +17,14 @@ LLM_MEM=${LLM_MEM:-0.55}
 # FlashInfer's attention JIT-compiles with nvcc on first use and the image has no CUDA toolkit;
 # Triton attention needs no compiler. Set LLM_ATTN=FLASHINFER once a toolkit matching the driver is installed.
 LLM_ATTN=${LLM_ATTN:-TRITON_ATTN}
+# MTP speculative decoding with the checkpoint's own next-token layer (LLM_MTP=1): coordinator 272 -> 229 ms p50 and
+# NeMo Gym unchanged within run-to-run noise (evaluations/results/coordinator_mtp_brev.json), but OFF by default: with
+# concurrent requests next to the other agents it ended in a CUDA fault that, under MPS, took every GPU process down.
+# It also fails (HTTP 500) together with --mamba-cache-mode all.
+LLM_MTP=${LLM_MTP:-0}
+SPEC=(); [[ $LLM_MTP == 1 ]] && SPEC=(--speculative-config '{"method":"mtp","num_speculative_tokens":1}')
+# extra vLLM flags for experiments
+LLM_EXTRA=${LLM_EXTRA:-}
 LOGS=.run/logs
 mkdir -p "$LOGS" .run/pids
 
@@ -45,12 +53,25 @@ status() {
   nvidia-smi --query-gpu=memory.used,memory.total --format=csv,noheader
 }
 
+# NVIDIA MPS (UNSPOKEN_MPS=1, the default; measured in docs/SERVING.md): one MPS server lets kernels from every GPU process run at the same
+# time instead of time-slicing between their contexts (docs/SERVING.md). Clients attach when they start, so the
+# daemon is (re)set before any GPU process launches. UNSPOKEN_MPS=0 runs without it, for A/B latency runs.
+MPS=${UNSPOKEN_MPS:-1}
+# -f: Linux truncates process names to 15 characters, so `pgrep -x nvidia-cuda-mps-control` never matches
+mps_running() { pgrep -f '[n]vidia-cuda-mps-control' >/dev/null; }
+mps() {
+  if [[ $MPS == 1 ]] && ! mps_running; then nvidia-cuda-mps-control -d && echo "  MPS daemon started"; fi
+  if [[ $MPS == 0 ]] && mps_running; then echo quit | nvidia-cuda-mps-control && echo "  MPS daemon stopped"; fi
+}
+
 case "${1:-start}" in
   stop) stop; exit 0 ;;
-  status) status; exit 0 ;;
+  status) status; mps_running && echo "  MPS on" || echo "  MPS off"
+          pgrep -f "[v]llm serve.*speculative" >/dev/null && echo "  MTP on" || echo "  MTP off"; exit 0 ;;
 esac
 
 stop
+mps
 launch() {  # name, then the command
   local name=$1; shift
   nohup "$@" >"$LOGS/$name.log" 2>&1 </dev/null &
@@ -63,7 +84,7 @@ echo "Starting Unspoken backend on $(hostname)"
 launch vllm env VLLM_USE_FLASHINFER_SAMPLER=0 "$LLM" serve "$LLM_MODEL" --host 127.0.0.1 --port 8001 \
   --max-model-len 16384 --gpu-memory-utilization "$LLM_MEM" --attention-backend "$LLM_ATTN" \
   --enable-auto-tool-choice --tool-call-parser qwen3_coder --reasoning-parser nemotron_v3 \
-  --enable-prefix-caching --max-num-seqs 8
+  --enable-prefix-caching --max-num-seqs 8 "${SPEC[@]}" $LLM_EXTRA
 
 export PYTHONPATH=$PWD TOKENIZERS_PARALLELISM=false
 export UNSPOKEN_HOST_LABEL="NVIDIA Brev"

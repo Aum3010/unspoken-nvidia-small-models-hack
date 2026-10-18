@@ -62,3 +62,18 @@ def dtw(a: np.ndarray, b: np.ndarray) -> float:
         j = s - i
         acc[i, j] = d[i - 1, j - 1] + np.minimum(np.minimum(acc[i - 1, j], acc[i, j - 1]), acc[i - 1, j - 1])
     return float(acc[n, m] / (n + m))
+
+
+def dtw_batch(a: np.ndarray, bs: np.ndarray, lens: np.ndarray) -> np.ndarray:
+    """`dtw(a, bs[k, :lens[k]])` for every k in one pass: the templates are zero-padded to one length and their
+    cost matrices filled together, one anti-diagonal at a time. Padding only adds cells past each template's end,
+    which its own result never reads, so every distance is the one `dtw` returns."""
+    d = 1.0 - a @ bs.transpose(0, 2, 1)
+    k, n, m = d.shape
+    acc = np.full((k, n + 1, m + 1), np.inf)
+    acc[:, 0, 0] = 0.0
+    for s in range(2, n + m + 1):
+        i = np.arange(max(1, s - m), min(n, s - 1) + 1)
+        j = s - i
+        acc[:, i, j] = d[:, i - 1, j - 1] + np.minimum(np.minimum(acc[:, i - 1, j], acc[:, i, j - 1]), acc[:, i - 1, j - 1])
+    return acc[np.arange(k), n, lens] / (n + lens)

@@ -1,0 +1,137 @@
+{
+  "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition, 64605 MiB, 97887 MiB",
+  "n": 20,
+  "date": "2026-10-18",
+  "alone": {
+    "audio": {
+      "n": 20,
+      "p50": 61,
+      "p95": 73,
+      "max": 75,
+      "mean": 62
+    },
+    "vsr": {
+      "n": 20,
+      "p50": 619,
+      "p95": 688,
+      "max": 700,
+      "mean": 616
+    },
+    "coordinator": {
+      "n": 20,
+      "p50": 264,
+      "p95": 316,
+      "max": 323,
+      "mean": 265
+    },
+    "tts": {
+      "n": 20,
+      "p50": 25,
+      "p95": 26,
+      "max": 28,
+      "mean": 25
+    },
+    "eeg": {
+      "n": 20,
+      "p50": 117,
+      "p95": 121,
+      "max": 121,
+      "mean": 118
+    }
+  },
+  "together": {
+    "audio": {
+      "n": 20,
+      "p50": 75,
+      "p95": 156,
+      "max": 283,
+      "mean": 90
+    },
+    "vsr": {
+      "n": 20,
+      "p50": 611,
+      "p95": 741,
+      "max": 765,
+      "mean": 628
+    },
+    "coordinator": {
+      "n": 20,
+      "p50": 273,
+      "p95": 307,
+      "max": 386,
+      "mean": 279
+    },
+    "tts": {
+      "n": 20,
+      "p50": 34,
+      "p95": 54,
+      "max": 58,
+      "mean": 36
+    },
+    "eeg": {
+      "n": 20,
+      "p50": 117,
+      "p95": 126,
+      "max": 128,
+      "mean": 118
+    },
+    "_gpu": {
+      "util_mean_pct": 59,
+      "util_max_pct": 100,
+      "mem_max_mib": 66063,
+      "wall_s": 12.6
+    }
+  },
+  "end_to_end": {
+    "evidence": {
+      "n": 20,
+      "p50": 618,
+      "p95": 724,
+      "max": 772,
+      "mean": 622
+    },
+    "plan": {
+      "n": 20,
+      "p50": 381,
+      "p95": 461,
+      "max": 514,
+      "mean": 386
+    },
+    "speech": {
+      "n": 20,
+      "p50": 41,
+      "p95": 52,
+      "max": 64,
+      "mean": 43
+    },
+    "total": {
+      "n": 20,
+      "p50": 1047,
+      "p95": 1195,
+      "max": 1213,
+      "mean": 1051
+    }
+  },
+  "voice_wait_after_utterance": {
+    "sent_at_700ms": {
+      "n": 20,
+      "p50": 102,
+      "p95": 110,
+      "max": 110,
+      "mean": 101
+    },
+    "early_decode": {
+      "n": 20,
+      "p50": 2,
+      "p95": 3,
+      "max": 3,
+      "mean": 2
+    }
+  },
+  "inputs": {
+    "voice": "Kokoro af_heart speaking the 20 phrases",
+    "lips": "12 GRID videos (3 s, 25 fps)",
+    "eeg": "BNCI A01, one letter",
+    "coordinator": "2 candidates, ambiguous audio + proposed lip"
+  }
+}

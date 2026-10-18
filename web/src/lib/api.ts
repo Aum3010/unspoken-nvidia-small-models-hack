@@ -12,6 +12,21 @@ export const SESSION_ID = (() => {
   }
 })()
 
+let liveWs: WebSocket | null = null
+
+/** Send one piece of a streamed mouth clip over the session WebSocket, in order. False if it cannot be sent. */
+export function sendLipPiece(header: { id: string; seq?: number; mime?: string; discard?: boolean }, piece?: ArrayBuffer): boolean {
+  if (!liveWs || liveWs.readyState !== WebSocket.OPEN) return false
+  const h = new TextEncoder().encode(JSON.stringify(header))
+  const out = new Uint8Array(2 + h.length + (piece?.byteLength ?? 0))
+  out[0] = h.length >> 8
+  out[1] = h.length & 255
+  out.set(h, 2)
+  if (piece) out.set(new Uint8Array(piece), 2 + h.length)
+  liveWs.send(out)
+  return true
+}
+
 async function req<T>(path: string, init?: RequestInit): Promise<T> {
   const r = await fetch(path, init)
   if (!r.ok) {
@@ -35,18 +50,31 @@ export const api = {
     f.append('video', blob, blob.type.includes('mp4') ? 'clip.mp4' : 'clip.webm')
     return req<{ event: any; state: SessionState }>(`${base}/capture/lip`, { method: 'POST', body: f })
   },
+  /** A mouth clip whose pieces already went over the WebSocket; 409 means send the whole clip instead. */
+  finishLipStream: (stream_id: string, chunks: number) =>
+    post<{ event: any; state: SessionState }>(`${base}/capture/lip/stream`, { stream_id, chunks }),
   captureAudio: (blob: Blob, enhance = true) => {
     const f = new FormData()
     f.append('audio', blob, blob.type.includes('wav') ? 'clip.wav' : blob.type.includes('mp4') ? 'clip.m4a' : 'clip.webm')
     f.append('enhance', String(enhance))
     return req<{ event: any; state: SessionState }>(`${base}/capture/audio`, { method: 'POST', body: f })
   },
+  /** Early voice decode (see services/gateway): start decoding during the pause, then commit or discard. */
+  captureAudioEarly: (blob: Blob) => {
+    const f = new FormData()
+    f.append('audio', blob, 'clip.wav')
+    return req<{ early_id: string }>(`${base}/capture/audio/early`, { method: 'POST', body: f })
+  },
+  commitAudio: (early_id: string) => post<{ event: any; state: SessionState }>(`${base}/capture/audio/commit`, { early_id }),
+  discardAudio: (early_id: string) => post<{ discarded: boolean }>(`${base}/capture/audio/discard`, { early_id }),
   captureEeg: (subject: string, chars: number[]) => post<SessionState>(`${base}/capture/eeg`, { subject, chars }),
   board: (text: string, origin: 'board' | 'spelling') => post<SessionState>(`${base}/board`, { text, origin }),
   select: (candidate_id: string, method: string) => post<SessionState>(`${base}/select`, { candidate_id, method }),
   edit: (candidate_id: string, text: string) => post<SessionState>(`${base}/edit`, { candidate_id, text }),
   confirm: (method: ConfirmationMethod) =>
-    post<{ message_id: string; audio_url: string | null; text: string; state: SessionState }>(`${base}/confirm`, { method }),
+    post<{ message_id: string; audio_url: string | null; phrase_audio_id?: string | null; text: string; state: SessionState }>(`${base}/confirm`, { method }),
+  /** The fixed phrases, rendered once for this session's voice; the page preloads them (see services/gateway). */
+  phraseAudio: (texts: string[]) => post<{ phrases: { id: string; text: string }[] }>(`${base}/phrase_audio`, { texts }),
   reject: () => post<SessionState>(`${base}/reject`),
   undo: () => post<SessionState>(`${base}/undo`),
   newMessage: () => post<SessionState>(`${base}/new`),
@@ -70,6 +98,8 @@ export function useSession() {
     const connect = () => {
       const proto = location.protocol === 'https:' ? 'wss' : 'ws'
       ws = new WebSocket(`${proto}://${location.host}/ws/${SESSION_ID}`)
+      ws.binaryType = 'arraybuffer'
+      liveWs = ws
       ws.onopen = () => {
         setConnected(true)
         retry.current = 0

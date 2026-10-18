@@ -5,7 +5,7 @@ Parameter counts below come from `scripts/verify_weights.py`, which reads the we
 | Role | Model / checkpoint | Params (counted) | Runtime | Licence |
 |---|---|---:|---|---|
 | Coordinator (all logical agent roles share it) | NVIDIA Nemotron 3.5 Lightning 30B-A3B — Ollama `nemotron-3.5-lightning:30b-a3b` / `mlx-community/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-4bit` | 30 B (nominal; weight files 31.578 B) | Ollama (Metal) · MLX · vLLM on Brev (NVFP4) | OpenMDW-1.1 |
-| Visual speech | Auto-AVSR `LRS3_V_WER19.1` via Chaplin (`huggingface.co/Amanvir/LRS3_V_WER19.1`) | 0.250 B | PyTorch MPS / CUDA | code Apache-2.0 / MIT (Chaplin); weights follow LRS3 terms |
+| Visual speech | Auto-AVSR `LRS3_V_WER19.1` via Chaplin (`huggingface.co/Amanvir/LRS3_V_WER19.1`); on `ui` used as an encoder for personal phrase enrollment (DTW over its features), free text optional | 0.250 B | PyTorch MPS / CUDA | code Apache-2.0 / MIT (Chaplin); weights follow LRS3 terms |
 | VSR beam-search LM | Auto-AVSR `lm_en_subword` | 0.054 B | PyTorch MPS / CUDA | as above |
 | ASR | NVIDIA Nemotron Speech Streaming en 0.6B (`nvidia/nemotron-speech-streaming-en-0.6b`), forced_llr phrase scoring | 0.618 B | NeMo, CUDA (bf16 autocast) | NVIDIA Open Model License |
 | Voice activity gate | Silero VAD 6.2.3 | 0.0005 B | PyTorch CPU | MIT |
@@ -62,4 +62,5 @@ Supporting components in the harness:
 - **Auto-AVSR** was trained on LRS3 broadcast speech. Its benchmark WER (~19–20%) is not webcam or patient accuracy; see EVALUATION.md for unseen-speaker GRID results. A still face makes it hallucinate fluent sentences, so mouth-motion gating is mandatory.
 - **Nemotron Speech** proposes only the 20 fixed phrases (`asr_eval/configs/eval.yaml`), never free text. Validated on 3 speakers (leave-one-speaker-out: 71.5% accepted correctly, 0.4% wrong at the strict point); the app uses the balanced point because every candidate is confirmed. No hypotheses when Silero finds no speech or the model hears no words.
 - **Gaze** (MediaPipe iris + MobileGaze) gives an estimate of screen position with tens of pixels of error after calibration, measured on unseen dots. It is not clinical eye tracking.
+- **Lip enrollment matching** is person-specific. Its threshold (DTW distance 0.30) was set from 10 recordings, and in an incidental check 5 of 43 clips from strangers (GRID) matched an enrolled phrase. A held-out false-match evaluation is still needed.
 - **Nemotron** is used only to pick the next interaction step. Every call is validated by code, and it cannot produce message text.

@@ -14,13 +14,14 @@ import os
 # 10-30 s a clip (0.1 s single-threaded); run_all.sh sets the same for every service
 os.environ.setdefault("OPENBLAS_NUM_THREADS", "1")
 import sys
+import threading
 import time
 from pathlib import Path
 
 import cv2
 import numpy as np
 import torch
-from fastapi import File, Form, HTTPException, UploadFile
+from fastapi import File, Form, HTTPException, Request, UploadFile
 
 from shared.provenance import ROOT
 from shared.schemas import Evidence, Hypothesis, Provenance
@@ -168,13 +169,19 @@ def _encode(m, data: bytes, flags: list[str], quality: dict):
         flags.append("too_short")
         quality["decode_error"] = type(exc).__name__
         return None, None
+    return _encode_frames(m, frames, duration, None, flags, quality)
+
+
+def _encode_frames(m, frames: np.ndarray, duration: float, landmarks: list | None, flags: list[str], quality: dict):
+    """Decoded frames (and their face landmarks, when a streamed clip already found them) -> as `_encode`."""
     quality.update(duration_s=round(duration, 2), frames=int(len(frames)))
     if len(frames) < 0.6 * MODEL_FPS:
         flags.append("too_short")
         return None, None
     if duration > 12:
         flags.append("too_long")
-    landmarks = m["detector"].detect(frames, m["detector"].full_range_detector)
+    if landmarks is None:
+        landmarks = m["detector"].detect(frames, m["detector"].full_range_detector)
     if all(lm is None for lm in landmarks):
         landmarks = m["detector"].detect(frames, m["detector"].short_range_detector)
     detected = sum(lm is not None for lm in landmarks) / len(landmarks)
@@ -204,18 +211,22 @@ def _encode(m, data: bytes, flags: list[str], quality: dict):
 
 @app.post("/infer")
 def infer(video: UploadFile = File(...), session_id: str = Form("demo-session"), source_ref: str = Form("")):
+    data = video.file.read()
+    return _read_clip(lambda m, flags, quality: _encode(m, data, flags, quality), session_id, source_ref)
+
+
+def _read_clip(encode, session_id: str, source_ref: str, quality: dict | None = None) -> Evidence:
     t0 = time.time()
     m = model.get()
-    data = video.file.read()
     flags: list[str] = []
-    quality: dict = {}
+    quality = quality if quality is not None else {}
     prov = Provenance(
         service="vsr", checkpoint="Auto-AVSR LRS3_V_WER19.1", device=m["device"],
         preprocess="pyav-25fps -> mediapipe face det -> mean-face similarity warp -> 96px mouth ROI -> centercrop 88",
     )
 
     with model.lock:
-        enc, crops = _encode(m, data, flags, quality)
+        enc, crops = encode(m, flags, quality)
         if enc is None:
             return _evidence(session_id, source_ref, [], flags, quality, prov, t0)
 
@@ -270,6 +281,143 @@ def infer(video: UploadFile = File(...), session_id: str = Form("demo-session"),
         quality["top2_margin"] = round(hypotheses[0].score - hypotheses[1].score, 3)
     quality["mouth_thumbs"] = _thumbs(crops)
     return _evidence(session_id, source_ref, hypotheses, flags, quality, prov, t0)
+
+
+# ---- streamed clips ---------------------------------------------------------
+# The browser sends the clip in 250 ms pieces while the person is still mouthing. Each stream is decoded as it
+# arrives, and each frame goes through face detection as soon as it is final, so after the pause only cropping,
+# the encoder and matching remain. The frames are the ones the whole-clip decode gives: the same decoder reads
+# the same bytes, frames are picked on the same 25 fps grid (a grid point is final once a later frame exists),
+# and detection is per frame. Cropping (it smooths landmarks over neighbouring frames) runs on the whole clip at
+# the end, exactly as for an uploaded clip.
+
+class _Feed:
+    """A byte stream that grows as chunks arrive; a read waits for more bytes until the stream is closed."""
+
+    def __init__(self):
+        self.buf, self.pos, self.closed = bytearray(), 0, False
+        self.cv = threading.Condition()
+
+    def push(self, data: bytes):
+        with self.cv:
+            self.buf += data
+            self.cv.notify_all()
+
+    def close(self):
+        with self.cv:
+            self.closed = True
+            self.cv.notify_all()
+
+    def read(self, n: int = -1) -> bytes:
+        with self.cv:
+            while self.pos >= len(self.buf) and not self.closed:
+                self.cv.wait()
+            end = len(self.buf) if n is None or n < 0 else min(len(self.buf), self.pos + n)
+            out = bytes(self.buf[self.pos:end])
+            self.pos = end
+            return out
+
+
+_stream_detector: dict = {}
+_stream_detect_lock = threading.Lock()
+
+
+def _detector():
+    """Face detection for streamed clips; its own instance (detection is per frame), one stream at a time."""
+    if "d" not in _stream_detector:
+        from pipelines.detectors.mediapipe.detector import LandmarksDetector
+        _stream_detector["d"] = LandmarksDetector()
+    return _stream_detector["d"]
+
+
+class _ClipStream:
+    def __init__(self, mime: str):
+        self.feed, self.mime, self.touched = _Feed(), mime, time.time()
+        self.frames: list[np.ndarray] = []
+        self.times: list[float] = []
+        self.grid: list[int] = []      # source frame index of each 25 fps grid point
+        self.landmarks: list = []
+        self.error: str | None = None
+        self.done = threading.Event()
+        self.chunks = 0
+        threading.Thread(target=self._run, daemon=True).start()
+
+    def _detect_until(self, t_end: float | None):
+        """Grid points before t_end (all of them when None) get their frame and face detection."""
+        times = np.asarray(self.times) - self.times[0]
+        points = np.arange(0.0, times[-1] + 1.0 / MODEL_FPS if t_end is None else t_end, 1.0 / MODEL_FPS)[len(self.grid):]
+        if not len(points):
+            return
+        idx = np.clip(np.searchsorted(times, points, side="right") - 1, 0, len(self.frames) - 1)
+        d = _detector()
+        with _stream_detect_lock:
+            self.landmarks += d.detect([self.frames[i] for i in idx], d.full_range_detector)
+        self.grid += idx.tolist()
+
+    def _run(self):
+        import av
+        try:
+            fmt = "mp4" if "mp4" in self.mime else "matroska"
+            with av.open(self.feed, format=fmt, options={"probesize": "32", "analyzeduration": "0"}) as c:
+                for frame in c.decode(c.streams.video[0]):
+                    if frame.pts is None:
+                        continue
+                    self.times.append(float(frame.pts * frame.time_base))
+                    self.frames.append(frame.to_ndarray(format="rgb24"))
+                    self._detect_until(self.times[-1] - self.times[0])  # grid points before this frame are final
+            if self.frames:
+                self._detect_until(None)
+        except Exception as exc:
+            self.error = type(exc).__name__
+        finally:
+            self.done.set()
+
+    def encode(self, m, flags: list[str], quality: dict):
+        if self.error or not self.frames:
+            flags.append("too_short")
+            quality["decode_error"] = self.error or "no frames"
+            return None, None
+        times = np.asarray(self.times) - self.times[0]
+        frames = np.stack([self.frames[i] for i in self.grid])
+        return _encode_frames(m, frames, float(times[-1]) + 1.0 / MODEL_FPS, list(self.landmarks), flags, quality)
+
+
+_streams: dict[str, _ClipStream] = {}
+STREAM_TTL_S = 60
+
+
+@app.post("/stream/{stream_id}/chunk")
+async def stream_chunk(stream_id: str, request: Request, mime: str = "video/webm"):
+    data = await request.body()
+    for k in [k for k, v in _streams.items() if time.time() - v.touched > STREAM_TTL_S]:
+        _streams.pop(k).feed.close()
+    st = _streams.get(stream_id)
+    if st is None:
+        st = _streams[stream_id] = _ClipStream(mime)
+    st.feed.push(data)
+    st.chunks += 1
+    st.touched = time.time()
+    return {"chunks": st.chunks}
+
+
+@app.post("/stream/{stream_id}/finish")
+def stream_finish(stream_id: str, session_id: str = Form("demo-session"), source_ref: str = Form("")):
+    st = _streams.pop(stream_id, None)
+    if st is None:
+        raise HTTPException(404, "unknown stream")
+    t0 = time.time()
+    st.feed.close()
+    st.done.wait(30)
+    quality = {"streamed": True, "stream_chunks": st.chunks, "stream_tail_ms": int((time.time() - t0) * 1000)}
+    return _read_clip(st.encode, session_id, source_ref, quality)
+
+
+@app.post("/stream/{stream_id}/discard")
+def stream_discard(stream_id: str):
+    st = _streams.pop(stream_id, None)
+    if st:
+        st.feed.close()
+    return {"discarded": st is not None}
 
 
 # ---- personal enrollment ----------------------------------------------------
