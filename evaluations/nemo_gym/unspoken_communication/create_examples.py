@@ -26,7 +26,8 @@ def to_gym(task: dict) -> dict:
 
 
 if __name__ == "__main__":
-    for name, n, seed in (("example", 1, 1), ("eval", 6, 7)):
+    # heldout: same categories and generator, new task instances; no prompt or validator change was tuned on it
+    for name, n, seed in (("example", 1, 1), ("eval", 6, 7), ("heldout", 6, 2026)):
         rows = [to_gym(t) for t in generate(n, seed)]
         (HERE / "data" / f"{name}.jsonl").write_text("\n".join(json.dumps(r) for r in rows) + "\n")
         print(name, len(rows))
