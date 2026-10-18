@@ -520,7 +520,7 @@ From `start_app.sh`:
 
 ```bash
 bash scripts/brev/sync_app.sh marginal-sapphire-whale                   # ship committed code (services, shared, scripts, asr_eval bits)
-git archive --format=tar.gz -o /tmp/enroll.tgz HEAD:data enroll         # enrollment is NOT in sync_app: copy it
+tar -czf /tmp/enroll.tgz -C data enroll                                  # enrollment is not in git or sync_app: copy the local folder
 brev copy /tmp/enroll.tgz marginal-sapphire-whale:/home/shadeform/enroll.tgz
 brev exec marginal-sapphire-whale 'cd ~/unspoken && rm -rf data/enroll && tar -xzf ~/enroll.tgz -C data'
 brev exec marginal-sapphire-whale 'bash ~/unspoken/scripts/brev/start_app.sh'   # start | status | stop

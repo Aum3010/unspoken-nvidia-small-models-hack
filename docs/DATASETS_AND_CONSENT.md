@@ -76,6 +76,9 @@ For the ASR evaluation there are two recorders:
   says they "are not uploaded", and the rules above keep personal recordings out of git.
 - **Status on `demo-final`: pending the person's written consent decision.** Git history has **not** been
   rewritten. Until that decision, do not copy `data/enroll/` anywhere new.
+- **Status from `serving-experiments` / `main` on: step 1 below is done.** The features are no longer tracked; they
+  stay on disk where they already were (the laptop, the GPU instance) and are shipped with `tar` (docs/BREV.md §4b).
+  Older branches and history still hold them; step 3 is still a team decision.
 - **If the person does not consent to a shared repository**, remove the features from the tip of every branch
   that has them, keep them only on the GPU instance, and then decide with the team whether to purge history:
 

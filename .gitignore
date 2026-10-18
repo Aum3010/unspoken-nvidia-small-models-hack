@@ -20,3 +20,32 @@ __pycache__/
 /environment_servers/
 /responses_api_models/
 /outputs/
+
+# personal data: the lip enrollment features stay out of git (consent, docs/DATASETS_AND_CONSENT.md); /data/ covers
+# them, this line keeps them out if that rule ever changes
+data/enroll/
+
+# secrets and local config
+.env
+.env.*
+*.pem
+.claude/settings.local.json
+
+# model weights and training artifacts (adapters stay on the GPU box, RESULTS.md §8)
+*.safetensors
+*.pt
+*.pth
+*.ckpt
+evaluations/results/**/adapter*/
+
+# tool caches, editors, OS files (AppleDouble ._* files come from tar archives made on a Mac)
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+.ipynb_checkpoints/
+.idea/
+.vscode/
+._*
+Thumbs.db
+web/*.tsbuildinfo
