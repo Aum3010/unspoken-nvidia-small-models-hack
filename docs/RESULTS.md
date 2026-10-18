@@ -14,7 +14,7 @@ they apply to, not in a footnote.
 | [Lips, personal](#2-lips-specialise-the-decoder) | Top-1 phrase: **72.0% → 96.1%** (phrase list → own recordings) | MIRACL-VC1, 15 speakers | MIRACL-VC1 is licensed for research use only |
 | [EEG, ALS patients](#3-eeg-alone-als-patients-study-f) | Wrong characters: **24 → 1** per 120, same decoder; throughput not lower (2.51 → 3.13 correct/min) | bigP3BCI Study F, 10 ALS participants, session 3 | Yields on 36% of selections; 4 of 10 participants cannot be served reliably by EEG; throughput CIs overlap |
 | [EEG + gaze](#4-eeg--gaze-study-h) | Correct within 3 s at ~1% wrong: **2.9% → 29.1%** (+26.1 points, 95% CI 18.2 to 35.3) | bigP3BCI Study H, 16 participants, held-out runs | Participants do not have ALS: supports the mechanism, not ALS speed |
-| [Coordinator](#5-coordinator-nemo-gym-unspoken_communication) | Correct action **80% → 100%**, unsafe 0% → 0% (Nemotron alone → Nemotron + validator) | NeMo Gym `unspoken_communication`, 60 tasks | The gain is validator code, not a retrained model |
+| [Coordinator](#5-coordinator-nemo-gym-unspoken_communication) | Right action **82% → 95%**, unsafe 0% → 0%, 278 ms p50 (Nemotron alone → Nemotron + validator) | NeMo Gym `unspoken_communication`, 44 held-out tasks | The gain is validator code, not a retrained model |
 
 ---
 
@@ -122,20 +122,23 @@ Files: `evaluations/results/eeg_gaze_fusion/`, `docs/EEG_GAZE_FUSION.md`. Reprod
 **Question.** Given the agents' candidates and quality flags, does the coordinator pick the right single action (offer,
 ask, retake, ignore, switch input, correct) and never speak for the patient unconfirmed?
 
-60 tasks in 10 categories, scored by the environment's verifier on valid / correct action / safety.
+Scored by the environment's verifier on valid / right action / safety. Held-out set: same generator, seed 2026, every
+task that also occurs in the 72-task eval set removed (44 remain, 10 categories). Nemotron 3.5 Lightning NVFP4 on vLLM,
+Brev, temperature 0.
 
-| Policy | Reward | Correct action | Unsafe | p50 latency |
+| Policy (44 held-out tasks) | Reward | Right action | Unsafe | p50 latency |
 |---|---:|---:|---:|---:|
-| Nemotron 3.5 Lightning 30B-A3B, alone | 0.933 | 80% | 0% | 4.6 s |
-| granite4.2:8b, alone (comparison) | 0.933 | 80% | 0% | 6.2 s |
-| **Deployed: Nemotron + validator + fallback** | **1.000** | **100%** | **0%** | 2.9 s |
+| Nemotron 3.5 Lightning 30B-A3B, alone | 0.939 | 81.8% | 0% | 281 ms |
+| **Deployed: Nemotron + validator + fallback** | **0.985** | **95.5%** | **0%** | 278 ms |
+| Rules alone (reference ceiling) | 1.000 | 100% | 0% | 0 |
 
-Both models fail on history: after two failed retakes they ask for a third, and after "none of these" they re-ask
-instead of switching to spelling. Those rules now live in a validator, and a rejected call falls back to rules (80% of
-decisions are still Nemotron's). The deterministic reference policy shares the verifier's specification, so its 1.000 is
-a ceiling, not an independent baseline.
+The whole gain is in `none_of_these` (0.67 → 1.00): after the person rejects every reading, Nemotron re-asks; the
+validator's history rule switches to spelling. Nemotron still makes 86% of the decisions. The rules share the
+verifier's specification, so their 1.000 is a ceiling, not an independent baseline. Earlier, on a Mac through Ollama,
+the same model took 4.6 s per decision; on vLLM it takes 278 ms.
 
-Files: `evaluations/results/coordinator.json`, `docs/EVALUATION.md` §4. Reproduce: `python evaluations/nemo_gym/run_local.py`.
+Files: `evaluations/results/coordinator_heldout_brev.json`, `coordinator_brev.json`, `docs/BOUNTIES.md` §2.
+Reproduce: `python evaluations/nemo_gym/run_local.py --seed 2026 --distinct-from 7 --out coordinator_heldout.json`.
 
 ## 6. EEG decisions in NeMo Gym (`neuro_comm`)
 

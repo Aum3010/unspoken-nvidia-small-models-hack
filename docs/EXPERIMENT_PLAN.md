@@ -1,5 +1,18 @@
 # Final evaluation plan
 
+> **Note for the team (P J, Yash).** `eval-consolidation` = `ui-speedups` (merged as is, no conflicts, 92 tests pass)
+> plus evidence from `eeg-dataset-foundation` and `yash-lipreading-v2`, plus two new experiments: **E1** (lips + voice
+> fused on the same GRID utterances) and **E4** (Nemotron on `neuro_comm`, the ALS EEG Gym environment). The coordinator
+> Gym runs (72 eval + 44 held-out) and the serving/latency work on `ui-speedups` are used as they are, not re-run.
+> - `docs/RESULTS.md` is the one-page results summary; its coordinator row uses the held-out Brev numbers from
+>   `coordinator_heldout_brev.json`.
+> - **Bounty wording to check:** `BOUNTIES.md` §2 ("Best Model Improvement With NeMo Gym") says, correctly, that no
+>   weights changed: the gain is the validator. A judge reading "model improvement" may expect training. We have no
+>   training run, so we should not claim one; keep the wording as it is.
+> - Copied code needed two small fixes: `scripts/data/audit_eeg_datasets.py --skip-bnci` (the Study F audit crashed
+>   with BNCI files present) and `evaluations/dataset_manifests/` (missing from the first copy).
+
+
 **The claim to support.** Each agent was specialised with task-specific data, and that improved its accuracy and/or
 latency on held-out people. Combining the agents beats the best single agent, without making the system slower.
 
@@ -38,38 +51,28 @@ commits, wrong commits, abstentions and latency, on people or sessions the agent
 ### E2. EEG + gaze (done)
 Study H: correct within 3 s at ~1% wrong, 2.9% (EEG) and 3.9% (gaze) → 29.1% fused, CI [18.2, 35.3]. Non-ALS.
 
-### E3. Coordinator: accuracy and latency in NeMo Gym (Brev)
-`evaluations/nemo_gym/run_local.py` with `UNSPOKEN_LLM_BACKEND=openai`, 60 tasks:
-- Nemotron 3.5 Lightning 30B-A3B BF16 on vLLM (GPU 0): raw and deployed (with validator)
-- Nemotron 3 Nano 4B BF16 on vLLM (GPU 1): raw and deployed
-- Report: reward, correct action, unsafe, p50/p95 latency.
-
-The question: does the validator let a model 7x smaller hold 100% at lower latency?
+### E3. Coordinator: accuracy and latency in NeMo Gym (done on `ui-speedups`)
+44 held-out tasks (duplicates of eval tasks removed), Nemotron 3.5 Lightning NVFP4 on vLLM, Brev: Nemotron alone right
+action 0.82 → deployed (validator + fallback) 0.95, 0 unsafe, 278 ms p50; Nemotron decides 86% itself
+(`coordinator_heldout_brev.json`). Not re-run.
 
 ### E4. EEG decisions in NeMo Gym, first Nemotron run (Brev)
 `scripts/benchmark/run_neuro_comm_eval.py` on Study F session 3 (120 selections, 10 ALS participants):
 Bayes, Bayes + abstain, Nemotron 30B, hybrid (Nemotron called only when Bayes is unsure). Report: reward, correct,
 wrong, abstain, model calls, end-to-end latency, participant bootstrap CIs.
 
-### E5. Whole system under load (done, reported as measured)
-`latency_brev.json`: each agent alone vs all together on one GPU. Voice 55 → 304 ms p50, coordinator 241 → 304 ms,
-lips p95 0.5 → 2.8 s. Two GPUs (LLM on one, agents on the other) is the fix. Re-measure on the 2x H100 if time allows.
+### E5. Whole system under load (done on `ui-speedups`)
+NVIDIA MPS on one GPU: with every agent busy, voice 244 → 75 ms p50, Kokoro 79 → 30 ms, vLLM 352 → 336 ms
+(`latency_brev_ui_mps{0,1}.json`). Not re-run.
 
-## Box layout (2x H100 80GB)
+## Box layout (2x H100 80GB, `breakable-tomato-hippopotamus`)
 
 | GPU | Process |
 |---|---|
-| 0 | vLLM: Nemotron 3.5 Lightning 30B-A3B BF16, port 8001 |
-| 1 | vLLM: Nemotron 3 Nano 4B BF16, port 8002; then NeMo voice scoring (E1) |
+| 0 | vLLM: Nemotron 3.5 Lightning 30B-A3B BF16, port 8001 (E4) |
+| 1 | NeMo: Nemotron Speech Streaming 0.6B (E1 voice) |
 
-## Timeline (minutes from box ready)
-
-| Min | Box | Mac |
-|---|---|---|
-| 0-15 | uv venvs (vLLM, NeMo), model downloads, sync code + 200 GRID clips + Study F evidence | E1 lips (running) |
-| 15-30 | E1 voice; E3 on both models | write the E1 section |
-| 30-45 | E4 (Nemotron, hybrid) | E1 fuse; RESULTS.md |
-| 45-60 | E5 re-measure if time; copy results back; **delete the instance** | slide |
+Lips (E1) ran on the Mac: 200 clips, top-1 88.5%, 348 ms p50 (MPS).
 
 ## Not claimed
 
