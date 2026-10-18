@@ -1,15 +1,45 @@
 # Unspoken
 
-> **A voice for those who cannot speak.**
-> Small specialist models read lips, a weak voice, the eyes and recorded EEG. NVIDIA Nemotron 3.5 Lightning
-> coordinates them to *ask*, never to assume, and code decides what may be spoken.
+### Because everyone deserves to be heard.
 
-Unspoken is an assistive-communication **research prototype**. It is not a medical device, not a nurse-call
-system and not a mind reader.
+Imagine you are lying in a hospital bed. You are fully conscious. You understand everything happening around you.
+But you cannot speak.
 
-- **Where it runs:** the browser UI runs on your laptop. The agents run on an NVIDIA GPU on
-  [Brev](https://brev.nvidia.com), with the coordinator on vLLM, and the laptop reaches them through an SSH tunnel.
-- **On a Mac instead:** Apple Silicon works too, using Metal (MPS + MLX) and Ollama.
+You are thirsty. You are in pain. You need your family. And the only thing stopping you from saying so is that
+your body won't cooperate.
+
+**What if AI could understand what you are trying to say, even when you can't say it?**
+
+That is why we built **Unspoken**.
+- **What it is:** a real-time, multimodal communication system. It turns a weak voice, silent lip movements, eye
+  gaze, deliberate blinks and head nods into a voice.
+- **How it works:** small specialist models read the person, and **NVIDIA Nemotron 3.5 Lightning** decides what
+  to do when they are unsure.
+- **The guarantee:** code, never a model, decides what may be spoken.
+
+---
+
+## See it work
+
+What the demo shows, on one NVIDIA RTX PRO 6000 running every model at once:
+
+1. **The room comes alive.** The live camera fills the page, and the agent activity view pulses as each specialist
+   reports.
+2. **A weak voice is enough.** Say "I need water", weakly. Nemotron Speech recognises one of the person's
+   phrases, and the system says it aloud. On the GPU box that takes **71–73 ms** from the clip to speech: demo
+   mode speaks a reading the voice agent accepted at once (see the fine print).
+3. **No sound at all? Mouth it.** The lip agent reads the silent mouth movements and proposes the phrase on screen,
+   **0.41 s** after the person stops mouthing. The video streams while they mouth.
+4. **The person decides, without a word.** They confirm by looking at Yes, a deliberate blink or a nod, and reject
+   with No or a head shake. Unspoken never blindly trusts a prediction.
+5. **Only then is the lip reading spoken.** The policy gate signs the exact confirmed text, and the voice (Kokoro)
+   will not speak anything unsigned.
+
+Someone who could not communicate now has another way to be heard.
+
+## Why small models, working together
+
+The most interesting part is not any single model. **It is how we made them work together.**
 
 ```
 lips ─┐                                         ┌─ you select ─┐
@@ -18,9 +48,86 @@ eyes ─┤   n-best / phrases +     (Nemotron 3.5    └─ or correct ┘     
 EEG* ─┘   quality flags           Lightning, typed tools)            *recorded replay only
 ```
 
-**The core behaviour is active uncertainty resolution.** When a reading is unsure, or lips and voice disagree,
-the coordinator picks the smallest useful question. Another input then lets the person answer: gaze dwell, a
-blink, a nod or the phrase board. The person, never a model, decides what is said.
+**The specialists:**
+- **Weak voice:** NVIDIA **Nemotron Speech** Streaming 0.6B, which scores the person's fixed phrases and abstains
+  when unsure.
+- **Lips:** **Auto-AVSR**, matched against the person's own recorded phrases.
+- **Eyes, blinks, head:** **MediaPipe** and **MobileGaze** in the browser, calibrated for each person.
+- **Speech out:** **Kokoro**. EEG works from recorded replays only.
+
+**The coordinator:** **NVIDIA Nemotron 3.5 Lightning**, 30B-A3B, served on **Red Hat vLLM**.
+- **Its job is not to generate text.** Its job is to decide what to do when the specialists are unsure:
+  - Ask for confirmation, and with which input?
+  - Fix a misread word?
+  - Request another attempt?
+  - Switch to gaze or spelling?
+  - Or ignore noise?
+- **It answers with exactly one typed tool call.** The call is validated outside the model, and invalid calls fall
+  back to deterministic rules.
+- **An unreliable model decision cannot authorize speech.**
+
+**The whole system fits the 33B limit:** 31.01B parameters (`scripts/verify_weights.py`).
+
+## Proof, not promises
+
+We did not just connect models together. We measured and optimised the system, and every number links to its
+result file.
+
+| Claim | Measured |
+|---|---|
+| **Two senses beat one** | voice alone **8.0%**, lips alone **53.5%**, **together 76.0%**: correct commits on paired audio-video under heavy babble noise (0 dB, GRID) · [RESULTS §6](docs/RESULTS.md) |
+| **Faster lip reading** | **898 → 407 ms** after the person stops mouthing, by streaming video while they mouth (laptop through the tunnel) · [SERVING](docs/SERVING.md) |
+| **A coordinator that holds up on hard cases** | custom **NVIDIA NeMo Gym** environment: ambiguity, misreads, prompt injection, pressure to speak. Held-out reward **0.985** with **0 unsafe actions**; right action 82% → 95% from Nemotron alone to Nemotron + validator · [RESULTS §5](docs/RESULTS.md), [BOUNTIES §2](docs/BOUNTIES.md) |
+| **Real serving, not an API wrapper** | Nemotron on **Red Hat vLLM** beside four other models on one GPU (NVIDIA MPS): **0 errors up to 64 concurrent requests**, 16 req/s peak. If vLLM is slow, down or wrong, the coordinator falls back to rules: with vLLM killed outright (isolated from MPS in that test), the voice, lips and speech kept working · [serving SUMMARY](evaluations/results/serving/SUMMARY.md), [BOUNTIES §3](docs/BOUNTIES.md) |
+| **Safety enforced in code** | **49/49** safety tests, **7/7** live attacks blocked, **0** unconfirmed texts reaching speech · [EVALUATION](docs/EVALUATION.md) |
+| **Within budget** | **31.01B** of 33B parameters · [TECHNICAL_VERBOSE §8](docs/TECHNICAL_VERBOSE.md) |
+
+More results (dysarthric speech, ALS EEG, personal lip enrollment, Gym training): [Results at a glance](#results-at-a-glance).
+
+## What happens when AI gets it wrong?
+
+In a chatbot, a wrong answer is an inconvenience. For someone who cannot speak, it can mean saying the exact
+opposite of what they meant. So we did not optimise for accuracy alone; we engineered for uncertainty:
+
+- **Unsure means ask.** The coordinator picks the smallest useful question.
+- **Disagreement means show both.** When lips and voice disagree, the person sees both readings and chooses.
+- **Negations survive.** "I don't need water" must never become "I need water". In our coordinator evaluations the
+  model never dropped a negation, and an optional validator rule guards it.
+- **Speech needs a signature.** Text is spoken only through a gate that signs the exact text, and the voice refuses
+  anything else.
+- **Every decision is audited:** raw readings, tool calls (including rejected ones), confirmations and speech.
+
+**Small models do not have to solve everything individually.** Engineered to collaborate, they give people a
+capability no single model provides reliably on its own. We are building toward a future where losing the ability
+to speak does not have to mean losing the ability to communicate.
+
+## For judges: where to look
+
+| Track / bounty | Read | Code |
+|---|---|---|
+| Multi-agent system | [ARCHITECTURE](docs/ARCHITECTURE.md), [TECHNICAL_VERBOSE](docs/TECHNICAL_VERBOSE.md) | `shared/schemas.py` (typed `Evidence` / `ToolCall`), `services/gateway/` |
+| NVIDIA Nemotron Lightning | [BOUNTIES §1](docs/BOUNTIES.md) | `services/coordinator/app.py` (tools, validator, fallback) |
+| NVIDIA NeMo Gym | [BOUNTIES §2](docs/BOUNTIES.md), [RESULTS §5, §7–8](docs/RESULTS.md) | `evaluations/nemo_gym/unspoken_communication/`, `evaluations/nemo_gym/neuro_comm/` |
+| Red Hat vLLM | [BOUNTIES §3](docs/BOUNTIES.md), [serving SUMMARY](evaluations/results/serving/SUMMARY.md) | `scripts/brev/start_app.sh`, `scripts/brev/serving/` |
+| Every number, with caveats | [RESULTS](docs/RESULTS.md), [EVALUATION](docs/EVALUATION.md) | `evaluations/results/` |
+| Run it yourself | [Run it on NVIDIA Brev](#run-it-on-nvidia-brev) | `scripts/brev/` |
+
+### The honest fine print
+
+- **Not a clinical device.** Unspoken is a research prototype: not a medical device, not a nurse-call system, not
+  a mind reader.
+- **Demo auto-speak.** With the default `UNSPOKEN_AUTO_SPEAK=1`, a reading the specialists already agree on is
+  spoken without a confirmation, and it is audited as such. Lip-only, ambiguous and corrected readings always wait
+  for the person.
+- **What the numbers measure:**
+  - The lips + voice result uses GRID, a fixed 51-word grammar.
+  - The held-out coordinator tasks come from the same task generator as the eval set.
+  - EEG is recorded replay only.
+- **Where the gaps are:** every known gap is listed in [TECHNICAL_VERBOSE §10](docs/TECHNICAL_VERBOSE.md) and
+  next to each number in RESULTS.
+- **Where it runs:** the UI runs on your laptop, and the agents run on an NVIDIA GPU on
+  [Brev](https://brev.nvidia.com), reached through an SSH tunnel. An Apple-Silicon Mac also works (Metal +
+  Ollama).
 
 ---
 
