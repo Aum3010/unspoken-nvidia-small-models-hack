@@ -10,6 +10,8 @@ feeds the coordinator. Times are client round trips to each service on 127.0.0.1
   2. together    every agent at once: one closed loop per agent, all running concurrently (GPU sampled)
   3. end to end  through the gateway, like one real message: voice + lip clip sent together -> evidence and
                  the coordinator's plan -> select -> confirm -> policy gate -> speech audio
+  4. voice wait  from the end of an utterance (700 ms of silence) until its evidence is in the session:
+                 sent at that moment (as before) vs early decode (sent at 350 ms of silence, committed at 700 ms)
 
 Writes evaluations/results/latency_brev.json and prints a markdown table.
 """
@@ -172,6 +174,27 @@ async def phase_end_to_end(a: Agents, n: int) -> dict:
     return out
 
 
+async def phase_voice_wait(a: Agents, n: int) -> dict:
+    g, normal, early = URL["gateway"], [], []
+    for k in range(n):
+        wav = a.wavs[k % len(a.wavs)]
+        t = time.perf_counter()  # the 700 ms of silence has just passed
+        (await a.c.post(f"{g}/api/bench-n{k}-{uuid.uuid4().hex[:6]}/capture/audio", files={"audio": ("clip.wav", wav, "audio/wav")})).raise_for_status()
+        normal.append((time.perf_counter() - t) * 1000)
+        sid = f"bench-e{k}-{uuid.uuid4().hex[:6]}"
+        t_early = time.perf_counter()  # 350 ms of silence: sent early
+        r = await a.c.post(f"{g}/api/{sid}/capture/audio/early", files={"audio": ("clip.wav", wav, "audio/wav")})
+        r.raise_for_status()
+        await asyncio.sleep(max(0.0, 0.35 - (time.perf_counter() - t_early)))
+        t = time.perf_counter()  # 700 ms of silence: commit
+        (await a.c.post(f"{g}/api/{sid}/capture/audio/commit", json={"early_id": r.json()["early_id"]})).raise_for_status()
+        early.append((time.perf_counter() - t) * 1000)
+    out = {"sent_at_700ms": stats(normal), "early_decode": stats(early)}
+    for k, v in out.items():
+        print(f"  voice    {k:<14} {v}", flush=True)
+    return out
+
+
 async def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--n", type=int, default=20)
@@ -195,7 +218,10 @@ async def main():
         together = await phase_together(a, args.n)
         print("3) one message end to end, through the gateway", flush=True)
         e2e = await phase_end_to_end(a, args.n)
+        print("4) voice: end of utterance -> evidence in the session", flush=True)
+        voice_wait = await phase_voice_wait(a, args.n)
     res = {"gpu": gpu, "n": args.n, "date": time.strftime("%Y-%m-%d"), "alone": alone, "together": together, "end_to_end": e2e,
+           "voice_wait_after_utterance": voice_wait,
            "inputs": {"voice": "Kokoro af_heart speaking the 20 phrases", "lips": "12 GRID videos (3 s, 25 fps)", "eeg": f"BNCI {subject}, one letter",
                       "coordinator": "2 candidates, ambiguous audio + proposed lip"}}
     Path(args.out).write_text(json.dumps(res, indent=2))

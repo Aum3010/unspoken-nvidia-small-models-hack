@@ -250,25 +250,23 @@ def screen_evidence(ev: Evidence) -> str | None:
     return None
 
 
-async def _forward_capture(s: Session, service: str, field: str, upload: UploadFile, label: str, extra: dict | None = None):
-    data = await upload.read()
-    s.trace(service, f"{label} received", f"{len(data) / 1024:.0f} KB · processing", level="pending")
+async def _infer(s: Session, service: str, field: str, filename: str, data: bytes, content_type: str, extra: dict | None = None) -> Evidence:
+    async with httpx.AsyncClient(timeout=120) as client:
+        r = await client.post(f"{service_url(service)}/infer", files={field: (filename, data, content_type)},
+                              data={"session_id": s.id, **(extra or {})})
+    if r.status_code != 200:
+        raise HTTPException(502, f"{service} error: {r.text[:200]}")
+    return Evidence(**r.json())
+
+
+async def _unavailable(s: Session, service: str, exc: Exception):
+    s.timeline = [t for t in s.timeline if t["level"] != "pending"]
+    s.trace(service, f"{service} unavailable", f"{type(exc).__name__}. The board is still available.", level="error")
     await push(s)
-    try:
-        async with httpx.AsyncClient(timeout=120) as client:
-            r = await client.post(f"{service_url(service)}/infer",
-                                  files={field: (upload.filename or field, data, upload.content_type or "application/octet-stream")},
-                                  data={"session_id": s.id, **(extra or {})})
-        if r.status_code != 200:
-            raise HTTPException(502, f"{service} error: {r.text[:200]}")
-        ev = Evidence(**r.json())
-    except HTTPException:
-        raise
-    except Exception as exc:
-        s.timeline = [t for t in s.timeline if t["level"] != "pending"]
-        s.trace(service, f"{service} unavailable", f"{type(exc).__name__}. The board is still available.", level="error")
-        await push(s)
-        raise HTTPException(503, f"{service} unavailable")
+    raise HTTPException(503, f"{service} unavailable")
+
+
+async def _apply_evidence(s: Session, service: str, ev: Evidence, label: str) -> dict:
     s.timeline = [t for t in s.timeline if t["level"] != "pending"]
     ignored = screen_evidence(ev)
     if ignored:
@@ -294,6 +292,19 @@ async def _forward_capture(s: Session, service: str, field: str, upload: UploadF
     return {"event": ev.model_dump(), "state": s.snapshot()}
 
 
+async def _forward_capture(s: Session, service: str, field: str, upload: UploadFile, label: str, extra: dict | None = None):
+    data = await upload.read()
+    s.trace(service, f"{label} received", f"{len(data) / 1024:.0f} KB · processing", level="pending")
+    await push(s)
+    try:
+        ev = await _infer(s, service, field, upload.filename or field, data, upload.content_type or "application/octet-stream", extra)
+    except HTTPException:
+        raise
+    except Exception as exc:
+        await _unavailable(s, service, exc)
+    return await _apply_evidence(s, service, ev, label)
+
+
 @app.post("/api/{sid}/capture/lip")
 async def capture_lip(sid: str, video: UploadFile = File(...)):
     return await _forward_capture(get_session(sid), "vsr", "video", video, "Mouth clip")
@@ -302,6 +313,57 @@ async def capture_lip(sid: str, video: UploadFile = File(...)):
 @app.post("/api/{sid}/capture/audio")
 async def capture_audio(sid: str, audio: UploadFile = File(...), enhance: bool = Form(True)):
     return await _forward_capture(get_session(sid), "audio", "audio", audio, "Voice clip", {"enhance": str(enhance).lower()})
+
+
+# Early voice decode. The browser cuts an utterance after 700 ms of silence; at 350 ms it sends the clip here
+# and the voice agent starts decoding it *without* touching the session. If the person speaks again, the browser
+# discards it and keeps recording (the utterance is never split differently than before). At 700 ms it commits,
+# and the result, usually already finished, is applied exactly like a normal capture (same noise screening).
+# The decode and the upload overlap the silence the person waits through anyway, instead of following it.
+_early: dict[str, dict[str, asyncio.Task]] = {}
+EARLY_MAX = 4  # per session; older ones are dropped
+
+
+@app.post("/api/{sid}/capture/audio/early")
+async def capture_audio_early(sid: str, audio: UploadFile = File(...)):
+    s = get_session(sid)
+    data = await audio.read()
+    pending = _early.setdefault(sid, {})
+    while len(pending) >= EARLY_MAX:
+        pending.pop(next(iter(pending))).cancel()
+    early_id = f"early_{time.time_ns():x}"
+    pending[early_id] = asyncio.create_task(_infer(s, "audio", "audio", audio.filename or "clip.wav", data, audio.content_type or "audio/wav"))
+    return {"early_id": early_id}
+
+
+class EarlyBody(BaseModel):
+    early_id: str
+
+
+@app.post("/api/{sid}/capture/audio/commit")
+async def capture_audio_commit(sid: str, body: EarlyBody):
+    s = get_session(sid)
+    task = _early.get(sid, {}).pop(body.early_id, None)
+    if task is None:
+        raise HTTPException(404, "unknown or expired early clip")
+    if not task.done():
+        s.trace("audio", "Voice clip received", "decoding (started during the pause)", level="pending")
+        await push(s)
+    try:
+        ev = await task
+    except HTTPException:
+        raise
+    except Exception as exc:
+        await _unavailable(s, "audio", exc)
+    return await _apply_evidence(s, "audio", ev, "Voice clip")
+
+
+@app.post("/api/{sid}/capture/audio/discard")
+async def capture_audio_discard(sid: str, body: EarlyBody):
+    task = _early.get(sid, {}).pop(body.early_id, None)
+    if task:
+        task.cancel()
+    return {"discarded": task is not None}
 
 
 class EegCapture(BaseModel):

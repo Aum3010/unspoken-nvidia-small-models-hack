@@ -166,10 +166,20 @@ export function GlassApp() {
   useEffect(() => {
     let stop: (() => void) | null = null
     let alive = true
+    // early decode: the clip goes out at 350 ms of quiet and is committed at the usual 700 ms
+    let early: Promise<string | null> | null = null
     startVoice({
       canCapture: () => canCapture('audio'),
       onSpeech: (on) => { setHearing(on); if (on) E.fire('voice', .7, 'HEARING') },
-      onClip: (b) => { E.fire('voice', 1, 'DECODING'); sendClip('audio', () => api.captureAudio(b, true)) },
+      onEarly: (b) => { early = api.captureAudioEarly(b).then((r) => r.early_id).catch(() => null) },
+      onEarlyCancel: () => { const p = early; early = null; p?.then((id) => { if (id) api.discardAudio(id).catch(() => undefined) }) },
+      onClip: (b, _ms, wasEarly) => {
+        E.fire('voice', 1, 'DECODING')
+        const p = wasEarly ? early : null
+        early = null
+        // the commit is the voice agent's one clip in flight, like a normal capture
+        sendClip('audio', () => (p ? p.then((id) => (id ? api.commitAudio(id) : api.captureAudio(b, true))) : api.captureAudio(b, true)))
+      },
     }).then((f) => { if (alive) { stop = f; setMic('on') } else f() }).catch(() => setMic('off'))
     return () => { alive = false; stop?.() }
   }, [run, canCapture])
