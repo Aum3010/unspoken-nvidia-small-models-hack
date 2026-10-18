@@ -114,7 +114,7 @@ async def main():
                     s = await state(s_id)
                     shown = s["shown_candidate_ids"] or []
                     first_ms = int((time.perf_counter() - t0) * 1000)
-                    s2 = await settle(s_id, timeout=25)
+                    s2 = await settle(s_id, timeout=5)
                     check("rules_question", st == "ambiguous" and bool(s.get("plan")) and bool(shown) and not s["spoken"] and not s2["spoken"],
                           f"status={st} question on screen after {first_ms} ms: {s.get('plan', {}).get('name')} {shown}; "
                           f"final plan by={(s2.get('plan') or {}).get('by')} spoken={len(s2['spoken'])}")

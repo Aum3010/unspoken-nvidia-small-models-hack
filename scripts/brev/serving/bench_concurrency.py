@@ -15,6 +15,9 @@ dispatched through a pool of `level` workers. `same_as_first` is the share of re
 the first level's answer for the same task (batching changes numerics, temperature 0 does not make it invariant).
 `--measured auto` = max(20, 2 x level) (the max-capacity ramp). /metrics is scraped at the start and at the end.
 `--stop-file`: if that file appears (the max-capacity watchdog writes it), the level stops early and is marked.
+`--reference`: first send every task once, one at a time; each level then reports `expected_valid_rate` (the
+reference validity of the same tasks) and `valid_regressions` (calls valid alone but invalid under load).
+`--stop-rules`: end the ramp after a level with > 2% errors/timeouts or p95 > 5 s (the max-capacity limits).
 Writes <out>.json and <out>.md (and <out>.png unless --no-plot). Read-only: it never restarts anything.
 """
 
@@ -56,6 +59,7 @@ def load_requests() -> list[coord.PlanRequest]:
 
 
 FIRST: dict[str, str] = {}   # task -> the first level's answer (tool + arguments), for same_as_first
+REF_VALID: dict[str, bool] = {}   # task -> valid when sent alone (--reference)
 
 
 def body(req: coord.PlanRequest) -> dict:
@@ -146,7 +150,7 @@ async def run_level(c: httpx.AsyncClient, reqs: list[coord.PlanRequest], level: 
             req = reqs[i % len(reqs)]
             rows[i] = await one(c, req) | {"task": req.message_id}
 
-    t0 = time.perf_counter()
+    t0, t_start = time.perf_counter(), time.time()
     await asyncio.gather(*[worker() for _ in range(level)])
     wall = time.perf_counter() - t0
     done = [r for r in rows if r is not None]
@@ -158,6 +162,11 @@ async def run_level(c: httpx.AsyncClient, reqs: list[coord.PlanRequest], level: 
     s = summarize(done)
     s["same_as_first"] = round(same / len(compared), 4) if compared else None
     s["same_as_first_n"] = len(compared)
+    if REF_VALID:
+        ok = [r for r in done if r["ok"] and r["task"] in REF_VALID]
+        s["expected_valid_rate"] = round(sum(REF_VALID[r["task"]] for r in ok) / len(ok), 4) if ok else None
+        s["valid_regressions"] = sum(REF_VALID[r["task"]] and not r.get("valid") for r in ok)
+    s["t_start"], s["t_end"] = round(t_start, 2), round(time.time(), 2)
     s |= {"level": level, "measured_requested": n, "wall_s": round(wall, 2),
           "req_per_s": round(len(done) / wall, 2) if wall else None,
           "out_tok_per_s": round(s["out_tokens_sum"] / wall, 1) if wall else None,
@@ -259,6 +268,8 @@ async def main():
     ap.add_argument("--stop-file", default=None)
     ap.add_argument("--label", default="")
     ap.add_argument("--no-plot", action="store_true")
+    ap.add_argument("--reference", action="store_true")
+    ap.add_argument("--stop-rules", action="store_true")
     args = ap.parse_args()
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -276,6 +287,16 @@ async def main():
         res["server_args"] = f"unknown ({exc})"
     async with httpx.AsyncClient(timeout=TIMEOUT_S + 5, limits=limits) as c:
         res["metrics_start"] = await scrape(c)
+        if args.reference:
+            print(f"reference: {len(reqs)} tasks, one at a time", flush=True)
+            for req in reqs:
+                r = await one(c, req)
+                if r["ok"]:
+                    REF_VALID[req.message_id] = bool(r.get("valid"))
+                    if r.get("answer"):
+                        FIRST[req.message_id] = r["answer"]
+            res["reference"] = {"n": len(REF_VALID), "valid_rate": round(sum(REF_VALID.values()) / len(REF_VALID), 4) if REF_VALID else None}
+            print(f"  reference valid rate {res['reference']['valid_rate']}", flush=True)
         for level in args.levels:
             if stop and stop.exists():
                 res["stopped_before"] = level
@@ -292,6 +313,17 @@ async def main():
             print(f"  p50/p95 {lv['latency_ms']['p50']}/{lv['latency_ms']['p95']} ms  ttft p50 {lv['ttft_ms']['p50']}  "
                   f"{lv['req_per_s']} req/s  valid {lv['valid_rate']}  err {lv['error_rate']}", flush=True)
             out.with_suffix(".json").write_text(json.dumps(res, indent=1))  # partial results survive a crash
+            reason = None
+            if lv["stopped_early"]:
+                reason = "watchdog: " + (stop.read_text().strip() if stop and stop.exists() else "stop file")
+            elif args.stop_rules and (lv["error_rate"] or 0) > 0.02:
+                reason = f"error/timeout rate {100 * lv['error_rate']:.1f}% > 2%"
+            elif args.stop_rules and (lv["latency_ms"]["p95"] or 0) > 5000:
+                reason = f"p95 {lv['latency_ms']['p95']:.0f} ms > 5 s"
+            if reason:
+                res["stop"] = {"level": level, "reason": reason}
+                print(f"  STOP at level {level}: {reason}", flush=True)
+                break
         res["metrics_end"] = await scrape(c)
     if "error" not in res["metrics_start"] and "error" not in res["metrics_end"]:
         res["metrics_delta"] = delta(res["metrics_start"], res["metrics_end"])
