@@ -89,7 +89,9 @@ def infer(audio: UploadFile = File(...), session_id: str = Form("demo-session"),
     hyps = [Hypothesis(text=p["text"], score=p["score"], score_kind=f"{METHOD} (Nemotron RNNT, per-token log-likelihood ratio), uncalibrated")
             for p in r["top3"]]
     if r["decision"] == "candidate":
-        return _evidence(session_id, hyps, [], "proposed", quality, prov, t0)
+        # accepted: it passed the score and margin gates, so the runners-up are not plausible readings;
+        # one option keeps the question as small as possible (they stay in quality.top3 for the audit)
+        return _evidence(session_id, hyps[:1], [], "proposed", quality, prov, t0)
     # unknown (low score, small margin, negation): offer the top 3 so the person chooses, never pick for them
     return _evidence(session_id, hyps, ["low_word_confidence"], "ambiguous", quality, prov, t0)
 
