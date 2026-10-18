@@ -98,6 +98,7 @@ export interface SessionState {
   plan: ToolCall | null
   shown_candidate_ids: string[]
   auto_speak_candidate_id?: string | null
+  auto_speak_in_ms?: number | null
   spoken: SpokenItem[]
   timeline: TimelineItem[]
   settings: {

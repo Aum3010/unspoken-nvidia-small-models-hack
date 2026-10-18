@@ -20,7 +20,7 @@ from pydantic import BaseModel
 from services.gateway.state import Session, TransitionError
 from shared.confirmation import PolicyViolation, authorize_speech, phrase_preload_token, sign
 from shared.provenance import MODEL_LEDGER, ROOT, service_url
-from shared.schemas import ALLOWED_CONFIRMATION_METHODS, Candidate, Evidence, ToolCall
+from shared.schemas import ALLOWED_CONFIRMATION_METHODS, Candidate, Evidence, ToolCall, now_ms
 from shared.service import make_app
 
 app = make_app("unspoken-gateway")
@@ -142,6 +142,9 @@ _background: set[asyncio.Task] = set()
 # agent accepted it, or lips and voice agree on it) the rules decide that case exactly as Nemotron is asked to, so the
 # person does not wait for the model and the GPU does not run it. UNSPOKEN_LLM_FOR_ACCEPTED=1 restores the model call.
 LLM_FOR_ACCEPTED = os.environ.get("UNSPOKEN_LLM_FOR_ACCEPTED", "0") != "0"
+# Optional pause before an accepted reading is auto-spoken, shown as a countdown; No or a shake in that time
+# rejects it and nothing is spoken. 0 (the default) speaks at once, as before.
+AUTO_SPEAK_DELAY_MS = int(os.environ.get("UNSPOKEN_AUTO_SPEAK_DELAY_MS", "0") or 0)
 
 
 def _accepted_reading(s: Session):
@@ -164,9 +167,12 @@ def _schedule(coro):
 
 
 async def _auto_speak(s: Session, message_id: str, candidate_id: str):
-    """Demo auto-speak: say the coordinator's final reading, unless the person moved on or said No meanwhile."""
+    """Demo auto-speak: say the accepted reading, unless the person moved on or said No meanwhile."""
+    if AUTO_SPEAK_DELAY_MS > 0:
+        await asyncio.sleep(AUTO_SPEAK_DELAY_MS / 1000)
     m = s.message
-    if m.id != message_id or m.status not in ("proposed", "ambiguous", "clarifying"):
+    if m.id != message_id or m.status not in ("proposed", "ambiguous", "clarifying") \
+            or s.auto_speak_candidate_id != candidate_id:
         return
     ev = s.auto_confirm(candidate_id)
     try:
@@ -259,6 +265,7 @@ def apply_plan(s: Session, call: ToolCall, quiet: bool = False):
     # for the person's Yes/No.
     if call.name == "ask_confirmation" and s.settings["auto_speak"] and accepted and s.shown_candidate_ids == [accepted.id]:
         s.auto_speak_candidate_id = accepted.id
+        s.auto_speak_at = now_ms() + AUTO_SPEAK_DELAY_MS if AUTO_SPEAK_DELAY_MS > 0 else None
         _schedule(_auto_speak(s, m.id, accepted.id))
 
 

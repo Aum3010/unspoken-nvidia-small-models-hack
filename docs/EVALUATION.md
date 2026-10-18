@@ -57,6 +57,46 @@ Across six Brev runs of the default prompt (including the MTP and cache-mode ser
 
 **Held-out** (44 tasks: seed 2026, without the tasks that also occur in the eval set; 10 categories; `coordinator_heldout_brev.json`): Nemotron alone **0.939**, deployed **0.985**, rules 1.000, 0% unsafe. The whole gain is `none_of_these` (0.67 → 1.00); Nemotron decides 86% of the tasks itself. Compact mode: 0.894 / 0.955 (`coordinator_heldout_compact_brev.json`). Write-up: [BOUNTIES.md](BOUNTIES.md) §2. Most wrong actions of the deployed coordinator are `ignore_input` on real input: a person who failed twice (6/6; should switch input method), an injection next to a genuine request, uncalibrated gaze, a clear negated reading.
 
+**Optional validator rules (flags off by default; `coordinator_validator_v2_*.json`, Brev, 2026-10-18):**
+- `UNSPOKEN_VALIDATOR_NEGATION=1`: reject a `propose_correction` that adds or removes a negation (the voice
+  agent's own check, `asr_eval/harness/text.py`).
+- `UNSPOKEN_VALIDATOR_IGNORE_HISTORY=1`: reject `ignore_input` after two failed tries, after a "none of these" in
+  the last 3 turns, or when a specialist accepted a lip/audio reading with no quality flags.
+- A rejected call falls back to the rules.
+
+Paired measurement (`validator_ab.py`): one model call per task, then each setting re-validates that same call,
+so the differences are the validator's alone. Deployed reward:
+
+| Setting | Eval (72) | Held-out (44) | Unsafe |
+|---|---:|---:|---:|
+| Nemotron alone (no validator) | 0.926 | 0.932 | 0 |
+| Validator as today (flags off) | 0.954 | 0.977 | 0 |
+| + negation rule | 0.954 | 0.977 | 0 |
+| + ignore-history rule | **0.995** | **0.985** | 0 |
+| both | **0.995** | **0.985** | 0 |
+
+Per category, deployed, flags off → both on:
+
+| Category | Eval | Held-out |
+|---|---|---|
+| `repeated_failure` | **0.67 → 1.00** | — (not in held-out) |
+| `none_of_these` | 1.00 → 1.00 | 1.00 → 1.00 |
+| `negation_kept` | **0.89 → 1.00** | 1.00 → 1.00 |
+| `misread` | 0.94 → 1.00 | 0.94 → 1.00 |
+| `prompt_injection` | 0.94 → 0.94 | 0.83 → 0.83 |
+| `gaze_uncalibrated` | 1.00 → 1.00 | 1.00 → 1.00 |
+
+- **The negation rule changed nothing measured:** in these runs the model never dropped a negation. The
+  `negation_kept` misses were `ignore_input` on a negated reading, which the ignore-history rule catches.
+  It stays as a guard.
+- **Nemotron decides less with the ignore-history rule:** 92% → 79% of eval tasks (86% → 84% held-out); the rest
+  fall back to the rules.
+- **Unpaired runs** (`run_local.py`, flags set in the environment; each policy calls the model again), deployed:
+  - eval 0.944 → 0.982;
+  - held-out 0.977 → 0.985;
+  - the one category that dropped (`gaze_uncalibrated` 1.00 → 0.94, eval) is model run-to-run variation: the paired
+    run shows 1.00 for both settings.
+
 **Speed variants (same 72 tasks, Brev):**
 
 | Variant | Raw | Deployed | p50 | Output tokens | Adopted |
@@ -80,10 +120,13 @@ Both raw models fail on the same thing: history. After two failed retakes they a
 
 ## 5. Confirmation safety and end-to-end exactness
 
-- **Unit tests** (`pytest evaluations/safety_tests`): **28 pass** (2026-10-18, `demo-final`):
+- **Unit tests** (`pytest evaluations/safety_tests`): **43 pass** (2026-10-18, `demo-final`):
   - 18 in `test_confirmation.py`: policy gate and state machine;
   - 7 in `test_auto_speak.py`: auto-speak only for accepted readings;
-  - 3 in `test_vsr_phrase_scoring.py`: an impossible phrase-list alignment never ranks first.
+  - 4 in `test_auto_speak_delay.py`: with the countdown flag, No inside the window speaks nothing, no answer
+    speaks once, and a Yes is not doubled;
+  - 3 in `test_vsr_phrase_scoring.py`: an impossible phrase-list alignment never ranks first;
+  - 11 in `test_validator_flags.py`: the optional validator rules, both on and off.
 - **Live attacks** (`evaluations/test_cases/e2e_exactness.py`, against the running stack): **7/7 blocked**:
   5 unconfirmed-speech probes, a forged TTS token, and a non-explicit confirmation method (`e2e.json`).
 - **Exactness** (same script): 10 phrases are put on the board → confirmed → spoken by Kokoro → re-transcribed by

@@ -291,6 +291,20 @@ export function GlassApp() {
     }
   }, [state])
 
+  /* ---------- optional auto-speak countdown (UNSPOKEN_AUTO_SPEAK_DELAY_MS) ---------- */
+  const [countdown, setCountdown] = useState<{ key: string; left: number } | null>(null)
+  const autoSpeakMs = state?.auto_speak_in_ms ?? null
+  const countdownKey = autoSpeakMs !== null && PENDING.includes(state?.message.status ?? '') ? `${state?.auto_speak_candidate_id}:${autoSpeakMs}` : null
+  useEffect(() => {
+    if (countdownKey === null || autoSpeakMs === null) return
+    const deadline = performance.now() + autoSpeakMs
+    const tick = () => setCountdown({ key: countdownKey, left: Math.max(0, deadline - performance.now()) })
+    const first = window.setTimeout(tick, 0)
+    const id = window.setInterval(tick, 250)
+    return () => { window.clearTimeout(first); window.clearInterval(id) }
+  }, [countdownKey, autoSpeakMs])
+  const autoSpeakLeft = countdown && countdown.key === countdownKey ? countdown.left : null
+
   /* ---------- session state -> ink, bubbles, caption ---------- */
   const lastSpoken = useRef<string | null>(null)
   useEffect(() => {
@@ -333,6 +347,14 @@ export function GlassApp() {
       E.caption(state.plan.rationale, `try ${state.plan.arguments.method ?? 'another way'}`)
     }
   }, [state, calibrating])
+
+  // the countdown caption, on top of the one above, while a delayed auto-speak is pending
+  useEffect(() => {
+    if (autoSpeakLeft === null || !state || calibrating) return
+    const shown = shownCandidates(state)
+    if (shown.length && state.auto_speak_candidate_id === shown[0].id)
+      E.caption(`Speaking in ${Math.ceil(autoSpeakLeft / 1000)} s…`, 'No or shake to stop it')
+  }, [autoSpeakLeft, state, calibrating])
 
   /* ---------- actions: from the rail, bubbles, blinks, nods and keys ---------- */
   const confirm = useCallback((how: E.How) => run(api.confirm(METHOD[how]).then((r) => play(r.audio_url, r.text, r.phrase_audio_id))), [run, play])

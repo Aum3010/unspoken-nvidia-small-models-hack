@@ -76,6 +76,9 @@ mic ──── voice detector → wav clip ─┘─────────�
 | `UNSPOKEN_LLM_FOR_ACCEPTED` | `0` | gateway | `1` = call Nemotron for accepted readings too (no rules-only fast path) |
 | `UNSPOKEN_HOST_LABEL` | `this device` (`NVIDIA Brev` from `start_app.sh`) | gateway `/api/health` | where clips are processed; any value other than `this device` makes the page say clips go there |
 | `UNSPOKEN_COORD_COMPACT` | `0` | coordinator | `1` = schema-constrained short JSON answers (faster, less accurate; §3.3) |
+| `UNSPOKEN_VALIDATOR_NEGATION` | `0` | coordinator | `1` = reject a correction that adds or removes a negation (§3.3) |
+| `UNSPOKEN_VALIDATOR_IGNORE_HISTORY` | `0` | coordinator | `1` = reject `ignore_input` after two failed tries, a recent "none of these", or on an accepted clean reading (§3.3) |
+| `UNSPOKEN_AUTO_SPEAK_DELAY_MS` | `0` | gateway | > 0 = a countdown before an accepted reading is auto-spoken; No or a shake cancels it (§4) |
 | `UNSPOKEN_LLM_BACKEND`, `_BASE_URL`, `_MODEL`, `_TIMEOUT` | `ollama`, `http://127.0.0.1:11434`, `nemotron-3.5-lightning:30b-a3b`, `20` | coordinator | the model server; `start_app.sh` sets `openai` + vLLM on :8001 |
 | `UNSPOKEN_VSR_PHRASES` | empty | lip agent | optional closed phrase list (off) |
 | `UNSPOKEN_VSR_FREE_TEXT` | `0` | lip agent | `1` = free-text beam search when no recorded phrase matches |
@@ -199,6 +202,14 @@ mic ──── voice detector → wav clip ─┘─────────�
     within ±2 words, only lip/audio evidence readings;
   - **`ignore_input`:** rejected if a candidate is supported by 2 modalities, or is not a lip/audio reading.
   - An invalid call falls back to the deterministic policy.
+  - **Optional rules (flags, off by default):**
+    - `UNSPOKEN_VALIDATOR_NEGATION`: a correction may not add or remove a negation. It uses asr_eval's
+      normalisation and negation words.
+    - `UNSPOKEN_VALIDATOR_IGNORE_HISTORY`: no `ignore_input` after two failed tries, after a recent "none of
+      these", or on an accepted lip/audio reading with no quality flags.
+    - Paired NeMo Gym, deployed: eval **0.954 → 0.995**, held-out **0.977 → 0.985**, 0 unsafe.
+    - It fixes `repeated_failure` (0.67 → 1.00) and `negation_kept` (0.89 → 1.00).
+    - The negation rule changed nothing measured. See EVALUATION §4.
 - **Deterministic policy:** applied instantly to every new evidence (quietly), so options appear at once; Nemotron
   refines it in the background.
 - **Evaluation** (NeMo Gym environment, 72 tasks, Brev, 2026-10-18,
@@ -293,6 +304,15 @@ stitched to it. A lip and a voice clip pair into one message when they are withi
 scheduled at once; it auto-confirms the reading as `system` and speaks it through the same policy gate with
 `demo_auto=True`. The snapshot's `auto_speak_candidate_id` tells the page which caption to show ("Understanding
 you…" or "Did you mean this?"). Tests: `evaluations/safety_tests/test_auto_speak.py`.
+
+**Optional countdown** (`UNSPOKEN_AUTO_SPEAK_DELAY_MS`, default 0 = speak at once):
+- `_auto_speak` waits that long, then speaks only if the same message is still pending with the same accepted
+  reading.
+- The snapshot carries `auto_speak_in_ms` (relative, so clock skew does not matter), and the page shows
+  "Speaking in N s… No or shake to stop it".
+- No or a shake (reject) inside the window means nothing is spoken. A Yes inside the window speaks once, by the
+  person.
+- Tests: `test_auto_speak_delay.py`.
 
 **Pre-rendered phrase audio** (`POST /api/{sid}/phrase_audio`, `GET /api/phrase_audio/{id}`):
 - The fixed phrases are rendered once per voice and rate and preloaded by the page: the voice agent's 20, the
@@ -606,7 +626,8 @@ The lip enrollment adds stored features, not parameters.
 
 | What | Command | Result file |
 |---|---|---|
-| Safety tests (policy gate, auto-speak, phrase scoring) | `pytest evaluations/safety_tests`: **28 tests** = 18 in `test_confirmation.py` + 7 in `test_auto_speak.py` + 3 in `test_vsr_phrase_scoring.py` | — |
+| Safety tests (policy gate, auto-speak, phrase scoring, validator flags) | `pytest evaluations/safety_tests`: **43 tests** = 18 `test_confirmation.py` + 7 `test_auto_speak.py` + 4 `test_auto_speak_delay.py` + 3 `test_vsr_phrase_scoring.py` + 11 `test_validator_flags.py` | — |
+| Validator flags, paired A/B | `evaluations/nemo_gym/validator_ab.py [--seed 2026 --distinct-from 7] --out <file>` | `coordinator_validator_v2_paired_{eval,heldout}.json`; unpaired: `coordinator_validator_v2_{eval,heldout}_{off,on}.json` |
 | Live attacks + exactness (needs the running stack) | `python evaluations/test_cases/e2e_exactness.py`: 7 attacks (5 unconfirmed-speech probes, a forged TTS token, a non-explicit method): 7/7 blocked on `demo-final`. Its exactness half (10 phrases spoken and re-transcribed) needs a free-text ASR; today's phrase-only voice agent cannot do it (EVALUATION §5) | `e2e.json` (2026-10-17, Whisper), `e2e_demo_final.json` |
 | Coordinator (NeMo Gym, 72 tasks; held-out 44) | `run_local.py --policies raw:<model> guarded deterministic` (held-out: `--seed 2026 --distinct-from 7 --out <file>`; `UNSPOKEN_COORD_COMPACT=1` for compact mode) | `coordinator_brev.json` (Brev); `coordinator_heldout_brev.json`, `coordinator_heldout_compact_brev.json` (held-out); `coordinator_mtp_brev.json`, `coordinator_compact_brev.json`, `coordinator_compact_mtp_brev.json` (A/B); `coordinator.json` (Mac, 60 tasks, older prompt) |
 | Lip speed vs accuracy | `evaluations/modality_baselines/vsr_speed_accuracy.py` | `vsr_speed_accuracy.json` |
@@ -627,8 +648,13 @@ The NeMo Gym data files (`data/*.jsonl`) embed the coordinator's prompt and tool
      (`test_auto_speak.py`).
    - It is scheduled immediately, so a No rarely arrives in time.
 2. **Coordinator overuses `ignore_input`.** A person who failed twice, a genuine request next to an injection,
-   and clear negated readings get dropped as noise (§3.3). The validator allows it.
-3. **The correction validator does not check negations.** It accepts "I don't need water" → "I need water".
+   and clear negated readings get dropped as noise (§3.3).
+   - The validator allows it by default.
+   - `UNSPOKEN_VALIDATOR_IGNORE_HISTORY=1` fixes the failed-twice and negated cases (eval 0.954 → 0.995), but not
+     the injection case.
+   - Off pending the team's decision.
+3. **The correction validator does not check negations** by default; `UNSPOKEN_VALIDATOR_NEGATION=1` adds the
+   check (no measured change: the model never dropped a negation in these runs).
 4. **Personal lip data in git, pending a consent decision.** `data/enroll/` holds encoder features of a real
    person's recordings, force-added past the `/data/` gitignore rule, while `enroll.py` says they "are not
    uploaded". History is not rewritten; the note and the removal commands are in
