@@ -1,12 +1,19 @@
 #!/usr/bin/env bash
 # One-time setup on Apple Silicon: Python env, pinned upstream repos, checkpoints, datasets, web deps.
+# Also runs on Linux + NVIDIA (e.g. Brev, for benchmarks): the MLX packages are skipped there.
+# Options: WITH_GRID=0|1, GRID_SPEAKERS="s1 s2 ...", WITH_WEB=0|1, WITH_OLLAMA=0|1
 set -euo pipefail
 cd "$(dirname "$0")/.."
 CHAPLIN_COMMIT=7aee1f8fca776ce4f63690063310b53573b7d804
 
 echo "== Python 3.12 env"
 uv venv --python 3.12 .venv 2>/dev/null || true
-uv pip install --python .venv -r requirements.txt
+if [[ "$(uname)" == "Darwin" ]]; then
+  uv pip install --python .venv -r requirements.txt
+else  # MLX (Whisper/Kokoro/LLM on Metal) is Apple-only; the VSR, EEG and coordinator code paths do not need it
+  grep -v -E '^mlx' requirements.txt > .venv/requirements-linux.txt
+  uv pip install --python .venv -r .venv/requirements-linux.txt
+fi
 
 echo "== Chaplin (Auto-AVSR wrapper) @ $CHAPLIN_COMMIT"
 mkdir -p third_party
@@ -42,14 +49,30 @@ for i in 1 2 3 4 5 6 7 8; do
 done; wait
 
 if [[ "${WITH_GRID:-1}" == "1" ]]; then
-  echo "== GRID corpus speakers 1-2 + alignments (CC BY 4.0, evaluation only)"
+  GRID_SPEAKERS=${GRID_SPEAKERS:-s1 s2}
+  echo "== GRID corpus $GRID_SPEAKERS + alignments (CC BY 4.0)"
   mkdir -p data/grid
-  for f in s1 s2 alignments; do
-    [[ -d data/grid/$f ]] || { curl -sSL -o data/grid/$f.zip "https://zenodo.org/records/3625687/files/$f.zip?download=1" && unzip -q -o data/grid/$f.zip -d data/grid && rm data/grid/$f.zip; }
-  done
+  # speaker videos from the Sheffield GRID site (~30x faster than Zenodo here); Zenodo is the fallback
+  for f in alignments $GRID_SPEAKERS; do
+    [[ -d data/grid/$f ]] || {
+      { [[ $f != alignments ]] && curl -sSLf -o data/grid/$f.zip "https://spandh.dcs.shef.ac.uk/gridcorpus/$f/video/$f.mpg_vcd.zip"; } ||
+        curl -sSL -o data/grid/$f.zip "https://zenodo.org/records/3625687/files/$f.zip?download=1"
+      unzip -q -o data/grid/$f.zip -d data/grid && rm data/grid/$f.zip; } &
+  done; wait
   rm -rf data/grid/__MACOSX
+  # Zenodo's alignment folders do not line up with the speaker videos for many speakers;
+  # when a speaker's clips have no matching transcripts, use that speaker's Sheffield alignments
+  for f in $GRID_SPEAKERS; do
+    first=$(ls data/grid/$f | grep mpg | head -1 | sed 's/.mpg$//')
+    if [[ -n "$first" && ! -f data/grid/alignments/$f/$first.align ]]; then
+      mkdir -p data/grid/tmp_$f && curl -sSLf "https://spandh.dcs.shef.ac.uk/gridcorpus/$f/align/$f.tar" | tar x -C data/grid/tmp_$f &&
+        rm -rf data/grid/alignments/$f && mv data/grid/tmp_$f/align data/grid/alignments/$f && rm -rf data/grid/tmp_$f &&
+        echo "  $f: alignments replaced with the Sheffield set"
+    fi
+  done
 fi
 
+if [[ "${WITH_WEB:-1}" == "1" ]]; then
 echo "== Web app + on-device browser models"
 (cd web && npm install)
 mkdir -p web/public/mediapipe
@@ -60,9 +83,10 @@ cp -r web/node_modules/@mediapipe/tasks-vision/wasm web/public/mediapipe/
 mkdir -p web/public/models
 [[ -s web/public/models/mobileone_s0_gaze.onnx ]] || curl -sSL -o web/public/models/mobileone_s0_gaze.onnx \
   https://github.com/yakhyo/gaze-estimation/releases/download/weights/mobileone_s0_gaze.onnx
+fi
 
 echo "== Coordinator model (Ollama, Metal)"
-if command -v ollama >/dev/null; then ollama pull nemotron-3.5-lightning:30b-a3b; else echo "  install Ollama, or set UNSPOKEN_LLM_BACKEND=openai (see scripts/serve_coordinator_mlx.sh)"; fi
+if [[ "${WITH_OLLAMA:-1}" != "1" ]]; then echo "  skipped"; elif command -v ollama >/dev/null; then ollama pull nemotron-3.5-lightning:30b-a3b; else echo "  install Ollama, or set UNSPOKEN_LLM_BACKEND=openai (see scripts/serve_coordinator_mlx.sh)"; fi
 
 echo "== Pre-train EEG decoders on calibration runs"
 PYTHONPATH=$PWD .venv/bin/python -c "from services.eeg import p300; [p300.train_and_evaluate(s) for s in p300.available_subjects()]"

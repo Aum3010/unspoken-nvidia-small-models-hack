@@ -7,11 +7,11 @@
 # never camera frames, audio, or EEG. The UI must disclose cloud processing when this is on.
 set -euo pipefail
 MODEL=${MODEL:-nvidia/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-NVFP4}
-pip install -U "vllm>=0.11"
+command -v vllm >/dev/null || pip install -U "vllm>=0.11"
 exec vllm serve "$MODEL" \
   --host 0.0.0.0 --port "${PORT:-8001}" \
   --max-model-len 16384 \
-  --gpu-memory-utilization 0.90 \
+  --gpu-memory-utilization "${GPU_MEM_UTIL:-0.90}" \
   --enable-auto-tool-choice \
   --tool-call-parser qwen3_coder \
   --reasoning-parser nemotron_v3 \

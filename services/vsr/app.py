@@ -11,15 +11,18 @@ import base64
 import os
 import sys
 import time
+from pathlib import Path
 
 import cv2
 import numpy as np
 import torch
-from fastapi import File, Form, UploadFile
+from fastapi import File, Form, HTTPException, UploadFile
 
 from shared.provenance import ROOT
 from shared.schemas import Evidence, Hypothesis, Provenance
 from shared.service import Readiness, decode_video_rgb, make_app
+from services.vsr.enroll import EnrollmentStore
+from services.vsr.phrases import score_phrases, tokenize
 
 CHAPLIN = ROOT / "third_party" / "chaplin"
 sys.path.insert(0, str(CHAPLIN))
@@ -30,8 +33,15 @@ BEAM = int(os.environ.get("UNSPOKEN_VSR_BEAM", 12))
 # Mean absolute frame-to-frame change of the 88x88 mouth crop below which we
 # flag "low_mouth_motion" (a still face makes Auto-AVSR hallucinate fluent text).
 MOTION_THRESHOLD = float(os.environ.get("UNSPOKEN_VSR_MOTION_THRESHOLD", 2.2))
+# Optional closed phrase list: its best matches are added as candidates (see services/vsr/phrases.py).
+PHRASES_PATH = os.environ.get("UNSPOKEN_VSR_PHRASES", "")
+PHRASE_TOP = 3
+# Optional fine-tuned decoder + CTC head (scripts/finetune_vsr_grid.py). The GRID one only knows GRID words.
+DECODER_PATH = os.environ.get("UNSPOKEN_VSR_DECODER", "")
 
 app = make_app("unspoken-vsr")
+enrolled = EnrollmentStore()
+SUGGESTIONS = Path(__file__).with_name("patient_phrases.txt")
 
 
 def _device() -> torch.device:
@@ -56,6 +66,15 @@ def _load():
         str(models / "language_models/lm_en_subword/model.json"),
         penalty=0.0, ctc_weight=0.1, lm_weight=0.3, beam_size=BEAM, device=dev,
     )
+    if DECODER_PATH:
+        ck = torch.load(DECODER_PATH, map_location="cpu")
+        avsr.model.decoder.load_state_dict(ck["decoder"])
+        avsr.model.ctc.load_state_dict(ck["ctc"])
+    phrases = []
+    if PHRASES_PATH:
+        piece_to_id = {p: i for i, p in enumerate(avsr.token_list)}
+        lines = [l.strip() for l in open(PHRASES_PATH) if l.strip() and not l.lstrip().startswith("#")]
+        phrases = [(l, tokenize(l, piece_to_id)) for l in lines]
     n_params = sum(p.numel() for p in avsr.model.parameters())
     # warm-up so the first real request is not 2x slower
     with torch.no_grad():
@@ -67,6 +86,7 @@ def _load():
         "transform": VideoTransform(speed_rate=1),
         "device": str(dev),
         "params": n_params,
+        "phrases": phrases,
     }
 
 
@@ -82,8 +102,10 @@ def _startup():
 def health():
     h = model.health()
     if model.state == "ready":
-        h.update(device=model.value["device"], params=model.value["params"])
-    return {"service": "vsr", **h, "checkpoint": "Auto-AVSR LRS3_V_WER19.1 (Chaplin)", "beam": BEAM}
+        h.update(device=model.value["device"], params=model.value["params"], phrase_list=len(model.value["phrases"]),
+                 enrolled_phrases=len(enrolled.phrases()))
+    return {"service": "vsr", **h, "checkpoint": "Auto-AVSR LRS3_V_WER19.1 (Chaplin)", "beam": BEAM,
+            "decoder": DECODER_PATH or "original"}
 
 
 def _thumbs(crops: np.ndarray, n: int = 8) -> list[str]:
@@ -116,63 +138,128 @@ def _nbest_texts(avsr, hyps) -> list[Hypothesis]:
     return out
 
 
+def _encode(m, data: bytes, flags: list[str], quality: dict):
+    """Clip bytes -> (encoder features, mouth crops), or (None, None) with a quality flag. Caller holds model.lock."""
+    try:
+        frames, duration = decode_video_rgb(data, MODEL_FPS)
+    except Exception as exc:  # empty or corrupt upload
+        flags.append("too_short")
+        quality["decode_error"] = type(exc).__name__
+        return None, None
+    quality.update(duration_s=round(duration, 2), frames=int(len(frames)))
+    if len(frames) < 0.6 * MODEL_FPS:
+        flags.append("too_short")
+        return None, None
+    if duration > 12:
+        flags.append("too_long")
+    landmarks = m["detector"].detect(frames, m["detector"].full_range_detector)
+    if all(lm is None for lm in landmarks):
+        landmarks = m["detector"].detect(frames, m["detector"].short_range_detector)
+    detected = sum(lm is not None for lm in landmarks) / len(landmarks)
+    quality["face_detected_ratio"] = round(detected, 3)
+    if detected == 0:
+        flags.append("no_face")
+        return None, None
+    if detected < 0.9:
+        flags.append("partial_face")
+    try:
+        crops = m["process"](frames, landmarks)
+    except Exception as exc:
+        flags.append("occlusion")
+        quality["crop_error"] = str(exc)
+        return None, None
+    x = m["transform"](torch.tensor(crops))
+    center = crops[:, 4:92, 4:92].astype(np.float32)
+    motion = float(np.abs(np.diff(center, axis=0)).mean()) if len(center) > 1 else 0.0
+    quality["mouth_motion"] = round(motion, 3)
+    quality["mouth_motion_threshold"] = MOTION_THRESHOLD
+    if motion < MOTION_THRESHOLD:
+        flags.append("low_mouth_motion")
+    with torch.no_grad():
+        enc = m["avsr"].model.encode(x.to(m["avsr"].device))
+    return enc, crops
+
+
 @app.post("/infer")
 def infer(video: UploadFile = File(...), session_id: str = Form("demo-session"), source_ref: str = Form("")):
     t0 = time.time()
     m = model.get()
     data = video.file.read()
-    frames, duration = decode_video_rgb(data, MODEL_FPS)
     flags: list[str] = []
-    quality: dict = {"duration_s": round(duration, 2), "frames": int(len(frames))}
+    quality: dict = {}
     prov = Provenance(
         service="vsr", checkpoint="Auto-AVSR LRS3_V_WER19.1", device=m["device"],
         preprocess="pyav-25fps -> mediapipe face det -> mean-face similarity warp -> 96px mouth ROI -> centercrop 88",
     )
 
-    if len(frames) < 0.6 * MODEL_FPS:
-        flags.append("too_short")
-        return _evidence(session_id, source_ref, [], flags, quality, prov, t0)
-    if duration > 12:
-        flags.append("too_long")
-
     with model.lock:
-        landmarks = m["detector"].detect(frames, m["detector"].full_range_detector)
-        if all(lm is None for lm in landmarks):
-            landmarks = m["detector"].detect(frames, m["detector"].short_range_detector)
-        detected = sum(lm is not None for lm in landmarks) / len(landmarks)
-        quality["face_detected_ratio"] = round(detected, 3)
-        if detected == 0:
-            flags.append("no_face")
+        enc, crops = _encode(m, data, flags, quality)
+        if enc is None:
             return _evidence(session_id, source_ref, [], flags, quality, prov, t0)
-        if detected < 0.9:
-            flags.append("partial_face")
-
-        try:
-            crops = m["process"](frames, landmarks)
-        except Exception as exc:
-            flags.append("occlusion")
-            quality["crop_error"] = str(exc)
-            return _evidence(session_id, source_ref, [], flags, quality, prov, t0)
-
-        x = m["transform"](torch.tensor(crops))
-        center = crops[:, 4:92, 4:92].astype(np.float32)
-        motion = float(np.abs(np.diff(center, axis=0)).mean()) if len(center) > 1 else 0.0
-        quality["mouth_motion"] = round(motion, 3)
-        quality["mouth_motion_threshold"] = MOTION_THRESHOLD
-        if motion < MOTION_THRESHOLD:
-            flags.append("low_mouth_motion")
-
         t_inf = time.time()
         with torch.no_grad():
-            enc = m["avsr"].model.encode(x.to(m["avsr"].device))
             hyps = m["avsr"].beam_search(enc)
         quality["decode_ms"] = int((time.time() - t_inf) * 1000)
+        phrase_hyps = []
+        if m["phrases"]:
+            t_ph = time.time()
+            with torch.no_grad():
+                scores = score_phrases(m["avsr"].model, enc, [t for _, t in m["phrases"]])
+            for i in scores.argsort(descending=True)[:PHRASE_TOP].tolist():
+                phrase_hyps.append(Hypothesis(
+                    text=m["phrases"][i][0], score=round(float(scores[i]), 3),
+                    score_kind="phrase-list log-likelihood (decoder+CTC), uncalibrated",
+                    words=[{"word": w} for w in m["phrases"][i][0].split()]))
+            quality["phrase_ms"] = int((time.time() - t_ph) * 1000)
 
-    hypotheses = _nbest_texts(m["avsr"], hyps)
+    personal = []
+    if enrolled.phrases():
+        t_en = time.time()
+        for phrase, dist in enrolled.match(enc.cpu().numpy(), PHRASE_TOP):
+            personal.append(Hypothesis(text=phrase, score=round(-dist, 4),
+                                       score_kind="personal enrollment match (negative DTW distance)",
+                                       words=[{"word": w} for w in phrase.split()]))
+        quality["enroll_ms"] = int((time.time() - t_en) * 1000)
+
+    hypotheses, seen = [], set()
+    for h in personal + phrase_hyps + _nbest_texts(m["avsr"], hyps):
+        if h.text.lower() not in seen:
+            seen.add(h.text.lower())
+            hypotheses.append(h)
     if len(hypotheses) >= 2:
         quality["top2_margin"] = round(hypotheses[0].score - hypotheses[1].score, 3)
     quality["mouth_thumbs"] = _thumbs(crops)
     return _evidence(session_id, source_ref, hypotheses, flags, quality, prov, t0)
+
+
+# ---- personal enrollment ----------------------------------------------------
+
+@app.get("/enroll")
+def enroll_list():
+    suggestions = [l.strip() for l in SUGGESTIONS.read_text().splitlines() if l.strip() and not l.startswith("#")]
+    return {"phrases": enrolled.phrases(), "suggestions": suggestions}
+
+
+@app.post("/enroll")
+def enroll_add(video: UploadFile = File(...), phrase: str = Form(...)):
+    if not phrase.strip():
+        raise HTTPException(400, "empty phrase")
+    m = model.get()
+    flags: list[str] = []
+    quality: dict = {}
+    with model.lock:
+        enc, _ = _encode(m, video.file.read(), flags, quality)
+    bad = {"too_short", "no_face", "occlusion", "low_mouth_motion"} & set(flags)
+    if enc is None or bad:
+        raise HTTPException(422, f"recording not saved: {', '.join(sorted(bad or flags)).replace('_', ' ')}")
+    count = enrolled.add(phrase, enc.cpu().numpy())
+    return {"phrase": " ".join(phrase.split()), "count": count, "quality": quality, "phrases": enrolled.phrases()}
+
+
+@app.delete("/enroll")
+def enroll_remove(phrase: str):
+    enrolled.remove(phrase)
+    return {"phrases": enrolled.phrases()}
 
 
 def _evidence(session_id, source_ref, hyps, flags, quality, prov, t0) -> Evidence:

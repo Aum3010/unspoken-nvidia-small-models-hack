@@ -55,6 +55,15 @@ export const api = {
   audit: () => req<any[]>(`${base}/audit`),
   eeg: <T = any,>(path: string) => req<T>(`/api/eeg/${path}`),
   evals: () => req<any>('/api/evals'),
+  enrollList: () => req<{ phrases: { phrase: string; count: number }[]; suggestions: string[] }>('/api/enroll'),
+  enrollAdd: (blob: Blob, phrase: string) => {
+    const f = new FormData()
+    f.append('video', blob, blob.type.includes('mp4') ? 'clip.mp4' : 'clip.webm')
+    f.append('phrase', phrase)
+    return req<{ phrase: string; count: number; phrases: { phrase: string; count: number }[] }>('/api/enroll', { method: 'POST', body: f })
+  },
+  enrollRemove: (phrase: string) =>
+    req<{ phrases: { phrase: string; count: number }[] }>(`/api/enroll?phrase=${encodeURIComponent(phrase)}`, { method: 'DELETE' }),
 }
 
 /** Live session state over WebSocket, with automatic reconnect. */

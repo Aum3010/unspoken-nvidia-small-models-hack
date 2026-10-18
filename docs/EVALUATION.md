@@ -21,6 +21,26 @@ Chance is 2.8%. These are healthy-protocol research recordings, so they do not s
 
 The Auto-AVSR LRS3 model has never seen these speakers or GRID's letter/digit grammar. Its paper LRS3 WER of about 19% does **not** transfer, which is why lip readings are only ever *candidates* for the person to confirm. The median latency of 7.9 s was measured while the coordinator benchmark shared the GPU, so it is a contended number. With a still face the model still produces fluent sentences (for example "THAT'S WHAT I'M GOING TO DO"); the mouth-motion gate flags every such clip.
 
+### 2b. Lip reading: original vs adapted (same held-out speakers s1, s2; 200 clips)
+
+`scripts/finetune_vsr_grid.py` keeps the Auto-AVSR visual encoder frozen and fine-tunes only the decoder and CTC head (68.4M parameters, no new weights) on 2,850 clips from GRID speakers s3–s8. It took 4 epochs, about 6 minutes on an M2. The original model is the baseline throughout, and it stays the deployed default.
+
+| Free text (beam 12) | WER | decode p50 |
+|---|---:|---:|
+| Original (LRS3 LM 0.3, deployed) | 80.7% | 2.0 s |
+| **Fine-tuned decoder, no LM** | **4.6%** | 1.1 s |
+| Fine-tuned decoder + LRS3 LM 0.3 | 6.4% | 1.5 s |
+
+**Closed phrase list.** Instead of free decoding, every phrase in a fixed list is scored against the video (teacher-forced decoder + CTC log-likelihood, one batched pass of about 0.1 s for 44 phrases). Each test clip's true sentence is mixed with N−1 other GRID sentences.
+
+| Distractors | N | Original top-1 / top-3 | Fine-tuned top-1 / top-3 |
+|---|---:|---:|---:|
+| random | 10 / 50 / 100 | 100 / 99.5 / 100% · top-3 100% | 100 / 100 / 99.5% · top-3 100% |
+| differ in **one word** | 10 | 90.5% / 99.0% | 94.0% / 100% |
+| differ in **one word** | 50 | 76.5% / 98.0% | 81.5% / 99.0% |
+
+**Findings.** (1) Adapting the decoder to a fixed sentence set cuts WER 17× on speakers it never saw, so the recipe works. (2) Even without training, ranking a closed list puts the right phrase in the top 3 for ≥98% of clips. That suits the confirm-from-three-cards interaction. **Limits:** the adapted decoder only knows GRID's 51-word grammar and is not deployed. GRID is frontal studio video of healthy speakers speaking aloud, so webcam and patient accuracy will be lower. The deployed phrase list (`UNSPOKEN_VSR_PHRASES=services/vsr/patient_phrases.txt`) has not been measured on webcam video yet. GRID's distributed s5/s6 video archives are swapped relative to their alignments, and the folders were swapped back before training.
+
 ## 3. Weak speech: raw vs RNNoise-enhanced Whisper-base (MLX)
 
 The test set is 10 synthetic Kokoro utterances (5 voices) with pink noise, so the references are exact. This is **not** a dysarthria benchmark.
