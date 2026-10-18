@@ -21,10 +21,18 @@ LOGS=.run/logs
 mkdir -p "$LOGS" .run/pids
 
 stop() {
+  local pids=()
   for f in .run/pids/*.pid; do
     [[ -e $f ]] || continue
-    kill "$(cat "$f")" 2>/dev/null && echo "  stopped $(basename "$f" .pid)"
+    kill "$(cat "$f")" 2>/dev/null && { echo "  stopped $(basename "$f" .pid)"; pids+=("$(cat "$f")"); }
     rm -f "$f"
+  done
+  # wait for them to exit (and release their ports) before anything restarts
+  for _ in $(seq 1 30); do
+    local alive=0
+    for p in "${pids[@]}"; do kill -0 "$p" 2>/dev/null && alive=1; done
+    ((alive)) || break
+    sleep 1
   done
 }
 
