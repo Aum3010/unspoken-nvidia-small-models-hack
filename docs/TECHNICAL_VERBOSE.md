@@ -1,13 +1,26 @@
 # Unspoken: technical reference (verbose)
 
-Everything about the system as it is on branch **`demo-final`** (2026-10-18; it is `ui` + the measured speedups
-of `ui-speedups` + four flag-gated phases): what runs where, every agent and its contract, the decision and safety
-logic, the browser, how it is served on the NVIDIA Brev GPU, every measured number, and every known shortfall,
-bug and pending task (§10). Where a number or behaviour differs on `ui`, the text says so. Shorter docs: [README](../README.md), [ARCHITECTURE](ARCHITECTURE.md),
-[SERVING](SERVING.md), [BREV](BREV.md), [EVALUATION](EVALUATION.md), [web/README](../web/README.md). Bounty
-write-ups (Nemotron Lightning, NeMo Gym, vLLM): [BOUNTIES](BOUNTIES.md). Every agent against its baseline
-(branch `eval-consolidation`): [RESULTS](RESULTS.md). vLLM serving experiments (concurrency, capacity,
-isolation + MTP): `evaluations/results/serving/SUMMARY.md`.
+Everything about the system as it is on **`main`** (2026-10-18). `main` is three branches merged, in this order:
+- **`demo-final`:** `ui`, plus the measured speedups of `ui-speedups`, plus four flag-gated phases. This is the
+  deployed system.
+- **`eval-consolidation`:** the evaluation evidence (EEG datasets and stopping policies, the `neuro_comm` NeMo Gym
+  environment and its training run, lips + voice fusion, the trained coordinators), and a restyled page. It took
+  precedence where the two overlapped.
+- **`serving-experiments`:** vLLM concurrency, capacity, isolation + MTP, and a flag-gated serving card.
+
+This document covers what runs where, every agent and its contract, the decision and safety logic, the browser,
+how it is served on the NVIDIA Brev GPU, every measured number, and every known shortfall, bug and pending task
+(§10). Where a number or behaviour differs on an older branch, the text says so.
+
+Other docs:
+- shorter: [README](../README.md), [ARCHITECTURE](ARCHITECTURE.md), [SERVING](SERVING.md), [BREV](BREV.md),
+  [EVALUATION](EVALUATION.md), [web/README](../web/README.md);
+- bounty write-ups (Nemotron Lightning, NeMo Gym, vLLM): [BOUNTIES](BOUNTIES.md);
+- every agent against its baseline: [RESULTS](RESULTS.md), with its experiment write-ups
+  ([EXPERIMENT_PLAN](EXPERIMENT_PLAN.md), [LIP_READING](LIP_READING.md), [EEG_DATASET_AUDIT](EEG_DATASET_AUDIT.md),
+  [EEG_STOPPING_BENCHMARK](EEG_STOPPING_BENCHMARK.md), [EEG_FAST_SELECTION](EEG_FAST_SELECTION.md),
+  [EEG_GAZE_FUSION](EEG_GAZE_FUSION.md), [NEUROCOMM_GYM_EXPERIMENT](NEUROCOMM_GYM_EXPERIMENT.md));
+- vLLM serving experiments: `evaluations/results/serving/SUMMARY.md`.
 
 ---
 
@@ -36,7 +49,7 @@ mic ──── voice detector → wav clip ─┘─────────�
 **Two delivery modes for speech** (see §6):
 - **Confirm mode** (`UNSPOKEN_AUTO_SPEAK=0`): nothing is spoken until the person confirms. This is the product rule
   in the README.
-- **Demo auto-speak** (`UNSPOKEN_AUTO_SPEAK=1`, **the current default on `ui`**): an **accepted** reading is spoken
+- **Demo auto-speak** (`UNSPOKEN_AUTO_SPEAK=1`, **the current default**): an **accepted** reading is spoken
   without a confirmation. Accepted means the voice agent accepted it, or lips and voice agree on it. Everything
   else waits for Yes/No:
   - ambiguous readings;
@@ -61,6 +74,12 @@ mic ──── voice detector → wav clip ─┘─────────�
 | Coordinator client | 8105 | `services/coordinator/app.py` | `/workspace/venv-app` | `.venv` |
 | vLLM (Nemotron 3.5 Lightning) | 8001 | `scripts/brev/start_app.sh` | `/workspace/venv-vllm` | Ollama :11434 instead |
 | NVIDIA MPS daemon | — | `start_app.sh` (`UNSPOKEN_MPS`, default 1) | system | — |
+| `neuro_comm` NeMo Gym resources server (evaluation only) | Gym-assigned | `evaluations/nemo_gym/neuro_comm/app.py` | inside a NeMo Gym checkout | — |
+
+The evaluation experiments of `eval-consolidation` ran on a separate box, not on the app instance:
+- **The box:** 2× H100, set up by `scripts/brev/eval_box.sh setup | serve | status | stop`.
+- **GPU 0:** vLLM serving the 30B coordinator, for `neuro_comm` (E4).
+- **GPU 1:** a NeMo venv for the voice agent, for lips + voice fusion (E1).
 
 - **Binding:** every backend port binds `127.0.0.1`. The laptop reaches only the gateway, through an SSH tunnel
   (`scripts/brev/connect.sh`, or `brev port-forward`). Vite proxies `/api` and `/ws` to `127.0.0.1:8000`.
@@ -83,6 +102,7 @@ mic ──── voice detector → wav clip ─┘─────────�
 | `UNSPOKEN_VALIDATOR_IGNORE_HISTORY` | `0` | coordinator | `1` = reject `ignore_input` after two failed tries, a recent "none of these", or on an accepted clean reading (§3.3) |
 | `UNSPOKEN_AUTO_SPEAK_DELAY_MS` | `0` | gateway | > 0 = a countdown before an accepted reading is auto-spoken; No or a shake cancels it (§4) |
 | `UNSPOKEN_CHECKIN` | `0` | gateway + page | `1` = vision preview: proactive check-in routes and panel (§4); `0` = none of it exists (routes 404) |
+| `UNSPOKEN_SERVING_PANEL` | `0` | gateway + page | `1` = `GET /api/serving_metrics` and the page's "Serving · vLLM" card (§4, §5); `0` = the route is a 404 and the card is hidden |
 | `UNSPOKEN_LLM_BACKEND`, `_BASE_URL`, `_MODEL`, `_TIMEOUT` | `ollama`, `http://127.0.0.1:11434`, `nemotron-3.5-lightning:30b-a3b`, `20` | coordinator | the model server; `start_app.sh` sets `openai` + vLLM on :8001 |
 | `UNSPOKEN_VSR_PHRASES` | empty | lip agent | optional closed phrase list (off) |
 | `UNSPOKEN_VSR_FREE_TEXT` | `0` | lip agent | `1` = free-text beam search when no recorded phrase matches |
@@ -136,8 +156,9 @@ mic ──── voice detector → wav clip ─┘─────────�
 - **Recognition order:**
   1. **Personal enrollment** (`enroll.py`, `phrases.py`).
      - The person's own recordings are stored as encoder features in `data/enroll/<sha1>/NNN.npy` with
-       `phrase.txt`: 22 phrases and 90 recordings on `ui`. These are derived from a real person's recordings and
-       are committed; see §10.
+       `phrase.txt`: 22 phrases and 90 recordings. These are derived from a real person's recordings.
+     - **Not tracked in git on `main`** (consent pending, §10). They live on the laptop and on the instance, and
+       are shipped with `tar` (§6). Without them the lip agent has no enrolled phrases.
      - A clip is matched by length-normalised DTW over cosine distance. Every recording is compared in one
        batched pass (`dtw_batch`): the recordings are zero-padded into one array and filled one anti-diagonal at a
        time. On 270 test queries, distances match the per-recording loop to within 3e-8, with 0 top-3 changes.
@@ -171,6 +192,14 @@ mic ──── voice detector → wav clip ─┘─────────�
   - **Free-text accuracy** (beam 12, 132 GRID clips, 33 unseen speakers): WER 69.4%, best-of-5 60.9%.
   - **Enrollment matcher on strangers:** 5 of 43 GRID clips (unrelated people and sentences) matched an enrolled
     phrase within 0.30 (about 12%).
+- **Evaluated on `eval-consolidation`** ([RESULTS](RESULTS.md) §2, [LIP_READING](LIP_READING.md)):
+  - **Personal enrollment** on MIRACL-VC1 (15 speakers, research use only): top-1 phrase 72.0% (phrase list) →
+    **96.1%** (own recordings).
+  - **Decoder fine-tuned on GRID:** encoder frozen, decoder + CTC head trained on other speakers. WER on the unseen
+    speakers s1/s2 drops from 80.7% to **4.6%**. GRID is a fixed 51-word grammar, so this proves the recipe; the
+    fine-tune is **not deployed**.
+  - **Lips + voice together** on 200 GRID utterances (real paired audio and video, `scripts/benchmark/av_fusion_grid.py`):
+    babble at 0 dB, correct commits voice 8.0%, lips 53.5%, together 76.0% (RESULTS §6).
 
 ### 3.3 Coordinator: `services/coordinator/app.py`
 
@@ -247,6 +276,20 @@ mic ──── voice detector → wav clip ─┘─────────�
   Misreads were handled right (corrected or asked) in 5 of 6 tasks; the miss was an `ignore_input`. **No negation
   was ever dropped.** But the validator would
   accept "I don't need water" → "I need water". The validator is unchanged on purpose (decision of 2026-10-18).
+- **Under load** (`serving-experiments`; `evaluations/results/serving/`; real coordinator requests through this
+  file's prompt, tools and validator; details in §6):
+  - p50 281 ms at 1 concurrent request, 856 ms at 8, 3.7 s at 64;
+  - 0 errors up to 64 concurrent requests, peak 16 req/s;
+  - p95 < 500 ms only up to 2 concurrent requests;
+  - no tool call that is valid alone became invalid under load.
+- **Trained coordinator variants** (`eval-consolidation`, [RESULTS](RESULTS.md) §9, `scripts/benchmark/coordinator_student.py`).
+  The test is a voice → lips → EEG chain on GRID s1/s2 plus Study F selections, trained on one speaker and tested
+  on the other. Against the rule cascade's 44 wrong phrases of 1,400:
+  - **Nemotron 30B, untrained:** 59 wrong.
+  - **Nemotron 30B with a LoRA:** 53 wrong; agreement with the rule rises from 90.6% to 95.6%.
+  - **Nano 4B, trained:** 93.1% right at 42 ms per call, but 70 wrong.
+  - Neither trained variant matches the rule's safety, so **the deployed coordinator is the untrained 30B** with
+    the validator above.
 
 ### 3.4 TTS: `services/tts/app.py`
 
@@ -257,11 +300,31 @@ mic ──── voice detector → wav clip ─┘─────────�
 
 ### 3.5 EEG replay: `services/eeg/`
 
+**The deployed EEG replay:**
 - **Data and decoder:** BNCI2014-008 (8 ALS participants); xDAWN covariances → tangent space → logistic
   regression, trained per participant.
 - **Recorded data only:** evidence is labelled `RECORDED EEG` and confirmed by an operator.
 - **Accuracy:** flash AUC 0.850; letter accuracy 94% at 10 repetitions.
 - **Speed:** 106–117 ms per letter on the CPU.
+
+**Added on `eval-consolidation`** (evaluation code; the app's replay above is unchanged):
+- **`services/eeg/datasets/`:** a protocol-aware dataset layer. It has a BNCI2014-008 adapter and a bigP3BCI
+  EDF+ parser (`bigp3bci.py`), fetched by `scripts/data/fetch_bigp3bci.py` from the PhysioNet S3 mirror and
+  SHA-256 checked. It writes canonical tables (`schema.py`): agent-safe selection and stimulus tables kept apart
+  from the labels. Fail-loud QA lives in `qa.py`. Audit: [EEG_DATASET_AUDIT](EEG_DATASET_AUDIT.md).
+- **`services/eeg/study_f/`:** bigP3BCI Study F, 10 ALS participants, 36 characters.
+  - Frozen flash-level evidence (`evidence.py`, built by `scripts/benchmark/build_study_f_evidence.py`).
+  - Sequential Bayesian stopping (`stopping.py`, `flash_stopping.py`).
+  - The `neuro_comm` replay (`replay.py`).
+  - The policies that drive it (`policies.py`): Bayes, Nemotron tool calling, and a hybrid.
+- **Results on held-out session 3** ([RESULTS](RESULTS.md) §3, §7, §8):
+  - wrong characters 24 → 1 per 120 with the same decoder;
+  - EEG + gaze (Study H, not ALS) correct within 3 s 2.9% → 29.1%;
+  - on `neuro_comm`, Nemotron 30B alone does not beat Bayes and never abstains;
+  - a Nano 4B with a LoRA on Gym-reward labels cuts wrong characters 29 → 5 against Bayes, with the caveats in
+    RESULTS §8.
+
+  None of this is deployed: the EEG commit decision stays with the calibrated Bayesian rule.
 
 ---
 
@@ -354,6 +417,20 @@ A broken stream answers 409 and the page uploads the whole clip.
 - **Panel label:** "Recorded ICU data (MIMIC-IV demo) · synthetic profile · vision preview".
 - **Tests:** `test_checkin.py`.
 
+**Serving metrics** (`UNSPOKEN_SERVING_PANEL=1`, off by default; in `services/gateway/app.py`):
+- `GET /api/serving_metrics` reads vLLM's `/metrics` (at `UNSPOKEN_LLM_BASE_URL`) with a 300 ms timeout and a 1 s
+  cache.
+- It answers with:
+  - running and waiting requests;
+  - TTFT p50 (from the histogram over the last 60 s, else since start);
+  - KV-cache use;
+  - prefix-cache hit rate;
+  - MTP acceptance (only when present).
+- vLLM down or slow: `{"state": "unavailable"}`, and nothing else reads it.
+- Flag off: the route is not registered (404).
+- Tests: `scripts/brev/serving/test_serving_panel.py` (4).
+- Live check: `scripts/brev/serving/panel_live_check.sh`, which uses test gateways on ports 8010–8012.
+
 **Policy gate:** `shared/confirmation.py:authorize_speech`.
 - In confirm mode it requires:
   - status `confirmed`;
@@ -372,8 +449,22 @@ confirmations, speech.
 
 ### Page
 
-One liquid-glass page (`web/src/glass/`) over the live camera:
+One liquid-glass page (`web/src/glass/`) over the live camera. Restyled on `eval-consolidation`:
+- **The name:** "Unspoken" is drawn at the top centre, in the same clay tube as the written sentence
+  (`E.drawStatic`).
+- **Status chips removed:** the camera, mic and eyes chips no longer exist (see §10: the remote-processing
+  disclosure was on the camera chip). Only "Gateway offline · reconnecting" remains.
+- **Smoked glass:** every glass surface has a dark tint, so text stays legible over a bright room.
+- **Hint removed:** the bottom-right controls hint is gone.
+- **Finished text dissolves:** a spoken message, or "nurse notified", stays 5 s and then disappears. A reading
+  waiting for Yes/No stays on screen.
 - **Rail:** Phrases, Clear, Help. **Big Yes / No targets** at the top. There is no Speak button.
+- **Vision preview panel** (flag `UNSPOKEN_CHECKIN`): titled "Recorded ICU data (MIMIC-IV)", with the same type as
+  the other boards. The nurse notice is written in ink by name.
+- **Serving card** (flag `UNSPOKEN_SERVING_PANEL`): "Serving · vLLM", polled every 2 s. It shows running · waiting,
+  TTFT p50, KV cache in use, prefix-cache hits, and MTP acceptance when present.
+  - It is hidden unless `/api/serving_metrics` answers 200. On a 404 the page asks only every 30 s.
+  - With vLLM down it reads "vLLM is not answering · the coordinator uses its rules".
 - **Agent activity panel:**
   - a canvas nucleus with six input nodes (voice, lips, gaze, blink, brain, head);
   - "N of 6 inputs on";
@@ -454,8 +545,12 @@ All of these run at once.
 - **Required browser files** (gitignored; `scripts/setup_models.sh` fetches them):
   - `web/public/mediapipe/face_landmarker.task` and `mediapipe/wasm/`;
   - `web/public/models/mobileone_s0_gaze.onnx`.
-- **Known UI issues on `ui`:**
-  - **Privacy text:** fixed on `demo-final`; the chip and calibration screen name the remote host.
+- **Known UI issues:**
+  - **Privacy text (open again on `main`):**
+    - `demo-final` named the remote host on both the camera chip and the calibration screen.
+    - `eval-consolidation` removed the chips, so only the calibration screen says "Mouth and voice clips are
+      processed on the NVIDIA Brev GPU server".
+    - That screen is skipped when a saved calibration is reused (§10, item 7).
   - **Camera opening:** the shared camera-open promise and the single face-tracking loop were reverted
     (`3d3e95c`), so slow USB cameras can stall on parallel `getUserMedia` calls.
   - **Unused dependency:** `webgazer` is listed but unused.
@@ -509,6 +604,38 @@ From `start_app.sh`:
     access).
   - MTP alone, 8 concurrent requests × 30 rounds, passed 240/240. Not reproduced, not explained.
   - It also fails (HTTP 500) together with `--mamba-cache-mode all`.
+  - **Re-run with vLLM outside MPS** (`serving-experiments`, below): 89.8% of drafts accepted; coordinator 340 →
+    262 ms p50 with every agent busy; held-out NeMo Gym 0.970 vs 0.985 (within one task; `misread` 1.00 → 0.89).
+    There was no fault in that one benchmark run, which is not a soak.
+
+### Serving experiments (`serving-experiments`, 2026-10-18; `evaluations/results/serving/SUMMARY.md`)
+
+All four ran on the live instance from `scripts/brev/serving/`. Each one restored the defaults afterwards and was
+checked: all services ready, 49/49 safety tests, default vLLM arguments.
+
+**How the experiments were run:**
+- **Requests:** real coordinator requests, built by importing this repo's `SYSTEM_PROMPT`, `TOOLS`,
+  `_user_payload` and `validate`. They use the NeMo Gym eval tasks with production parameters, streamed so the
+  client sees time to first token. Every level sends the same seeded shuffle of the tasks (`eval.jsonl` is
+  sorted by category).
+- **Restarting only vLLM:** `relaunch_vllm.py` rebuilds vLLM's own command line and environment from `/proc`.
+- **Waiting for an idle app:** `idle_check.py` measures the time since the last gateway POST to an agent; the
+  page's health and `/enroll` polling and the experiments' own runs don't count. `common.sh` restores with
+  `start_app.sh stop && start_app.sh` and runs the safety tests.
+
+| Experiment | Result |
+|---|---|
+| **A. Concurrency on the live vLLM** (`--max-num-seqs 8`, every agent loaded) | p50 / p95: 281 / 310 ms at 1, 542 / 628 ms at 4, 856 / 921 ms at 8, 1,291 / 1,781 ms at 16. Throughput 3.6 / 7.5 / 9.4 / 9.4 req/s: it stops at 8 because of `--max-num-seqs`, and 16 only queues. 0 errors; validity 85% at every level (the same tasks fail alone); 90–100% of answers identical to concurrency 1 |
+| **B. Serving card** (`UNSPOKEN_SERVING_PANEL`) | works: flag off → 404; flag on → live numbers; vLLM unreachable → `unavailable` in 3 ms and `/api/health` still 200; smoke and safety tests pass |
+| **C. vLLM outside MPS + MTP** | verified not an MPS client (nvidia-smi type `C` vs `M+C`; absent from `get_client_list`). `kill -9` of the EngineCore: voice, lips and TTS stayed ready; an accepted clip was still auto-spoken and an ambiguous one still got the rules' question, all within 0.45 s. But with every agent busy the voice agent went 78 → 104 ms p50 (p95 106 → 266) and Kokoro 32 → 53 ms, because vLLM now time-slices with the MPS server. **Recommendation: keep all-MPS; isolate only with a second GPU or MIG** |
+| **D. Max capacity** (levels 1–64; 128 not reached) | shared (`--max-num-seqs 64`, util 0.55, agents loaded but idle) and dedicated (agents and gateway stopped, `128`, util 0.85) are the same within noise: peak **16.2 req/s** (1,065 output tok/s); p95 < 500 ms only up to 2 concurrent (5.4 req/s); both stopped at 64 on p95 > 5 s (about 6.3 s). KV memory is not the limit (64 × ~1.9k tokens vs a 3.76M-token cache at 0.55). 0 validity regressions, no safety stop; peak 63 / 82.6 GiB, 64 °C, 502 W |
+
+**Rooms per GPU** (an estimate for the coordinator only):
+- **Assumptions:** 20 messages per patient-hour; 2 of 40 messages need Nemotron; capacity measured at p95 < 500 ms.
+- **Result:** about 19,000 rooms, or about 970 if every message needed Nemotron.
+- **The real limit is elsewhere:** the voice and lip agents (one replica each, no batching) were not load-tested
+  and bound a GPU far sooner.
+- **Configurable:** the assumptions are flags of `scripts/brev/serving/build_summary.py`.
 
 ### NVIDIA MPS
 
@@ -518,14 +645,22 @@ From `start_app.sh`:
 
 ### Commands
 
+The full step-by-step run, from a fresh instance to the UI, is in the [README](../README.md#run-it-on-nvidia-brev).
+
 ```bash
-bash scripts/brev/sync_app.sh marginal-sapphire-whale                   # ship committed code (services, shared, scripts, asr_eval bits)
+bash scripts/brev/sync_app.sh marginal-sapphire-whale                   # ship committed code (services, shared, scripts, evaluations, asr_eval bits)
+bash asr_eval/scripts/brev/sync.sh marginal-sapphire-whale              # once: asr_eval, whose setup_brev.sh builds the voice agent's /workspace/venv-asr
+brev exec marginal-sapphire-whale 'cd ~/unspoken && nohup bash scripts/brev/setup_app.sh > .run/setup.log 2>&1 < /dev/null &'   # once
+brev exec marginal-sapphire-whale 'cd ~/asr_eval && nohup bash scripts/setup_brev.sh > setup.log 2>&1 < /dev/null &'            # once
 tar -czf /tmp/enroll.tgz -C data enroll                                  # enrollment is not in git or sync_app: copy the local folder
 brev copy /tmp/enroll.tgz marginal-sapphire-whale:/home/shadeform/enroll.tgz
 brev exec marginal-sapphire-whale 'cd ~/unspoken && rm -rf data/enroll && tar -xzf ~/enroll.tgz -C data'
 brev exec marginal-sapphire-whale 'bash ~/unspoken/scripts/brev/start_app.sh'   # start | status | stop
 bash scripts/brev/connect.sh marginal-sapphire-whale                    # tunnel :8000
 cd web && npm run dev                                                   # http://localhost:8800
+# serving experiments (on the box, under nohup; C and D wait for 10 idle minutes and restore the defaults)
+bash scripts/brev/serving/isolation_experiment.sh ; bash scripts/brev/serving/max_capacity.sh ; bash scripts/brev/serving/final_check.sh
+bash scripts/brev/serving/fetch_results.sh marginal-sapphire-whale     # laptop: copy evaluations/results/serving/ home
 ```
 
 ### Fixes for problems already met
@@ -541,6 +676,9 @@ See [BREV.md](BREV.md) §5:
 ---
 
 ## 7. Latency (Brev, warm, batch 1)
+
+Everything in this section is one request at a time per agent. The coordinator under concurrency (1–64 requests)
+is in §6, "Serving experiments".
 
 ### On the GPU box (no laptop network)
 
@@ -625,7 +763,8 @@ A lip-only reading is never auto-spoken; it waits for the person's answer.
   - A crop changes the frames the lip agent sees, so it needs the GRID check plus the person's own clips.
 - **Network:** 120 ms round trip to the instance. Lip pieces already ride the session WebSocket. An East Coast
   instance would save about 100 ms per round trip.
-- GPU isolation for vLLM (2 GPUs or MIG).
+- GPU isolation for vLLM (2 GPUs or MIG). Moving vLLM out of MPS on the same GPU was measured (§6): it contains a
+  vLLM crash but slows the voice agent and Kokoro, so it needs real isolation.
 
 ---
 
@@ -664,15 +803,28 @@ The lip enrollment adds stored features, not parameters.
 | Latency | `scripts/brev/bench_latency.py` (auto-speak aware) | `latency_brev_*.json` |
 | Live checks (smoke, accepted voice, streamed lip, countdown, check-in, lip profile) | `scripts/checks/` (see its README; clips not in git) | printed |
 | Voice model selection | `asr_eval/run_eval.py`, `scripts/loso.py` | `asr_eval/results/` |
+| Whole test suite | `pytest` (`pytest.ini`: `evaluations/safety_tests` + `evaluations/dataset_tests`): **101 passed, 16 skipped** on a laptop without the EEG data. The 68 dataset tests: 14 EEG datasets, 8 flash stopping, 25 `neuro_comm` replay, 16 Study F benchmark, 5 Study H fusion; the skips need the bigP3BCI files or frozen evidence | — |
+| Serving card | `pytest scripts/brev/serving/test_serving_panel.py` (4); live: `scripts/brev/serving/panel_live_check.sh` | `serving/panel_check.json` |
+| Serving experiments (concurrency, isolation + MTP, max capacity, final check) | `scripts/brev/serving/{bench_concurrency.py, isolation_experiment.sh, max_capacity.sh, final_check.sh}`, then `build_summary.py` | `evaluations/results/serving/` (`SUMMARY.md`) |
+| EEG datasets: fetch, audit | `scripts/data/fetch_bigp3bci.py --study F` (or `H`) `--participant <id>`, `scripts/data/audit_eeg_datasets.py` | `evaluations/dataset_manifests/` |
+| EEG stopping, fast selection, EEG + gaze (Study F / H) | `scripts/benchmark/{build_study_f_evidence, run_study_f_baselines, run_study_f_fast_selection, study_h_fusion}.py` | `evaluations/results/eeg_stopping/`, `eeg_fast_selection/`, `eeg_gaze_fusion/` |
+| `neuro_comm` (EEG decisions in NeMo Gym) and its training run | `run_neuro_comm_eval.py --policies bayes bayes_abstain nemotron hybrid`; `neuro_comm_student.py` (`data`, `value_data`, `train`, `eval`) | `neuro_comm_brev/`, `neuro_comm_student/` |
+| Lip fine-tune, enrollment on MIRACL-VC1, lips + voice fusion | `scripts/finetune_vsr_grid.py`, `scripts/eval_enrollment_miracl.py`, `scripts/benchmark/av_fusion_grid.py` | `vsr_finetune.json`, `brev/vsr_enrollment_miracl.json`, `av_fusion/` |
+| Agents in a chain; trained coordinators | `scripts/benchmark/coordinated_cascade.py [--llm-url …]`, `coordinator_student.py` | `coordinated_cascade/` |
 
 The NeMo Gym data files (`data/*.jsonl`) embed the coordinator's prompt and tools; regenerate them with
-`create_examples.py` after any coordinator change.
+`create_examples.py` after any coordinator change. The `neuro_comm` task files come from the frozen Study F
+evidence (`evaluations/nemo_gym/neuro_comm/create_examples.py`). `train.jsonl` holds sessions 1–2; `eval.jsonl`
+holds held-out session 3, with no targets written into any task.
+
+Every public dataset used for training or testing, with citation, licence and source:
+[README](../README.md#data-sources).
 
 ---
 
-## 10. Shortfalls, bugs and pending tasks (`demo-final`, 2026-10-18)
+## 10. Shortfalls, bugs and pending tasks (`main`, 2026-10-18)
 
-The same list, shorter, is in [HANDOFF.md](../HANDOFF.md).
+An older, shorter version of this list (as of `demo-final`) is in [HANDOFF.md](../HANDOFF.md).
 
 ### Bugs (open)
 
@@ -680,7 +832,7 @@ The same list, shorter, is in [HANDOFF.md](../HANDOFF.md).
    - `POST /api/{sid}/phrase_audio` renders and caches every fixed phrase, then calls
      `s.log("gateway", "phrase_audio_preloaded", …)`.
    - `AuditEvent.actor` only allows user / coordinator / policy / specialist / system / operator, so the request
-     fails.
+     fails. The traceback shows in the live gateway log on the instance.
    - The gateway cache is already filled at that point, so Kokoro is skipped. The page never gets the manifest and
      downloads the audio for each spoken phrase.
    - Measured on the box: the cache is worth about 2 ms (accepted voice 73 ms cold vs 71 ms warm).
@@ -693,8 +845,9 @@ The same list, shorter, is in [HANDOFF.md](../HANDOFF.md).
 3. **MTP speculative decoding: one unexplained CUDA fault.**
    - It happened in the benchmark's "every agent at once" phase: vLLM failed (`cudaErrorLaunchFailure`), and under
      MPS every GPU process went down with it.
-   - Not reproduced: MTP alone passed 240/240 concurrent requests.
-   - MTP is off (`LLM_MTP=0`). Re-test it with every agent busy, ideally on an isolated GPU, before turning it on.
+   - Not reproduced: MTP alone passed 240/240 concurrent requests. With vLLM outside MPS (§6), one full benchmark
+     ran without a fault. That is one run, not a soak.
+   - MTP is off (`LLM_MTP=0`). Turn it on only after a longer soak with every agent busy, ideally on an isolated GPU.
 4. **`LLM_MTP=1` together with `--mamba-cache-mode all`** answers HTTP 500 on every request.
 5. **Development:** Vite's watcher sometimes misses edits written by scripts and serves stale modules. Seen as a
    blank page (`api.visionData is not a function`) and as old calibration text. Touch the file or restart
@@ -703,73 +856,112 @@ The same list, shorter, is in [HANDOFF.md](../HANDOFF.md).
    - `/api/health` can report the coordinator `unavailable` for a few seconds after a restart (cached probe of a
      warming vLLM);
    - the comment on `auto_speak` in `services/gateway/state.py` still says "the coordinator's final reading";
-   - 8 lint warnings (unchanged).
+   - lint warnings (`react-hooks/exhaustive-deps`) are unchanged.
+7. **The remote-processing disclosure is no longer always visible.**
+   - `eval-consolidation`'s restyle removed the status chips. On `demo-final` the camera chip read "Camera · clips
+     to NVIDIA Brev".
+   - Now only the calibration screen says that mouth and voice clips are processed on the GPU server, and that
+     screen is skipped when a saved calibration is reused.
+   - With the chips also went the camera / mic state prompts ("Camera off · allow & reload", "Mic · voice agent
+     offline").
+   - Not changed here, because `eval-consolidation` took precedence on the page. Tell the person yourself until a
+     visible disclosure is back (task 33).
 
 ### Product and safety shortfalls
 
-7. **Auto-speak is on by default** (`UNSPOKEN_AUTO_SPEAK=1`).
+8. **Auto-speak is on by default** (`UNSPOKEN_AUTO_SPEAK=1`).
    - It contradicts the README's product rule.
    - It covers accepted readings only (`test_auto_speak.py`).
    - It speaks at once unless `UNSPOKEN_AUTO_SPEAK_DELAY_MS` > 0 (countdown; `test_auto_speak_delay.py`).
-8. **The coordinator overuses `ignore_input`** (§3.3). By default it drops a person who failed twice
+9. **The coordinator overuses `ignore_input`** (§3.3). By default it drops a person who failed twice
    (`repeated_failure` 0.67) and clear negated readings.
    - `UNSPOKEN_VALIDATOR_IGNORE_HISTORY=1` fixes both: paired deployed eval 0.954 → 0.995, held-out
      0.977 → 0.985. It is off pending the team's decision.
    - **Not fixed by any flag:** a genuine request next to an injected instruction (`prompt_injection` 0.94 eval,
      0.83 held-out).
-9. **No negation check on corrections by default.** `UNSPOKEN_VALIDATOR_NEGATION=1` adds it. In these runs the
-   model never dropped a negation, so it is a guard with no measured effect.
-10. **Personal lip data in git.**
-    - `data/enroll/` holds encoder features of a real person's recordings, force-added past `/data/` in
-      `.gitignore`, while `enroll.py` says they are not uploaded.
-    - It is pending the person's written consent decision; history has not been rewritten.
-    - Removal commands: [DATASETS_AND_CONSENT.md](DATASETS_AND_CONSENT.md).
-11. **The enrollment threshold is barely measured.** `ENROLL_MAX_DIST` 0.30 was set from 10 recordings, and
+10. **No negation check on corrections by default.** `UNSPOKEN_VALIDATOR_NEGATION=1` adds it. In these runs the
+    model never dropped a negation, so it is a guard with no measured effect.
+11. **Personal lip data is still in git history.**
+    - `data/enroll/` holds encoder features of a real person's recordings, pending their written consent decision.
+    - On `main` it is **no longer tracked** (step 1 of the removal in
+      [DATASETS_AND_CONSENT.md](DATASETS_AND_CONSENT.md)). It stays on the laptop and the instance.
+    - It is still in git history and at the tip of older branches (`demo-final`, `eval-consolidation`, `ui`,
+      `ui-speedups`, …). Purging history is a team decision.
+12. **The enrollment threshold is barely measured.** `ENROLL_MAX_DIST` 0.30 was set from 10 recordings, and
     strangers matched an enrolled phrase in about 12% of GRID clips.
-12. **Lip reading outside enrolled phrases is weak:** free-text WER 69.4% on unseen GRID speakers. Lip-only
+13. **Lip reading outside enrolled phrases is weak:** free-text WER 69.4% on unseen GRID speakers. Lip-only
     readings are never auto-spoken, by design.
-13. **Camera opening:** the shared `getUserMedia` promise and the single face-tracking loop were reverted
+14. **Camera opening:** the shared `getUserMedia` promise and the single face-tracking loop were reverted
     (`3d3e95c`), so slow USB cameras can stall.
-14. **The Mac / local path** needs NeMo for the voice agent, and it is not wired up.
-15. **`sync_app.sh` ships neither `data/enroll/` nor `data/vision/`;** copy them separately (§6, HANDOFF).
-16. **The vision preview is a preview.**
+15. **The Mac / local path** needs NeMo for the voice agent, and it is not wired up.
+16. **Neither git nor `sync_app.sh` carries `data/enroll/` or `data/vision/`;** copy them separately (§6). A fresh
+    clone of `main` has no enrolled phrases.
+17. **The vision preview is a preview.**
     - It uses a fixed question, one recorded MIMIC-IV demo event, and a SYNTHETIC profile.
     - Nothing is connected to a real monitor or nurse call. It needs clinical review before anything like that.
+18. **None of the trained models is deployed** ([RESULTS](RESULTS.md) §2, §8, §9):
+    - the lip decoder fine-tuned on GRID;
+    - the Nano 4B trained on `neuro_comm`;
+    - the Nano 4B and 30B trained as coordinators.
+
+    None beats the deployed rule on safety. Their adapters and training labels are on the evaluation box only, not
+    published.
 
 ### Measurement gaps
 
-17. **Accepted-voice numbers come from an ad-hoc bench** (now `scripts/checks/accepted_bench.py`), printed rather
+19. **Accepted-voice numbers come from an ad-hoc bench** (now `scripts/checks/accepted_bench.py`), printed rather
     than saved: 413 → 106 → 105 → 71 ms across runs. The 105 → 71 ms drop is unexplained; it is not the phrase
     cache.
-18. **"What a person waits for"** (§7) is a sum of measured parts, not an end-to-end browser measurement.
-19. **Streamed lip clips were verified** with synthesized live webm (VP9/VP8, written non-seekably) and a Python
+20. **"What a person waits for"** (§7) is a sum of measured parts, not an end-to-end browser measurement.
+21. **Streamed lip clips were verified** with synthesized live webm (VP9/VP8, written non-seekably) and a Python
     WebSocket client: 12/12 identical on the box, 8/8 from the laptop. They were not verified with Chrome's own
     MediaRecorder, because headless Chrome emitted too few pieces to test with.
-20. **Checked only in headless Chrome:** the countdown caption, the check-in panel (with a fake camera), and the
-    disclosure texts. Not checked with a real camera and a person.
-21. **NeMo Gym:**
-    - the held-out set comes from the same generator (seed 2026); 28 of 72 tasks duplicated eval tasks and were
-      removed, leaving no `no_speech` or `repeated_failure` tasks;
+22. **Checked only in headless Chrome:** the countdown caption, the check-in panel (with a fake camera), and the
+    disclosure texts. Not checked with a real camera and a person. The `eval-consolidation` restyle and the
+    serving card were checked only by building the page.
+23. **NeMo Gym:**
+    - the coordinator's held-out set comes from the same generator (seed 2026); 28 of 72 tasks duplicated eval
+      tasks and were removed, leaving no `no_speech` or `repeated_failure` tasks;
     - the rules policy was written to the scorer's specification, so its 1.0 is a ceiling, not a baseline;
-    - no model was trained.
-22. **No user studies:** gaze accuracy and false selections, clarification efficiency, and live lip reading on new
+    - no model was trained on the coordinator task. The training run is on `neuro_comm`, and its final labelling
+      was designed after seeing the first attempt's held-out score (one disclosed iteration, RESULTS §8).
+24. **Load testing covered only the coordinator** (§6).
+    - The voice and lip agents (one replica each, no batching) were not load-tested.
+    - The "shared" ramp had the agents loaded but idle.
+    - The experiments' idle check is a heuristic: POSTs in the gateway log.
+25. **Evaluation caveats** (stated per row in RESULTS):
+    - **GRID** is a fixed 51-word grammar.
+    - **MIRACL-VC1** enrollment and test clips come from the same session.
+    - **Study H** participants do not have ALS.
+    - **The agent chain** pairs a GRID utterance with another person's ALS selection.
+    - **Hardware** was mixed: the eval box's H100s and a Mac.
+26. **No user studies:** gaze accuracy and false selections, clarification efficiency, and live lip reading on new
     consenting people.
 
 ### Pending tasks and decisions
 
-23. **Decide the Phase 3 flags.** Recommended: ignore-history on, negation on, and a countdown of about 2000 ms
+27. **Decide the Phase 3 flags.** Recommended: ignore-history on, negation on, and a countdown of about 2000 ms
     for the demo if a visible cancel is wanted (it adds that time to every accepted message).
-24. **Fix bug 1** and re-check the preload in the page.
-25. **Consent decision on `data/enroll/`.**
-26. **Push `demo-final`** (local only), and decide how `ui`, `ui-speedups` and `demo-final` are merged.
-27. **Speed items not done:**
+28. **Fix bug 1** and re-check the preload in the page.
+29. **Consent decision on `data/enroll/`.** It is untracked on `main`; whether to purge history and older branches
+    is the team's call (DATASETS_AND_CONSENT).
+30. **Branches.**
+    - `main` now holds `demo-final` + `eval-consolidation` + `serving-experiments`. `serving-experiments` itself
+      is not pushed.
+    - Decide which of the older branches to keep. They still hold `data/enroll/`.
+31. **Speed items not done:**
     - early lip send (needs the person's own videos to show 0 decisions change);
     - face-crop upload (changes the frames; needs the GRID check plus own videos);
-    - GPU isolation for vLLM (2 GPUs or MIG);
+    - GPU isolation for vLLM: needs 2 GPUs or MIG, because outside MPS on the same GPU it slows the voice agent
+      and Kokoro (§6);
     - native FP4 for the coordinator (re-run NeMo Gym);
     - an instance closer to the users (120 ms round trip today).
-28. **The exactness check:** replace the re-transcription with a free-text ASR (bug 2).
-29. **Housekeeping:**
+32. **The exactness check:** replace the re-transcription with a free-text ASR (bug 2).
+33. **Bring back a visible remote-processing disclosure** on the restyled page (bug 7). This is a design decision
+    for the `eval-consolidation` owners.
+34. **Housekeeping:**
     - Brev bills $2.63/hr until deleted; a second instance, `unspoken-yash`, is also running;
     - rotate the Brev API key pasted in an earlier session;
-    - back up and then delete the voice recordings after the hackathon.
+    - back up and then delete the voice recordings after the hackathon;
+    - on the instance, the serving experiments left small files: `/tmp/serving_*` and
+      `~/unspoken/.run/serving_self_windows.txt`.

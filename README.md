@@ -225,7 +225,9 @@ npm run dev                                            # http://localhost:8800 (
 
 - **What leaves the laptop:** mouth video and voice clips go to the instance over SSH. They are processed in
   memory and not stored.
-- **The page says so:** the camera chip reads "Camera · clips to NVIDIA Brev".
+- **Tell the person:** on `main` only the calibration screen says that clips are processed on the GPU server, and
+  it is skipped when a saved calibration is reused. The camera chip that said "Camera · clips to NVIDIA Brev" was
+  removed in the page restyle (TECHNICAL_VERBOSE §10, bug 7).
 
 ### 6. Check that it works
 
