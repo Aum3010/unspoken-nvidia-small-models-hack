@@ -17,8 +17,8 @@ Branch `ui`, 2026-10-18. It builds on `asr-eval` (the voice model selection, sum
 - **Gaze = MediaPipe iris + MobileGaze** (from `yash-gaze-v3`) with per-user ridge calibration. WebGazer is gone.
 - **Budget 31.01B of 33B.** The coordinator is counted at its nominal 30B; with its weight-file count of 31.58B the
   total is 32.59B, also within budget.
-- **Latency on Brev:** one message end to end in 1.03 s p50. Every agent slows down when all run at once; see
-  [docs/SERVING.md](docs/SERVING.md) for the numbers and how to serve faster.
+- **Latency on Brev:** one message end to end in 0.97 s p50 with NVIDIA MPS; the voice result is ready 2 ms after
+  the end-of-utterance pause (early decode). Numbers and decisions: [docs/SERVING.md](docs/SERVING.md).
 
 ## What was built (branch `ui`)
 
@@ -71,8 +71,10 @@ cd web && npm run dev                                                          #
    offered list can include "I need water". Decide whether a negation mismatch should offer nothing instead.
 3. **Mac path for the voice agent.** It needs NeMo; `run_all.sh` should start `services/audio` from a NeMo venv
    (as `start_app.sh` does on Brev).
-4. **Serve faster.** Try NVIDIA MPS first, then stop the duplicate asr_eval bench, then native FP4 for the
-   coordinator (needs a CUDA 13 toolkit for FlashInfer). Details in [docs/SERVING.md](docs/SERVING.md).
+4. **Serve faster.** Done: NVIDIA MPS (on by default), the duplicate Nemotron Speech stopped, early voice decode.
+   Tested and rejected: beam 6 for lip reading (accuracy drop), fp16 (no gain). Remaining: GPU isolation for vLLM
+   (2 GPUs or MIG), to do last; native FP4 for the coordinator is not recommended before that (it is the less
+   accurate option and the coordinator is not the bottleneck). Details in [docs/SERVING.md](docs/SERVING.md).
 5. **Not ported from `yash-gaze-v3`:** the Gaze cards page (card snap, gaze lock), the look-then-blink setting,
    the head-assist settings UI, and the diagnostics export button.
 6. **The phrase list.** The voice agent knows 20 phrases (`asr_eval/configs/eval.yaml`); the rail's Phrases

@@ -88,5 +88,6 @@ manifest.csv ─► Silero VAD ─► model (own process) ─► rankers ─► 
 ```
 
 - **Brev:** one RTX PRO 6000 holds everything (about 72 GB with the asr_eval bench). The gateway reports `host: "NVIDIA Brev"` in `/api/health`, and the UI's camera chip then says clips go to Brev.
+- **Brev serving:** NVIDIA MPS lets the GPU processes run concurrently. The voice clip is sent early, at 350 ms of silence, and committed at the usual 700 ms (`/capture/audio/early|commit|discard`), so its decode overlaps the pause ([SERVING.md](SERVING.md)).
 - **Same code on both.** Device selection goes through `shared.service.pick_device` (cuda > mps > cpu). The ASR and TTS backends are picked by platform: MLX on a Mac, PyTorch/NeMo on CUDA.
 - **Latency** with every model running together, and how to serve it faster: [SERVING.md](SERVING.md).

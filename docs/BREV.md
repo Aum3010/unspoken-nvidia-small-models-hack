@@ -65,7 +65,7 @@ brev delete unspoken-asr                            # billing stops; disk is gon
 | Host | 16 vCPU, 141 GB RAM, 665 GB free disk, Ubuntu with Python 3.10.12, user `shadeform`, passwordless sudo |
 | Layout | `/workspace/venv-asr` (NeMo venv: asr_eval and the app's voice agent), `/workspace/venv-app` (app agents, torch cu128), `/workspace/venv-vllm` (vLLM), `/workspace/hf` (HF cache), `/workspace/asr_eval_data` (data, symlinked as `~/asr_eval/data`), `~/asr_eval` (bench code), `~/unspoken` (app backend) |
 | Recordings | `/workspace/asr_eval_data/own/`: 307 clips from 3 speakers (17 MB), backed up to the laptop in `asr_eval/data/own/` on 2026-10-17 |
-| Running | The whole app backend (§4b: vLLM + 6 services, about 66 GB of GPU memory) and the asr_eval live test bench on 127.0.0.1:8800 (a second Nemotron Speech, 5.6 GB; stop it while the app runs, see [SERVING.md](SERVING.md)) |
+| Running | The whole app backend (§4b: vLLM + 6 services under NVIDIA MPS, about 64 GB of GPU memory). The asr_eval live test bench is **stopped** (it held a second copy of Nemotron Speech); restart it with `serve_ui.sh` only when recording |
 | Status | **Kept running** for more recording sessions. Billing continues at $2.63/hr until deleted (about $16 by the end of 2026-10-17). Copy recordings home before deleting |
 
 ## 4. The loop
@@ -169,7 +169,8 @@ bash scripts/brev/connect.sh marginal-sapphire-whale
 - **Privacy:** mouth video and voice clips now leave the laptop for the instance (over SSH). The gateway reports `host: "NVIDIA Brev"` and the UI's camera chip says *clips to NVIDIA Brev*. Clips are processed in memory and not stored.
 - **Ports:** the asr_eval bench also uses 8800 on the instance. The app's UI uses the laptop's 8800, so don't forward the bench to 8800 while the app UI is open.
 - Measured 2026-10-18: Nemotron loads 17.8 GiB of weights; the whole stack uses about 72 GB of the 96 GB (with the asr_eval bench). One message end to end (voice + lip clip → coordinator → confirm → speech) takes 1.03 s p50; the voice agent 55 ms alone and 304 ms with every model busy ([SERVING.md](SERVING.md)).
-- **Latency:** `PYTHONPATH=. /workspace/venv-app/bin/python scripts/brev/bench_latency.py` (on the instance) measures each agent alone, all at once, and one message end to end. Results and how to serve faster: [SERVING.md](SERVING.md).
+- **NVIDIA MPS** is on by default (`start_app.sh` starts the daemon before any GPU process; `UNSPOKEN_MPS=0` turns it off). With every agent busy it cut the voice agent from 289 to 70 ms p50 ([SERVING.md](SERVING.md)).
+- **Latency:** `PYTHONPATH=. /workspace/venv-app/bin/python scripts/brev/bench_latency.py` (on the instance) measures each agent alone, all at once, one message end to end, and the voice wait after an utterance. Results and how to serve faster: [SERVING.md](SERVING.md).
 - Logs: `~/unspoken/.run/logs/<service>.log`; pinned versions: `~/unspoken/.run/requirements-cuda.lock`, `requirements-vllm.lock`.
 
 ## 5. Problems we hit, and the fixes

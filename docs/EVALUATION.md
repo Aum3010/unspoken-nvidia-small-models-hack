@@ -102,8 +102,10 @@ Both raw models fail on the same thing: history. After two failed retakes they a
 
 Full method, tables and serving advice: [SERVING.md](SERVING.md); raw numbers: `evaluations/results/latency_brev.json`.
 
-- **One message end to end** (voice + lip clip → evidence → coordinator → confirm → speech): **1.03 s p50, 1.10 s p95**. Lip reading (≈0.5 s per 3 s clip) is the long pole.
-- **Interference:** with all agents busy at once, the voice agent goes from 55 to 304 ms p50 and Kokoro from 23 to 78 ms. The GPU is only 50% busy on average, so the cost is processes time-slicing the GPU, not missing compute.
+- **One message end to end** (voice + lip clip → evidence → coordinator → confirm → speech): **0.97 s p50, 1.09 s p95** with NVIDIA MPS (1.03 s / 1.10 s before). Lip reading (≈0.5 s per 3 s clip) is the long pole.
+- **Interference, and MPS:** with all agents busy at once and no MPS, the voice agent went from 55 to 289 ms p50 and Kokoro from 24 to 82 ms, at only 47% GPU use (processes time-slicing the GPU). With MPS: voice 70 ms, Kokoro 32 ms, lip p95 0.7 s instead of 2.7 s. MPS does not change model arithmetic.
+- **Lip agent speed vs accuracy** (132 GRID clips, 33 unseen speakers): beam 6 saves ≈50 ms but WER rises 69.4 → 71.1% (best-of-5 60.9 → 64.5%), so it is rejected; fp16 gives identical answers and no speed-up; beam 12 fp32 stays.
+- **Early voice decode** (sent at 350 ms of silence, committed at 700 ms): 0/304 decisions changed on the real recordings; the voice evidence is in the session 2 ms after the pause instead of 102 ms.
 
 ## Not yet measured (honest gaps)
 

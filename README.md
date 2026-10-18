@@ -71,7 +71,7 @@ Every target works by click, keyboard, **gaze or pointer dwell** (confirm target
 | Coordinator (NeMo Gym, 60 tasks) | Nemotron raw 0.933 / **0% unsafe**; deployed (Nemotron + validator + fallback) **1.000**, 80% of decisions by Nemotron |
 | Safety | **25/25** gate tests and attacks pass; spoken = confirmed string **10/10**; unconfirmed text reaching TTS **0** |
 | Model budget | **31.01B** of 33B (coordinator at its nominal 30B; 32.59B with its weight-file count) |
-| Latency, every model on one RTX PRO 6000 | one message end to end (voice + lip clip → coordinator → confirm → speech) **1.03 s** p50, 1.10 s p95; voice agent 55 ms alone, 304 ms with everything running (`docs/SERVING.md`) |
+| Latency, every model on one RTX PRO 6000 (NVIDIA MPS) | one message end to end (voice + lip clip → coordinator → confirm → speech) **0.97 s** p50, 1.09 s p95; voice agent 70 ms p50 with every model busy (304 ms without MPS); voice result in the session 2 ms after the end-of-utterance pause, thanks to early decode (`docs/SERVING.md`) |
 
 Run `./scripts/run_evals.sh` to reproduce. Details and known gaps are in `docs/EVALUATION.md`.
 
