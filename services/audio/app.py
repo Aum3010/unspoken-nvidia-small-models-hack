@@ -1,6 +1,6 @@
 """Residual-voice specialist: weak speech -> raw ASR and enhanced ASR, side by side.
 
-Whisper (MLX, Metal) transcribes the untouched audio and an RNNoise-denoised,
+Whisper base (MLX on Apple Silicon, faster-whisper/CTranslate2 on CUDA) transcribes the untouched audio and an RNNoise-denoised,
 loudness-normalised copy. Both are kept; disagreements are marked, never merged.
 Words absent from every usable input are never inferred: if voice activity is
 absent, no hypotheses are returned (Whisper otherwise hallucinates on silence).
@@ -12,6 +12,7 @@ import base64
 import difflib
 import io
 import os
+import sys
 import time
 
 import numpy as np
@@ -19,21 +20,44 @@ import soundfile as sf
 from fastapi import File, Form, UploadFile
 
 from shared.schemas import Evidence, Hypothesis, Provenance
-from shared.service import Readiness, decode_audio_mono, make_app
+from shared.service import Readiness, decode_audio_mono, make_app, pick_device, preload_cudnn
 
 SR = 16000
-WHISPER_REPO = os.environ.get("UNSPOKEN_WHISPER", "mlx-community/whisper-base-mlx")
+# mlx: Apple Silicon (Metal). faster-whisper: CUDA or CPU elsewhere. Same Whisper base weights.
+BACKEND = os.environ.get("UNSPOKEN_ASR_BACKEND", "mlx" if sys.platform == "darwin" else "faster-whisper")
+WHISPER_REPO = os.environ.get("UNSPOKEN_WHISPER", "mlx-community/whisper-base-mlx" if BACKEND == "mlx" else "Systran/faster-whisper-base")
+DEVICE = "mlx-metal" if BACKEND == "mlx" else pick_device("UNSPOKEN_ASR_DEVICE")
 LOW_WORD_PROB = 0.5
+# identical decoding on both backends: greedy, no prompt carry-over, Whisper's default silence thresholds
+DECODE = dict(language="en", word_timestamps=True, temperature=0.0, condition_on_previous_text=False)
 
 app = make_app("unspoken-audio")
 
 
 def _load():
-    import mlx_whisper
+    if BACKEND == "mlx":
+        import mlx_whisper
 
-    # warm-up: downloads/compiles the model once
-    mlx_whisper.transcribe(np.zeros(SR, np.float32), path_or_hf_repo=WHISPER_REPO, language="en")
-    return mlx_whisper
+        def run(audio: np.ndarray) -> dict:
+            return mlx_whisper.transcribe(audio, path_or_hf_repo=WHISPER_REPO, **DECODE)
+    else:
+        if DEVICE == "cuda":
+            preload_cudnn()
+        from faster_whisper import WhisperModel
+
+        fw = WhisperModel(WHISPER_REPO, device=DEVICE, compute_type="float16" if DEVICE == "cuda" else "int8")
+
+        def run(audio: np.ndarray) -> dict:
+            # faster-whisper yields objects; reshape them into mlx-whisper's dict so callers don't change
+            segs, _ = fw.transcribe(audio, beam_size=1, vad_filter=False, **DECODE)
+            segs = list(segs)
+            return {"text": "".join(s.text for s in segs), "segments": [
+                {"avg_logprob": s.avg_logprob, "no_speech_prob": s.no_speech_prob,
+                 "words": [{"word": w.word, "probability": w.probability, "start": w.start, "end": w.end} for w in (s.words or [])]}
+                for s in segs]}
+
+    run(np.zeros(SR, np.float32))  # warm-up: downloads/compiles the model once
+    return run
 
 
 model = Readiness("audio", _load)
@@ -46,7 +70,7 @@ def _startup():
 
 @app.get("/health")
 def health():
-    return {"service": "audio", **model.health(), "checkpoint": WHISPER_REPO, "enhancer": "RNNoise (pyrnnoise)", "device": "mlx-metal"}
+    return {"service": "audio", **model.health(), "checkpoint": WHISPER_REPO, "enhancer": "RNNoise (pyrnnoise)", "device": DEVICE}
 
 
 def _rnnoise(audio: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
@@ -74,11 +98,8 @@ def _dbfs(x: np.ndarray) -> float:
     return round(float(20 * np.log10(np.sqrt(np.mean(x**2)) + 1e-9)), 1)
 
 
-def _transcribe(mlx_whisper, audio: np.ndarray) -> dict:
-    r = mlx_whisper.transcribe(
-        audio, path_or_hf_repo=WHISPER_REPO, language="en", word_timestamps=True,
-        temperature=0.0, condition_on_previous_text=False,
-    )
+def _transcribe(run, audio: np.ndarray) -> dict:
+    r = run(audio)
     words = [
         {"word": w["word"].strip(), "p": round(float(w["probability"]), 3), "start": round(w["start"], 2), "end": round(w["end"], 2)}
         for s in r.get("segments", []) for w in s.get("words", [])
@@ -118,7 +139,7 @@ def infer(audio: UploadFile = File(...), session_id: str = Form("demo-session"),
     wav = decode_audio_mono(audio.file.read(), SR)
     flags: list[str] = []
     quality: dict = {"duration_s": round(len(wav) / SR, 2), "input_dbfs": _dbfs(wav) if len(wav) else None}
-    prov = Provenance(service="audio", checkpoint=WHISPER_REPO, device="mlx-metal",
+    prov = Provenance(service="audio", checkpoint=WHISPER_REPO, device=DEVICE,
                       preprocess="pyav->16k mono; enhanced = RNNoise + loudness normalisation (-20 dBFS, <=+30 dB)")
 
     if len(wav) < 0.4 * SR:

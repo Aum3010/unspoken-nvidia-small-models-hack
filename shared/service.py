@@ -54,6 +54,34 @@ class Readiness:
         return {"state": self.state, "error": self.error, "load_seconds": self.loaded_s}
 
 
+def pick_device(override_env: str | None = None) -> str:
+    """cuda > mps > cpu. `override_env` (per service) or UNSPOKEN_DEVICE forces one."""
+    import os
+
+    forced = (override_env and os.environ.get(override_env)) or os.environ.get("UNSPOKEN_DEVICE")
+    if forced:
+        return forced
+    import torch
+
+    if torch.cuda.is_available():
+        return "cuda"
+    return "mps" if torch.backends.mps.is_available() else "cpu"
+
+
+def preload_cudnn() -> None:
+    """CTranslate2 (faster-whisper) needs cuDNN 9; torch's wheel ships it but not on the loader path."""
+    import ctypes
+    import glob
+    import site
+
+    for sp in site.getsitepackages():
+        for lib in sorted(glob.glob(f"{sp}/nvidia/cudnn/lib/libcudnn*.so.9")):
+            try:
+                ctypes.CDLL(lib, mode=ctypes.RTLD_GLOBAL)
+            except OSError:
+                pass
+
+
 def make_app(title: str) -> FastAPI:
     app = FastAPI(title=title)
     app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])

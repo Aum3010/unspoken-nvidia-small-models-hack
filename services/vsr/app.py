@@ -19,7 +19,7 @@ from fastapi import File, Form, UploadFile
 
 from shared.provenance import ROOT
 from shared.schemas import Evidence, Hypothesis, Provenance
-from shared.service import Readiness, decode_video_rgb, make_app
+from shared.service import Readiness, decode_video_rgb, make_app, pick_device
 
 CHAPLIN = ROOT / "third_party" / "chaplin"
 sys.path.insert(0, str(CHAPLIN))
@@ -35,9 +35,7 @@ app = make_app("unspoken-vsr")
 
 
 def _device() -> torch.device:
-    if os.environ.get("UNSPOKEN_VSR_DEVICE"):
-        return torch.device(os.environ["UNSPOKEN_VSR_DEVICE"])
-    return torch.device("mps" if torch.backends.mps.is_available() else "cpu")
+    return torch.device(pick_device("UNSPOKEN_VSR_DEVICE"))
 
 
 def _load():

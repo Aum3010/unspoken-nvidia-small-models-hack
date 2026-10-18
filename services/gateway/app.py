@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
 import time
 
 import httpx
@@ -63,7 +64,8 @@ async def health():
         async with httpx.AsyncClient() as client:
             results = await asyncio.gather(*[_probe(client, n) for n in SPECIALISTS])
         _health_cache.update(ts=time.time(), data={n: r for n, r in zip(SPECIALISTS, results)})
-    return {"gateway": {"state": "ready"}, **_health_cache["data"]}
+    # where the agents run; the UI must say so when clips leave the person's device
+    return {"gateway": {"state": "ready", "host": os.environ.get("UNSPOKEN_HOST_LABEL", "this device")}, **_health_cache["data"]}
 
 
 @app.get("/api/ledger")

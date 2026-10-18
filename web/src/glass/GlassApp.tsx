@@ -310,6 +310,9 @@ export function GlassApp() {
   }, [])
 
   const selected = state?.message.status === 'selected'
+  // agents on a remote GPU: mouth and voice clips leave this device, so the room says where they go
+  const host = health?.gateway?.host as string | undefined
+  const remote = host && host !== 'this device' ? host : null
   const active = useMemo(() => {
     const up = (svc: string) => health?.[svc]?.state === 'ready'
     return 1 + (cam === 'on' ? 2 : 0) + (up('eeg') ? 1 : 0) + (mic === 'on' && up('audio') ? 1 : 0) + (cam === 'on' && up('vsr') ? 1 : 0)
@@ -326,7 +329,7 @@ export function GlassApp() {
 
       <div className="brand">
         <div className="name"><span className="logo" /><span>unspoken<i>.</i></span></div>
-        <button className={`chip glass mono ${cam === 'on' ? 'live' : ''}`} data-a="camera"><b /><span>{cam === 'on' ? 'Camera · on device' : cam === 'off' ? 'Camera off · allow & reload' : 'Camera · starting'}</span></button>
+        <button className={`chip glass mono ${cam === 'on' ? 'live' : ''}`} data-a="camera"><b /><span>{cam === 'on' ? `Camera · ${remote ? `clips to ${remote}` : 'on device'}` : cam === 'off' ? 'Camera off · allow & reload' : 'Camera · starting'}</span></button>
         <span className={`chip glass mono ${mic === 'on' ? (hearing ? 'live' : 'ok') : ''}`}><b /><span>{mic === 'on' ? (health?.audio?.state !== 'ready' ? 'Mic · voice agent offline' : hearing ? 'Mic · hearing you' : 'Mic · listening') : mic === 'off' ? 'Mic off' : 'Mic · starting'}</span></span>
         <button className={`chip glass mono ${eyes ? 'ok' : 'warn'}`} data-a="calibrate"><b /><span>{eyes ? `Eyes · ≈${Math.round(gazeState.accuracyPx ?? 0)} px` : 'Eyes · pointer · calibrate'}</span></button>
       </div>
