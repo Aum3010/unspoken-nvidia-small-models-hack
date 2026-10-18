@@ -43,7 +43,7 @@ concurrently), then one message end to end:
 | **Each agent alone, p50 ms** (voice / lips / coordinator / Kokoro) | 55 / 501 / 241 / 23 | 56 / 508 / 231 / 24 | 60 / 535 / 248 / 23 |
 | **One message end to end, p50 / p95 ms** | 1032 / 1103 | 1030 / 1327 | **967 / 1086** |
 
-- **MPS removes most of the interference.** With every agent busy, the voice agent drops from 289 to 70 ms p50,
+- **MPS removes most of the interference** (run 2 → run 3, nothing else changed). With every agent busy, the voice agent drops from 289 to 70 ms p50,
   Kokoro from 82 to 32 ms, and the lip agent's tail from 2.7 to 0.7 s. The same work finishes in 11.8 s instead of 16.1 s.
 - **The cost of MPS** is about 5% on an agent that runs alone (voice 56 → 60 ms). MPS does not change any model's
   arithmetic, so accuracy is unaffected.

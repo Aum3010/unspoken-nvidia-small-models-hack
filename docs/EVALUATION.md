@@ -19,7 +19,7 @@ Chance is 2.8%. These are healthy-protocol research recordings, so they do not s
 |---:|---:|---:|---:|---:|
 | **79.6%** | 71.3% | 55.0% | **8/8** | **0%** |
 
-The Auto-AVSR LRS3 model has never seen these speakers or GRID's letter/digit grammar. Its paper LRS3 WER of about 19% does **not** transfer, which is why lip readings are only ever *candidates* for the person to confirm. The median latency of 7.9 s was measured while the coordinator benchmark shared the GPU, so it is a contended number. With a still face the model still produces fluent sentences (for example "THAT'S WHAT I'M GOING TO DO"); the mouth-motion gate flags every such clip.
+The Auto-AVSR LRS3 model has never seen these speakers or GRID's letter/digit grammar. Its paper LRS3 WER of about 19% does **not** transfer, which is why lip readings are only ever *candidates* for the person to confirm. The median latency of 7.9 s in this run is **historical**: it was measured on the Mac (MPS) while the coordinator benchmark shared the GPU. On the Brev GPU the lip agent takes about 0.5 s per 3 s clip, alone or with every model busy under NVIDIA MPS (§7, [SERVING.md](SERVING.md)). With a still face the model still produces fluent sentences (for example "THAT'S WHAT I'M GOING TO DO"); the mouth-motion gate flags every such clip.
 
 ## 3. Weak speech: raw vs RNNoise-enhanced Whisper-base (MLX), the previous voice agent
 
@@ -41,12 +41,14 @@ The test set is 10 synthetic Kokoro utterances (5 voices) with pink noise, so th
 
 ## 4. Coordinator: NeMo Gym environment `unspoken_communication` (60 tasks, 10 categories)
 
-| Policy | Reward | Valid | Correct action | Unsafe | Decided by model | p50 latency |
+| Policy | Reward | Valid | Correct action | Unsafe | Decided by model | p50 latency (Mac/Ollama) |
 |---|---:|---:|---:|---:|---:|---:|
 | Nemotron 3.5 Lightning, raw (no guard) | 0.933 | 100% | 80% | **0%** | 100% | 4.6 s |
 | granite4.2:8b, raw (comparison) | 0.933 | 100% | 80% | 0% | 100% | 6.2 s |
 | **Deployed: Nemotron + outside validator + fallback** | **1.000** | 100% | 100% | **0%** | 80% | 2.9 s |
 | Deterministic rules (reference) | 1.000 | 100% | 100% | 0% | 0% | 0 ms |
+
+The latencies in this table were measured on a Mac with Ollama. Do not compare them with Brev: there, Nemotron on vLLM answers one tool call in 248 ms p50 alone and 263 ms with every model busy (§7, [SERVING.md](SERVING.md)).
 
 Both raw models fail on the same thing: history. After two failed retakes they ask for a third, and after "none of these" they re-ask instead of switching to spelling. Those product rules now live in the validator, so a rejected model call falls back to rules. The deterministic policy was written to the same specification as the verifier, so its 1.0 is a ceiling, not an independent baseline. The environment's own tests pass inside the real NeMo Gym package (5/5).
 
@@ -103,7 +105,7 @@ Both raw models fail on the same thing: history. After two failed retakes they a
 Full method, tables and serving advice: [SERVING.md](SERVING.md); raw numbers: `evaluations/results/latency_brev.json`.
 
 - **One message end to end** (voice + lip clip → evidence → coordinator → confirm → speech): **0.97 s p50, 1.09 s p95** with NVIDIA MPS (1.03 s / 1.10 s before). Lip reading (≈0.5 s per 3 s clip) is the long pole.
-- **Interference, and MPS:** with all agents busy at once and no MPS, the voice agent went from 55 to 289 ms p50 and Kokoro from 24 to 82 ms, at only 47% GPU use (processes time-slicing the GPU). With MPS: voice 70 ms, Kokoro 32 ms, lip p95 0.7 s instead of 2.7 s. MPS does not change model arithmetic.
+- **Interference, and MPS:** with all agents busy at once and no MPS (run 2: duplicate model stopped), the voice agent went from 55 to 289 ms p50 (304 ms in run 1, with the duplicate still loaded) and Kokoro from 24 to 82 ms, at only 47% GPU use (processes time-slicing the GPU). With MPS: voice 70 ms, Kokoro 32 ms, lip p95 0.7 s instead of 2.7 s. MPS does not change model arithmetic.
 - **Lip agent speed vs accuracy** (132 GRID clips, 33 unseen speakers): beam 6 saves ≈50 ms but WER rises 69.4 → 71.1% (best-of-5 60.9 → 64.5%), so it is rejected; fp16 gives identical answers and no speed-up; beam 12 fp32 stays.
 - **Early voice decode** (sent at 350 ms of silence, committed at 700 ms): 0/304 decisions changed on the real recordings; the voice evidence is in the session 2 ms after the pause instead of 102 ms.
 

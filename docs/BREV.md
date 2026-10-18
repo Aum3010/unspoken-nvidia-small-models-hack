@@ -152,7 +152,7 @@ The UI runs on the laptop (`cd web && npm run dev` → http://localhost:8800). E
 | audio :8102 | Nemotron Speech Streaming en 0.6B + Silero VAD (NeMo, CPU/MPS) | the same, CUDA bf16, run from the NeMo venv `/workspace/venv-asr` (asr_eval's decision code and frozen thresholds) |
 | tts :8104 | mlx-audio Kokoro-82M | `kokoro` KPipeline on CUDA (`UNSPOKEN_TTS_BACKEND`) |
 | vsr :8101 | torch MPS | torch CUDA (`pick_device`, `UNSPOKEN_VSR_DEVICE`) |
-| coordinator :8105 | Ollama | vLLM 0.31 on 127.0.0.1:8001 serving `nvidia/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-NVFP4` (`--gpu-memory-utilization 0.55`, so the agents and the asr_eval bench fit beside it). On this RTX PRO 6000 (sm_120) vLLM picks Marlin weight-only FP4 for the GEMMs/MoE, Triton attention and the PyTorch sampler (see §5) |
+| coordinator :8105 | Ollama | vLLM 0.31 on 127.0.0.1:8001 serving `nvidia/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-NVFP4` (`--gpu-memory-utilization 0.55`, so the agents fit beside it under MPS). On this RTX PRO 6000 (sm_120) vLLM picks Marlin weight-only FP4 for the GEMMs/MoE, Triton attention and the PyTorch sampler (see §5) |
 
 ```bash
 # laptop: commit first, then ship services/shared/scripts to ~/unspoken
@@ -168,8 +168,8 @@ bash scripts/brev/connect.sh marginal-sapphire-whale
 
 - **Privacy:** mouth video and voice clips now leave the laptop for the instance (over SSH). The gateway reports `host: "NVIDIA Brev"` and the UI's camera chip says *clips to NVIDIA Brev*. Clips are processed in memory and not stored.
 - **Ports:** the asr_eval bench also uses 8800 on the instance. The app's UI uses the laptop's 8800, so don't forward the bench to 8800 while the app UI is open.
-- Measured 2026-10-18: Nemotron loads 17.8 GiB of weights; the whole stack uses about 72 GB of the 96 GB (with the asr_eval bench). One message end to end (voice + lip clip → coordinator → confirm → speech) takes 1.03 s p50; the voice agent 55 ms alone and 304 ms with every model busy ([SERVING.md](SERVING.md)).
-- **NVIDIA MPS** is on by default (`start_app.sh` starts the daemon before any GPU process; `UNSPOKEN_MPS=0` turns it off). With every agent busy it cut the voice agent from 289 to 70 ms p50 ([SERVING.md](SERVING.md)).
+- Measured 2026-10-18 (MPS on, asr_eval bench stopped): Nemotron loads 17.8 GiB of weights; the whole stack peaks at about 63 GB of the 96 GB. One message end to end (voice + lip clip → coordinator → confirm → speech) takes 0.97 s p50; the voice agent 60 ms alone and 70 ms with every model busy ([SERVING.md](SERVING.md), run 3).
+- **NVIDIA MPS** is on by default (`start_app.sh` starts the daemon before any GPU process; `UNSPOKEN_MPS=0` turns it off). With every agent busy it cut the voice agent from 289 ms (run 2, no MPS) to 70 ms p50 (run 3) ([SERVING.md](SERVING.md)).
 - **Latency:** `PYTHONPATH=. /workspace/venv-app/bin/python scripts/brev/bench_latency.py` (on the instance) measures each agent alone, all at once, one message end to end, and the voice wait after an utterance. Results and how to serve faster: [SERVING.md](SERVING.md).
 - Logs: `~/unspoken/.run/logs/<service>.log`; pinned versions: `~/unspoken/.run/requirements-cuda.lock`, `requirements-vllm.lock`.
 
