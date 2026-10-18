@@ -1,7 +1,9 @@
 """Personal enrollment: the user records their own phrases; new clips are matched against them.
 
 Each recording is stored only as Auto-AVSR encoder features (no video) under
-data/enroll/ on this machine. Matching is nearest-neighbour DTW over those
+data/enroll/ on this machine: NNN.npy unit-length per frame (for matching) and raw_NNN.npy as the
+encoder produced them (for decoder fine-tuning, scripts/eval_enrollment_local.py). Recordings made
+before raw features were kept have only NNN.npy. Matching is nearest-neighbour DTW over those
 features (services/vsr/phrases.py). The recordings serve only this matching:
 they are not uploaded and do not train any model.
 """
@@ -16,7 +18,8 @@ from pathlib import Path
 
 import numpy as np
 
-from services.vsr.phrases import dtw_batch
+from services.vsr import phrases
+from services.vsr.phrases import dtw_batch, dtw_many
 from shared.provenance import ROOT
 
 ENROLL_DIR = Path(os.environ.get("UNSPOKEN_ENROLL_DIR", ROOT / "data" / "enroll"))
@@ -39,7 +42,7 @@ class EnrollmentStore:
             for d in sorted(self.root.glob("*/")) if self.root.exists() else []:
                 name = d / "phrase.txt"
                 if name.exists():
-                    clips = [np.load(f).astype(np.float32) for f in sorted(d.glob("*.npy"))]
+                    clips = [np.load(f).astype(np.float32) for f in sorted(d.glob("[0-9]*.npy"))]
                     if clips:
                         self._cache[name.read_text().strip()] = clips
         return self._cache
@@ -55,8 +58,9 @@ class EnrollmentStore:
             d.mkdir(parents=True, exist_ok=True)
             (d / "phrase.txt").write_text(phrase)
             normed = feats / (np.linalg.norm(feats, axis=1, keepdims=True) + 1e-8)
-            n = len(list(d.glob("*.npy")))
+            n = len(list(d.glob("[0-9]*.npy")))
             np.save(d / f"{n:03d}.npy", normed.astype(np.float16))
+            np.save(d / f"raw_{n:03d}.npy", feats.astype(np.float16))
             self._cache = None
             return n + 1
 
@@ -85,7 +89,10 @@ class EnrollmentStore:
             names, bs, lens = self._pack()
             if not names:
                 return []
-            best: dict[str, float] = {}
-            for p, dist in zip(names, dtw_batch(x, bs, lens).tolist()):
-                best[p] = min(dist, best.get(p, np.inf))
+            clips = [c for cs in self._load().values() for c in cs]
+        # compiled per-recording DTW when numba is installed (about 3x faster), else one batched pass
+        dist = dtw_many(x, clips) if phrases._acc_end is not None else dtw_batch(x, bs, lens)
+        best: dict[str, float] = {}
+        for p, d in zip(names, dist.tolist()):
+            best[p] = min(d, best.get(p, np.inf))
         return sorted(best.items(), key=lambda t: t[1])[:top]

@@ -45,14 +45,16 @@ const base = `/api/${SESSION_ID}`
 export const api = {
   health: () => req<ServiceHealth>('/api/health'),
   ledger: () => req<{ budget_b: number; components: any[] }>('/api/ledger'),
-  captureLip: (blob: Blob) => {
+  captureLip: (blob: Blob, movingMs?: number) => {
     const f = new FormData()
     f.append('video', blob, blob.type.includes('mp4') ? 'clip.mp4' : 'clip.webm')
+    if (movingMs != null) f.append('moving_ms', String(Math.round(movingMs)))   // lip-landmark movement time
     return req<{ event: any; state: SessionState }>(`${base}/capture/lip`, { method: 'POST', body: f })
   },
   /** A mouth clip whose pieces already went over the WebSocket; 409 means send the whole clip instead. */
-  finishLipStream: (stream_id: string, chunks: number) =>
-    post<{ event: any; state: SessionState }>(`${base}/capture/lip/stream`, { stream_id, chunks }),
+  finishLipStream: (stream_id: string, chunks: number, moving_ms?: number) =>
+    post<{ event: any; state: SessionState }>(`${base}/capture/lip/stream`,
+      { stream_id, chunks, ...(moving_ms != null ? { moving_ms: Math.round(moving_ms) } : {}) }),
   captureAudio: (blob: Blob, enhance = true) => {
     const f = new FormData()
     f.append('audio', blob, blob.type.includes('wav') ? 'clip.wav' : blob.type.includes('mp4') ? 'clip.m4a' : 'clip.webm')
