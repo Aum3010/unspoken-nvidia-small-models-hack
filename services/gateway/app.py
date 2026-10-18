@@ -119,7 +119,16 @@ async def coordinate(s: Session):
     if not s.settings["use_llm"]:
         apply_plan(s, validate(deterministic_plan(pr), pr))
         return
-    apply_plan(s, validate(deterministic_plan(pr), pr), quiet=True)
+    plan = validate(deterministic_plan(pr), pr)
+    accepted = _accepted_reading(s)
+    if accepted and not LLM_FOR_ACCEPTED and plan.valid and plan.name == "ask_confirmation" \
+            and plan.arguments.get("candidate_ids") == [accepted.id]:
+        # nothing for the model to resolve: act on the rules' plan now instead of waiting ~0.3 s for Nemotron
+        apply_plan(s, plan)
+        s.trace("coordinator", "Accepted reading: rules decide, Nemotron not needed",
+                f"“{accepted.text}” · {' + '.join(accepted.supporting_modalities)}")
+        return
+    apply_plan(s, plan, quiet=True)
     s.trace("coordinator", "Nemotron is planning the next question", f"{len(m.candidates)} candidate(s) · {len(m.evidence_ids)} evidence event(s)", level="pending")
     task = asyncio.create_task(_refine_with_model(s, req, _plan_version(s)))
     _background.add(task)
@@ -127,6 +136,24 @@ async def coordinate(s: Session):
 
 
 _background: set[asyncio.Task] = set()
+
+# Nemotron is for ambiguous and unknown readings. When the specialists have already settled the reading (the voice
+# agent accepted it, or lips and voice agree on it) the rules decide that case exactly as Nemotron is asked to, so the
+# person does not wait for the model and the GPU does not run it. UNSPOKEN_LLM_FOR_ACCEPTED=1 restores the model call.
+LLM_FOR_ACCEPTED = os.environ.get("UNSPOKEN_LLM_FOR_ACCEPTED", "0") != "0"
+
+
+def _accepted_reading(s: Session):
+    """The message's only candidate, if the specialists accepted it: every evidence event is `proposed` (no
+    ambiguity, no lip/voice disagreement) and the voice agent supports it. A lip-only match still goes to the model."""
+    m = s.message
+    if m.status != "proposed" or len(m.candidates) != 1:
+        return None
+    c = m.candidates[0]
+    evs = [s.evidence[e] for e in m.evidence_ids]
+    if c.origin != "evidence" or not evs or any(e.status != "proposed" for e in evs):
+        return None
+    return c if "audio" in c.supporting_modalities else None
 
 
 def _schedule(coro):
