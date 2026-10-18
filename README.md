@@ -18,23 +18,28 @@ EEG* ─┘   *recorded replay only
 
 ```bash
 ./scripts/setup_models.sh     # venv, pinned Chaplin + MPS patch, checkpoints, ALS EEG + GRID data, web deps, ollama pull
-./scripts/run_all.sh          # gateway, 5 specialist services, web → http://localhost:5317
+./scripts/run_all.sh          # gateway, 5 specialist services, web → http://localhost:8800
 ./scripts/smoke_test.sh       # health + board → confirm → speak round trip
-./scripts/run_evals.sh        # every benchmark → evaluations/results/summary.json (shown on the Evidence page)
+./scripts/run_evals.sh        # every benchmark → evaluations/results/summary.json (also served at /api/evals)
 ```
 
 Requirements: Python 3.12 via `uv`, Node 20+, Ollama with `nemotron-3.5-lightning:30b-a3b`, and about 25 GB of free unified memory. Chrome is recommended (MediaRecorder webm, WebGL).
 
 ## What's in the app
 
-| View | What it does |
-|---|---|
-| **Communicate** | Live camera with a MediaPipe mouth overlay and the "model view" crop; silent-mouth and weak-voice capture; candidate cards with source badges, raw scores and low-confidence words; coordinator note with its exact tool call; separate **Speak it** confirm dock; phrase board and two-step spelling board; live agent graph and timeline; conversation history with audit trail; a button that tries to speak an unconfirmed guess so you can watch the policy gate block it |
-| **Eyes** | Hands-free 9-point WebGazer calibration with a measured error in pixels (gaze stays off if it is poor), plus deliberate-blink tuning |
-| **Brain replay** | 8 ALS participants; the 6×6 matrix replays the recording's real flash sequence while row/column P300 evidence accumulates; scrolling EEG trace; ERP and accuracy-vs-repetitions charts; ground truth revealed only after inference; decoded letters can be routed into the communication panel, labelled `RECORDED EEG` |
-| **Evidence** | Parameter ledger counted from the weight files, per-modality held-out results, NeMo Gym coordinator scores, safety tests, saved failures, sources and licences |
+One liquid-glass page (`web/src/glass/`) at **http://localhost:8800**, over the live camera:
 
-Every target works by click, keyboard, **hover dwell** (head-mouse), **gaze dwell**, or **blink scanning**. The confirmation method is recorded in the audit log. Light and dark themes, high contrast, and large text are available.
+| Part | What it does |
+|---|---|
+| **Eye calibration** | Shown when the app opens (and from the *Eyes* chip): 9 hands-free dots, then a measured error in pixels. Gaze is used only when it is good enough; otherwise the pointer stands in for the eyes |
+| **Every input at once** | No mode switching. Voice: always-on VAD cuts 16 kHz clips for the voice agent. Lips: mouth-movement detection cuts webm clips for the lip agent. Blink (deliberate, MediaPipe) selects what you look at; head nod = yes, shake = no. Capture pauses while a message waits for confirmation or speech is playing |
+| **Writing in light** | A reading or chosen phrase appears as faint, trembling pencil. It is drawn in by the pen only after you confirm it (Speak, Yes, a blink or a nod) and the policy gate authorizes the exact text |
+| **Bubbles** | Phrases, and the coordinator's shortlist of readings with their source and raw score, bloom as glass bubbles to choose by dwell, blink or click |
+| **Rail** | Phrases · Yes · No · Speak · Clear · Help; tiles swell under the gaze |
+| **Agent activity** (top right) | The coordinator nucleus fed by six inputs (voice, lips, gaze, blink, brain replay, head); each pulses when its agent reports, with the latest gateway timeline below |
+| **History** | Every spoken message with the inputs and confirmation method behind it; click to hear it again |
+
+Every target works by click, keyboard, **gaze or pointer dwell** (confirm targets need 1.5× longer), or **deliberate blink** (Space simulates it). The confirmation method is recorded in the audit log.
 
 ## Hackathon tracks
 
@@ -84,7 +89,7 @@ python run_eval.py --config configs/local_smoke.yaml --limit 6         # CPU plu
 ## Repository
 
 ```
-web/                    React + Vite UI (selection engine, gaze, face, capture, views)
+web/                    React + Vite UI: glass room, ink + agent-activity engine, always-on sensors, calibration
 services/gateway/       state machine, fusion, coordinator calls, policy-gated speech, WebSocket
 services/vsr/           Auto-AVSR via Chaplin → raw n-best (MPS)
 services/audio/         Whisper (MLX) raw ∥ RNNoise-enhanced, word diff, VAD gating

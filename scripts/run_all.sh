@@ -31,7 +31,7 @@ start vsr 8101
 if [[ "${1:-}" != "--no-web" ]]; then
   (cd web && npm run dev >../.run/logs/web.log 2>&1) &
   pids+=($!)
-  echo "  • web      → http://localhost:5317"
+  echo "  • web      → http://localhost:8800"
 fi
 
 trap 'echo; echo "Stopping…"; kill "${pids[@]}" 2>/dev/null || true' INT TERM EXIT

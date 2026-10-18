@@ -37,7 +37,7 @@ export const api = {
   },
   captureAudio: (blob: Blob, enhance = true) => {
     const f = new FormData()
-    f.append('audio', blob, blob.type.includes('mp4') ? 'clip.m4a' : 'clip.webm')
+    f.append('audio', blob, blob.type.includes('wav') ? 'clip.wav' : blob.type.includes('mp4') ? 'clip.m4a' : 'clip.webm')
     f.append('enhance', String(enhance))
     return req<{ event: any; state: SessionState }>(`${base}/capture/audio`, { method: 'POST', body: f })
   },

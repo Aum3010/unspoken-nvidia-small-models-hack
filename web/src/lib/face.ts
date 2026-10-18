@@ -12,6 +12,8 @@ export interface FaceFrame {
   blinkL: number
   blinkR: number
   yaw: number            // rough left/right head turn, -1..1
+  headPitch: number      // head pose from the face transform, degrees (nod axis)
+  headYaw: number        // degrees (shake axis)
   t: number
 }
 
@@ -42,6 +44,7 @@ export function initFace(): Promise<FaceLandmarker> {
       runningMode: 'VIDEO',
       numFaces: 1,
       outputFaceBlendshapes: true,
+      outputFacialTransformationMatrixes: true,
     })
     return landmarker
   })()
@@ -74,8 +77,12 @@ export function trackVideo(video: HTMLVideoElement): () => void {
         const nose = lm[1], l = lm[234], r = lm[454]
         yaw = ((nose.x - l.x) / Math.max(1e-3, r.x - l.x) - 0.5) * 2
       }
+      // column-major 4x4; ZYX Euler angles from its rotation part
+      const M = res.facialTransformationMatrixes?.[0]?.data
+      const headPitch = M ? Math.atan2(M[6], M[10]) * 180 / Math.PI : 0
+      const headYaw = M ? Math.asin(Math.max(-1, Math.min(1, -M[2]))) * 180 / Math.PI : 0
       const frame: FaceFrame = {
-        present: !!lm, landmarks: lm, mouthBox, yaw,
+        present: !!lm, landmarks: lm, mouthBox, yaw, headPitch, headYaw,
         mouthOpen: shapes.jawOpen ?? 0, blinkL: shapes.eyeBlinkLeft ?? 0, blinkR: shapes.eyeBlinkRight ?? 0, t,
       }
       detectBlink(frame)

@@ -74,4 +74,4 @@ manifest.csv ─► Silero VAD ─► model (own process) ─► rankers ─► 
 
 ## Ports & processes
 
-`scripts/run_all.sh` starts gateway 8000, vsr 8101, audio 8102, eeg 8103, tts 8104, coordinator 8105 and the web app on 5317. Logs go to `.run/logs/`. Each service exposes `/health`; the gateway aggregates them at `/api/health`.
+`scripts/run_all.sh` starts gateway 8000, vsr 8101, audio 8102, eeg 8103, tts 8104, coordinator 8105 and the web app on 8800. Logs go to `.run/logs/`. Each service exposes `/health`; the gateway aggregates them at `/api/health`.
