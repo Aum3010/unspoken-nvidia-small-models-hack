@@ -68,6 +68,9 @@ export function GlassApp() {
   const remoteHost = host && host !== 'this device' ? host : null
   // vision preview: only when the gateway runs with UNSPOKEN_CHECKIN=1
   const checkinOn = !!health?.gateway?.checkin
+  // the name at the top, in the same clay tube as the written sentence
+  const brandRef = useRef<HTMLCanvasElement>(null)
+  useEffect(() => { if (brandRef.current) E.drawStatic(brandRef.current, 'unspoken', 30) }, [])
   // the profile's preferred name, so the check-in addresses the person (synthetic profile in the preview)
   const [patientName, setPatientName] = useState<string | null>(null)
   useEffect(() => {
@@ -476,7 +479,7 @@ export function GlassApp() {
       <canvas className="layer" id="ink" />
       {alarm > 0 && <div key={alarm} className="alarm" />}
 
-      <div className="brand glass"><span className="logo" /><span className="name">unspoken<i>.</i></span></div>
+      <canvas className="brand" ref={brandRef} aria-label="unspoken" role="img" />
       {!connected && <div className="offline mono">Gateway offline · reconnecting</div>}
 
       <div className="side">

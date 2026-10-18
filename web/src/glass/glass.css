@@ -48,18 +48,15 @@ canvas.layer{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none
 .mono{font-family:"JetBrains Mono",ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase}
 
 /* ---------- top-left ---------- */
-/* the name in a glass pill, centred between Yes and No (.answers spans left:300px to right:450px) */
-.brand{position:fixed;top:30px;left:calc(50% - 75px);transform:translateX(-50%);z-index:6;display:flex;align-items:center;gap:12px;padding:10px 24px 10px 14px;border-radius:999px}
-.brand .name{font-family:"Instrument Serif",Georgia,serif;font-style:italic;font-size:30px;line-height:1;letter-spacing:.005em}
-.brand .name i{font-style:normal;color:var(--faint)}
-.brand .logo{width:28px;height:28px}
+/* the name, written in the sentence's clay tube, centred between Yes and No (.answers spans left:300px to right:450px) */
+.brand{position:fixed;top:40px;left:calc(50% - 75px);transform:translateX(-50%);z-index:6;pointer-events:none;
+  filter:drop-shadow(0 4px 10px rgba(0,0,0,.35))}
 .chip{display:inline-flex;align-items:center;gap:8px;padding:7px 11px;border-radius:99px;font-size:9.5px;color:var(--dim)}
 .chip b{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.3)}
 .chip.live b{background:#ff6b6b;box-shadow:0 0 10px #ff6b6b}
 .chip.ok b{background:#5eead4;box-shadow:0 0 10px #5eead4}
 .chip.warn b{background:#ffb86c;box-shadow:0 0 10px #ffb86c}
 .chip.hot{color:#fff}
-.logo{width:20px;height:20px;border-radius:50%;background:radial-gradient(circle at 32% 28%,#fff6e8,#ffb86c 45%,#c76a2f);box-shadow:inset -2px -3px 5px rgba(0,0,0,.25),0 4px 10px rgba(255,160,90,.35);animation:bob 4s ease-in-out infinite}
 @keyframes bob{50%{transform:translateY(-2px) scale(1.04,.97)}}
 
 /* ---------- right column: agent activity + history ---------- */
@@ -90,7 +87,7 @@ canvas.layer{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none
 @keyframes msgIn{from{opacity:0;transform:translateY(10px) scale(.92)}}
 
 /* ---------- always-on control rail (left): a glass shelf of solid icon tiles that swell under your gaze ---------- */
-.rail{position:fixed;z-index:6;left:16px;top:20px;bottom:20px;display:flex;flex-direction:column;justify-content:space-around;padding:22px 14px;border-radius:30px;
+.rail{position:fixed;z-index:6;left:16px;top:184px;bottom:20px;display:flex;flex-direction:column;justify-content:space-around;padding:22px 14px;border-radius:30px;
   background:linear-gradient(180deg,rgba(10,14,22,.46),rgba(10,14,22,.36) 50%,rgba(10,14,22,.5))}
 .rail button{background:none;box-shadow:none;transform:none;width:auto;height:auto;padding:4px 6px;border-radius:0;
   display:flex;flex-direction:column;align-items:center;gap:7px;color:#fff;position:relative}
