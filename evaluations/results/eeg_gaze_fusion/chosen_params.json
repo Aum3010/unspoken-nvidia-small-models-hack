@@ -1,0 +1,7143 @@
+[
+ {
+  "fold": 0,
+  "gaze_offset_sd": 0.0,
+  "alpha": 1.0124342796405599,
+  "sigma": 0.3307370320615075,
+  "lapse": 0.02,
+  "eeg_0": {
+   "tau": 0.97,
+   "deadline": 15.0,
+   "cal_wrong": 0,
+   "cal_correct": 71,
+   "cal_n": 204,
+   "cal_ccpm": 1.6369662327681445,
+   "allowed_wrong": 0
+  },
+  "eeg_0.02": {
+   "tau": 0.93,
+   "deadline": 15.0,
+   "cal_wrong": 2,
+   "cal_correct": 82,
+   "cal_n": 204,
+   "cal_ccpm": 1.9518000595060991,
+   "allowed_wrong": 4
+  },
+  "eeg_0.05": {
+   "tau": 0.7,
+   "deadline": 7.5,
+   "cal_wrong": 10,
+   "cal_correct": 51,
+   "cal_n": 204,
+   "cal_ccpm": 2.20679707923916,
+   "allowed_wrong": 10
+  },
+  "eeg_0.1": {
+   "tau": 0.6,
+   "deadline": 10.0,
+   "cal_wrong": 20,
+   "cal_correct": 72,
+   "cal_n": 204,
+   "cal_ccpm": 2.603978300180832,
+   "allowed_wrong": 20
+  },
+  "eeg_0.02_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "eeg_0.02_budget2": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "eeg_0.02_budget3": {
+   "tau": 0.5,
+   "deadline": 3.0,
+   "cal_wrong": 3,
+   "cal_correct": 5,
+   "cal_n": 204,
+   "cal_ccpm": 0.4931169098006986,
+   "allowed_wrong": 4
+  },
+  "eeg_0.02_budget5": {
+   "tau": 0.7,
+   "deadline": 5.0,
+   "cal_wrong": 4,
+   "cal_correct": 22,
+   "cal_n": 204,
+   "cal_ccpm": 1.3424866514111367,
+   "allowed_wrong": 4
+  },
+  "eeg_0.02_budget10": {
+   "tau": 0.9,
+   "deadline": 10.0,
+   "cal_wrong": 4,
+   "cal_correct": 54,
+   "cal_n": 204,
+   "cal_ccpm": 1.7760723585034948,
+   "allowed_wrong": 4
+  },
+  "eeg_0.05_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "eeg_0.05_budget2": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "eeg_0.05_budget3": {
+   "tau": 0.5,
+   "deadline": 3.0,
+   "cal_wrong": 3,
+   "cal_correct": 5,
+   "cal_n": 204,
+   "cal_ccpm": 0.4931169098006986,
+   "allowed_wrong": 10
+  },
+  "eeg_0.05_budget5": {
+   "tau": 0.6,
+   "deadline": 5.0,
+   "cal_wrong": 8,
+   "cal_correct": 31,
+   "cal_n": 204,
+   "cal_ccpm": 1.9123505976095616,
+   "allowed_wrong": 10
+  },
+  "eeg_0.05_budget10": {
+   "tau": 0.8,
+   "deadline": 10.0,
+   "cal_wrong": 8,
+   "cal_correct": 65,
+   "cal_n": 204,
+   "cal_ccpm": 2.2037010877242547,
+   "allowed_wrong": 10
+  },
+  "gaze_0": {
+   "tau": 0.97,
+   "deadline": 0.5,
+   "cal_wrong": 0,
+   "cal_correct": 1,
+   "cal_n": 204,
+   "cal_ccpm": 0.5904059040590406,
+   "allowed_wrong": 0
+  },
+  "gaze_0.02": {
+   "tau": 0.97,
+   "deadline": 0.5,
+   "cal_wrong": 0,
+   "cal_correct": 1,
+   "cal_n": 204,
+   "cal_ccpm": 0.5904059040590406,
+   "allowed_wrong": 4
+  },
+  "gaze_0.05": {
+   "tau": 0.95,
+   "deadline": 0.5,
+   "cal_wrong": 6,
+   "cal_correct": 21,
+   "cal_n": 204,
+   "cal_ccpm": 13.53020134228188,
+   "allowed_wrong": 10
+  },
+  "gaze_0.1": {
+   "tau": 0.95,
+   "deadline": 0.5,
+   "cal_wrong": 6,
+   "cal_correct": 21,
+   "cal_n": 204,
+   "cal_ccpm": 13.53020134228188,
+   "allowed_wrong": 20
+  },
+  "gaze_0.02_budget1": {
+   "tau": 0.97,
+   "deadline": 1.0,
+   "cal_wrong": 0,
+   "cal_correct": 1,
+   "cal_n": 204,
+   "cal_ccpm": 0.2953846153846154,
+   "allowed_wrong": 4
+  },
+  "gaze_0.02_budget2": {
+   "tau": 0.97,
+   "deadline": 2.0,
+   "cal_wrong": 0,
+   "cal_correct": 1,
+   "cal_n": 204,
+   "cal_ccpm": 0.14773776546629733,
+   "allowed_wrong": 4
+  },
+  "gaze_0.02_budget3": {
+   "tau": 0.97,
+   "deadline": 3.0,
+   "cal_wrong": 0,
+   "cal_correct": 1,
+   "cal_n": 204,
+   "cal_ccpm": 0.09850194951775088,
+   "allowed_wrong": 4
+  },
+  "gaze_0.02_budget5": {
+   "tau": 0.97,
+   "deadline": 5.0,
+   "cal_wrong": 0,
+   "cal_correct": 1,
+   "cal_n": 204,
+   "cal_ccpm": 0.05910602142593277,
+   "allowed_wrong": 4
+  },
+  "gaze_0.02_budget10": {
+   "tau": 0.97,
+   "deadline": 10.0,
+   "cal_wrong": 0,
+   "cal_correct": 2,
+   "cal_n": 204,
+   "cal_ccpm": 0.059186189889025895,
+   "allowed_wrong": 4
+  },
+  "gaze_0.05_budget1": {
+   "tau": 0.95,
+   "deadline": 1.0,
+   "cal_wrong": 7,
+   "cal_correct": 22,
+   "cal_n": 204,
+   "cal_ccpm": 7.297857636489288,
+   "allowed_wrong": 10
+  },
+  "gaze_0.05_budget2": {
+   "tau": 0.95,
+   "deadline": 2.0,
+   "cal_wrong": 9,
+   "cal_correct": 31,
+   "cal_n": 204,
+   "cal_ccpm": 5.3218884120171674,
+   "allowed_wrong": 10
+  },
+  "gaze_0.05_budget3": {
+   "tau": 0.95,
+   "deadline": 3.0,
+   "cal_wrong": 9,
+   "cal_correct": 32,
+   "cal_n": 204,
+   "cal_ccpm": 3.73904576436222,
+   "allowed_wrong": 10
+  },
+  "gaze_0.05_budget5": {
+   "tau": 0.95,
+   "deadline": 5.0,
+   "cal_wrong": 9,
+   "cal_correct": 39,
+   "cal_n": 204,
+   "cal_ccpm": 2.810810810810811,
+   "allowed_wrong": 10
+  },
+  "gaze_0.05_budget10": {
+   "tau": 0.95,
+   "deadline": 10.0,
+   "cal_wrong": 9,
+   "cal_correct": 41,
+   "cal_n": 204,
+   "cal_ccpm": 1.5333073626801714,
+   "allowed_wrong": 10
+  },
+  "fused_0": {
+   "tau": 0.97,
+   "deadline": 2.0,
+   "cal_wrong": 0,
+   "cal_correct": 53,
+   "cal_n": 204,
+   "cal_ccpm": 8.496993987975952,
+   "allowed_wrong": 0
+  },
+  "fused_0.02": {
+   "tau": 0.97,
+   "deadline": 4.0,
+   "cal_wrong": 1,
+   "cal_correct": 107,
+   "cal_n": 204,
+   "cal_ccpm": 10.352751461398912,
+   "allowed_wrong": 4
+  },
+  "fused_0.05": {
+   "tau": 0.95,
+   "deadline": 0.5,
+   "cal_wrong": 6,
+   "cal_correct": 21,
+   "cal_n": 204,
+   "cal_ccpm": 13.53020134228188,
+   "allowed_wrong": 10
+  },
+  "fused_0.1": {
+   "tau": 0.95,
+   "deadline": 3.0,
+   "cal_wrong": 14,
+   "cal_correct": 111,
+   "cal_n": 204,
+   "cal_ccpm": 16.388803445093817,
+   "allowed_wrong": 20
+  },
+  "fused_0.02_budget1": {
+   "tau": 0.97,
+   "deadline": 1.0,
+   "cal_wrong": 0,
+   "cal_correct": 10,
+   "cal_n": 204,
+   "cal_ccpm": 2.977667493796526,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget2": {
+   "tau": 0.97,
+   "deadline": 2.0,
+   "cal_wrong": 0,
+   "cal_correct": 53,
+   "cal_n": 204,
+   "cal_ccpm": 8.496993987975952,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget3": {
+   "tau": 0.97,
+   "deadline": 3.0,
+   "cal_wrong": 1,
+   "cal_correct": 83,
+   "cal_n": 204,
+   "cal_ccpm": 9.72181551976574,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget5": {
+   "tau": 0.97,
+   "deadline": 5.0,
+   "cal_wrong": 1,
+   "cal_correct": 115,
+   "cal_n": 204,
+   "cal_ccpm": 9.692712906057945,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget10": {
+   "tau": 0.97,
+   "deadline": 10.0,
+   "cal_wrong": 3,
+   "cal_correct": 155,
+   "cal_n": 204,
+   "cal_ccpm": 9.04999391801484,
+   "allowed_wrong": 4
+  },
+  "fused_0.05_budget1": {
+   "tau": 0.95,
+   "deadline": 1.0,
+   "cal_wrong": 8,
+   "cal_correct": 35,
+   "cal_n": 204,
+   "cal_ccpm": 11.740041928721173,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget2": {
+   "tau": 0.97,
+   "deadline": 2.0,
+   "cal_wrong": 0,
+   "cal_correct": 53,
+   "cal_n": 204,
+   "cal_ccpm": 8.496993987975952,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget3": {
+   "tau": 0.97,
+   "deadline": 3.0,
+   "cal_wrong": 1,
+   "cal_correct": 83,
+   "cal_n": 204,
+   "cal_ccpm": 9.72181551976574,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget5": {
+   "tau": 0.97,
+   "deadline": 5.0,
+   "cal_wrong": 1,
+   "cal_correct": 115,
+   "cal_n": 204,
+   "cal_ccpm": 9.692712906057945,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget10": {
+   "tau": 0.97,
+   "deadline": 10.0,
+   "cal_wrong": 3,
+   "cal_correct": 155,
+   "cal_n": 204,
+   "cal_ccpm": 9.04999391801484,
+   "allowed_wrong": 10
+  }
+ },
+ {
+  "fold": 1,
+  "gaze_offset_sd": 0.0,
+  "alpha": 1.0124342796405599,
+  "sigma": 0.37219015066258454,
+  "lapse": 0.01,
+  "eeg_0": {
+   "tau": 0.995,
+   "deadline": Infinity,
+   "cal_wrong": 0,
+   "cal_correct": 45,
+   "cal_n": 204,
+   "cal_ccpm": 0.6782641462036049,
+   "allowed_wrong": 0
+  },
+  "eeg_0.02": {
+   "tau": 0.8,
+   "deadline": 10.0,
+   "cal_wrong": 3,
+   "cal_correct": 35,
+   "cal_n": 204,
+   "cal_ccpm": 1.0991886940591469,
+   "allowed_wrong": 4
+  },
+  "eeg_0.05": {
+   "tau": 0.6,
+   "deadline": 10.0,
+   "cal_wrong": 9,
+   "cal_correct": 42,
+   "cal_n": 204,
+   "cal_ccpm": 1.3609667184230068,
+   "allowed_wrong": 10
+  },
+  "eeg_0.1": {
+   "tau": 0.7,
+   "deadline": Infinity,
+   "cal_wrong": 19,
+   "cal_correct": 89,
+   "cal_n": 204,
+   "cal_ccpm": 1.6016796640671864,
+   "allowed_wrong": 20
+  },
+  "eeg_0.02_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "eeg_0.02_budget2": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "eeg_0.02_budget3": {
+   "tau": 0.5,
+   "deadline": 3.0,
+   "cal_wrong": 0,
+   "cal_correct": 5,
+   "cal_n": 204,
+   "cal_ccpm": 0.4924086992203529,
+   "allowed_wrong": 4
+  },
+  "eeg_0.02_budget5": {
+   "tau": 0.5,
+   "deadline": 5.0,
+   "cal_wrong": 2,
+   "cal_correct": 15,
+   "cal_n": 204,
+   "cal_ccpm": 0.9045226130653267,
+   "allowed_wrong": 4
+  },
+  "eeg_0.02_budget10": {
+   "tau": 0.8,
+   "deadline": 10.0,
+   "cal_wrong": 3,
+   "cal_correct": 35,
+   "cal_n": 204,
+   "cal_ccpm": 1.0991886940591469,
+   "allowed_wrong": 4
+  },
+  "eeg_0.05_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "eeg_0.05_budget2": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "eeg_0.05_budget3": {
+   "tau": 0.5,
+   "deadline": 3.0,
+   "cal_wrong": 0,
+   "cal_correct": 5,
+   "cal_n": 204,
+   "cal_ccpm": 0.4924086992203529,
+   "allowed_wrong": 10
+  },
+  "eeg_0.05_budget5": {
+   "tau": 0.5,
+   "deadline": 5.0,
+   "cal_wrong": 2,
+   "cal_correct": 15,
+   "cal_n": 204,
+   "cal_ccpm": 0.9045226130653267,
+   "allowed_wrong": 10
+  },
+  "eeg_0.05_budget10": {
+   "tau": 0.6,
+   "deadline": 10.0,
+   "cal_wrong": 9,
+   "cal_correct": 42,
+   "cal_n": 204,
+   "cal_ccpm": 1.3609667184230068,
+   "allowed_wrong": 10
+  },
+  "gaze_0": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 0,
+   "never_commit": true
+  },
+  "gaze_0.02": {
+   "tau": 0.93,
+   "deadline": 0.5,
+   "cal_wrong": 4,
+   "cal_correct": 12,
+   "cal_n": 204,
+   "cal_ccpm": 7.470817120622568,
+   "allowed_wrong": 4
+  },
+  "gaze_0.05": {
+   "tau": 0.9,
+   "deadline": 0.5,
+   "cal_wrong": 10,
+   "cal_correct": 25,
+   "cal_n": 204,
+   "cal_ccpm": 16.506189821182943,
+   "allowed_wrong": 10
+  },
+  "gaze_0.1": {
+   "tau": 0.9,
+   "deadline": 0.5,
+   "cal_wrong": 10,
+   "cal_correct": 25,
+   "cal_n": 204,
+   "cal_ccpm": 16.506189821182943,
+   "allowed_wrong": 20
+  },
+  "gaze_0.02_budget1": {
+   "tau": 0.93,
+   "deadline": 1.0,
+   "cal_wrong": 4,
+   "cal_correct": 14,
+   "cal_n": 204,
+   "cal_ccpm": 4.421052631578948,
+   "allowed_wrong": 4
+  },
+  "gaze_0.02_budget2": {
+   "tau": 0.93,
+   "deadline": 2.0,
+   "cal_wrong": 4,
+   "cal_correct": 16,
+   "cal_n": 204,
+   "cal_ccpm": 2.56,
+   "allowed_wrong": 4
+  },
+  "gaze_0.02_budget3": {
+   "tau": 0.93,
+   "deadline": 3.0,
+   "cal_wrong": 4,
+   "cal_correct": 16,
+   "cal_n": 204,
+   "cal_ccpm": 1.7173524150268338,
+   "allowed_wrong": 4
+  },
+  "gaze_0.02_budget5": {
+   "tau": 0.93,
+   "deadline": 5.0,
+   "cal_wrong": 4,
+   "cal_correct": 17,
+   "cal_n": 204,
+   "cal_ccpm": 1.101958136394328,
+   "allowed_wrong": 4
+  },
+  "gaze_0.02_budget10": {
+   "tau": 0.93,
+   "deadline": 10.0,
+   "cal_wrong": 4,
+   "cal_correct": 19,
+   "cal_n": 204,
+   "cal_ccpm": 0.621380391088097,
+   "allowed_wrong": 4
+  },
+  "gaze_0.05_budget1": {
+   "tau": 0.93,
+   "deadline": 1.0,
+   "cal_wrong": 4,
+   "cal_correct": 14,
+   "cal_n": 204,
+   "cal_ccpm": 4.421052631578948,
+   "allowed_wrong": 10
+  },
+  "gaze_0.05_budget2": {
+   "tau": 0.93,
+   "deadline": 2.0,
+   "cal_wrong": 4,
+   "cal_correct": 16,
+   "cal_n": 204,
+   "cal_ccpm": 2.56,
+   "allowed_wrong": 10
+  },
+  "gaze_0.05_budget3": {
+   "tau": 0.93,
+   "deadline": 3.0,
+   "cal_wrong": 4,
+   "cal_correct": 16,
+   "cal_n": 204,
+   "cal_ccpm": 1.7173524150268338,
+   "allowed_wrong": 10
+  },
+  "gaze_0.05_budget5": {
+   "tau": 0.93,
+   "deadline": 5.0,
+   "cal_wrong": 4,
+   "cal_correct": 17,
+   "cal_n": 204,
+   "cal_ccpm": 1.101958136394328,
+   "allowed_wrong": 10
+  },
+  "gaze_0.05_budget10": {
+   "tau": 0.93,
+   "deadline": 10.0,
+   "cal_wrong": 4,
+   "cal_correct": 19,
+   "cal_n": 204,
+   "cal_ccpm": 0.621380391088097,
+   "allowed_wrong": 10
+  },
+  "fused_0": {
+   "tau": 0.98,
+   "deadline": 5.0,
+   "cal_wrong": 0,
+   "cal_correct": 49,
+   "cal_n": 204,
+   "cal_ccpm": 3.183110028420625,
+   "allowed_wrong": 0
+  },
+  "fused_0.02": {
+   "tau": 0.93,
+   "deadline": 0.5,
+   "cal_wrong": 4,
+   "cal_correct": 12,
+   "cal_n": 204,
+   "cal_ccpm": 7.470817120622568,
+   "allowed_wrong": 4
+  },
+  "fused_0.05": {
+   "tau": 0.9,
+   "deadline": 0.5,
+   "cal_wrong": 10,
+   "cal_correct": 25,
+   "cal_n": 204,
+   "cal_ccpm": 16.506189821182943,
+   "allowed_wrong": 10
+  },
+  "fused_0.1": {
+   "tau": 0.9,
+   "deadline": 0.5,
+   "cal_wrong": 10,
+   "cal_correct": 25,
+   "cal_n": 204,
+   "cal_ccpm": 16.506189821182943,
+   "allowed_wrong": 20
+  },
+  "fused_0.02_budget1": {
+   "tau": 0.95,
+   "deadline": 1.0,
+   "cal_wrong": 2,
+   "cal_correct": 12,
+   "cal_n": 204,
+   "cal_ccpm": 3.67112810707457,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget2": {
+   "tau": 0.97,
+   "deadline": 2.0,
+   "cal_wrong": 3,
+   "cal_correct": 18,
+   "cal_n": 204,
+   "cal_ccpm": 2.7612655800575263,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget3": {
+   "tau": 0.97,
+   "deadline": 3.0,
+   "cal_wrong": 3,
+   "cal_correct": 30,
+   "cal_n": 204,
+   "cal_ccpm": 3.1704095112285335,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget5": {
+   "tau": 0.97,
+   "deadline": 5.0,
+   "cal_wrong": 4,
+   "cal_correct": 62,
+   "cal_n": 204,
+   "cal_ccpm": 4.238712434126193,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget10": {
+   "tau": 0.97,
+   "deadline": 10.0,
+   "cal_wrong": 4,
+   "cal_correct": 102,
+   "cal_n": 204,
+   "cal_ccpm": 4.2485248177716075,
+   "allowed_wrong": 4
+  },
+  "fused_0.05_budget1": {
+   "tau": 0.93,
+   "deadline": 1.0,
+   "cal_wrong": 5,
+   "cal_correct": 25,
+   "cal_n": 204,
+   "cal_ccpm": 7.9734219269103,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget2": {
+   "tau": 0.93,
+   "deadline": 2.0,
+   "cal_wrong": 8,
+   "cal_correct": 49,
+   "cal_n": 204,
+   "cal_ccpm": 8.415026833631485,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget3": {
+   "tau": 0.95,
+   "deadline": 3.0,
+   "cal_wrong": 7,
+   "cal_correct": 52,
+   "cal_n": 204,
+   "cal_ccpm": 5.879858657243816,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget5": {
+   "tau": 0.95,
+   "deadline": 5.0,
+   "cal_wrong": 8,
+   "cal_correct": 80,
+   "cal_n": 204,
+   "cal_ccpm": 6.067309211565808,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget10": {
+   "tau": 0.97,
+   "deadline": 10.0,
+   "cal_wrong": 4,
+   "cal_correct": 102,
+   "cal_n": 204,
+   "cal_ccpm": 4.2485248177716075,
+   "allowed_wrong": 10
+  }
+ },
+ {
+  "fold": 2,
+  "gaze_offset_sd": 0.0,
+  "alpha": 0.8566220304208312,
+  "sigma": 0.37219015066258454,
+  "lapse": 0.02,
+  "eeg_0": {
+   "tau": 0.8,
+   "deadline": 4.0,
+   "cal_wrong": 0,
+   "cal_correct": 17,
+   "cal_n": 204,
+   "cal_ccpm": 1.2714241196634466,
+   "allowed_wrong": 0
+  },
+  "eeg_0.02": {
+   "tau": 0.6,
+   "deadline": 4.0,
+   "cal_wrong": 2,
+   "cal_correct": 23,
+   "cal_n": 204,
+   "cal_ccpm": 1.7363950927964769,
+   "allowed_wrong": 4
+  },
+  "eeg_0.05": {
+   "tau": 0.7,
+   "deadline": 7.5,
+   "cal_wrong": 7,
+   "cal_correct": 44,
+   "cal_n": 204,
+   "cal_ccpm": 1.9102749638205498,
+   "allowed_wrong": 10
+  },
+  "eeg_0.1": {
+   "tau": 0.6,
+   "deadline": 7.5,
+   "cal_wrong": 13,
+   "cal_correct": 44,
+   "cal_n": 204,
+   "cal_ccpm": 1.931059705586541,
+   "allowed_wrong": 20
+  },
+  "eeg_0.02_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "eeg_0.02_budget2": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "eeg_0.02_budget3": {
+   "tau": 0.5,
+   "deadline": 3.0,
+   "cal_wrong": 3,
+   "cal_correct": 8,
+   "cal_n": 204,
+   "cal_ccpm": 0.7904487443392343,
+   "allowed_wrong": 4
+  },
+  "eeg_0.02_budget5": {
+   "tau": 0.7,
+   "deadline": 5.0,
+   "cal_wrong": 4,
+   "cal_correct": 27,
+   "cal_n": 204,
+   "cal_ccpm": 1.6583493282149713,
+   "allowed_wrong": 4
+  },
+  "eeg_0.02_budget10": {
+   "tau": 0.9,
+   "deadline": 10.0,
+   "cal_wrong": 4,
+   "cal_correct": 48,
+   "cal_n": 204,
+   "cal_ccpm": 1.5780821917808219,
+   "allowed_wrong": 4
+  },
+  "eeg_0.05_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "eeg_0.05_budget2": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "eeg_0.05_budget3": {
+   "tau": 0.5,
+   "deadline": 3.0,
+   "cal_wrong": 3,
+   "cal_correct": 8,
+   "cal_n": 204,
+   "cal_ccpm": 0.7904487443392343,
+   "allowed_wrong": 10
+  },
+  "eeg_0.05_budget5": {
+   "tau": 0.5,
+   "deadline": 5.0,
+   "cal_wrong": 8,
+   "cal_correct": 29,
+   "cal_n": 204,
+   "cal_ccpm": 1.810143042912874,
+   "allowed_wrong": 10
+  },
+  "eeg_0.05_budget10": {
+   "tau": 0.7,
+   "deadline": 10.0,
+   "cal_wrong": 9,
+   "cal_correct": 52,
+   "cal_n": 204,
+   "cal_ccpm": 1.7776511644469766,
+   "allowed_wrong": 10
+  },
+  "gaze_0": {
+   "tau": 0.93,
+   "deadline": 0.5,
+   "cal_wrong": 0,
+   "cal_correct": 6,
+   "cal_n": 204,
+   "cal_ccpm": 3.5999999999999996,
+   "allowed_wrong": 0
+  },
+  "gaze_0.02": {
+   "tau": 0.93,
+   "deadline": 0.5,
+   "cal_wrong": 0,
+   "cal_correct": 6,
+   "cal_n": 204,
+   "cal_ccpm": 3.5999999999999996,
+   "allowed_wrong": 4
+  },
+  "gaze_0.05": {
+   "tau": 0.9,
+   "deadline": 0.5,
+   "cal_wrong": 7,
+   "cal_correct": 29,
+   "cal_n": 204,
+   "cal_ccpm": 19.094650205761315,
+   "allowed_wrong": 10
+  },
+  "gaze_0.1": {
+   "tau": 0.9,
+   "deadline": 0.5,
+   "cal_wrong": 7,
+   "cal_correct": 29,
+   "cal_n": 204,
+   "cal_ccpm": 19.094650205761315,
+   "allowed_wrong": 20
+  },
+  "gaze_0.02_budget1": {
+   "tau": 0.93,
+   "deadline": 1.0,
+   "cal_wrong": 0,
+   "cal_correct": 7,
+   "cal_n": 204,
+   "cal_ccpm": 2.1132075471698113,
+   "allowed_wrong": 4
+  },
+  "gaze_0.02_budget2": {
+   "tau": 0.93,
+   "deadline": 2.0,
+   "cal_wrong": 0,
+   "cal_correct": 8,
+   "cal_n": 204,
+   "cal_ccpm": 1.2144212523719164,
+   "allowed_wrong": 4
+  },
+  "gaze_0.02_budget3": {
+   "tau": 0.93,
+   "deadline": 3.0,
+   "cal_wrong": 0,
+   "cal_correct": 8,
+   "cal_n": 204,
+   "cal_ccpm": 0.8118393234672305,
+   "allowed_wrong": 4
+  },
+  "gaze_0.02_budget5": {
+   "tau": 0.93,
+   "deadline": 5.0,
+   "cal_wrong": 0,
+   "cal_correct": 8,
+   "cal_n": 204,
+   "cal_ccpm": 0.48817696414950423,
+   "allowed_wrong": 4
+  },
+  "gaze_0.02_budget10": {
+   "tau": 0.93,
+   "deadline": 10.0,
+   "cal_wrong": 0,
+   "cal_correct": 9,
+   "cal_n": 204,
+   "cal_ccpm": 0.2757388140677858,
+   "allowed_wrong": 4
+  },
+  "gaze_0.05_budget1": {
+   "tau": 0.9,
+   "deadline": 1.0,
+   "cal_wrong": 8,
+   "cal_correct": 34,
+   "cal_n": 204,
+   "cal_ccpm": 11.75792507204611,
+   "allowed_wrong": 10
+  },
+  "gaze_0.05_budget2": {
+   "tau": 0.9,
+   "deadline": 2.0,
+   "cal_wrong": 9,
+   "cal_correct": 42,
+   "cal_n": 204,
+   "cal_ccpm": 7.613293051359516,
+   "allowed_wrong": 10
+  },
+  "gaze_0.05_budget3": {
+   "tau": 0.9,
+   "deadline": 3.0,
+   "cal_wrong": 9,
+   "cal_correct": 44,
+   "cal_n": 204,
+   "cal_ccpm": 5.461598138091544,
+   "allowed_wrong": 10
+  },
+  "gaze_0.05_budget5": {
+   "tau": 0.9,
+   "deadline": 5.0,
+   "cal_wrong": 9,
+   "cal_correct": 46,
+   "cal_n": 204,
+   "cal_ccpm": 3.5288476905865434,
+   "allowed_wrong": 10
+  },
+  "gaze_0.05_budget10": {
+   "tau": 0.9,
+   "deadline": 10.0,
+   "cal_wrong": 10,
+   "cal_correct": 49,
+   "cal_n": 204,
+   "cal_ccpm": 1.9388343912290824,
+   "allowed_wrong": 10
+  },
+  "fused_0": {
+   "tau": 0.97,
+   "deadline": 1.5,
+   "cal_wrong": 0,
+   "cal_correct": 19,
+   "cal_n": 204,
+   "cal_ccpm": 3.795255930087391,
+   "allowed_wrong": 0
+  },
+  "fused_0.02": {
+   "tau": 0.93,
+   "deadline": 1.0,
+   "cal_wrong": 1,
+   "cal_correct": 23,
+   "cal_n": 204,
+   "cal_ccpm": 7.0095238095238095,
+   "allowed_wrong": 4
+  },
+  "fused_0.05": {
+   "tau": 0.9,
+   "deadline": 0.5,
+   "cal_wrong": 7,
+   "cal_correct": 29,
+   "cal_n": 204,
+   "cal_ccpm": 19.094650205761315,
+   "allowed_wrong": 10
+  },
+  "fused_0.1": {
+   "tau": 0.9,
+   "deadline": 1.5,
+   "cal_wrong": 17,
+   "cal_correct": 77,
+   "cal_n": 204,
+   "cal_ccpm": 19.381227058206605,
+   "allowed_wrong": 20
+  },
+  "fused_0.02_budget1": {
+   "tau": 0.93,
+   "deadline": 1.0,
+   "cal_wrong": 1,
+   "cal_correct": 23,
+   "cal_n": 204,
+   "cal_ccpm": 7.0095238095238095,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget2": {
+   "tau": 0.97,
+   "deadline": 2.0,
+   "cal_wrong": 2,
+   "cal_correct": 37,
+   "cal_n": 204,
+   "cal_ccpm": 5.723493393490171,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget3": {
+   "tau": 0.97,
+   "deadline": 3.0,
+   "cal_wrong": 3,
+   "cal_correct": 50,
+   "cal_n": 204,
+   "cal_ccpm": 5.483207676490747,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget5": {
+   "tau": 0.97,
+   "deadline": 5.0,
+   "cal_wrong": 4,
+   "cal_correct": 72,
+   "cal_n": 204,
+   "cal_ccpm": 5.218967079432196,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget10": {
+   "tau": 0.98,
+   "deadline": 10.0,
+   "cal_wrong": 3,
+   "cal_correct": 117,
+   "cal_n": 204,
+   "cal_ccpm": 4.874153792744315,
+   "allowed_wrong": 4
+  },
+  "fused_0.05_budget1": {
+   "tau": 0.93,
+   "deadline": 1.0,
+   "cal_wrong": 1,
+   "cal_correct": 23,
+   "cal_n": 204,
+   "cal_ccpm": 7.0095238095238095,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget2": {
+   "tau": 0.93,
+   "deadline": 2.0,
+   "cal_wrong": 8,
+   "cal_correct": 67,
+   "cal_n": 204,
+   "cal_ccpm": 11.469329529243938,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget3": {
+   "tau": 0.93,
+   "deadline": 3.0,
+   "cal_wrong": 9,
+   "cal_correct": 86,
+   "cal_n": 204,
+   "cal_ccpm": 11.005065315915756,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget5": {
+   "tau": 0.95,
+   "deadline": 5.0,
+   "cal_wrong": 8,
+   "cal_correct": 97,
+   "cal_n": 204,
+   "cal_ccpm": 7.86752281176073,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget10": {
+   "tau": 0.95,
+   "deadline": 10.0,
+   "cal_wrong": 9,
+   "cal_correct": 143,
+   "cal_n": 204,
+   "cal_ccpm": 7.850852110259636,
+   "allowed_wrong": 10
+  }
+ },
+ {
+  "fold": 0,
+  "gaze_offset_sd": 0.5,
+  "alpha": 1.0124342796405599,
+  "sigma": 0.5968883208572184,
+  "lapse": 0.01,
+  "eeg_0": {
+   "tau": 0.97,
+   "deadline": 15.0,
+   "cal_wrong": 0,
+   "cal_correct": 71,
+   "cal_n": 204,
+   "cal_ccpm": 1.6369662327681445,
+   "allowed_wrong": 0
+  },
+  "eeg_0.02": {
+   "tau": 0.93,
+   "deadline": 15.0,
+   "cal_wrong": 2,
+   "cal_correct": 82,
+   "cal_n": 204,
+   "cal_ccpm": 1.9518000595060991,
+   "allowed_wrong": 4
+  },
+  "eeg_0.05": {
+   "tau": 0.7,
+   "deadline": 7.5,
+   "cal_wrong": 10,
+   "cal_correct": 51,
+   "cal_n": 204,
+   "cal_ccpm": 2.20679707923916,
+   "allowed_wrong": 10
+  },
+  "eeg_0.1": {
+   "tau": 0.6,
+   "deadline": 10.0,
+   "cal_wrong": 20,
+   "cal_correct": 72,
+   "cal_n": 204,
+   "cal_ccpm": 2.603978300180832,
+   "allowed_wrong": 20
+  },
+  "eeg_0.02_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "eeg_0.02_budget2": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "eeg_0.02_budget3": {
+   "tau": 0.5,
+   "deadline": 3.0,
+   "cal_wrong": 3,
+   "cal_correct": 5,
+   "cal_n": 204,
+   "cal_ccpm": 0.4931169098006986,
+   "allowed_wrong": 4
+  },
+  "eeg_0.02_budget5": {
+   "tau": 0.7,
+   "deadline": 5.0,
+   "cal_wrong": 4,
+   "cal_correct": 22,
+   "cal_n": 204,
+   "cal_ccpm": 1.3424866514111367,
+   "allowed_wrong": 4
+  },
+  "eeg_0.02_budget10": {
+   "tau": 0.9,
+   "deadline": 10.0,
+   "cal_wrong": 4,
+   "cal_correct": 54,
+   "cal_n": 204,
+   "cal_ccpm": 1.7760723585034948,
+   "allowed_wrong": 4
+  },
+  "eeg_0.05_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "eeg_0.05_budget2": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "eeg_0.05_budget3": {
+   "tau": 0.5,
+   "deadline": 3.0,
+   "cal_wrong": 3,
+   "cal_correct": 5,
+   "cal_n": 204,
+   "cal_ccpm": 0.4931169098006986,
+   "allowed_wrong": 10
+  },
+  "eeg_0.05_budget5": {
+   "tau": 0.6,
+   "deadline": 5.0,
+   "cal_wrong": 8,
+   "cal_correct": 31,
+   "cal_n": 204,
+   "cal_ccpm": 1.9123505976095616,
+   "allowed_wrong": 10
+  },
+  "eeg_0.05_budget10": {
+   "tau": 0.8,
+   "deadline": 10.0,
+   "cal_wrong": 8,
+   "cal_correct": 65,
+   "cal_n": 204,
+   "cal_ccpm": 2.2037010877242547,
+   "allowed_wrong": 10
+  },
+  "gaze_0": {
+   "tau": 0.8,
+   "deadline": 1.0,
+   "cal_wrong": 0,
+   "cal_correct": 2,
+   "cal_n": 204,
+   "cal_ccpm": 0.5911330049261084,
+   "allowed_wrong": 0
+  },
+  "gaze_0.02": {
+   "tau": 0.7,
+   "deadline": 0.5,
+   "cal_wrong": 1,
+   "cal_correct": 6,
+   "cal_n": 204,
+   "cal_ccpm": 3.618090452261306,
+   "allowed_wrong": 4
+  },
+  "gaze_0.05": {
+   "tau": 0.7,
+   "deadline": 0.5,
+   "cal_wrong": 1,
+   "cal_correct": 6,
+   "cal_n": 204,
+   "cal_ccpm": 3.618090452261306,
+   "allowed_wrong": 10
+  },
+  "gaze_0.1": {
+   "tau": 0.6,
+   "deadline": 0.5,
+   "cal_wrong": 14,
+   "cal_correct": 11,
+   "cal_n": 204,
+   "cal_ccpm": 6.993377483443708,
+   "allowed_wrong": 20
+  },
+  "gaze_0.02_budget1": {
+   "tau": 0.7,
+   "deadline": 1.0,
+   "cal_wrong": 1,
+   "cal_correct": 6,
+   "cal_n": 204,
+   "cal_ccpm": 1.8181818181818183,
+   "allowed_wrong": 4
+  },
+  "gaze_0.02_budget2": {
+   "tau": 0.7,
+   "deadline": 2.0,
+   "cal_wrong": 1,
+   "cal_correct": 6,
+   "cal_n": 204,
+   "cal_ccpm": 0.9113924050632912,
+   "allowed_wrong": 4
+  },
+  "gaze_0.02_budget3": {
+   "tau": 0.7,
+   "deadline": 3.0,
+   "cal_wrong": 1,
+   "cal_correct": 6,
+   "cal_n": 204,
+   "cal_ccpm": 0.6081081081081081,
+   "allowed_wrong": 4
+  },
+  "gaze_0.02_budget5": {
+   "tau": 0.7,
+   "deadline": 5.0,
+   "cal_wrong": 1,
+   "cal_correct": 6,
+   "cal_n": 204,
+   "cal_ccpm": 0.36511156186612576,
+   "allowed_wrong": 4
+  },
+  "gaze_0.02_budget10": {
+   "tau": 0.7,
+   "deadline": 10.0,
+   "cal_wrong": 1,
+   "cal_correct": 6,
+   "cal_n": 204,
+   "cal_ccpm": 0.182648401826484,
+   "allowed_wrong": 4
+  },
+  "gaze_0.05_budget1": {
+   "tau": 0.7,
+   "deadline": 1.0,
+   "cal_wrong": 1,
+   "cal_correct": 6,
+   "cal_n": 204,
+   "cal_ccpm": 1.8181818181818183,
+   "allowed_wrong": 10
+  },
+  "gaze_0.05_budget2": {
+   "tau": 0.7,
+   "deadline": 2.0,
+   "cal_wrong": 1,
+   "cal_correct": 6,
+   "cal_n": 204,
+   "cal_ccpm": 0.9113924050632912,
+   "allowed_wrong": 10
+  },
+  "gaze_0.05_budget3": {
+   "tau": 0.7,
+   "deadline": 3.0,
+   "cal_wrong": 1,
+   "cal_correct": 6,
+   "cal_n": 204,
+   "cal_ccpm": 0.6081081081081081,
+   "allowed_wrong": 10
+  },
+  "gaze_0.05_budget5": {
+   "tau": 0.7,
+   "deadline": 5.0,
+   "cal_wrong": 1,
+   "cal_correct": 6,
+   "cal_n": 204,
+   "cal_ccpm": 0.36511156186612576,
+   "allowed_wrong": 10
+  },
+  "gaze_0.05_budget10": {
+   "tau": 0.7,
+   "deadline": 10.0,
+   "cal_wrong": 1,
+   "cal_correct": 6,
+   "cal_n": 204,
+   "cal_ccpm": 0.182648401826484,
+   "allowed_wrong": 10
+  },
+  "fused_0": {
+   "tau": 0.93,
+   "deadline": 3.0,
+   "cal_wrong": 0,
+   "cal_correct": 29,
+   "cal_n": 204,
+   "cal_ccpm": 2.9541595925297113,
+   "allowed_wrong": 0
+  },
+  "fused_0.02": {
+   "tau": 0.85,
+   "deadline": 4.0,
+   "cal_wrong": 3,
+   "cal_correct": 62,
+   "cal_n": 204,
+   "cal_ccpm": 5.19825327510917,
+   "allowed_wrong": 4
+  },
+  "fused_0.05": {
+   "tau": 0.7,
+   "deadline": 1.5,
+   "cal_wrong": 9,
+   "cal_correct": 30,
+   "cal_n": 204,
+   "cal_ccpm": 6.299212598425196,
+   "allowed_wrong": 10
+  },
+  "fused_0.1": {
+   "tau": 0.7,
+   "deadline": 2.0,
+   "cal_wrong": 11,
+   "cal_correct": 46,
+   "cal_n": 204,
+   "cal_ccpm": 7.561643835616438,
+   "allowed_wrong": 20
+  },
+  "fused_0.02_budget1": {
+   "tau": 0.8,
+   "deadline": 1.0,
+   "cal_wrong": 2,
+   "cal_correct": 2,
+   "cal_n": 204,
+   "cal_ccpm": 0.5918618988902589,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget2": {
+   "tau": 0.8,
+   "deadline": 2.0,
+   "cal_wrong": 3,
+   "cal_correct": 28,
+   "cal_n": 204,
+   "cal_ccpm": 4.289818065751676,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget3": {
+   "tau": 0.85,
+   "deadline": 3.0,
+   "cal_wrong": 2,
+   "cal_correct": 49,
+   "cal_n": 204,
+   "cal_ccpm": 5.163556531284303,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget5": {
+   "tau": 0.93,
+   "deadline": 5.0,
+   "cal_wrong": 3,
+   "cal_correct": 57,
+   "cal_n": 204,
+   "cal_ccpm": 3.7665198237885464,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget10": {
+   "tau": 0.95,
+   "deadline": 10.0,
+   "cal_wrong": 2,
+   "cal_correct": 95,
+   "cal_n": 204,
+   "cal_ccpm": 3.619334867846655,
+   "allowed_wrong": 4
+  },
+  "fused_0.05_budget1": {
+   "tau": 0.7,
+   "deadline": 1.0,
+   "cal_wrong": 5,
+   "cal_correct": 10,
+   "cal_n": 204,
+   "cal_ccpm": 3.0476190476190474,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget2": {
+   "tau": 0.8,
+   "deadline": 2.0,
+   "cal_wrong": 3,
+   "cal_correct": 28,
+   "cal_n": 204,
+   "cal_ccpm": 4.289818065751676,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget3": {
+   "tau": 0.8,
+   "deadline": 3.0,
+   "cal_wrong": 5,
+   "cal_correct": 52,
+   "cal_n": 204,
+   "cal_ccpm": 5.625422582826234,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget5": {
+   "tau": 0.85,
+   "deadline": 5.0,
+   "cal_wrong": 7,
+   "cal_correct": 67,
+   "cal_n": 204,
+   "cal_ccpm": 4.723160522837421,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget10": {
+   "tau": 0.9,
+   "deadline": 10.0,
+   "cal_wrong": 10,
+   "cal_correct": 104,
+   "cal_n": 204,
+   "cal_ccpm": 4.292347377472055,
+   "allowed_wrong": 10
+  }
+ },
+ {
+  "fold": 1,
+  "gaze_offset_sd": 0.5,
+  "alpha": 1.0124342796405599,
+  "sigma": 0.5968883208572184,
+  "lapse": 0.01,
+  "eeg_0": {
+   "tau": 0.995,
+   "deadline": Infinity,
+   "cal_wrong": 0,
+   "cal_correct": 45,
+   "cal_n": 204,
+   "cal_ccpm": 0.6782641462036049,
+   "allowed_wrong": 0
+  },
+  "eeg_0.02": {
+   "tau": 0.8,
+   "deadline": 10.0,
+   "cal_wrong": 3,
+   "cal_correct": 35,
+   "cal_n": 204,
+   "cal_ccpm": 1.0991886940591469,
+   "allowed_wrong": 4
+  },
+  "eeg_0.05": {
+   "tau": 0.6,
+   "deadline": 10.0,
+   "cal_wrong": 9,
+   "cal_correct": 42,
+   "cal_n": 204,
+   "cal_ccpm": 1.3609667184230068,
+   "allowed_wrong": 10
+  },
+  "eeg_0.1": {
+   "tau": 0.7,
+   "deadline": Infinity,
+   "cal_wrong": 19,
+   "cal_correct": 89,
+   "cal_n": 204,
+   "cal_ccpm": 1.6016796640671864,
+   "allowed_wrong": 20
+  },
+  "eeg_0.02_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "eeg_0.02_budget2": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "eeg_0.02_budget3": {
+   "tau": 0.5,
+   "deadline": 3.0,
+   "cal_wrong": 0,
+   "cal_correct": 5,
+   "cal_n": 204,
+   "cal_ccpm": 0.4924086992203529,
+   "allowed_wrong": 4
+  },
+  "eeg_0.02_budget5": {
+   "tau": 0.5,
+   "deadline": 5.0,
+   "cal_wrong": 2,
+   "cal_correct": 15,
+   "cal_n": 204,
+   "cal_ccpm": 0.9045226130653267,
+   "allowed_wrong": 4
+  },
+  "eeg_0.02_budget10": {
+   "tau": 0.8,
+   "deadline": 10.0,
+   "cal_wrong": 3,
+   "cal_correct": 35,
+   "cal_n": 204,
+   "cal_ccpm": 1.0991886940591469,
+   "allowed_wrong": 4
+  },
+  "eeg_0.05_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "eeg_0.05_budget2": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "eeg_0.05_budget3": {
+   "tau": 0.5,
+   "deadline": 3.0,
+   "cal_wrong": 0,
+   "cal_correct": 5,
+   "cal_n": 204,
+   "cal_ccpm": 0.4924086992203529,
+   "allowed_wrong": 10
+  },
+  "eeg_0.05_budget5": {
+   "tau": 0.5,
+   "deadline": 5.0,
+   "cal_wrong": 2,
+   "cal_correct": 15,
+   "cal_n": 204,
+   "cal_ccpm": 0.9045226130653267,
+   "allowed_wrong": 10
+  },
+  "eeg_0.05_budget10": {
+   "tau": 0.6,
+   "deadline": 10.0,
+   "cal_wrong": 9,
+   "cal_correct": 42,
+   "cal_n": 204,
+   "cal_ccpm": 1.3609667184230068,
+   "allowed_wrong": 10
+  },
+  "gaze_0": {
+   "tau": 0.85,
+   "deadline": 0.5,
+   "cal_wrong": 0,
+   "cal_correct": 1,
+   "cal_n": 204,
+   "cal_ccpm": 0.5904059040590406,
+   "allowed_wrong": 0
+  },
+  "gaze_0.02": {
+   "tau": 0.8,
+   "deadline": 0.5,
+   "cal_wrong": 2,
+   "cal_correct": 3,
+   "cal_n": 204,
+   "cal_ccpm": 1.784386617100372,
+   "allowed_wrong": 4
+  },
+  "gaze_0.05": {
+   "tau": 0.7,
+   "deadline": 0.5,
+   "cal_wrong": 6,
+   "cal_correct": 6,
+   "cal_n": 204,
+   "cal_ccpm": 3.673469387755102,
+   "allowed_wrong": 10
+  },
+  "gaze_0.1": {
+   "tau": 0.6,
+   "deadline": 0.5,
+   "cal_wrong": 16,
+   "cal_correct": 13,
+   "cal_n": 204,
+   "cal_ccpm": 8.421052631578947,
+   "allowed_wrong": 20
+  },
+  "gaze_0.02_budget1": {
+   "tau": 0.8,
+   "deadline": 1.0,
+   "cal_wrong": 2,
+   "cal_correct": 3,
+   "cal_n": 204,
+   "cal_ccpm": 0.8983156581409857,
+   "allowed_wrong": 4
+  },
+  "gaze_0.02_budget2": {
+   "tau": 0.8,
+   "deadline": 2.0,
+   "cal_wrong": 2,
+   "cal_correct": 3,
+   "cal_n": 204,
+   "cal_ccpm": 0.4507042253521127,
+   "allowed_wrong": 4
+  },
+  "gaze_0.02_budget3": {
+   "tau": 0.8,
+   "deadline": 3.0,
+   "cal_wrong": 2,
+   "cal_correct": 3,
+   "cal_n": 204,
+   "cal_ccpm": 0.30081470649676206,
+   "allowed_wrong": 4
+  },
+  "gaze_0.02_budget5": {
+   "tau": 0.8,
+   "deadline": 5.0,
+   "cal_wrong": 2,
+   "cal_correct": 3,
+   "cal_n": 204,
+   "cal_ccpm": 0.1806548739179526,
+   "allowed_wrong": 4
+  },
+  "gaze_0.02_budget10": {
+   "tau": 0.8,
+   "deadline": 10.0,
+   "cal_wrong": 2,
+   "cal_correct": 3,
+   "cal_n": 204,
+   "cal_ccpm": 0.09038980603854121,
+   "allowed_wrong": 4
+  },
+  "gaze_0.05_budget1": {
+   "tau": 0.7,
+   "deadline": 1.0,
+   "cal_wrong": 6,
+   "cal_correct": 6,
+   "cal_n": 204,
+   "cal_ccpm": 1.8556701030927836,
+   "allowed_wrong": 10
+  },
+  "gaze_0.05_budget2": {
+   "tau": 0.7,
+   "deadline": 2.0,
+   "cal_wrong": 6,
+   "cal_correct": 7,
+   "cal_n": 204,
+   "cal_ccpm": 1.088082901554404,
+   "allowed_wrong": 10
+  },
+  "gaze_0.05_budget3": {
+   "tau": 0.7,
+   "deadline": 3.0,
+   "cal_wrong": 6,
+   "cal_correct": 7,
+   "cal_n": 204,
+   "cal_ccpm": 0.7279029462738301,
+   "allowed_wrong": 10
+  },
+  "gaze_0.05_budget5": {
+   "tau": 0.7,
+   "deadline": 5.0,
+   "cal_wrong": 6,
+   "cal_correct": 7,
+   "cal_n": 204,
+   "cal_ccpm": 0.43795620437956206,
+   "allowed_wrong": 10
+  },
+  "gaze_0.05_budget10": {
+   "tau": 0.7,
+   "deadline": 10.0,
+   "cal_wrong": 6,
+   "cal_correct": 7,
+   "cal_n": 204,
+   "cal_ccpm": 0.219435736677116,
+   "allowed_wrong": 10
+  },
+  "fused_0": {
+   "tau": 0.995,
+   "deadline": 15.0,
+   "cal_wrong": 0,
+   "cal_correct": 58,
+   "cal_n": 204,
+   "cal_ccpm": 1.2971159670129992,
+   "allowed_wrong": 0
+  },
+  "fused_0.02": {
+   "tau": 0.9,
+   "deadline": 5.0,
+   "cal_wrong": 4,
+   "cal_correct": 42,
+   "cal_n": 204,
+   "cal_ccpm": 2.6634958382877527,
+   "allowed_wrong": 4
+  },
+  "fused_0.05": {
+   "tau": 0.7,
+   "deadline": 0.5,
+   "cal_wrong": 6,
+   "cal_correct": 6,
+   "cal_n": 204,
+   "cal_ccpm": 3.673469387755102,
+   "allowed_wrong": 10
+  },
+  "fused_0.1": {
+   "tau": 0.6,
+   "deadline": 0.5,
+   "cal_wrong": 16,
+   "cal_correct": 13,
+   "cal_n": 204,
+   "cal_ccpm": 8.421052631578947,
+   "allowed_wrong": 20
+  },
+  "fused_0.02_budget1": {
+   "tau": 0.8,
+   "deadline": 1.0,
+   "cal_wrong": 3,
+   "cal_correct": 5,
+   "cal_n": 204,
+   "cal_ccpm": 1.50093808630394,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget2": {
+   "tau": 0.85,
+   "deadline": 2.0,
+   "cal_wrong": 3,
+   "cal_correct": 12,
+   "cal_n": 204,
+   "cal_ccpm": 1.8056426332288402,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget3": {
+   "tau": 0.9,
+   "deadline": 3.0,
+   "cal_wrong": 4,
+   "cal_correct": 11,
+   "cal_n": 204,
+   "cal_ccpm": 1.1087778244435111,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget5": {
+   "tau": 0.9,
+   "deadline": 5.0,
+   "cal_wrong": 4,
+   "cal_correct": 42,
+   "cal_n": 204,
+   "cal_ccpm": 2.6634958382877527,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget10": {
+   "tau": 0.97,
+   "deadline": 10.0,
+   "cal_wrong": 4,
+   "cal_correct": 52,
+   "cal_n": 204,
+   "cal_ccpm": 1.7293701933070047,
+   "allowed_wrong": 4
+  },
+  "fused_0.05_budget1": {
+   "tau": 0.7,
+   "deadline": 1.0,
+   "cal_wrong": 8,
+   "cal_correct": 10,
+   "cal_n": 204,
+   "cal_ccpm": 3.1088082901554404,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget2": {
+   "tau": 0.8,
+   "deadline": 2.0,
+   "cal_wrong": 8,
+   "cal_correct": 16,
+   "cal_n": 204,
+   "cal_ccpm": 2.471837785645317,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget3": {
+   "tau": 0.85,
+   "deadline": 3.0,
+   "cal_wrong": 7,
+   "cal_correct": 19,
+   "cal_n": 204,
+   "cal_ccpm": 1.957501609787508,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget5": {
+   "tau": 0.85,
+   "deadline": 5.0,
+   "cal_wrong": 10,
+   "cal_correct": 51,
+   "cal_n": 204,
+   "cal_ccpm": 3.380281690140845,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget10": {
+   "tau": 0.93,
+   "deadline": 10.0,
+   "cal_wrong": 7,
+   "cal_correct": 71,
+   "cal_n": 204,
+   "cal_ccpm": 2.495971876373224,
+   "allowed_wrong": 10
+  }
+ },
+ {
+  "fold": 2,
+  "gaze_offset_sd": 0.5,
+  "alpha": 0.8566220304208312,
+  "sigma": 0.5968883208572184,
+  "lapse": 0.01,
+  "eeg_0": {
+   "tau": 0.8,
+   "deadline": 4.0,
+   "cal_wrong": 0,
+   "cal_correct": 17,
+   "cal_n": 204,
+   "cal_ccpm": 1.2714241196634466,
+   "allowed_wrong": 0
+  },
+  "eeg_0.02": {
+   "tau": 0.6,
+   "deadline": 4.0,
+   "cal_wrong": 2,
+   "cal_correct": 23,
+   "cal_n": 204,
+   "cal_ccpm": 1.7363950927964769,
+   "allowed_wrong": 4
+  },
+  "eeg_0.05": {
+   "tau": 0.7,
+   "deadline": 7.5,
+   "cal_wrong": 7,
+   "cal_correct": 44,
+   "cal_n": 204,
+   "cal_ccpm": 1.9102749638205498,
+   "allowed_wrong": 10
+  },
+  "eeg_0.1": {
+   "tau": 0.6,
+   "deadline": 7.5,
+   "cal_wrong": 13,
+   "cal_correct": 44,
+   "cal_n": 204,
+   "cal_ccpm": 1.931059705586541,
+   "allowed_wrong": 20
+  },
+  "eeg_0.02_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "eeg_0.02_budget2": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "eeg_0.02_budget3": {
+   "tau": 0.5,
+   "deadline": 3.0,
+   "cal_wrong": 3,
+   "cal_correct": 8,
+   "cal_n": 204,
+   "cal_ccpm": 0.7904487443392343,
+   "allowed_wrong": 4
+  },
+  "eeg_0.02_budget5": {
+   "tau": 0.7,
+   "deadline": 5.0,
+   "cal_wrong": 4,
+   "cal_correct": 27,
+   "cal_n": 204,
+   "cal_ccpm": 1.6583493282149713,
+   "allowed_wrong": 4
+  },
+  "eeg_0.02_budget10": {
+   "tau": 0.9,
+   "deadline": 10.0,
+   "cal_wrong": 4,
+   "cal_correct": 48,
+   "cal_n": 204,
+   "cal_ccpm": 1.5780821917808219,
+   "allowed_wrong": 4
+  },
+  "eeg_0.05_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "eeg_0.05_budget2": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "eeg_0.05_budget3": {
+   "tau": 0.5,
+   "deadline": 3.0,
+   "cal_wrong": 3,
+   "cal_correct": 8,
+   "cal_n": 204,
+   "cal_ccpm": 0.7904487443392343,
+   "allowed_wrong": 10
+  },
+  "eeg_0.05_budget5": {
+   "tau": 0.5,
+   "deadline": 5.0,
+   "cal_wrong": 8,
+   "cal_correct": 29,
+   "cal_n": 204,
+   "cal_ccpm": 1.810143042912874,
+   "allowed_wrong": 10
+  },
+  "eeg_0.05_budget10": {
+   "tau": 0.7,
+   "deadline": 10.0,
+   "cal_wrong": 9,
+   "cal_correct": 52,
+   "cal_n": 204,
+   "cal_ccpm": 1.7776511644469766,
+   "allowed_wrong": 10
+  },
+  "gaze_0": {
+   "tau": 0.8,
+   "deadline": 0.5,
+   "cal_wrong": 0,
+   "cal_correct": 2,
+   "cal_n": 204,
+   "cal_ccpm": 1.1851851851851851,
+   "allowed_wrong": 0
+  },
+  "gaze_0.02": {
+   "tau": 0.7,
+   "deadline": 0.5,
+   "cal_wrong": 2,
+   "cal_correct": 4,
+   "cal_n": 204,
+   "cal_ccpm": 2.397003745318352,
+   "allowed_wrong": 4
+  },
+  "gaze_0.05": {
+   "tau": 0.7,
+   "deadline": 0.5,
+   "cal_wrong": 2,
+   "cal_correct": 4,
+   "cal_n": 204,
+   "cal_ccpm": 2.397003745318352,
+   "allowed_wrong": 10
+  },
+  "gaze_0.1": {
+   "tau": 0.6,
+   "deadline": 0.5,
+   "cal_wrong": 11,
+   "cal_correct": 16,
+   "cal_n": 204,
+   "cal_ccpm": 10.253671562082777,
+   "allowed_wrong": 20
+  },
+  "gaze_0.02_budget1": {
+   "tau": 0.7,
+   "deadline": 1.0,
+   "cal_wrong": 2,
+   "cal_correct": 5,
+   "cal_n": 204,
+   "cal_ccpm": 1.508485229415462,
+   "allowed_wrong": 4
+  },
+  "gaze_0.02_budget2": {
+   "tau": 0.7,
+   "deadline": 2.0,
+   "cal_wrong": 2,
+   "cal_correct": 5,
+   "cal_n": 204,
+   "cal_ccpm": 0.7578149668455952,
+   "allowed_wrong": 4
+  },
+  "gaze_0.02_budget3": {
+   "tau": 0.7,
+   "deadline": 3.0,
+   "cal_wrong": 3,
+   "cal_correct": 5,
+   "cal_n": 204,
+   "cal_ccpm": 0.5062223159670955,
+   "allowed_wrong": 4
+  },
+  "gaze_0.02_budget5": {
+   "tau": 0.7,
+   "deadline": 5.0,
+   "cal_wrong": 3,
+   "cal_correct": 5,
+   "cal_n": 204,
+   "cal_ccpm": 0.3046845245651898,
+   "allowed_wrong": 4
+  },
+  "gaze_0.02_budget10": {
+   "tau": 0.7,
+   "deadline": 10.0,
+   "cal_wrong": 3,
+   "cal_correct": 5,
+   "cal_n": 204,
+   "cal_ccpm": 0.15270089711777057,
+   "allowed_wrong": 4
+  },
+  "gaze_0.05_budget1": {
+   "tau": 0.7,
+   "deadline": 1.0,
+   "cal_wrong": 2,
+   "cal_correct": 5,
+   "cal_n": 204,
+   "cal_ccpm": 1.508485229415462,
+   "allowed_wrong": 10
+  },
+  "gaze_0.05_budget2": {
+   "tau": 0.7,
+   "deadline": 2.0,
+   "cal_wrong": 2,
+   "cal_correct": 5,
+   "cal_n": 204,
+   "cal_ccpm": 0.7578149668455952,
+   "allowed_wrong": 10
+  },
+  "gaze_0.05_budget3": {
+   "tau": 0.7,
+   "deadline": 3.0,
+   "cal_wrong": 3,
+   "cal_correct": 5,
+   "cal_n": 204,
+   "cal_ccpm": 0.5062223159670955,
+   "allowed_wrong": 10
+  },
+  "gaze_0.05_budget5": {
+   "tau": 0.7,
+   "deadline": 5.0,
+   "cal_wrong": 3,
+   "cal_correct": 5,
+   "cal_n": 204,
+   "cal_ccpm": 0.3046845245651898,
+   "allowed_wrong": 10
+  },
+  "gaze_0.05_budget10": {
+   "tau": 0.7,
+   "deadline": 10.0,
+   "cal_wrong": 3,
+   "cal_correct": 5,
+   "cal_n": 204,
+   "cal_ccpm": 0.15270089711777057,
+   "allowed_wrong": 10
+  },
+  "fused_0": {
+   "tau": 0.95,
+   "deadline": 3.0,
+   "cal_wrong": 0,
+   "cal_correct": 25,
+   "cal_n": 204,
+   "cal_ccpm": 2.542372881355932,
+   "allowed_wrong": 0
+  },
+  "fused_0.02": {
+   "tau": 0.8,
+   "deadline": 2.0,
+   "cal_wrong": 4,
+   "cal_correct": 29,
+   "cal_n": 204,
+   "cal_ccpm": 4.47588424437299,
+   "allowed_wrong": 4
+  },
+  "fused_0.05": {
+   "tau": 0.7,
+   "deadline": 2.0,
+   "cal_wrong": 10,
+   "cal_correct": 45,
+   "cal_n": 204,
+   "cal_ccpm": 7.3270013568521035,
+   "allowed_wrong": 10
+  },
+  "fused_0.1": {
+   "tau": 0.6,
+   "deadline": 1.5,
+   "cal_wrong": 20,
+   "cal_correct": 51,
+   "cal_n": 204,
+   "cal_ccpm": 11.900826446280993,
+   "allowed_wrong": 20
+  },
+  "fused_0.02_budget1": {
+   "tau": 0.7,
+   "deadline": 1.0,
+   "cal_wrong": 2,
+   "cal_correct": 14,
+   "cal_n": 204,
+   "cal_ccpm": 4.245104232469994,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget2": {
+   "tau": 0.8,
+   "deadline": 2.0,
+   "cal_wrong": 4,
+   "cal_correct": 29,
+   "cal_n": 204,
+   "cal_ccpm": 4.47588424437299,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget3": {
+   "tau": 0.93,
+   "deadline": 3.0,
+   "cal_wrong": 1,
+   "cal_correct": 27,
+   "cal_n": 204,
+   "cal_ccpm": 2.7580336241753565,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget5": {
+   "tau": 0.93,
+   "deadline": 5.0,
+   "cal_wrong": 2,
+   "cal_correct": 47,
+   "cal_n": 204,
+   "cal_ccpm": 3.0773427908880095,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget10": {
+   "tau": 0.93,
+   "deadline": 10.0,
+   "cal_wrong": 4,
+   "cal_correct": 82,
+   "cal_n": 204,
+   "cal_ccpm": 3.0783669638667295,
+   "allowed_wrong": 4
+  },
+  "fused_0.05_budget1": {
+   "tau": 0.7,
+   "deadline": 1.0,
+   "cal_wrong": 2,
+   "cal_correct": 14,
+   "cal_n": 204,
+   "cal_ccpm": 4.245104232469994,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget2": {
+   "tau": 0.7,
+   "deadline": 2.0,
+   "cal_wrong": 10,
+   "cal_correct": 45,
+   "cal_n": 204,
+   "cal_ccpm": 7.3270013568521035,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget3": {
+   "tau": 0.8,
+   "deadline": 3.0,
+   "cal_wrong": 7,
+   "cal_correct": 49,
+   "cal_n": 204,
+   "cal_ccpm": 5.351535836177474,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget5": {
+   "tau": 0.9,
+   "deadline": 5.0,
+   "cal_wrong": 8,
+   "cal_correct": 53,
+   "cal_n": 204,
+   "cal_ccpm": 3.5851183765501693,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget10": {
+   "tau": 0.9,
+   "deadline": 10.0,
+   "cal_wrong": 10,
+   "cal_correct": 83,
+   "cal_n": 204,
+   "cal_ccpm": 3.281172788667435,
+   "allowed_wrong": 10
+  }
+ },
+ {
+  "fold": 0,
+  "gaze_offset_sd": 1.0,
+  "alpha": 1.0124342796405599,
+  "sigma": 1.077217345015942,
+  "lapse": 0.0,
+  "eeg_0": {
+   "tau": 0.97,
+   "deadline": 15.0,
+   "cal_wrong": 0,
+   "cal_correct": 71,
+   "cal_n": 204,
+   "cal_ccpm": 1.6369662327681445,
+   "allowed_wrong": 0
+  },
+  "eeg_0.02": {
+   "tau": 0.93,
+   "deadline": 15.0,
+   "cal_wrong": 2,
+   "cal_correct": 82,
+   "cal_n": 204,
+   "cal_ccpm": 1.9518000595060991,
+   "allowed_wrong": 4
+  },
+  "eeg_0.05": {
+   "tau": 0.7,
+   "deadline": 7.5,
+   "cal_wrong": 10,
+   "cal_correct": 51,
+   "cal_n": 204,
+   "cal_ccpm": 2.20679707923916,
+   "allowed_wrong": 10
+  },
+  "eeg_0.1": {
+   "tau": 0.6,
+   "deadline": 10.0,
+   "cal_wrong": 20,
+   "cal_correct": 72,
+   "cal_n": 204,
+   "cal_ccpm": 2.603978300180832,
+   "allowed_wrong": 20
+  },
+  "eeg_0.02_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "eeg_0.02_budget2": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "eeg_0.02_budget3": {
+   "tau": 0.5,
+   "deadline": 3.0,
+   "cal_wrong": 3,
+   "cal_correct": 5,
+   "cal_n": 204,
+   "cal_ccpm": 0.4931169098006986,
+   "allowed_wrong": 4
+  },
+  "eeg_0.02_budget5": {
+   "tau": 0.7,
+   "deadline": 5.0,
+   "cal_wrong": 4,
+   "cal_correct": 22,
+   "cal_n": 204,
+   "cal_ccpm": 1.3424866514111367,
+   "allowed_wrong": 4
+  },
+  "eeg_0.02_budget10": {
+   "tau": 0.9,
+   "deadline": 10.0,
+   "cal_wrong": 4,
+   "cal_correct": 54,
+   "cal_n": 204,
+   "cal_ccpm": 1.7760723585034948,
+   "allowed_wrong": 4
+  },
+  "eeg_0.05_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "eeg_0.05_budget2": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "eeg_0.05_budget3": {
+   "tau": 0.5,
+   "deadline": 3.0,
+   "cal_wrong": 3,
+   "cal_correct": 5,
+   "cal_n": 204,
+   "cal_ccpm": 0.4931169098006986,
+   "allowed_wrong": 10
+  },
+  "eeg_0.05_budget5": {
+   "tau": 0.6,
+   "deadline": 5.0,
+   "cal_wrong": 8,
+   "cal_correct": 31,
+   "cal_n": 204,
+   "cal_ccpm": 1.9123505976095616,
+   "allowed_wrong": 10
+  },
+  "eeg_0.05_budget10": {
+   "tau": 0.8,
+   "deadline": 10.0,
+   "cal_wrong": 8,
+   "cal_correct": 65,
+   "cal_n": 204,
+   "cal_ccpm": 2.2037010877242547,
+   "allowed_wrong": 10
+  },
+  "gaze_0": {
+   "tau": 0.7,
+   "deadline": 5.0,
+   "cal_wrong": 0,
+   "cal_correct": 1,
+   "cal_n": 204,
+   "cal_ccpm": 0.05883795047805835,
+   "allowed_wrong": 0
+  },
+  "gaze_0.02": {
+   "tau": 0.5,
+   "deadline": 0.5,
+   "cal_wrong": 3,
+   "cal_correct": 3,
+   "cal_n": 204,
+   "cal_ccpm": 1.802252816020025,
+   "allowed_wrong": 4
+  },
+  "gaze_0.05": {
+   "tau": 0.5,
+   "deadline": 0.5,
+   "cal_wrong": 3,
+   "cal_correct": 3,
+   "cal_n": 204,
+   "cal_ccpm": 1.802252816020025,
+   "allowed_wrong": 10
+  },
+  "gaze_0.1": {
+   "tau": 0.5,
+   "deadline": 0.5,
+   "cal_wrong": 3,
+   "cal_correct": 3,
+   "cal_n": 204,
+   "cal_ccpm": 1.802252816020025,
+   "allowed_wrong": 20
+  },
+  "gaze_0.02_budget1": {
+   "tau": 0.5,
+   "deadline": 1.0,
+   "cal_wrong": 3,
+   "cal_correct": 3,
+   "cal_n": 204,
+   "cal_ccpm": 0.9050911376492772,
+   "allowed_wrong": 4
+  },
+  "gaze_0.02_budget2": {
+   "tau": 0.5,
+   "deadline": 2.0,
+   "cal_wrong": 3,
+   "cal_correct": 3,
+   "cal_n": 204,
+   "cal_ccpm": 0.45354330708661417,
+   "allowed_wrong": 4
+  },
+  "gaze_0.02_budget3": {
+   "tau": 0.5,
+   "deadline": 3.0,
+   "cal_wrong": 3,
+   "cal_correct": 3,
+   "cal_n": 204,
+   "cal_ccpm": 0.30258457659172094,
+   "allowed_wrong": 4
+  },
+  "gaze_0.02_budget5": {
+   "tau": 0.5,
+   "deadline": 5.0,
+   "cal_wrong": 3,
+   "cal_correct": 3,
+   "cal_n": 204,
+   "cal_ccpm": 0.1816576258357512,
+   "allowed_wrong": 4
+  },
+  "gaze_0.02_budget10": {
+   "tau": 0.5,
+   "deadline": 10.0,
+   "cal_wrong": 3,
+   "cal_correct": 3,
+   "cal_n": 204,
+   "cal_ccpm": 0.09086893418312614,
+   "allowed_wrong": 4
+  },
+  "gaze_0.05_budget1": {
+   "tau": 0.5,
+   "deadline": 1.0,
+   "cal_wrong": 3,
+   "cal_correct": 3,
+   "cal_n": 204,
+   "cal_ccpm": 0.9050911376492772,
+   "allowed_wrong": 10
+  },
+  "gaze_0.05_budget2": {
+   "tau": 0.5,
+   "deadline": 2.0,
+   "cal_wrong": 3,
+   "cal_correct": 3,
+   "cal_n": 204,
+   "cal_ccpm": 0.45354330708661417,
+   "allowed_wrong": 10
+  },
+  "gaze_0.05_budget3": {
+   "tau": 0.5,
+   "deadline": 3.0,
+   "cal_wrong": 3,
+   "cal_correct": 3,
+   "cal_n": 204,
+   "cal_ccpm": 0.30258457659172094,
+   "allowed_wrong": 10
+  },
+  "gaze_0.05_budget5": {
+   "tau": 0.5,
+   "deadline": 5.0,
+   "cal_wrong": 3,
+   "cal_correct": 3,
+   "cal_n": 204,
+   "cal_ccpm": 0.1816576258357512,
+   "allowed_wrong": 10
+  },
+  "gaze_0.05_budget10": {
+   "tau": 0.5,
+   "deadline": 10.0,
+   "cal_wrong": 3,
+   "cal_correct": 3,
+   "cal_n": 204,
+   "cal_ccpm": 0.09086893418312614,
+   "allowed_wrong": 10
+  },
+  "fused_0": {
+   "tau": 0.999,
+   "deadline": Infinity,
+   "cal_wrong": 0,
+   "cal_correct": 86,
+   "cal_n": 204,
+   "cal_ccpm": 1.4732334047109208,
+   "allowed_wrong": 0
+  },
+  "fused_0.02": {
+   "tau": 0.8,
+   "deadline": 4.0,
+   "cal_wrong": 4,
+   "cal_correct": 39,
+   "cal_n": 204,
+   "cal_ccpm": 3.068349450909687,
+   "allowed_wrong": 4
+  },
+  "fused_0.05": {
+   "tau": 0.7,
+   "deadline": 4.0,
+   "cal_wrong": 9,
+   "cal_correct": 44,
+   "cal_n": 204,
+   "cal_ccpm": 3.5645569620253164,
+   "allowed_wrong": 10
+  },
+  "fused_0.1": {
+   "tau": 0.6,
+   "deadline": 4.0,
+   "cal_wrong": 18,
+   "cal_correct": 55,
+   "cal_n": 204,
+   "cal_ccpm": 4.7670639219935,
+   "allowed_wrong": 20
+  },
+  "fused_0.02_budget1": {
+   "tau": 0.6,
+   "deadline": 1.0,
+   "cal_wrong": 4,
+   "cal_correct": 4,
+   "cal_n": 204,
+   "cal_ccpm": 1.2045169385194479,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget2": {
+   "tau": 0.7,
+   "deadline": 2.0,
+   "cal_wrong": 3,
+   "cal_correct": 11,
+   "cal_n": 204,
+   "cal_ccpm": 1.6423017107309485,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget3": {
+   "tau": 0.8,
+   "deadline": 3.0,
+   "cal_wrong": 4,
+   "cal_correct": 22,
+   "cal_n": 204,
+   "cal_ccpm": 2.2259696458684655,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget5": {
+   "tau": 0.9,
+   "deadline": 5.0,
+   "cal_wrong": 3,
+   "cal_correct": 42,
+   "cal_n": 204,
+   "cal_ccpm": 2.673385492640233,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget10": {
+   "tau": 0.95,
+   "deadline": 10.0,
+   "cal_wrong": 2,
+   "cal_correct": 75,
+   "cal_n": 204,
+   "cal_ccpm": 2.6574149258138333,
+   "allowed_wrong": 4
+  },
+  "fused_0.05_budget1": {
+   "tau": 0.5,
+   "deadline": 1.0,
+   "cal_wrong": 6,
+   "cal_correct": 5,
+   "cal_n": 204,
+   "cal_ccpm": 1.5161086544535691,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget2": {
+   "tau": 0.6,
+   "deadline": 2.0,
+   "cal_wrong": 9,
+   "cal_correct": 19,
+   "cal_n": 204,
+   "cal_ccpm": 2.931533269045323,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget3": {
+   "tau": 0.7,
+   "deadline": 3.0,
+   "cal_wrong": 9,
+   "cal_correct": 28,
+   "cal_n": 204,
+   "cal_ccpm": 2.8804114873553366,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget5": {
+   "tau": 0.8,
+   "deadline": 5.0,
+   "cal_wrong": 7,
+   "cal_correct": 50,
+   "cal_n": 204,
+   "cal_ccpm": 3.2693093583980386,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget10": {
+   "tau": 0.9,
+   "deadline": 10.0,
+   "cal_wrong": 7,
+   "cal_correct": 81,
+   "cal_n": 204,
+   "cal_ccpm": 2.9893895125326773,
+   "allowed_wrong": 10
+  }
+ },
+ {
+  "fold": 1,
+  "gaze_offset_sd": 1.0,
+  "alpha": 1.0124342796405599,
+  "sigma": 1.077217345015942,
+  "lapse": 0.0,
+  "eeg_0": {
+   "tau": 0.995,
+   "deadline": Infinity,
+   "cal_wrong": 0,
+   "cal_correct": 45,
+   "cal_n": 204,
+   "cal_ccpm": 0.6782641462036049,
+   "allowed_wrong": 0
+  },
+  "eeg_0.02": {
+   "tau": 0.8,
+   "deadline": 10.0,
+   "cal_wrong": 3,
+   "cal_correct": 35,
+   "cal_n": 204,
+   "cal_ccpm": 1.0991886940591469,
+   "allowed_wrong": 4
+  },
+  "eeg_0.05": {
+   "tau": 0.6,
+   "deadline": 10.0,
+   "cal_wrong": 9,
+   "cal_correct": 42,
+   "cal_n": 204,
+   "cal_ccpm": 1.3609667184230068,
+   "allowed_wrong": 10
+  },
+  "eeg_0.1": {
+   "tau": 0.7,
+   "deadline": Infinity,
+   "cal_wrong": 19,
+   "cal_correct": 89,
+   "cal_n": 204,
+   "cal_ccpm": 1.6016796640671864,
+   "allowed_wrong": 20
+  },
+  "eeg_0.02_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "eeg_0.02_budget2": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "eeg_0.02_budget3": {
+   "tau": 0.5,
+   "deadline": 3.0,
+   "cal_wrong": 0,
+   "cal_correct": 5,
+   "cal_n": 204,
+   "cal_ccpm": 0.4924086992203529,
+   "allowed_wrong": 4
+  },
+  "eeg_0.02_budget5": {
+   "tau": 0.5,
+   "deadline": 5.0,
+   "cal_wrong": 2,
+   "cal_correct": 15,
+   "cal_n": 204,
+   "cal_ccpm": 0.9045226130653267,
+   "allowed_wrong": 4
+  },
+  "eeg_0.02_budget10": {
+   "tau": 0.8,
+   "deadline": 10.0,
+   "cal_wrong": 3,
+   "cal_correct": 35,
+   "cal_n": 204,
+   "cal_ccpm": 1.0991886940591469,
+   "allowed_wrong": 4
+  },
+  "eeg_0.05_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "eeg_0.05_budget2": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "eeg_0.05_budget3": {
+   "tau": 0.5,
+   "deadline": 3.0,
+   "cal_wrong": 0,
+   "cal_correct": 5,
+   "cal_n": 204,
+   "cal_ccpm": 0.4924086992203529,
+   "allowed_wrong": 10
+  },
+  "eeg_0.05_budget5": {
+   "tau": 0.5,
+   "deadline": 5.0,
+   "cal_wrong": 2,
+   "cal_correct": 15,
+   "cal_n": 204,
+   "cal_ccpm": 0.9045226130653267,
+   "allowed_wrong": 10
+  },
+  "eeg_0.05_budget10": {
+   "tau": 0.6,
+   "deadline": 10.0,
+   "cal_wrong": 9,
+   "cal_correct": 42,
+   "cal_n": 204,
+   "cal_ccpm": 1.3609667184230068,
+   "allowed_wrong": 10
+  },
+  "gaze_0": {
+   "tau": 0.7,
+   "deadline": 0.5,
+   "cal_wrong": 0,
+   "cal_correct": 1,
+   "cal_n": 204,
+   "cal_ccpm": 0.5904059040590406,
+   "allowed_wrong": 0
+  },
+  "gaze_0.02": {
+   "tau": 0.5,
+   "deadline": 0.5,
+   "cal_wrong": 2,
+   "cal_correct": 2,
+   "cal_n": 204,
+   "cal_ccpm": 1.1940298507462686,
+   "allowed_wrong": 4
+  },
+  "gaze_0.05": {
+   "tau": 0.5,
+   "deadline": 0.5,
+   "cal_wrong": 2,
+   "cal_correct": 2,
+   "cal_n": 204,
+   "cal_ccpm": 1.1940298507462686,
+   "allowed_wrong": 10
+  },
+  "gaze_0.1": {
+   "tau": 0.5,
+   "deadline": 0.5,
+   "cal_wrong": 2,
+   "cal_correct": 2,
+   "cal_n": 204,
+   "cal_ccpm": 1.1940298507462686,
+   "allowed_wrong": 20
+  },
+  "gaze_0.02_budget1": {
+   "tau": 0.5,
+   "deadline": 1.0,
+   "cal_wrong": 2,
+   "cal_correct": 2,
+   "cal_n": 204,
+   "cal_ccpm": 0.5985037406483791,
+   "allowed_wrong": 4
+  },
+  "gaze_0.02_budget2": {
+   "tau": 0.5,
+   "deadline": 2.0,
+   "cal_wrong": 2,
+   "cal_correct": 2,
+   "cal_n": 204,
+   "cal_ccpm": 0.299625468164794,
+   "allowed_wrong": 4
+  },
+  "gaze_0.02_budget3": {
+   "tau": 0.5,
+   "deadline": 3.0,
+   "cal_wrong": 2,
+   "cal_correct": 2,
+   "cal_n": 204,
+   "cal_ccpm": 0.19983347210657787,
+   "allowed_wrong": 4
+  },
+  "gaze_0.02_budget5": {
+   "tau": 0.5,
+   "deadline": 5.0,
+   "cal_wrong": 2,
+   "cal_correct": 2,
+   "cal_n": 204,
+   "cal_ccpm": 0.1199400299850075,
+   "allowed_wrong": 4
+  },
+  "gaze_0.02_budget10": {
+   "tau": 0.5,
+   "deadline": 10.0,
+   "cal_wrong": 2,
+   "cal_correct": 3,
+   "cal_n": 204,
+   "cal_ccpm": 0.09003376266099787,
+   "allowed_wrong": 4
+  },
+  "gaze_0.05_budget1": {
+   "tau": 0.5,
+   "deadline": 1.0,
+   "cal_wrong": 2,
+   "cal_correct": 2,
+   "cal_n": 204,
+   "cal_ccpm": 0.5985037406483791,
+   "allowed_wrong": 10
+  },
+  "gaze_0.05_budget2": {
+   "tau": 0.5,
+   "deadline": 2.0,
+   "cal_wrong": 2,
+   "cal_correct": 2,
+   "cal_n": 204,
+   "cal_ccpm": 0.299625468164794,
+   "allowed_wrong": 10
+  },
+  "gaze_0.05_budget3": {
+   "tau": 0.5,
+   "deadline": 3.0,
+   "cal_wrong": 2,
+   "cal_correct": 2,
+   "cal_n": 204,
+   "cal_ccpm": 0.19983347210657787,
+   "allowed_wrong": 10
+  },
+  "gaze_0.05_budget5": {
+   "tau": 0.5,
+   "deadline": 5.0,
+   "cal_wrong": 2,
+   "cal_correct": 2,
+   "cal_n": 204,
+   "cal_ccpm": 0.1199400299850075,
+   "allowed_wrong": 10
+  },
+  "gaze_0.05_budget10": {
+   "tau": 0.5,
+   "deadline": 10.0,
+   "cal_wrong": 2,
+   "cal_correct": 3,
+   "cal_n": 204,
+   "cal_ccpm": 0.09003376266099787,
+   "allowed_wrong": 10
+  },
+  "fused_0": {
+   "tau": 0.98,
+   "deadline": 15.0,
+   "cal_wrong": 0,
+   "cal_correct": 61,
+   "cal_n": 204,
+   "cal_ccpm": 1.361607142857143,
+   "allowed_wrong": 0
+  },
+  "fused_0.02": {
+   "tau": 0.98,
+   "deadline": Infinity,
+   "cal_wrong": 2,
+   "cal_correct": 89,
+   "cal_n": 204,
+   "cal_ccpm": 1.5128014448103688,
+   "allowed_wrong": 4
+  },
+  "fused_0.05": {
+   "tau": 0.8,
+   "deadline": 7.5,
+   "cal_wrong": 10,
+   "cal_correct": 53,
+   "cal_n": 204,
+   "cal_ccpm": 2.3472965491788154,
+   "allowed_wrong": 10
+  },
+  "fused_0.1": {
+   "tau": 0.7,
+   "deadline": 7.5,
+   "cal_wrong": 17,
+   "cal_correct": 59,
+   "cal_n": 204,
+   "cal_ccpm": 2.7729364535396064,
+   "allowed_wrong": 20
+  },
+  "fused_0.02_budget1": {
+   "tau": 0.5,
+   "deadline": 1.0,
+   "cal_wrong": 4,
+   "cal_correct": 3,
+   "cal_n": 204,
+   "cal_ccpm": 0.8994378513429107,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget2": {
+   "tau": 0.7,
+   "deadline": 2.0,
+   "cal_wrong": 3,
+   "cal_correct": 7,
+   "cal_n": 204,
+   "cal_ccpm": 1.0470551573698972,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget3": {
+   "tau": 0.8,
+   "deadline": 3.0,
+   "cal_wrong": 1,
+   "cal_correct": 8,
+   "cal_n": 204,
+   "cal_ccpm": 0.7937164117403885,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget5": {
+   "tau": 0.85,
+   "deadline": 5.0,
+   "cal_wrong": 3,
+   "cal_correct": 24,
+   "cal_n": 204,
+   "cal_ccpm": 1.463972550514678,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget10": {
+   "tau": 0.95,
+   "deadline": 10.0,
+   "cal_wrong": 4,
+   "cal_correct": 46,
+   "cal_n": 204,
+   "cal_ccpm": 1.4915895426602717,
+   "allowed_wrong": 4
+  },
+  "fused_0.05_budget1": {
+   "tau": 0.5,
+   "deadline": 1.0,
+   "cal_wrong": 4,
+   "cal_correct": 3,
+   "cal_n": 204,
+   "cal_ccpm": 0.8994378513429107,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget2": {
+   "tau": 0.6,
+   "deadline": 2.0,
+   "cal_wrong": 7,
+   "cal_correct": 11,
+   "cal_n": 204,
+   "cal_ccpm": 1.6703574818095541,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget3": {
+   "tau": 0.7,
+   "deadline": 3.0,
+   "cal_wrong": 8,
+   "cal_correct": 14,
+   "cal_n": 204,
+   "cal_ccpm": 1.4255409418752651,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget5": {
+   "tau": 0.8,
+   "deadline": 5.0,
+   "cal_wrong": 5,
+   "cal_correct": 31,
+   "cal_n": 204,
+   "cal_ccpm": 1.9138263665594855,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget10": {
+   "tau": 0.9,
+   "deadline": 10.0,
+   "cal_wrong": 9,
+   "cal_correct": 52,
+   "cal_n": 204,
+   "cal_ccpm": 1.7391304347826089,
+   "allowed_wrong": 10
+  }
+ },
+ {
+  "fold": 2,
+  "gaze_offset_sd": 1.0,
+  "alpha": 0.8566220304208312,
+  "sigma": 1.077217345015942,
+  "lapse": 0.0,
+  "eeg_0": {
+   "tau": 0.8,
+   "deadline": 4.0,
+   "cal_wrong": 0,
+   "cal_correct": 17,
+   "cal_n": 204,
+   "cal_ccpm": 1.2714241196634466,
+   "allowed_wrong": 0
+  },
+  "eeg_0.02": {
+   "tau": 0.6,
+   "deadline": 4.0,
+   "cal_wrong": 2,
+   "cal_correct": 23,
+   "cal_n": 204,
+   "cal_ccpm": 1.7363950927964769,
+   "allowed_wrong": 4
+  },
+  "eeg_0.05": {
+   "tau": 0.7,
+   "deadline": 7.5,
+   "cal_wrong": 7,
+   "cal_correct": 44,
+   "cal_n": 204,
+   "cal_ccpm": 1.9102749638205498,
+   "allowed_wrong": 10
+  },
+  "eeg_0.1": {
+   "tau": 0.6,
+   "deadline": 7.5,
+   "cal_wrong": 13,
+   "cal_correct": 44,
+   "cal_n": 204,
+   "cal_ccpm": 1.931059705586541,
+   "allowed_wrong": 20
+  },
+  "eeg_0.02_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "eeg_0.02_budget2": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "eeg_0.02_budget3": {
+   "tau": 0.5,
+   "deadline": 3.0,
+   "cal_wrong": 3,
+   "cal_correct": 8,
+   "cal_n": 204,
+   "cal_ccpm": 0.7904487443392343,
+   "allowed_wrong": 4
+  },
+  "eeg_0.02_budget5": {
+   "tau": 0.7,
+   "deadline": 5.0,
+   "cal_wrong": 4,
+   "cal_correct": 27,
+   "cal_n": 204,
+   "cal_ccpm": 1.6583493282149713,
+   "allowed_wrong": 4
+  },
+  "eeg_0.02_budget10": {
+   "tau": 0.9,
+   "deadline": 10.0,
+   "cal_wrong": 4,
+   "cal_correct": 48,
+   "cal_n": 204,
+   "cal_ccpm": 1.5780821917808219,
+   "allowed_wrong": 4
+  },
+  "eeg_0.05_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "eeg_0.05_budget2": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "eeg_0.05_budget3": {
+   "tau": 0.5,
+   "deadline": 3.0,
+   "cal_wrong": 3,
+   "cal_correct": 8,
+   "cal_n": 204,
+   "cal_ccpm": 0.7904487443392343,
+   "allowed_wrong": 10
+  },
+  "eeg_0.05_budget5": {
+   "tau": 0.5,
+   "deadline": 5.0,
+   "cal_wrong": 8,
+   "cal_correct": 29,
+   "cal_n": 204,
+   "cal_ccpm": 1.810143042912874,
+   "allowed_wrong": 10
+  },
+  "eeg_0.05_budget10": {
+   "tau": 0.7,
+   "deadline": 10.0,
+   "cal_wrong": 9,
+   "cal_correct": 52,
+   "cal_n": 204,
+   "cal_ccpm": 1.7776511644469766,
+   "allowed_wrong": 10
+  },
+  "gaze_0": {
+   "tau": 0.6,
+   "deadline": 1.5,
+   "cal_wrong": 0,
+   "cal_correct": 2,
+   "cal_n": 204,
+   "cal_ccpm": 0.3929594760540319,
+   "allowed_wrong": 0
+  },
+  "gaze_0.02": {
+   "tau": 0.5,
+   "deadline": 0.5,
+   "cal_wrong": 4,
+   "cal_correct": 3,
+   "cal_n": 204,
+   "cal_ccpm": 1.7999999999999998,
+   "allowed_wrong": 4
+  },
+  "gaze_0.05": {
+   "tau": 0.5,
+   "deadline": 0.5,
+   "cal_wrong": 4,
+   "cal_correct": 3,
+   "cal_n": 204,
+   "cal_ccpm": 1.7999999999999998,
+   "allowed_wrong": 10
+  },
+  "gaze_0.1": {
+   "tau": 0.5,
+   "deadline": 0.5,
+   "cal_wrong": 4,
+   "cal_correct": 3,
+   "cal_n": 204,
+   "cal_ccpm": 1.7999999999999998,
+   "allowed_wrong": 20
+  },
+  "gaze_0.02_budget1": {
+   "tau": 0.6,
+   "deadline": 1.0,
+   "cal_wrong": 0,
+   "cal_correct": 1,
+   "cal_n": 204,
+   "cal_ccpm": 0.29411764705882354,
+   "allowed_wrong": 4
+  },
+  "gaze_0.02_budget2": {
+   "tau": 0.6,
+   "deadline": 2.0,
+   "cal_wrong": 0,
+   "cal_correct": 2,
+   "cal_n": 204,
+   "cal_ccpm": 0.2952937557674562,
+   "allowed_wrong": 4
+  },
+  "gaze_0.02_budget3": {
+   "tau": 0.6,
+   "deadline": 3.0,
+   "cal_wrong": 0,
+   "cal_correct": 2,
+   "cal_n": 204,
+   "cal_ccpm": 0.19724676392027946,
+   "allowed_wrong": 4
+  },
+  "gaze_0.02_budget5": {
+   "tau": 0.6,
+   "deadline": 5.0,
+   "cal_wrong": 0,
+   "cal_correct": 2,
+   "cal_n": 204,
+   "cal_ccpm": 0.11853315224101742,
+   "allowed_wrong": 4
+  },
+  "gaze_0.02_budget10": {
+   "tau": 0.6,
+   "deadline": 10.0,
+   "cal_wrong": 0,
+   "cal_correct": 2,
+   "cal_n": 204,
+   "cal_ccpm": 0.05933617652512517,
+   "allowed_wrong": 4
+  },
+  "gaze_0.05_budget1": {
+   "tau": 0.5,
+   "deadline": 1.0,
+   "cal_wrong": 5,
+   "cal_correct": 3,
+   "cal_n": 204,
+   "cal_ccpm": 0.9085173501577287,
+   "allowed_wrong": 10
+  },
+  "gaze_0.05_budget2": {
+   "tau": 0.5,
+   "deadline": 2.0,
+   "cal_wrong": 5,
+   "cal_correct": 3,
+   "cal_n": 204,
+   "cal_ccpm": 0.45670789724072314,
+   "allowed_wrong": 10
+  },
+  "gaze_0.05_budget3": {
+   "tau": 0.5,
+   "deadline": 3.0,
+   "cal_wrong": 5,
+   "cal_correct": 3,
+   "cal_n": 204,
+   "cal_ccpm": 0.30502012285532726,
+   "allowed_wrong": 10
+  },
+  "gaze_0.05_budget5": {
+   "tau": 0.5,
+   "deadline": 5.0,
+   "cal_wrong": 5,
+   "cal_correct": 3,
+   "cal_n": 204,
+   "cal_ccpm": 0.18327605956471937,
+   "allowed_wrong": 10
+  },
+  "gaze_0.05_budget10": {
+   "tau": 0.5,
+   "deadline": 10.0,
+   "cal_wrong": 5,
+   "cal_correct": 3,
+   "cal_n": 204,
+   "cal_ccpm": 0.09173727463846594,
+   "allowed_wrong": 10
+  },
+  "fused_0": {
+   "tau": 0.93,
+   "deadline": 4.0,
+   "cal_wrong": 0,
+   "cal_correct": 24,
+   "cal_n": 204,
+   "cal_ccpm": 1.815889029003783,
+   "allowed_wrong": 0
+  },
+  "fused_0.02": {
+   "tau": 0.93,
+   "deadline": 7.5,
+   "cal_wrong": 4,
+   "cal_correct": 56,
+   "cal_n": 204,
+   "cal_ccpm": 2.4746823789357393,
+   "allowed_wrong": 4
+  },
+  "fused_0.05": {
+   "tau": 0.7,
+   "deadline": 4.0,
+   "cal_wrong": 9,
+   "cal_correct": 44,
+   "cal_n": 204,
+   "cal_ccpm": 3.563354142061751,
+   "allowed_wrong": 10
+  },
+  "fused_0.1": {
+   "tau": 0.5,
+   "deadline": 2.0,
+   "cal_wrong": 18,
+   "cal_correct": 31,
+   "cal_n": 204,
+   "cal_ccpm": 4.989939637826962,
+   "allowed_wrong": 20
+  },
+  "fused_0.02_budget1": {
+   "tau": 0.6,
+   "deadline": 1.0,
+   "cal_wrong": 2,
+   "cal_correct": 3,
+   "cal_n": 204,
+   "cal_ccpm": 0.8845208845208845,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget2": {
+   "tau": 0.7,
+   "deadline": 2.0,
+   "cal_wrong": 2,
+   "cal_correct": 14,
+   "cal_n": 204,
+   "cal_ccpm": 2.085013962147068,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget3": {
+   "tau": 0.85,
+   "deadline": 3.0,
+   "cal_wrong": 3,
+   "cal_correct": 13,
+   "cal_n": 204,
+   "cal_ccpm": 1.293264248704663,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget5": {
+   "tau": 0.9,
+   "deadline": 5.0,
+   "cal_wrong": 3,
+   "cal_correct": 37,
+   "cal_n": 204,
+   "cal_ccpm": 2.321872140149039,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget10": {
+   "tau": 0.95,
+   "deadline": 10.0,
+   "cal_wrong": 4,
+   "cal_correct": 61,
+   "cal_n": 204,
+   "cal_ccpm": 2.1120969487124,
+   "allowed_wrong": 4
+  },
+  "fused_0.05_budget1": {
+   "tau": 0.5,
+   "deadline": 1.0,
+   "cal_wrong": 7,
+   "cal_correct": 8,
+   "cal_n": 204,
+   "cal_ccpm": 2.430379746835443,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget2": {
+   "tau": 0.6,
+   "deadline": 2.0,
+   "cal_wrong": 5,
+   "cal_correct": 19,
+   "cal_n": 204,
+   "cal_ccpm": 2.883338602592475,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget3": {
+   "tau": 0.7,
+   "deadline": 3.0,
+   "cal_wrong": 7,
+   "cal_correct": 31,
+   "cal_n": 204,
+   "cal_ccpm": 3.193818415969092,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget5": {
+   "tau": 0.8,
+   "deadline": 5.0,
+   "cal_wrong": 9,
+   "cal_correct": 41,
+   "cal_n": 204,
+   "cal_ccpm": 2.651219183618483,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget10": {
+   "tau": 0.9,
+   "deadline": 10.0,
+   "cal_wrong": 8,
+   "cal_correct": 69,
+   "cal_n": 204,
+   "cal_ccpm": 2.479227487087357,
+   "allowed_wrong": 10
+  }
+ },
+ {
+  "fold": 0,
+  "gaze_offset_sd": 1.5,
+  "alpha": 1.0124342796405599,
+  "sigma": 1.5351453148789251,
+  "lapse": 0.0,
+  "eeg_0": {
+   "tau": 0.97,
+   "deadline": 15.0,
+   "cal_wrong": 0,
+   "cal_correct": 71,
+   "cal_n": 204,
+   "cal_ccpm": 1.6369662327681445,
+   "allowed_wrong": 0
+  },
+  "eeg_0.02": {
+   "tau": 0.93,
+   "deadline": 15.0,
+   "cal_wrong": 2,
+   "cal_correct": 82,
+   "cal_n": 204,
+   "cal_ccpm": 1.9518000595060991,
+   "allowed_wrong": 4
+  },
+  "eeg_0.05": {
+   "tau": 0.7,
+   "deadline": 7.5,
+   "cal_wrong": 10,
+   "cal_correct": 51,
+   "cal_n": 204,
+   "cal_ccpm": 2.20679707923916,
+   "allowed_wrong": 10
+  },
+  "eeg_0.1": {
+   "tau": 0.6,
+   "deadline": 10.0,
+   "cal_wrong": 20,
+   "cal_correct": 72,
+   "cal_n": 204,
+   "cal_ccpm": 2.603978300180832,
+   "allowed_wrong": 20
+  },
+  "eeg_0.02_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "eeg_0.02_budget2": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "eeg_0.02_budget3": {
+   "tau": 0.5,
+   "deadline": 3.0,
+   "cal_wrong": 3,
+   "cal_correct": 5,
+   "cal_n": 204,
+   "cal_ccpm": 0.4931169098006986,
+   "allowed_wrong": 4
+  },
+  "eeg_0.02_budget5": {
+   "tau": 0.7,
+   "deadline": 5.0,
+   "cal_wrong": 4,
+   "cal_correct": 22,
+   "cal_n": 204,
+   "cal_ccpm": 1.3424866514111367,
+   "allowed_wrong": 4
+  },
+  "eeg_0.02_budget10": {
+   "tau": 0.9,
+   "deadline": 10.0,
+   "cal_wrong": 4,
+   "cal_correct": 54,
+   "cal_n": 204,
+   "cal_ccpm": 1.7760723585034948,
+   "allowed_wrong": 4
+  },
+  "eeg_0.05_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "eeg_0.05_budget2": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "eeg_0.05_budget3": {
+   "tau": 0.5,
+   "deadline": 3.0,
+   "cal_wrong": 3,
+   "cal_correct": 5,
+   "cal_n": 204,
+   "cal_ccpm": 0.4931169098006986,
+   "allowed_wrong": 10
+  },
+  "eeg_0.05_budget5": {
+   "tau": 0.6,
+   "deadline": 5.0,
+   "cal_wrong": 8,
+   "cal_correct": 31,
+   "cal_n": 204,
+   "cal_ccpm": 1.9123505976095616,
+   "allowed_wrong": 10
+  },
+  "eeg_0.05_budget10": {
+   "tau": 0.8,
+   "deadline": 10.0,
+   "cal_wrong": 8,
+   "cal_correct": 65,
+   "cal_n": 204,
+   "cal_ccpm": 2.2037010877242547,
+   "allowed_wrong": 10
+  },
+  "gaze_0": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 0,
+   "never_commit": true
+  },
+  "gaze_0.02": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "gaze_0.05": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "gaze_0.1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 20,
+   "never_commit": true
+  },
+  "gaze_0.02_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "gaze_0.02_budget2": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "gaze_0.02_budget3": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "gaze_0.02_budget5": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "gaze_0.02_budget10": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "gaze_0.05_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "gaze_0.05_budget2": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "gaze_0.05_budget3": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "gaze_0.05_budget5": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "gaze_0.05_budget10": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "fused_0": {
+   "tau": 0.999,
+   "deadline": Infinity,
+   "cal_wrong": 0,
+   "cal_correct": 79,
+   "cal_n": 204,
+   "cal_ccpm": 1.317764804003336,
+   "allowed_wrong": 0
+  },
+  "fused_0.02": {
+   "tau": 0.85,
+   "deadline": 7.5,
+   "cal_wrong": 4,
+   "cal_correct": 62,
+   "cal_n": 204,
+   "cal_ccpm": 2.7930549038010324,
+   "allowed_wrong": 4
+  },
+  "fused_0.05": {
+   "tau": 0.7,
+   "deadline": 5.0,
+   "cal_wrong": 9,
+   "cal_correct": 45,
+   "cal_n": 204,
+   "cal_ccpm": 2.9224732783114598,
+   "allowed_wrong": 10
+  },
+  "fused_0.1": {
+   "tau": 0.6,
+   "deadline": 5.0,
+   "cal_wrong": 17,
+   "cal_correct": 51,
+   "cal_n": 204,
+   "cal_ccpm": 3.4415858287642345,
+   "allowed_wrong": 20
+  },
+  "fused_0.02_budget1": {
+   "tau": 0.5,
+   "deadline": 1.0,
+   "cal_wrong": 3,
+   "cal_correct": 2,
+   "cal_n": 204,
+   "cal_ccpm": 0.5907692307692308,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget2": {
+   "tau": 0.7,
+   "deadline": 2.0,
+   "cal_wrong": 2,
+   "cal_correct": 5,
+   "cal_n": 204,
+   "cal_ccpm": 0.7414272474513438,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget3": {
+   "tau": 0.8,
+   "deadline": 3.0,
+   "cal_wrong": 3,
+   "cal_correct": 10,
+   "cal_n": 204,
+   "cal_ccpm": 0.9903032803796162,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget5": {
+   "tau": 0.85,
+   "deadline": 5.0,
+   "cal_wrong": 2,
+   "cal_correct": 38,
+   "cal_n": 204,
+   "cal_ccpm": 2.376237623762376,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget10": {
+   "tau": 0.9,
+   "deadline": 10.0,
+   "cal_wrong": 2,
+   "cal_correct": 72,
+   "cal_n": 204,
+   "cal_ccpm": 2.5165659360664097,
+   "allowed_wrong": 4
+  },
+  "fused_0.05_budget1": {
+   "tau": 0.5,
+   "deadline": 1.0,
+   "cal_wrong": 3,
+   "cal_correct": 2,
+   "cal_n": 204,
+   "cal_ccpm": 0.5907692307692308,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget2": {
+   "tau": 0.6,
+   "deadline": 2.0,
+   "cal_wrong": 5,
+   "cal_correct": 7,
+   "cal_n": 204,
+   "cal_ccpm": 1.041537507749535,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget3": {
+   "tau": 0.7,
+   "deadline": 3.0,
+   "cal_wrong": 5,
+   "cal_correct": 15,
+   "cal_n": 204,
+   "cal_ccpm": 1.5107007973143096,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget5": {
+   "tau": 0.7,
+   "deadline": 5.0,
+   "cal_wrong": 9,
+   "cal_correct": 45,
+   "cal_n": 204,
+   "cal_ccpm": 2.9224732783114598,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget10": {
+   "tau": 0.85,
+   "deadline": 10.0,
+   "cal_wrong": 7,
+   "cal_correct": 77,
+   "cal_n": 204,
+   "cal_ccpm": 2.792173453199365,
+   "allowed_wrong": 10
+  }
+ },
+ {
+  "fold": 1,
+  "gaze_offset_sd": 1.5,
+  "alpha": 1.0124342796405599,
+  "sigma": 1.5351453148789251,
+  "lapse": 0.0,
+  "eeg_0": {
+   "tau": 0.995,
+   "deadline": Infinity,
+   "cal_wrong": 0,
+   "cal_correct": 45,
+   "cal_n": 204,
+   "cal_ccpm": 0.6782641462036049,
+   "allowed_wrong": 0
+  },
+  "eeg_0.02": {
+   "tau": 0.8,
+   "deadline": 10.0,
+   "cal_wrong": 3,
+   "cal_correct": 35,
+   "cal_n": 204,
+   "cal_ccpm": 1.0991886940591469,
+   "allowed_wrong": 4
+  },
+  "eeg_0.05": {
+   "tau": 0.6,
+   "deadline": 10.0,
+   "cal_wrong": 9,
+   "cal_correct": 42,
+   "cal_n": 204,
+   "cal_ccpm": 1.3609667184230068,
+   "allowed_wrong": 10
+  },
+  "eeg_0.1": {
+   "tau": 0.7,
+   "deadline": Infinity,
+   "cal_wrong": 19,
+   "cal_correct": 89,
+   "cal_n": 204,
+   "cal_ccpm": 1.6016796640671864,
+   "allowed_wrong": 20
+  },
+  "eeg_0.02_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "eeg_0.02_budget2": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "eeg_0.02_budget3": {
+   "tau": 0.5,
+   "deadline": 3.0,
+   "cal_wrong": 0,
+   "cal_correct": 5,
+   "cal_n": 204,
+   "cal_ccpm": 0.4924086992203529,
+   "allowed_wrong": 4
+  },
+  "eeg_0.02_budget5": {
+   "tau": 0.5,
+   "deadline": 5.0,
+   "cal_wrong": 2,
+   "cal_correct": 15,
+   "cal_n": 204,
+   "cal_ccpm": 0.9045226130653267,
+   "allowed_wrong": 4
+  },
+  "eeg_0.02_budget10": {
+   "tau": 0.8,
+   "deadline": 10.0,
+   "cal_wrong": 3,
+   "cal_correct": 35,
+   "cal_n": 204,
+   "cal_ccpm": 1.0991886940591469,
+   "allowed_wrong": 4
+  },
+  "eeg_0.05_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "eeg_0.05_budget2": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "eeg_0.05_budget3": {
+   "tau": 0.5,
+   "deadline": 3.0,
+   "cal_wrong": 0,
+   "cal_correct": 5,
+   "cal_n": 204,
+   "cal_ccpm": 0.4924086992203529,
+   "allowed_wrong": 10
+  },
+  "eeg_0.05_budget5": {
+   "tau": 0.5,
+   "deadline": 5.0,
+   "cal_wrong": 2,
+   "cal_correct": 15,
+   "cal_n": 204,
+   "cal_ccpm": 0.9045226130653267,
+   "allowed_wrong": 10
+  },
+  "eeg_0.05_budget10": {
+   "tau": 0.6,
+   "deadline": 10.0,
+   "cal_wrong": 9,
+   "cal_correct": 42,
+   "cal_n": 204,
+   "cal_ccpm": 1.3609667184230068,
+   "allowed_wrong": 10
+  },
+  "gaze_0": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 0,
+   "never_commit": true
+  },
+  "gaze_0.02": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "gaze_0.05": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "gaze_0.1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 20,
+   "never_commit": true
+  },
+  "gaze_0.02_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "gaze_0.02_budget2": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "gaze_0.02_budget3": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "gaze_0.02_budget5": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "gaze_0.02_budget10": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "gaze_0.05_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "gaze_0.05_budget2": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "gaze_0.05_budget3": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "gaze_0.05_budget5": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "gaze_0.05_budget10": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "fused_0": {
+   "tau": 0.93,
+   "deadline": 15.0,
+   "cal_wrong": 0,
+   "cal_correct": 64,
+   "cal_n": 204,
+   "cal_ccpm": 1.4492616879747133,
+   "allowed_wrong": 0
+  },
+  "fused_0.02": {
+   "tau": 0.93,
+   "deadline": Infinity,
+   "cal_wrong": 4,
+   "cal_correct": 97,
+   "cal_n": 204,
+   "cal_ccpm": 1.684819974669803,
+   "allowed_wrong": 4
+  },
+  "fused_0.05": {
+   "tau": 0.7,
+   "deadline": 10.0,
+   "cal_wrong": 10,
+   "cal_correct": 61,
+   "cal_n": 204,
+   "cal_ccpm": 2.115606936416185,
+   "allowed_wrong": 10
+  },
+  "fused_0.1": {
+   "tau": 0.7,
+   "deadline": Infinity,
+   "cal_wrong": 20,
+   "cal_correct": 110,
+   "cal_n": 204,
+   "cal_ccpm": 2.334940078715783,
+   "allowed_wrong": 20
+  },
+  "fused_0.02_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "fused_0.02_budget2": {
+   "tau": 0.6,
+   "deadline": 2.0,
+   "cal_wrong": 3,
+   "cal_correct": 2,
+   "cal_n": 204,
+   "cal_ccpm": 0.29547553093259465,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget3": {
+   "tau": 0.7,
+   "deadline": 3.0,
+   "cal_wrong": 2,
+   "cal_correct": 6,
+   "cal_n": 204,
+   "cal_ccpm": 0.5943045810978126,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget5": {
+   "tau": 0.8,
+   "deadline": 5.0,
+   "cal_wrong": 2,
+   "cal_correct": 19,
+   "cal_n": 204,
+   "cal_ccpm": 1.1515151515151516,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget10": {
+   "tau": 0.9,
+   "deadline": 10.0,
+   "cal_wrong": 2,
+   "cal_correct": 46,
+   "cal_n": 204,
+   "cal_ccpm": 1.4815808897537408,
+   "allowed_wrong": 4
+  },
+  "fused_0.05_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "fused_0.05_budget2": {
+   "tau": 0.5,
+   "deadline": 2.0,
+   "cal_wrong": 8,
+   "cal_correct": 2,
+   "cal_n": 204,
+   "cal_ccpm": 0.2983219390926041,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget3": {
+   "tau": 0.6,
+   "deadline": 3.0,
+   "cal_wrong": 5,
+   "cal_correct": 6,
+   "cal_n": 204,
+   "cal_ccpm": 0.5982550893228085,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget5": {
+   "tau": 0.7,
+   "deadline": 5.0,
+   "cal_wrong": 5,
+   "cal_correct": 26,
+   "cal_n": 204,
+   "cal_ccpm": 1.5926493108728943,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget10": {
+   "tau": 0.7,
+   "deadline": 10.0,
+   "cal_wrong": 10,
+   "cal_correct": 61,
+   "cal_n": 204,
+   "cal_ccpm": 2.115606936416185,
+   "allowed_wrong": 10
+  }
+ },
+ {
+  "fold": 2,
+  "gaze_offset_sd": 1.5,
+  "alpha": 0.8566220304208312,
+  "sigma": 1.5351453148789251,
+  "lapse": 0.0,
+  "eeg_0": {
+   "tau": 0.8,
+   "deadline": 4.0,
+   "cal_wrong": 0,
+   "cal_correct": 17,
+   "cal_n": 204,
+   "cal_ccpm": 1.2714241196634466,
+   "allowed_wrong": 0
+  },
+  "eeg_0.02": {
+   "tau": 0.6,
+   "deadline": 4.0,
+   "cal_wrong": 2,
+   "cal_correct": 23,
+   "cal_n": 204,
+   "cal_ccpm": 1.7363950927964769,
+   "allowed_wrong": 4
+  },
+  "eeg_0.05": {
+   "tau": 0.7,
+   "deadline": 7.5,
+   "cal_wrong": 7,
+   "cal_correct": 44,
+   "cal_n": 204,
+   "cal_ccpm": 1.9102749638205498,
+   "allowed_wrong": 10
+  },
+  "eeg_0.1": {
+   "tau": 0.6,
+   "deadline": 7.5,
+   "cal_wrong": 13,
+   "cal_correct": 44,
+   "cal_n": 204,
+   "cal_ccpm": 1.931059705586541,
+   "allowed_wrong": 20
+  },
+  "eeg_0.02_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "eeg_0.02_budget2": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "eeg_0.02_budget3": {
+   "tau": 0.5,
+   "deadline": 3.0,
+   "cal_wrong": 3,
+   "cal_correct": 8,
+   "cal_n": 204,
+   "cal_ccpm": 0.7904487443392343,
+   "allowed_wrong": 4
+  },
+  "eeg_0.02_budget5": {
+   "tau": 0.7,
+   "deadline": 5.0,
+   "cal_wrong": 4,
+   "cal_correct": 27,
+   "cal_n": 204,
+   "cal_ccpm": 1.6583493282149713,
+   "allowed_wrong": 4
+  },
+  "eeg_0.02_budget10": {
+   "tau": 0.9,
+   "deadline": 10.0,
+   "cal_wrong": 4,
+   "cal_correct": 48,
+   "cal_n": 204,
+   "cal_ccpm": 1.5780821917808219,
+   "allowed_wrong": 4
+  },
+  "eeg_0.05_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "eeg_0.05_budget2": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "eeg_0.05_budget3": {
+   "tau": 0.5,
+   "deadline": 3.0,
+   "cal_wrong": 3,
+   "cal_correct": 8,
+   "cal_n": 204,
+   "cal_ccpm": 0.7904487443392343,
+   "allowed_wrong": 10
+  },
+  "eeg_0.05_budget5": {
+   "tau": 0.5,
+   "deadline": 5.0,
+   "cal_wrong": 8,
+   "cal_correct": 29,
+   "cal_n": 204,
+   "cal_ccpm": 1.810143042912874,
+   "allowed_wrong": 10
+  },
+  "eeg_0.05_budget10": {
+   "tau": 0.7,
+   "deadline": 10.0,
+   "cal_wrong": 9,
+   "cal_correct": 52,
+   "cal_n": 204,
+   "cal_ccpm": 1.7776511644469766,
+   "allowed_wrong": 10
+  },
+  "gaze_0": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 0,
+   "never_commit": true
+  },
+  "gaze_0.02": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "gaze_0.05": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "gaze_0.1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 20,
+   "never_commit": true
+  },
+  "gaze_0.02_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "gaze_0.02_budget2": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "gaze_0.02_budget3": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "gaze_0.02_budget5": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "gaze_0.02_budget10": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "gaze_0.05_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "gaze_0.05_budget2": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "gaze_0.05_budget3": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "gaze_0.05_budget5": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "gaze_0.05_budget10": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "fused_0": {
+   "tau": 0.97,
+   "deadline": 5.0,
+   "cal_wrong": 0,
+   "cal_correct": 23,
+   "cal_n": 204,
+   "cal_ccpm": 1.3987077156974532,
+   "allowed_wrong": 0
+  },
+  "fused_0.02": {
+   "tau": 0.85,
+   "deadline": 5.0,
+   "cal_wrong": 3,
+   "cal_correct": 35,
+   "cal_n": 204,
+   "cal_ccpm": 2.18408736349454,
+   "allowed_wrong": 4
+  },
+  "fused_0.05": {
+   "tau": 0.7,
+   "deadline": 4.0,
+   "cal_wrong": 9,
+   "cal_correct": 35,
+   "cal_n": 204,
+   "cal_ccpm": 2.7299317517062076,
+   "allowed_wrong": 10
+  },
+  "fused_0.1": {
+   "tau": 0.6,
+   "deadline": 4.0,
+   "cal_wrong": 15,
+   "cal_correct": 40,
+   "cal_n": 204,
+   "cal_ccpm": 3.1920199501246884,
+   "allowed_wrong": 20
+  },
+  "fused_0.02_budget1": {
+   "tau": 0.5,
+   "deadline": 1.0,
+   "cal_wrong": 0,
+   "cal_correct": 2,
+   "cal_n": 204,
+   "cal_ccpm": 0.5896805896805897,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget2": {
+   "tau": 0.5,
+   "deadline": 2.0,
+   "cal_wrong": 3,
+   "cal_correct": 11,
+   "cal_n": 204,
+   "cal_ccpm": 1.6489693941286696,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget3": {
+   "tau": 0.8,
+   "deadline": 3.0,
+   "cal_wrong": 2,
+   "cal_correct": 13,
+   "cal_n": 204,
+   "cal_ccpm": 1.2919254658385093,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget5": {
+   "tau": 0.85,
+   "deadline": 5.0,
+   "cal_wrong": 3,
+   "cal_correct": 35,
+   "cal_n": 204,
+   "cal_ccpm": 2.18408736349454,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget10": {
+   "tau": 0.95,
+   "deadline": 10.0,
+   "cal_wrong": 4,
+   "cal_correct": 55,
+   "cal_n": 204,
+   "cal_ccpm": 1.8595477917869971,
+   "allowed_wrong": 4
+  },
+  "fused_0.05_budget1": {
+   "tau": 0.5,
+   "deadline": 1.0,
+   "cal_wrong": 0,
+   "cal_correct": 2,
+   "cal_n": 204,
+   "cal_ccpm": 0.5896805896805897,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget2": {
+   "tau": 0.5,
+   "deadline": 2.0,
+   "cal_wrong": 3,
+   "cal_correct": 11,
+   "cal_n": 204,
+   "cal_ccpm": 1.6489693941286696,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget3": {
+   "tau": 0.6,
+   "deadline": 3.0,
+   "cal_wrong": 7,
+   "cal_correct": 19,
+   "cal_n": 204,
+   "cal_ccpm": 1.9334322662709351,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget5": {
+   "tau": 0.8,
+   "deadline": 5.0,
+   "cal_wrong": 6,
+   "cal_correct": 39,
+   "cal_n": 204,
+   "cal_ccpm": 2.4765180579441726,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget10": {
+   "tau": 0.85,
+   "deadline": 10.0,
+   "cal_wrong": 7,
+   "cal_correct": 65,
+   "cal_n": 204,
+   "cal_ccpm": 2.3034330011074196,
+   "allowed_wrong": 10
+  }
+ },
+ {
+  "fold": 0,
+  "gaze_offset_sd": 2.0,
+  "alpha": 1.0124342796405599,
+  "sigma": 1.9440775901540435,
+  "lapse": 0.0,
+  "eeg_0": {
+   "tau": 0.97,
+   "deadline": 15.0,
+   "cal_wrong": 0,
+   "cal_correct": 71,
+   "cal_n": 204,
+   "cal_ccpm": 1.6369662327681445,
+   "allowed_wrong": 0
+  },
+  "eeg_0.02": {
+   "tau": 0.93,
+   "deadline": 15.0,
+   "cal_wrong": 2,
+   "cal_correct": 82,
+   "cal_n": 204,
+   "cal_ccpm": 1.9518000595060991,
+   "allowed_wrong": 4
+  },
+  "eeg_0.05": {
+   "tau": 0.7,
+   "deadline": 7.5,
+   "cal_wrong": 10,
+   "cal_correct": 51,
+   "cal_n": 204,
+   "cal_ccpm": 2.20679707923916,
+   "allowed_wrong": 10
+  },
+  "eeg_0.1": {
+   "tau": 0.6,
+   "deadline": 10.0,
+   "cal_wrong": 20,
+   "cal_correct": 72,
+   "cal_n": 204,
+   "cal_ccpm": 2.603978300180832,
+   "allowed_wrong": 20
+  },
+  "eeg_0.02_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "eeg_0.02_budget2": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "eeg_0.02_budget3": {
+   "tau": 0.5,
+   "deadline": 3.0,
+   "cal_wrong": 3,
+   "cal_correct": 5,
+   "cal_n": 204,
+   "cal_ccpm": 0.4931169098006986,
+   "allowed_wrong": 4
+  },
+  "eeg_0.02_budget5": {
+   "tau": 0.7,
+   "deadline": 5.0,
+   "cal_wrong": 4,
+   "cal_correct": 22,
+   "cal_n": 204,
+   "cal_ccpm": 1.3424866514111367,
+   "allowed_wrong": 4
+  },
+  "eeg_0.02_budget10": {
+   "tau": 0.9,
+   "deadline": 10.0,
+   "cal_wrong": 4,
+   "cal_correct": 54,
+   "cal_n": 204,
+   "cal_ccpm": 1.7760723585034948,
+   "allowed_wrong": 4
+  },
+  "eeg_0.05_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "eeg_0.05_budget2": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "eeg_0.05_budget3": {
+   "tau": 0.5,
+   "deadline": 3.0,
+   "cal_wrong": 3,
+   "cal_correct": 5,
+   "cal_n": 204,
+   "cal_ccpm": 0.4931169098006986,
+   "allowed_wrong": 10
+  },
+  "eeg_0.05_budget5": {
+   "tau": 0.6,
+   "deadline": 5.0,
+   "cal_wrong": 8,
+   "cal_correct": 31,
+   "cal_n": 204,
+   "cal_ccpm": 1.9123505976095616,
+   "allowed_wrong": 10
+  },
+  "eeg_0.05_budget10": {
+   "tau": 0.8,
+   "deadline": 10.0,
+   "cal_wrong": 8,
+   "cal_correct": 65,
+   "cal_n": 204,
+   "cal_ccpm": 2.2037010877242547,
+   "allowed_wrong": 10
+  },
+  "gaze_0": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 0,
+   "never_commit": true
+  },
+  "gaze_0.02": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "gaze_0.05": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "gaze_0.1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 20,
+   "never_commit": true
+  },
+  "gaze_0.02_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "gaze_0.02_budget2": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "gaze_0.02_budget3": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "gaze_0.02_budget5": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "gaze_0.02_budget10": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "gaze_0.05_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "gaze_0.05_budget2": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "gaze_0.05_budget3": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "gaze_0.05_budget5": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "gaze_0.05_budget10": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "fused_0": {
+   "tau": 0.995,
+   "deadline": 15.0,
+   "cal_wrong": 0,
+   "cal_correct": 70,
+   "cal_n": 204,
+   "cal_ccpm": 1.5996191383004048,
+   "allowed_wrong": 0
+  },
+  "fused_0.02": {
+   "tau": 0.9,
+   "deadline": 10.0,
+   "cal_wrong": 4,
+   "cal_correct": 71,
+   "cal_n": 204,
+   "cal_ccpm": 2.473688030775931,
+   "allowed_wrong": 4
+  },
+  "fused_0.05": {
+   "tau": 0.7,
+   "deadline": 5.0,
+   "cal_wrong": 8,
+   "cal_correct": 49,
+   "cal_n": 204,
+   "cal_ccpm": 3.1330757959238045,
+   "allowed_wrong": 10
+  },
+  "fused_0.1": {
+   "tau": 0.6,
+   "deadline": 5.0,
+   "cal_wrong": 18,
+   "cal_correct": 53,
+   "cal_n": 204,
+   "cal_ccpm": 3.5012386457473164,
+   "allowed_wrong": 20
+  },
+  "fused_0.02_budget1": {
+   "tau": 0.5,
+   "deadline": 1.0,
+   "cal_wrong": 2,
+   "cal_correct": 1,
+   "cal_n": 204,
+   "cal_ccpm": 0.29593094944512943,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget2": {
+   "tau": 0.6,
+   "deadline": 2.0,
+   "cal_wrong": 1,
+   "cal_correct": 2,
+   "cal_n": 204,
+   "cal_ccpm": 0.29574861367837335,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget3": {
+   "tau": 0.7,
+   "deadline": 3.0,
+   "cal_wrong": 3,
+   "cal_correct": 10,
+   "cal_n": 204,
+   "cal_ccpm": 0.992966487381051,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget5": {
+   "tau": 0.85,
+   "deadline": 5.0,
+   "cal_wrong": 3,
+   "cal_correct": 37,
+   "cal_n": 204,
+   "cal_ccpm": 2.2824829713404444,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget10": {
+   "tau": 0.9,
+   "deadline": 10.0,
+   "cal_wrong": 4,
+   "cal_correct": 71,
+   "cal_n": 204,
+   "cal_ccpm": 2.473688030775931,
+   "allowed_wrong": 4
+  },
+  "fused_0.05_budget1": {
+   "tau": 0.5,
+   "deadline": 1.0,
+   "cal_wrong": 2,
+   "cal_correct": 1,
+   "cal_n": 204,
+   "cal_ccpm": 0.29593094944512943,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget2": {
+   "tau": 0.5,
+   "deadline": 2.0,
+   "cal_wrong": 5,
+   "cal_correct": 6,
+   "cal_n": 204,
+   "cal_ccpm": 0.8966376089663761,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget3": {
+   "tau": 0.6,
+   "deadline": 3.0,
+   "cal_wrong": 8,
+   "cal_correct": 17,
+   "cal_n": 204,
+   "cal_ccpm": 1.7028380634390652,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget5": {
+   "tau": 0.7,
+   "deadline": 5.0,
+   "cal_wrong": 8,
+   "cal_correct": 49,
+   "cal_n": 204,
+   "cal_ccpm": 3.1330757959238045,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget10": {
+   "tau": 0.85,
+   "deadline": 10.0,
+   "cal_wrong": 8,
+   "cal_correct": 75,
+   "cal_n": 204,
+   "cal_ccpm": 2.67538644470868,
+   "allowed_wrong": 10
+  }
+ },
+ {
+  "fold": 1,
+  "gaze_offset_sd": 2.0,
+  "alpha": 1.0124342796405599,
+  "sigma": 1.9440775901540435,
+  "lapse": 0.0,
+  "eeg_0": {
+   "tau": 0.995,
+   "deadline": Infinity,
+   "cal_wrong": 0,
+   "cal_correct": 45,
+   "cal_n": 204,
+   "cal_ccpm": 0.6782641462036049,
+   "allowed_wrong": 0
+  },
+  "eeg_0.02": {
+   "tau": 0.8,
+   "deadline": 10.0,
+   "cal_wrong": 3,
+   "cal_correct": 35,
+   "cal_n": 204,
+   "cal_ccpm": 1.0991886940591469,
+   "allowed_wrong": 4
+  },
+  "eeg_0.05": {
+   "tau": 0.6,
+   "deadline": 10.0,
+   "cal_wrong": 9,
+   "cal_correct": 42,
+   "cal_n": 204,
+   "cal_ccpm": 1.3609667184230068,
+   "allowed_wrong": 10
+  },
+  "eeg_0.1": {
+   "tau": 0.7,
+   "deadline": Infinity,
+   "cal_wrong": 19,
+   "cal_correct": 89,
+   "cal_n": 204,
+   "cal_ccpm": 1.6016796640671864,
+   "allowed_wrong": 20
+  },
+  "eeg_0.02_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "eeg_0.02_budget2": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "eeg_0.02_budget3": {
+   "tau": 0.5,
+   "deadline": 3.0,
+   "cal_wrong": 0,
+   "cal_correct": 5,
+   "cal_n": 204,
+   "cal_ccpm": 0.4924086992203529,
+   "allowed_wrong": 4
+  },
+  "eeg_0.02_budget5": {
+   "tau": 0.5,
+   "deadline": 5.0,
+   "cal_wrong": 2,
+   "cal_correct": 15,
+   "cal_n": 204,
+   "cal_ccpm": 0.9045226130653267,
+   "allowed_wrong": 4
+  },
+  "eeg_0.02_budget10": {
+   "tau": 0.8,
+   "deadline": 10.0,
+   "cal_wrong": 3,
+   "cal_correct": 35,
+   "cal_n": 204,
+   "cal_ccpm": 1.0991886940591469,
+   "allowed_wrong": 4
+  },
+  "eeg_0.05_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "eeg_0.05_budget2": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "eeg_0.05_budget3": {
+   "tau": 0.5,
+   "deadline": 3.0,
+   "cal_wrong": 0,
+   "cal_correct": 5,
+   "cal_n": 204,
+   "cal_ccpm": 0.4924086992203529,
+   "allowed_wrong": 10
+  },
+  "eeg_0.05_budget5": {
+   "tau": 0.5,
+   "deadline": 5.0,
+   "cal_wrong": 2,
+   "cal_correct": 15,
+   "cal_n": 204,
+   "cal_ccpm": 0.9045226130653267,
+   "allowed_wrong": 10
+  },
+  "eeg_0.05_budget10": {
+   "tau": 0.6,
+   "deadline": 10.0,
+   "cal_wrong": 9,
+   "cal_correct": 42,
+   "cal_n": 204,
+   "cal_ccpm": 1.3609667184230068,
+   "allowed_wrong": 10
+  },
+  "gaze_0": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 0,
+   "never_commit": true
+  },
+  "gaze_0.02": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "gaze_0.05": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "gaze_0.1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 20,
+   "never_commit": true
+  },
+  "gaze_0.02_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "gaze_0.02_budget2": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "gaze_0.02_budget3": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "gaze_0.02_budget5": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "gaze_0.02_budget10": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "gaze_0.05_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "gaze_0.05_budget2": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "gaze_0.05_budget3": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "gaze_0.05_budget5": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "gaze_0.05_budget10": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "fused_0": {
+   "tau": 0.95,
+   "deadline": 10.0,
+   "cal_wrong": 0,
+   "cal_correct": 36,
+   "cal_n": 204,
+   "cal_ccpm": 1.1227340653628746,
+   "allowed_wrong": 0
+  },
+  "fused_0.02": {
+   "tau": 0.95,
+   "deadline": 15.0,
+   "cal_wrong": 2,
+   "cal_correct": 57,
+   "cal_n": 204,
+   "cal_ccpm": 1.2655534483556132,
+   "allowed_wrong": 4
+  },
+  "fused_0.05": {
+   "tau": 0.85,
+   "deadline": 15.0,
+   "cal_wrong": 10,
+   "cal_correct": 70,
+   "cal_n": 204,
+   "cal_ccpm": 1.6592592592592592,
+   "allowed_wrong": 10
+  },
+  "fused_0.1": {
+   "tau": 0.5,
+   "deadline": 5.0,
+   "cal_wrong": 19,
+   "cal_correct": 34,
+   "cal_n": 204,
+   "cal_ccpm": 2.1780328306419325,
+   "allowed_wrong": 20
+  },
+  "fused_0.02_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "fused_0.02_budget2": {
+   "tau": 0.5,
+   "deadline": 2.0,
+   "cal_wrong": 4,
+   "cal_correct": 5,
+   "cal_n": 204,
+   "cal_ccpm": 0.7418856259659969,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget3": {
+   "tau": 0.7,
+   "deadline": 3.0,
+   "cal_wrong": 3,
+   "cal_correct": 4,
+   "cal_n": 204,
+   "cal_ccpm": 0.39546858908341914,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget5": {
+   "tau": 0.8,
+   "deadline": 5.0,
+   "cal_wrong": 3,
+   "cal_correct": 16,
+   "cal_n": 204,
+   "cal_ccpm": 0.9650665996481529,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget10": {
+   "tau": 0.93,
+   "deadline": 10.0,
+   "cal_wrong": 3,
+   "cal_correct": 39,
+   "cal_n": 204,
+   "cal_ccpm": 1.229637414608513,
+   "allowed_wrong": 4
+  },
+  "fused_0.05_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "fused_0.05_budget2": {
+   "tau": 0.5,
+   "deadline": 2.0,
+   "cal_wrong": 4,
+   "cal_correct": 5,
+   "cal_n": 204,
+   "cal_ccpm": 0.7418856259659969,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget3": {
+   "tau": 0.5,
+   "deadline": 3.0,
+   "cal_wrong": 9,
+   "cal_correct": 10,
+   "cal_n": 204,
+   "cal_ccpm": 1.0092514718250631,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget5": {
+   "tau": 0.7,
+   "deadline": 5.0,
+   "cal_wrong": 5,
+   "cal_correct": 18,
+   "cal_n": 204,
+   "cal_ccpm": 1.096029430419891,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget10": {
+   "tau": 0.85,
+   "deadline": 10.0,
+   "cal_wrong": 7,
+   "cal_correct": 45,
+   "cal_n": 204,
+   "cal_ccpm": 1.4639105388004068,
+   "allowed_wrong": 10
+  }
+ },
+ {
+  "fold": 2,
+  "gaze_offset_sd": 2.0,
+  "alpha": 0.8566220304208312,
+  "sigma": 2.1877396875370922,
+  "lapse": 0.0,
+  "eeg_0": {
+   "tau": 0.8,
+   "deadline": 4.0,
+   "cal_wrong": 0,
+   "cal_correct": 17,
+   "cal_n": 204,
+   "cal_ccpm": 1.2714241196634466,
+   "allowed_wrong": 0
+  },
+  "eeg_0.02": {
+   "tau": 0.6,
+   "deadline": 4.0,
+   "cal_wrong": 2,
+   "cal_correct": 23,
+   "cal_n": 204,
+   "cal_ccpm": 1.7363950927964769,
+   "allowed_wrong": 4
+  },
+  "eeg_0.05": {
+   "tau": 0.7,
+   "deadline": 7.5,
+   "cal_wrong": 7,
+   "cal_correct": 44,
+   "cal_n": 204,
+   "cal_ccpm": 1.9102749638205498,
+   "allowed_wrong": 10
+  },
+  "eeg_0.1": {
+   "tau": 0.6,
+   "deadline": 7.5,
+   "cal_wrong": 13,
+   "cal_correct": 44,
+   "cal_n": 204,
+   "cal_ccpm": 1.931059705586541,
+   "allowed_wrong": 20
+  },
+  "eeg_0.02_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "eeg_0.02_budget2": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "eeg_0.02_budget3": {
+   "tau": 0.5,
+   "deadline": 3.0,
+   "cal_wrong": 3,
+   "cal_correct": 8,
+   "cal_n": 204,
+   "cal_ccpm": 0.7904487443392343,
+   "allowed_wrong": 4
+  },
+  "eeg_0.02_budget5": {
+   "tau": 0.7,
+   "deadline": 5.0,
+   "cal_wrong": 4,
+   "cal_correct": 27,
+   "cal_n": 204,
+   "cal_ccpm": 1.6583493282149713,
+   "allowed_wrong": 4
+  },
+  "eeg_0.02_budget10": {
+   "tau": 0.9,
+   "deadline": 10.0,
+   "cal_wrong": 4,
+   "cal_correct": 48,
+   "cal_n": 204,
+   "cal_ccpm": 1.5780821917808219,
+   "allowed_wrong": 4
+  },
+  "eeg_0.05_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "eeg_0.05_budget2": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "eeg_0.05_budget3": {
+   "tau": 0.5,
+   "deadline": 3.0,
+   "cal_wrong": 3,
+   "cal_correct": 8,
+   "cal_n": 204,
+   "cal_ccpm": 0.7904487443392343,
+   "allowed_wrong": 10
+  },
+  "eeg_0.05_budget5": {
+   "tau": 0.5,
+   "deadline": 5.0,
+   "cal_wrong": 8,
+   "cal_correct": 29,
+   "cal_n": 204,
+   "cal_ccpm": 1.810143042912874,
+   "allowed_wrong": 10
+  },
+  "eeg_0.05_budget10": {
+   "tau": 0.7,
+   "deadline": 10.0,
+   "cal_wrong": 9,
+   "cal_correct": 52,
+   "cal_n": 204,
+   "cal_ccpm": 1.7776511644469766,
+   "allowed_wrong": 10
+  },
+  "gaze_0": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 0,
+   "never_commit": true
+  },
+  "gaze_0.02": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "gaze_0.05": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "gaze_0.1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 20,
+   "never_commit": true
+  },
+  "gaze_0.02_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "gaze_0.02_budget2": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "gaze_0.02_budget3": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "gaze_0.02_budget5": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "gaze_0.02_budget10": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "gaze_0.05_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "gaze_0.05_budget2": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "gaze_0.05_budget3": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "gaze_0.05_budget5": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "gaze_0.05_budget10": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "fused_0": {
+   "tau": 0.93,
+   "deadline": 4.0,
+   "cal_wrong": 0,
+   "cal_correct": 18,
+   "cal_n": 204,
+   "cal_ccpm": 1.3472633712770934,
+   "allowed_wrong": 0
+  },
+  "fused_0.02": {
+   "tau": 0.7,
+   "deadline": 5.0,
+   "cal_wrong": 3,
+   "cal_correct": 36,
+   "cal_n": 204,
+   "cal_ccpm": 2.2535211267605635,
+   "allowed_wrong": 4
+  },
+  "fused_0.05": {
+   "tau": 0.8,
+   "deadline": 7.5,
+   "cal_wrong": 8,
+   "cal_correct": 52,
+   "cal_n": 204,
+   "cal_ccpm": 2.2834141432622816,
+   "allowed_wrong": 10
+  },
+  "fused_0.1": {
+   "tau": 0.7,
+   "deadline": 7.5,
+   "cal_wrong": 11,
+   "cal_correct": 56,
+   "cal_n": 204,
+   "cal_ccpm": 2.510741640201756,
+   "allowed_wrong": 20
+  },
+  "fused_0.02_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "fused_0.02_budget2": {
+   "tau": 0.5,
+   "deadline": 2.0,
+   "cal_wrong": 3,
+   "cal_correct": 8,
+   "cal_n": 204,
+   "cal_ccpm": 1.1884865366759516,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget3": {
+   "tau": 0.7,
+   "deadline": 3.0,
+   "cal_wrong": 1,
+   "cal_correct": 12,
+   "cal_n": 204,
+   "cal_ccpm": 1.1927935390349969,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget5": {
+   "tau": 0.7,
+   "deadline": 5.0,
+   "cal_wrong": 3,
+   "cal_correct": 36,
+   "cal_n": 204,
+   "cal_ccpm": 2.2535211267605635,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget10": {
+   "tau": 0.93,
+   "deadline": 10.0,
+   "cal_wrong": 3,
+   "cal_correct": 55,
+   "cal_n": 204,
+   "cal_ccpm": 1.8431892759896669,
+   "allowed_wrong": 4
+  },
+  "fused_0.05_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "fused_0.05_budget2": {
+   "tau": 0.5,
+   "deadline": 2.0,
+   "cal_wrong": 3,
+   "cal_correct": 8,
+   "cal_n": 204,
+   "cal_ccpm": 1.1884865366759516,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget3": {
+   "tau": 0.6,
+   "deadline": 3.0,
+   "cal_wrong": 5,
+   "cal_correct": 15,
+   "cal_n": 204,
+   "cal_ccpm": 1.4971927635683093,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget5": {
+   "tau": 0.7,
+   "deadline": 5.0,
+   "cal_wrong": 3,
+   "cal_correct": 36,
+   "cal_n": 204,
+   "cal_ccpm": 2.2535211267605635,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget10": {
+   "tau": 0.8,
+   "deadline": 10.0,
+   "cal_wrong": 10,
+   "cal_correct": 64,
+   "cal_n": 204,
+   "cal_ccpm": 2.242499452514782,
+   "allowed_wrong": 10
+  }
+ },
+ {
+  "fold": 0,
+  "gaze_offset_sd": 3.0,
+  "alpha": 1.0124342796405599,
+  "sigma": 3.117753670636956,
+  "lapse": 0.0,
+  "eeg_0": {
+   "tau": 0.97,
+   "deadline": 15.0,
+   "cal_wrong": 0,
+   "cal_correct": 71,
+   "cal_n": 204,
+   "cal_ccpm": 1.6369662327681445,
+   "allowed_wrong": 0
+  },
+  "eeg_0.02": {
+   "tau": 0.93,
+   "deadline": 15.0,
+   "cal_wrong": 2,
+   "cal_correct": 82,
+   "cal_n": 204,
+   "cal_ccpm": 1.9518000595060991,
+   "allowed_wrong": 4
+  },
+  "eeg_0.05": {
+   "tau": 0.7,
+   "deadline": 7.5,
+   "cal_wrong": 10,
+   "cal_correct": 51,
+   "cal_n": 204,
+   "cal_ccpm": 2.20679707923916,
+   "allowed_wrong": 10
+  },
+  "eeg_0.1": {
+   "tau": 0.6,
+   "deadline": 10.0,
+   "cal_wrong": 20,
+   "cal_correct": 72,
+   "cal_n": 204,
+   "cal_ccpm": 2.603978300180832,
+   "allowed_wrong": 20
+  },
+  "eeg_0.02_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "eeg_0.02_budget2": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "eeg_0.02_budget3": {
+   "tau": 0.5,
+   "deadline": 3.0,
+   "cal_wrong": 3,
+   "cal_correct": 5,
+   "cal_n": 204,
+   "cal_ccpm": 0.4931169098006986,
+   "allowed_wrong": 4
+  },
+  "eeg_0.02_budget5": {
+   "tau": 0.7,
+   "deadline": 5.0,
+   "cal_wrong": 4,
+   "cal_correct": 22,
+   "cal_n": 204,
+   "cal_ccpm": 1.3424866514111367,
+   "allowed_wrong": 4
+  },
+  "eeg_0.02_budget10": {
+   "tau": 0.9,
+   "deadline": 10.0,
+   "cal_wrong": 4,
+   "cal_correct": 54,
+   "cal_n": 204,
+   "cal_ccpm": 1.7760723585034948,
+   "allowed_wrong": 4
+  },
+  "eeg_0.05_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "eeg_0.05_budget2": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "eeg_0.05_budget3": {
+   "tau": 0.5,
+   "deadline": 3.0,
+   "cal_wrong": 3,
+   "cal_correct": 5,
+   "cal_n": 204,
+   "cal_ccpm": 0.4931169098006986,
+   "allowed_wrong": 10
+  },
+  "eeg_0.05_budget5": {
+   "tau": 0.6,
+   "deadline": 5.0,
+   "cal_wrong": 8,
+   "cal_correct": 31,
+   "cal_n": 204,
+   "cal_ccpm": 1.9123505976095616,
+   "allowed_wrong": 10
+  },
+  "eeg_0.05_budget10": {
+   "tau": 0.8,
+   "deadline": 10.0,
+   "cal_wrong": 8,
+   "cal_correct": 65,
+   "cal_n": 204,
+   "cal_ccpm": 2.2037010877242547,
+   "allowed_wrong": 10
+  },
+  "gaze_0": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 0,
+   "never_commit": true
+  },
+  "gaze_0.02": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "gaze_0.05": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "gaze_0.1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 20,
+   "never_commit": true
+  },
+  "gaze_0.02_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "gaze_0.02_budget2": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "gaze_0.02_budget3": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "gaze_0.02_budget5": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "gaze_0.02_budget10": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "gaze_0.05_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "gaze_0.05_budget2": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "gaze_0.05_budget3": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "gaze_0.05_budget5": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "gaze_0.05_budget10": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "fused_0": {
+   "tau": 0.99,
+   "deadline": 15.0,
+   "cal_wrong": 0,
+   "cal_correct": 70,
+   "cal_n": 204,
+   "cal_ccpm": 1.6038951739939855,
+   "allowed_wrong": 0
+  },
+  "fused_0.02": {
+   "tau": 0.93,
+   "deadline": 15.0,
+   "cal_wrong": 4,
+   "cal_correct": 84,
+   "cal_n": 204,
+   "cal_ccpm": 2.061455084615778,
+   "allowed_wrong": 4
+  },
+  "fused_0.05": {
+   "tau": 0.8,
+   "deadline": 10.0,
+   "cal_wrong": 9,
+   "cal_correct": 70,
+   "cal_n": 204,
+   "cal_ccpm": 2.460276781137878,
+   "allowed_wrong": 10
+  },
+  "fused_0.1": {
+   "tau": 0.5,
+   "deadline": 5.0,
+   "cal_wrong": 19,
+   "cal_correct": 43,
+   "cal_n": 204,
+   "cal_ccpm": 2.7756858526089294,
+   "allowed_wrong": 20
+  },
+  "fused_0.02_budget1": {
+   "tau": 0.5,
+   "deadline": 1.0,
+   "cal_wrong": 0,
+   "cal_correct": 1,
+   "cal_n": 204,
+   "cal_ccpm": 0.29447852760736193,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget2": {
+   "tau": 0.5,
+   "deadline": 2.0,
+   "cal_wrong": 0,
+   "cal_correct": 1,
+   "cal_n": 204,
+   "cal_ccpm": 0.14751075599262445,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget3": {
+   "tau": 0.6,
+   "deadline": 3.0,
+   "cal_wrong": 3,
+   "cal_correct": 6,
+   "cal_n": 204,
+   "cal_ccpm": 0.591983556012333,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget5": {
+   "tau": 0.8,
+   "deadline": 5.0,
+   "cal_wrong": 4,
+   "cal_correct": 25,
+   "cal_n": 204,
+   "cal_ccpm": 1.5304170386430302,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget10": {
+   "tau": 0.93,
+   "deadline": 10.0,
+   "cal_wrong": 3,
+   "cal_correct": 58,
+   "cal_n": 204,
+   "cal_ccpm": 1.9259771705292288,
+   "allowed_wrong": 4
+  },
+  "fused_0.05_budget1": {
+   "tau": 0.5,
+   "deadline": 1.0,
+   "cal_wrong": 0,
+   "cal_correct": 1,
+   "cal_n": 204,
+   "cal_ccpm": 0.29447852760736193,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget2": {
+   "tau": 0.5,
+   "deadline": 2.0,
+   "cal_wrong": 0,
+   "cal_correct": 1,
+   "cal_n": 204,
+   "cal_ccpm": 0.14751075599262445,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget3": {
+   "tau": 0.5,
+   "deadline": 3.0,
+   "cal_wrong": 8,
+   "cal_correct": 9,
+   "cal_n": 204,
+   "cal_ccpm": 0.8936698386429458,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget5": {
+   "tau": 0.6,
+   "deadline": 5.0,
+   "cal_wrong": 10,
+   "cal_correct": 37,
+   "cal_n": 204,
+   "cal_ccpm": 2.3380726698262246,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget10": {
+   "tau": 0.8,
+   "deadline": 10.0,
+   "cal_wrong": 9,
+   "cal_correct": 70,
+   "cal_n": 204,
+   "cal_ccpm": 2.460276781137878,
+   "allowed_wrong": 10
+  }
+ },
+ {
+  "fold": 1,
+  "gaze_offset_sd": 3.0,
+  "alpha": 1.0124342796405599,
+  "sigma": 3.117753670636956,
+  "lapse": 0.0,
+  "eeg_0": {
+   "tau": 0.995,
+   "deadline": Infinity,
+   "cal_wrong": 0,
+   "cal_correct": 45,
+   "cal_n": 204,
+   "cal_ccpm": 0.6782641462036049,
+   "allowed_wrong": 0
+  },
+  "eeg_0.02": {
+   "tau": 0.8,
+   "deadline": 10.0,
+   "cal_wrong": 3,
+   "cal_correct": 35,
+   "cal_n": 204,
+   "cal_ccpm": 1.0991886940591469,
+   "allowed_wrong": 4
+  },
+  "eeg_0.05": {
+   "tau": 0.6,
+   "deadline": 10.0,
+   "cal_wrong": 9,
+   "cal_correct": 42,
+   "cal_n": 204,
+   "cal_ccpm": 1.3609667184230068,
+   "allowed_wrong": 10
+  },
+  "eeg_0.1": {
+   "tau": 0.7,
+   "deadline": Infinity,
+   "cal_wrong": 19,
+   "cal_correct": 89,
+   "cal_n": 204,
+   "cal_ccpm": 1.6016796640671864,
+   "allowed_wrong": 20
+  },
+  "eeg_0.02_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "eeg_0.02_budget2": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "eeg_0.02_budget3": {
+   "tau": 0.5,
+   "deadline": 3.0,
+   "cal_wrong": 0,
+   "cal_correct": 5,
+   "cal_n": 204,
+   "cal_ccpm": 0.4924086992203529,
+   "allowed_wrong": 4
+  },
+  "eeg_0.02_budget5": {
+   "tau": 0.5,
+   "deadline": 5.0,
+   "cal_wrong": 2,
+   "cal_correct": 15,
+   "cal_n": 204,
+   "cal_ccpm": 0.9045226130653267,
+   "allowed_wrong": 4
+  },
+  "eeg_0.02_budget10": {
+   "tau": 0.8,
+   "deadline": 10.0,
+   "cal_wrong": 3,
+   "cal_correct": 35,
+   "cal_n": 204,
+   "cal_ccpm": 1.0991886940591469,
+   "allowed_wrong": 4
+  },
+  "eeg_0.05_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "eeg_0.05_budget2": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "eeg_0.05_budget3": {
+   "tau": 0.5,
+   "deadline": 3.0,
+   "cal_wrong": 0,
+   "cal_correct": 5,
+   "cal_n": 204,
+   "cal_ccpm": 0.4924086992203529,
+   "allowed_wrong": 10
+  },
+  "eeg_0.05_budget5": {
+   "tau": 0.5,
+   "deadline": 5.0,
+   "cal_wrong": 2,
+   "cal_correct": 15,
+   "cal_n": 204,
+   "cal_ccpm": 0.9045226130653267,
+   "allowed_wrong": 10
+  },
+  "eeg_0.05_budget10": {
+   "tau": 0.6,
+   "deadline": 10.0,
+   "cal_wrong": 9,
+   "cal_correct": 42,
+   "cal_n": 204,
+   "cal_ccpm": 1.3609667184230068,
+   "allowed_wrong": 10
+  },
+  "gaze_0": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 0,
+   "never_commit": true
+  },
+  "gaze_0.02": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "gaze_0.05": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "gaze_0.1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 20,
+   "never_commit": true
+  },
+  "gaze_0.02_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "gaze_0.02_budget2": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "gaze_0.02_budget3": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "gaze_0.02_budget5": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "gaze_0.02_budget10": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "gaze_0.05_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "gaze_0.05_budget2": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "gaze_0.05_budget3": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "gaze_0.05_budget5": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "gaze_0.05_budget10": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "fused_0": {
+   "tau": 0.93,
+   "deadline": 10.0,
+   "cal_wrong": 0,
+   "cal_correct": 37,
+   "cal_n": 204,
+   "cal_ccpm": 1.148473874806001,
+   "allowed_wrong": 0
+  },
+  "fused_0.02": {
+   "tau": 0.85,
+   "deadline": 10.0,
+   "cal_wrong": 4,
+   "cal_correct": 41,
+   "cal_n": 204,
+   "cal_ccpm": 1.2991814100871402,
+   "allowed_wrong": 4
+  },
+  "fused_0.05": {
+   "tau": 0.6,
+   "deadline": 7.5,
+   "cal_wrong": 10,
+   "cal_correct": 39,
+   "cal_n": 204,
+   "cal_ccpm": 1.6595744680851063,
+   "allowed_wrong": 10
+  },
+  "fused_0.1": {
+   "tau": 0.8,
+   "deadline": Infinity,
+   "cal_wrong": 17,
+   "cal_correct": 94,
+   "cal_n": 204,
+   "cal_ccpm": 1.7037344711701847,
+   "allowed_wrong": 20
+  },
+  "fused_0.02_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "fused_0.02_budget2": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "fused_0.02_budget3": {
+   "tau": 0.6,
+   "deadline": 3.0,
+   "cal_wrong": 2,
+   "cal_correct": 5,
+   "cal_n": 204,
+   "cal_ccpm": 0.49261083743842365,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget5": {
+   "tau": 0.6,
+   "deadline": 5.0,
+   "cal_wrong": 3,
+   "cal_correct": 20,
+   "cal_n": 204,
+   "cal_ccpm": 1.2147285840819941,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget10": {
+   "tau": 0.85,
+   "deadline": 10.0,
+   "cal_wrong": 4,
+   "cal_correct": 41,
+   "cal_n": 204,
+   "cal_ccpm": 1.2991814100871402,
+   "allowed_wrong": 4
+  },
+  "fused_0.05_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "fused_0.05_budget2": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "fused_0.05_budget3": {
+   "tau": 0.6,
+   "deadline": 3.0,
+   "cal_wrong": 2,
+   "cal_correct": 5,
+   "cal_n": 204,
+   "cal_ccpm": 0.49261083743842365,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget5": {
+   "tau": 0.6,
+   "deadline": 5.0,
+   "cal_wrong": 3,
+   "cal_correct": 20,
+   "cal_n": 204,
+   "cal_ccpm": 1.2147285840819941,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget10": {
+   "tau": 0.7,
+   "deadline": 10.0,
+   "cal_wrong": 10,
+   "cal_correct": 46,
+   "cal_n": 204,
+   "cal_ccpm": 1.5163793695487946,
+   "allowed_wrong": 10
+  }
+ },
+ {
+  "fold": 2,
+  "gaze_offset_sd": 3.0,
+  "alpha": 0.8566220304208312,
+  "sigma": 2.770510165004747,
+  "lapse": 0.0,
+  "eeg_0": {
+   "tau": 0.8,
+   "deadline": 4.0,
+   "cal_wrong": 0,
+   "cal_correct": 17,
+   "cal_n": 204,
+   "cal_ccpm": 1.2714241196634466,
+   "allowed_wrong": 0
+  },
+  "eeg_0.02": {
+   "tau": 0.6,
+   "deadline": 4.0,
+   "cal_wrong": 2,
+   "cal_correct": 23,
+   "cal_n": 204,
+   "cal_ccpm": 1.7363950927964769,
+   "allowed_wrong": 4
+  },
+  "eeg_0.05": {
+   "tau": 0.7,
+   "deadline": 7.5,
+   "cal_wrong": 7,
+   "cal_correct": 44,
+   "cal_n": 204,
+   "cal_ccpm": 1.9102749638205498,
+   "allowed_wrong": 10
+  },
+  "eeg_0.1": {
+   "tau": 0.6,
+   "deadline": 7.5,
+   "cal_wrong": 13,
+   "cal_correct": 44,
+   "cal_n": 204,
+   "cal_ccpm": 1.931059705586541,
+   "allowed_wrong": 20
+  },
+  "eeg_0.02_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "eeg_0.02_budget2": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "eeg_0.02_budget3": {
+   "tau": 0.5,
+   "deadline": 3.0,
+   "cal_wrong": 3,
+   "cal_correct": 8,
+   "cal_n": 204,
+   "cal_ccpm": 0.7904487443392343,
+   "allowed_wrong": 4
+  },
+  "eeg_0.02_budget5": {
+   "tau": 0.7,
+   "deadline": 5.0,
+   "cal_wrong": 4,
+   "cal_correct": 27,
+   "cal_n": 204,
+   "cal_ccpm": 1.6583493282149713,
+   "allowed_wrong": 4
+  },
+  "eeg_0.02_budget10": {
+   "tau": 0.9,
+   "deadline": 10.0,
+   "cal_wrong": 4,
+   "cal_correct": 48,
+   "cal_n": 204,
+   "cal_ccpm": 1.5780821917808219,
+   "allowed_wrong": 4
+  },
+  "eeg_0.05_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "eeg_0.05_budget2": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "eeg_0.05_budget3": {
+   "tau": 0.5,
+   "deadline": 3.0,
+   "cal_wrong": 3,
+   "cal_correct": 8,
+   "cal_n": 204,
+   "cal_ccpm": 0.7904487443392343,
+   "allowed_wrong": 10
+  },
+  "eeg_0.05_budget5": {
+   "tau": 0.5,
+   "deadline": 5.0,
+   "cal_wrong": 8,
+   "cal_correct": 29,
+   "cal_n": 204,
+   "cal_ccpm": 1.810143042912874,
+   "allowed_wrong": 10
+  },
+  "eeg_0.05_budget10": {
+   "tau": 0.7,
+   "deadline": 10.0,
+   "cal_wrong": 9,
+   "cal_correct": 52,
+   "cal_n": 204,
+   "cal_ccpm": 1.7776511644469766,
+   "allowed_wrong": 10
+  },
+  "gaze_0": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 0,
+   "never_commit": true
+  },
+  "gaze_0.02": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "gaze_0.05": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "gaze_0.1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 20,
+   "never_commit": true
+  },
+  "gaze_0.02_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "gaze_0.02_budget2": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "gaze_0.02_budget3": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "gaze_0.02_budget5": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "gaze_0.02_budget10": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "gaze_0.05_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "gaze_0.05_budget2": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "gaze_0.05_budget3": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "gaze_0.05_budget5": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "gaze_0.05_budget10": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "fused_0": {
+   "tau": 0.85,
+   "deadline": 4.0,
+   "cal_wrong": 0,
+   "cal_correct": 20,
+   "cal_n": 204,
+   "cal_ccpm": 1.5058823529411764,
+   "allowed_wrong": 0
+  },
+  "fused_0.02": {
+   "tau": 0.7,
+   "deadline": 4.0,
+   "cal_wrong": 3,
+   "cal_correct": 23,
+   "cal_n": 204,
+   "cal_ccpm": 1.7435249526216046,
+   "allowed_wrong": 4
+  },
+  "fused_0.05": {
+   "tau": 0.6,
+   "deadline": 5.0,
+   "cal_wrong": 8,
+   "cal_correct": 34,
+   "cal_n": 204,
+   "cal_ccpm": 2.1389252948885975,
+   "allowed_wrong": 10
+  },
+  "fused_0.1": {
+   "tau": 0.6,
+   "deadline": 7.5,
+   "cal_wrong": 14,
+   "cal_correct": 50,
+   "cal_n": 204,
+   "cal_ccpm": 2.257973468811741,
+   "allowed_wrong": 20
+  },
+  "fused_0.02_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 4,
+   "never_commit": true
+  },
+  "fused_0.02_budget2": {
+   "tau": 0.5,
+   "deadline": 2.0,
+   "cal_wrong": 1,
+   "cal_correct": 3,
+   "cal_n": 204,
+   "cal_ccpm": 0.4433497536945813,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget3": {
+   "tau": 0.6,
+   "deadline": 3.0,
+   "cal_wrong": 2,
+   "cal_correct": 9,
+   "cal_n": 204,
+   "cal_ccpm": 0.893854748603352,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget5": {
+   "tau": 0.8,
+   "deadline": 5.0,
+   "cal_wrong": 2,
+   "cal_correct": 27,
+   "cal_n": 204,
+   "cal_ccpm": 1.6608996539792387,
+   "allowed_wrong": 4
+  },
+  "fused_0.02_budget10": {
+   "tau": 0.95,
+   "deadline": 10.0,
+   "cal_wrong": 3,
+   "cal_correct": 44,
+   "cal_n": 204,
+   "cal_ccpm": 1.4451895442726153,
+   "allowed_wrong": 4
+  },
+  "fused_0.05_budget1": {
+   "tau": 1.01,
+   "deadline": 0.0,
+   "cal_wrong": 0,
+   "cal_correct": 0,
+   "cal_n": 204,
+   "cal_ccpm": 0.0,
+   "allowed_wrong": 10,
+   "never_commit": true
+  },
+  "fused_0.05_budget2": {
+   "tau": 0.5,
+   "deadline": 2.0,
+   "cal_wrong": 1,
+   "cal_correct": 3,
+   "cal_n": 204,
+   "cal_ccpm": 0.4433497536945813,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget3": {
+   "tau": 0.5,
+   "deadline": 3.0,
+   "cal_wrong": 5,
+   "cal_correct": 12,
+   "cal_n": 204,
+   "cal_ccpm": 1.1977542108546475,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget5": {
+   "tau": 0.6,
+   "deadline": 5.0,
+   "cal_wrong": 8,
+   "cal_correct": 34,
+   "cal_n": 204,
+   "cal_ccpm": 2.1389252948885975,
+   "allowed_wrong": 10
+  },
+  "fused_0.05_budget10": {
+   "tau": 0.8,
+   "deadline": 10.0,
+   "cal_wrong": 10,
+   "cal_correct": 55,
+   "cal_n": 204,
+   "cal_ccpm": 1.8823529411764706,
+   "allowed_wrong": 10
+  }
+ }
+]

@@ -1,0 +1,51 @@
+neuro_comm:
+  resources_servers:
+    neuro_comm:
+      entrypoint: app.py
+      domain: agent
+      verified: false
+      description: Sequential P300 communication decisions on recorded ALS EEG (bigP3BCI Study F) - request more EEG, commit, abstain
+      value: Measures whether a small agent beats classical Bayesian stopping on real recorded EEG without ever seeing the target
+      evidence_dir: data/evidence/study_f
+      decoder: xdawn_riemann_lr
+      roles: [calibration, evaluation, evaluation_secondary]
+      reward:                       # see docs/NEUROCOMM_GYM_EXPERIMENT.md
+        r_correct: 1.0
+        p_wrong: 1.0
+        p_abstain: 0.2
+        p_timeout: 0.5
+        c_sec: 0.01
+        c_turn: 0.005
+        p_invalid: 0.1
+        p_modality: 0.05
+        max_calls: 40
+      rollout_log: evaluations/results/neuro_comm/gym_rollouts.jsonl
+neuro_comm_simple_agent:
+  responses_api_agents:
+    simple_agent:
+      entrypoint: app.py
+      resources_server:
+        type: resources_servers
+        name: neuro_comm
+      model_server:
+        type: responses_api_models
+        name: policy_model
+      datasets:
+      - name: train                 # calibration-role episodes (sessions 1-2): the only episodes training may use
+        type: train
+        jsonl_fpath: resources_servers/neuro_comm/data/train.jsonl
+        license: Apache 2.0         # task prompts only; EEG derives from bigP3BCI (CC BY 4.0), see docs
+      - name: validation            # held-out session-3 Static Test episodes: never train on these
+        type: validation
+        jsonl_fpath: resources_servers/neuro_comm/data/eval.jsonl
+        license: Apache 2.0
+      - name: example
+        type: example
+        jsonl_fpath: resources_servers/neuro_comm/data/example.jsonl
+neuro_comm_environment_server:
+  environment_servers:
+    legacy_agent:
+      entrypoint: app.py
+      agent_server:
+        type: responses_api_agents
+        name: neuro_comm_simple_agent

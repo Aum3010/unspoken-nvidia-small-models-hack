@@ -1,0 +1,271 @@
+participant_id,session,run_id,run_type,condition,role,reason
+F_03,1,bigp3bci/F_03/SE001/Test/Dyn01,Test,Dyn,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_03,1,bigp3bci/F_03/SE001/Test/Dyn02,Test,Dyn,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_03,1,bigp3bci/F_03/SE001/Test/DynBigram01,Test,DynBigram,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_03,1,bigp3bci/F_03/SE001/Test/DynBigram02,Test,DynBigram,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_03,1,bigp3bci/F_03/SE001/Test/Static01,Test,Static,calibration,session 1 complete fixed-length run
+F_03,1,bigp3bci/F_03/SE001/Test/Static02,Test,Static,calibration,session 1 complete fixed-length run
+F_03,1,bigp3bci/F_03/SE001/Train/CBCol01,Train,CBCol,calibration,session 1 complete fixed-length run
+F_03,1,bigp3bci/F_03/SE001/Train/CBCol02,Train,CBCol,calibration,session 1 complete fixed-length run
+F_03,1,bigp3bci/F_03/SE001/Train/CBCol03,Train,CBCol,calibration,session 1 complete fixed-length run
+F_03,2,bigp3bci/F_03/SE002/Test/Dyn01,Test,Dyn,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_03,2,bigp3bci/F_03/SE002/Test/Dyn02,Test,Dyn,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_03,2,bigp3bci/F_03/SE002/Test/DynBigram01,Test,DynBigram,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_03,2,bigp3bci/F_03/SE002/Test/DynBigram02,Test,DynBigram,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_03,2,bigp3bci/F_03/SE002/Test/Static01,Test,Static,calibration,session 2 complete fixed-length run
+F_03,2,bigp3bci/F_03/SE002/Test/Static02,Test,Static,calibration,session 2 complete fixed-length run
+F_03,2,bigp3bci/F_03/SE002/Train/CBCol01,Train,CBCol,calibration,session 2 complete fixed-length run
+F_03,2,bigp3bci/F_03/SE002/Train/CBCol02,Train,CBCol,calibration,session 2 complete fixed-length run
+F_03,2,bigp3bci/F_03/SE002/Train/CBCol03,Train,CBCol,calibration,session 2 complete fixed-length run
+F_03,3,bigp3bci/F_03/SE003/Test/Dyn01,Test,Dyn,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_03,3,bigp3bci/F_03/SE003/Test/Dyn02,Test,Dyn,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_03,3,bigp3bci/F_03/SE003/Test/DynBigram01,Test,DynBigram,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_03,3,bigp3bci/F_03/SE003/Test/DynBigram02,Test,DynBigram,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_03,3,bigp3bci/F_03/SE003/Test/Static01,Test,Static,evaluation,session 3 complete fixed-length Test run (primary)
+F_03,3,bigp3bci/F_03/SE003/Test/Static02,Test,Static,evaluation,session 3 complete fixed-length Test run (primary)
+F_03,3,bigp3bci/F_03/SE003/Train/CBCol01,Train,CBCol,evaluation_secondary,session 3 complete calibration-style run; never used for training
+F_03,3,bigp3bci/F_03/SE003/Train/CBCol02,Train,CBCol,evaluation_secondary,session 3 complete calibration-style run; never used for training
+F_03,3,bigp3bci/F_03/SE003/Train/CBCol03,Train,CBCol,evaluation_secondary,session 3 complete calibration-style run; never used for training
+F_05,1,bigp3bci/F_05/SE001/Test/Dyn05,Test,Dyn,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_05,1,bigp3bci/F_05/SE001/Test/Dyn06,Test,Dyn,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_05,1,bigp3bci/F_05/SE001/Test/DynBigram07,Test,DynBigram,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_05,1,bigp3bci/F_05/SE001/Test/DynBigram08,Test,DynBigram,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_05,1,bigp3bci/F_05/SE001/Test/Static09,Test,Static,calibration,session 1 complete fixed-length run
+F_05,1,bigp3bci/F_05/SE001/Test/Static10,Test,Static,calibration,session 1 complete fixed-length run
+F_05,1,bigp3bci/F_05/SE001/Train/CBCol02,Train,CBCol,calibration,session 1 complete fixed-length run
+F_05,1,bigp3bci/F_05/SE001/Train/CBCol03,Train,CBCol,calibration,session 1 complete fixed-length run
+F_05,1,bigp3bci/F_05/SE001/Train/CBCol04,Train,CBCol,calibration,session 1 complete fixed-length run
+F_05,2,bigp3bci/F_05/SE002/Test/Dyn06,Test,Dyn,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_05,2,bigp3bci/F_05/SE002/Test/Dyn07,Test,Dyn,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_05,2,bigp3bci/F_05/SE002/Test/DynBigram08,Test,DynBigram,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_05,2,bigp3bci/F_05/SE002/Test/DynBigram09,Test,DynBigram,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_05,2,bigp3bci/F_05/SE002/Test/Static04,Test,Static,calibration,session 2 complete fixed-length run
+F_05,2,bigp3bci/F_05/SE002/Test/Static05,Test,Static,calibration,session 2 complete fixed-length run
+F_05,2,bigp3bci/F_05/SE002/Train/CBCol01,Train,CBCol,calibration,session 2 complete fixed-length run
+F_05,2,bigp3bci/F_05/SE002/Train/CBCol02,Train,CBCol,calibration,session 2 complete fixed-length run
+F_05,2,bigp3bci/F_05/SE002/Train/CBCol03,Train,CBCol,calibration,session 2 complete fixed-length run
+F_05,3,bigp3bci/F_05/SE003/Test/Dyn09,Test,Dyn,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_05,3,bigp3bci/F_05/SE003/Test/Dyn10,Test,Dyn,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_05,3,bigp3bci/F_05/SE003/Test/DynBigram05,Test,DynBigram,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_05,3,bigp3bci/F_05/SE003/Test/DynBigram06,Test,DynBigram,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_05,3,bigp3bci/F_05/SE003/Test/Static07,Test,Static,evaluation,session 3 complete fixed-length Test run (primary)
+F_05,3,bigp3bci/F_05/SE003/Test/Static08,Test,Static,evaluation,session 3 complete fixed-length Test run (primary)
+F_05,3,bigp3bci/F_05/SE003/Train/CBCol02,Train,CBCol,evaluation_secondary,session 3 complete calibration-style run; never used for training
+F_05,3,bigp3bci/F_05/SE003/Train/CBCol03,Train,CBCol,evaluation_secondary,session 3 complete calibration-style run; never used for training
+F_05,3,bigp3bci/F_05/SE003/Train/CBCol04,Train,CBCol,evaluation_secondary,session 3 complete calibration-style run; never used for training
+F_06,1,bigp3bci/F_06/SE001/Test/Dyn08,Test,Dyn,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_06,1,bigp3bci/F_06/SE001/Test/Dyn09,Test,Dyn,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_06,1,bigp3bci/F_06/SE001/Test/DynBigram06,Test,DynBigram,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_06,1,bigp3bci/F_06/SE001/Test/DynBigram07,Test,DynBigram,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_06,1,bigp3bci/F_06/SE001/Test/Static04,Test,Static,calibration,session 1 complete fixed-length run
+F_06,1,bigp3bci/F_06/SE001/Test/Static05,Test,Static,calibration,session 1 complete fixed-length run
+F_06,1,bigp3bci/F_06/SE001/Train/CBCol01,Train,CBCol,calibration,session 1 complete fixed-length run
+F_06,1,bigp3bci/F_06/SE001/Train/CBCol02,Train,CBCol,calibration,session 1 complete fixed-length run
+F_06,1,bigp3bci/F_06/SE001/Train/CBCol03,Train,CBCol,calibration,session 1 complete fixed-length run
+F_06,2,bigp3bci/F_06/SE002/Test/Dyn08,Test,Dyn,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_06,2,bigp3bci/F_06/SE002/Test/Dyn09,Test,Dyn,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_06,2,bigp3bci/F_06/SE002/Test/DynBigram04,Test,DynBigram,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_06,2,bigp3bci/F_06/SE002/Test/DynBigram05,Test,DynBigram,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_06,2,bigp3bci/F_06/SE002/Test/Static06,Test,Static,calibration,session 2 complete fixed-length run
+F_06,2,bigp3bci/F_06/SE002/Test/Static07,Test,Static,calibration,session 2 complete fixed-length run
+F_06,2,bigp3bci/F_06/SE002/Train/CBCol01,Train,CBCol,calibration,session 2 complete fixed-length run
+F_06,2,bigp3bci/F_06/SE002/Train/CBCol02,Train,CBCol,calibration,session 2 complete fixed-length run
+F_06,2,bigp3bci/F_06/SE002/Train/CBCol03,Train,CBCol,calibration,session 2 complete fixed-length run
+F_06,3,bigp3bci/F_06/SE003/Test/Dyn04,Test,Dyn,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_06,3,bigp3bci/F_06/SE003/Test/Dyn05,Test,Dyn,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_06,3,bigp3bci/F_06/SE003/Test/DynBigram08,Test,DynBigram,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_06,3,bigp3bci/F_06/SE003/Test/DynBigram09,Test,DynBigram,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_06,3,bigp3bci/F_06/SE003/Test/Static06,Test,Static,evaluation,session 3 complete fixed-length Test run (primary)
+F_06,3,bigp3bci/F_06/SE003/Test/Static07,Test,Static,evaluation,session 3 complete fixed-length Test run (primary)
+F_06,3,bigp3bci/F_06/SE003/Train/CBCol01,Train,CBCol,evaluation_secondary,session 3 complete calibration-style run; never used for training
+F_06,3,bigp3bci/F_06/SE003/Train/CBCol02,Train,CBCol,evaluation_secondary,session 3 complete calibration-style run; never used for training
+F_06,3,bigp3bci/F_06/SE003/Train/CBCol03,Train,CBCol,evaluation_secondary,session 3 complete calibration-style run; never used for training
+F_07,1,bigp3bci/F_07/SE001/Test/Dyn05,Test,Dyn,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_07,1,bigp3bci/F_07/SE001/Test/Dyn06,Test,Dyn,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_07,1,bigp3bci/F_07/SE001/Test/DynBigram09,Test,DynBigram,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_07,1,bigp3bci/F_07/SE001/Test/DynBigram10,Test,DynBigram,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_07,1,bigp3bci/F_07/SE001/Test/Static07,Test,Static,calibration,session 1 complete fixed-length run
+F_07,1,bigp3bci/F_07/SE001/Test/Static08,Test,Static,calibration,session 1 complete fixed-length run
+F_07,1,bigp3bci/F_07/SE001/Train/CBCol01,Train,CBCol,calibration,session 1 complete fixed-length run
+F_07,1,bigp3bci/F_07/SE001/Train/CBCol03,Train,CBCol,calibration,session 1 complete fixed-length run
+F_07,1,bigp3bci/F_07/SE001/Train/CBCol04,Train,CBCol,calibration,session 1 complete fixed-length run
+F_07,2,bigp3bci/F_07/SE002/Test/Dyn06,Test,Dyn,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_07,2,bigp3bci/F_07/SE002/Test/Dyn07,Test,Dyn,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_07,2,bigp3bci/F_07/SE002/Test/DynBigram04,Test,DynBigram,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_07,2,bigp3bci/F_07/SE002/Test/DynBigram05,Test,DynBigram,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_07,2,bigp3bci/F_07/SE002/Test/Static08,Test,Static,calibration,session 2 complete fixed-length run
+F_07,2,bigp3bci/F_07/SE002/Test/Static09,Test,Static,calibration,session 2 complete fixed-length run
+F_07,2,bigp3bci/F_07/SE002/Train/CBCol01,Train,CBCol,calibration,session 2 complete fixed-length run
+F_07,2,bigp3bci/F_07/SE002/Train/CBCol02,Train,CBCol,calibration,session 2 complete fixed-length run
+F_07,2,bigp3bci/F_07/SE002/Train/CBCol03,Train,CBCol,calibration,session 2 complete fixed-length run
+F_07,3,bigp3bci/F_07/SE003/Test/Dyn08,Test,Dyn,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_07,3,bigp3bci/F_07/SE003/Test/Dyn09,Test,Dyn,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_07,3,bigp3bci/F_07/SE003/Test/DynBigram06,Test,DynBigram,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_07,3,bigp3bci/F_07/SE003/Test/DynBigram07,Test,DynBigram,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_07,3,bigp3bci/F_07/SE003/Test/Static04,Test,Static,evaluation,session 3 complete fixed-length Test run (primary)
+F_07,3,bigp3bci/F_07/SE003/Test/Static05,Test,Static,evaluation,session 3 complete fixed-length Test run (primary)
+F_07,3,bigp3bci/F_07/SE003/Train/CBCol01,Train,CBCol,evaluation_secondary,session 3 complete calibration-style run; never used for training
+F_07,3,bigp3bci/F_07/SE003/Train/CBCol02,Train,CBCol,evaluation_secondary,session 3 complete calibration-style run; never used for training
+F_07,3,bigp3bci/F_07/SE003/Train/CBCol03,Train,CBCol,evaluation_secondary,session 3 complete calibration-style run; never used for training
+F_08,1,bigp3bci/F_08/SE001/Test/Dyn04,Test,Dyn,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_08,1,bigp3bci/F_08/SE001/Test/Dyn05,Test,Dyn,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_08,1,bigp3bci/F_08/SE001/Test/DynBigram08,Test,DynBigram,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_08,1,bigp3bci/F_08/SE001/Test/DynBigram09,Test,DynBigram,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_08,1,bigp3bci/F_08/SE001/Test/Static06,Test,Static,calibration,session 1 complete fixed-length run
+F_08,1,bigp3bci/F_08/SE001/Test/Static07,Test,Static,calibration,session 1 complete fixed-length run
+F_08,1,bigp3bci/F_08/SE001/Train/CBCol01,Train,CBCol,calibration,session 1 complete fixed-length run
+F_08,1,bigp3bci/F_08/SE001/Train/CBCol02,Train,CBCol,calibration,session 1 complete fixed-length run
+F_08,1,bigp3bci/F_08/SE001/Train/CBCol03,Train,CBCol,calibration,session 1 complete fixed-length run
+F_08,2,bigp3bci/F_08/SE002/Test/Dyn08,Test,Dyn,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_08,2,bigp3bci/F_08/SE002/Test/Dyn09,Test,Dyn,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_08,2,bigp3bci/F_08/SE002/Test/DynBigram06,Test,DynBigram,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_08,2,bigp3bci/F_08/SE002/Test/DynBigram07,Test,DynBigram,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_08,2,bigp3bci/F_08/SE002/Test/Static04,Test,Static,calibration,session 2 complete fixed-length run
+F_08,2,bigp3bci/F_08/SE002/Test/Static05,Test,Static,calibration,session 2 complete fixed-length run
+F_08,2,bigp3bci/F_08/SE002/Train/CBCol01,Train,CBCol,calibration,session 2 complete fixed-length run
+F_08,2,bigp3bci/F_08/SE002/Train/CBCol02,Train,CBCol,calibration,session 2 complete fixed-length run
+F_08,2,bigp3bci/F_08/SE002/Train/CBCol03,Train,CBCol,calibration,session 2 complete fixed-length run
+F_08,3,bigp3bci/F_08/SE003/Test/Dyn08,Test,Dyn,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_08,3,bigp3bci/F_08/SE003/Test/Dyn09,Test,Dyn,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_08,3,bigp3bci/F_08/SE003/Test/DynBigram04,Test,DynBigram,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_08,3,bigp3bci/F_08/SE003/Test/DynBigram05,Test,DynBigram,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_08,3,bigp3bci/F_08/SE003/Test/Static06,Test,Static,evaluation,session 3 complete fixed-length Test run (primary)
+F_08,3,bigp3bci/F_08/SE003/Test/Static07,Test,Static,evaluation,session 3 complete fixed-length Test run (primary)
+F_08,3,bigp3bci/F_08/SE003/Train/CBCol01,Train,CBCol,evaluation_secondary,session 3 complete calibration-style run; never used for training
+F_08,3,bigp3bci/F_08/SE003/Train/CBCol02,Train,CBCol,evaluation_secondary,session 3 complete calibration-style run; never used for training
+F_08,3,bigp3bci/F_08/SE003/Train/CBCol03,Train,CBCol,evaluation_secondary,session 3 complete calibration-style run; never used for training
+F_20,1,bigp3bci/F_20/SE001/Test/Dyn01,Test,Dyn,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_20,1,bigp3bci/F_20/SE001/Test/Dyn02,Test,Dyn,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_20,1,bigp3bci/F_20/SE001/Test/DynBigram01,Test,DynBigram,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_20,1,bigp3bci/F_20/SE001/Test/DynBigram02,Test,DynBigram,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_20,1,bigp3bci/F_20/SE001/Test/Static01,Test,Static,calibration,session 1 complete fixed-length run
+F_20,1,bigp3bci/F_20/SE001/Test/Static02,Test,Static,calibration,session 1 complete fixed-length run
+F_20,1,bigp3bci/F_20/SE001/Train/CBCol01,Train,CBCol,calibration,session 1 complete fixed-length run
+F_20,1,bigp3bci/F_20/SE001/Train/CBCol02,Train,CBCol,calibration,session 1 complete fixed-length run
+F_20,1,bigp3bci/F_20/SE001/Train/CBCol03,Train,CBCol,calibration,session 1 complete fixed-length run
+F_20,2,bigp3bci/F_20/SE002/Test/Dyn01,Test,Dyn,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_20,2,bigp3bci/F_20/SE002/Test/Dyn02,Test,Dyn,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_20,2,bigp3bci/F_20/SE002/Test/DynBigram01,Test,DynBigram,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_20,2,bigp3bci/F_20/SE002/Test/DynBigram02,Test,DynBigram,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_20,2,bigp3bci/F_20/SE002/Test/Static01,Test,Static,calibration,session 2 complete fixed-length run
+F_20,2,bigp3bci/F_20/SE002/Test/Static02,Test,Static,calibration,session 2 complete fixed-length run
+F_20,2,bigp3bci/F_20/SE002/Train/CBCol01,Train,CBCol,calibration,session 2 complete fixed-length run
+F_20,2,bigp3bci/F_20/SE002/Train/CBCol02,Train,CBCol,calibration,session 2 complete fixed-length run
+F_20,2,bigp3bci/F_20/SE002/Train/CBCol03,Train,CBCol,calibration,session 2 complete fixed-length run
+F_20,3,bigp3bci/F_20/SE003/Test/Dyn01,Test,Dyn,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_20,3,bigp3bci/F_20/SE003/Test/Dyn02,Test,Dyn,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_20,3,bigp3bci/F_20/SE003/Test/DynBigram01,Test,DynBigram,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_20,3,bigp3bci/F_20/SE003/Test/DynBigram02,Test,DynBigram,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_20,3,bigp3bci/F_20/SE003/Test/Static01,Test,Static,evaluation,session 3 complete fixed-length Test run (primary)
+F_20,3,bigp3bci/F_20/SE003/Test/Static02,Test,Static,evaluation,session 3 complete fixed-length Test run (primary)
+F_20,3,bigp3bci/F_20/SE003/Train/CBCol01,Train,CBCol,evaluation_secondary,session 3 complete calibration-style run; never used for training
+F_20,3,bigp3bci/F_20/SE003/Train/CBCol02,Train,CBCol,evaluation_secondary,session 3 complete calibration-style run; never used for training
+F_20,3,bigp3bci/F_20/SE003/Train/CBCol03,Train,CBCol,evaluation_secondary,session 3 complete calibration-style run; never used for training
+F_21,1,bigp3bci/F_21/SE001/Test/Dyn01,Test,Dyn,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_21,1,bigp3bci/F_21/SE001/Test/Dyn02,Test,Dyn,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_21,1,bigp3bci/F_21/SE001/Test/DynBigram01,Test,DynBigram,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_21,1,bigp3bci/F_21/SE001/Test/DynBigram02,Test,DynBigram,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_21,1,bigp3bci/F_21/SE001/Test/Static01,Test,Static,calibration,session 1 complete fixed-length run
+F_21,1,bigp3bci/F_21/SE001/Test/Static02,Test,Static,calibration,session 1 complete fixed-length run
+F_21,1,bigp3bci/F_21/SE001/Train/CBCol01,Train,CBCol,calibration,session 1 complete fixed-length run
+F_21,1,bigp3bci/F_21/SE001/Train/CBCol02,Train,CBCol,calibration,session 1 complete fixed-length run
+F_21,1,bigp3bci/F_21/SE001/Train/CBCol03,Train,CBCol,calibration,session 1 complete fixed-length run
+F_21,2,bigp3bci/F_21/SE002/Test/Dyn01,Test,Dyn,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_21,2,bigp3bci/F_21/SE002/Test/Dyn02,Test,Dyn,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_21,2,bigp3bci/F_21/SE002/Test/DynBigram01,Test,DynBigram,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_21,2,bigp3bci/F_21/SE002/Test/DynBigram02,Test,DynBigram,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_21,2,bigp3bci/F_21/SE002/Test/Static01,Test,Static,calibration,session 2 complete fixed-length run
+F_21,2,bigp3bci/F_21/SE002/Test/Static02,Test,Static,calibration,session 2 complete fixed-length run
+F_21,2,bigp3bci/F_21/SE002/Train/CBCol01,Train,CBCol,calibration,session 2 complete fixed-length run
+F_21,2,bigp3bci/F_21/SE002/Train/CBCol02,Train,CBCol,calibration,session 2 complete fixed-length run
+F_21,2,bigp3bci/F_21/SE002/Train/CBCol03,Train,CBCol,calibration,session 2 complete fixed-length run
+F_21,3,bigp3bci/F_21/SE003/Test/Dyn01,Test,Dyn,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_21,3,bigp3bci/F_21/SE003/Test/Dyn02,Test,Dyn,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_21,3,bigp3bci/F_21/SE003/Test/DynBigram01,Test,DynBigram,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_21,3,bigp3bci/F_21/SE003/Test/DynBigram02,Test,DynBigram,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_21,3,bigp3bci/F_21/SE003/Test/Static01,Test,Static,evaluation,session 3 complete fixed-length Test run (primary)
+F_21,3,bigp3bci/F_21/SE003/Test/Static02,Test,Static,evaluation,session 3 complete fixed-length Test run (primary)
+F_21,3,bigp3bci/F_21/SE003/Train/CBCol01,Train,CBCol,evaluation_secondary,session 3 complete calibration-style run; never used for training
+F_21,3,bigp3bci/F_21/SE003/Train/CBCol02,Train,CBCol,evaluation_secondary,session 3 complete calibration-style run; never used for training
+F_21,3,bigp3bci/F_21/SE003/Train/CBCol03,Train,CBCol,evaluation_secondary,session 3 complete calibration-style run; never used for training
+F_23,1,bigp3bci/F_23/SE001/Test/Dyn01,Test,Dyn,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_23,1,bigp3bci/F_23/SE001/Test/Dyn02,Test,Dyn,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_23,1,bigp3bci/F_23/SE001/Test/DynBigram01,Test,DynBigram,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_23,1,bigp3bci/F_23/SE001/Test/DynBigram02,Test,DynBigram,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_23,1,bigp3bci/F_23/SE001/Test/Static01,Test,Static,calibration,session 1 complete fixed-length run
+F_23,1,bigp3bci/F_23/SE001/Test/Static02,Test,Static,calibration,session 1 complete fixed-length run
+F_23,1,bigp3bci/F_23/SE001/Train/CBCol02,Train,CBCol,calibration,session 1 complete fixed-length run
+F_23,1,bigp3bci/F_23/SE001/Train/CBCol03,Train,CBCol,calibration,session 1 complete fixed-length run
+F_23,1,bigp3bci/F_23/SE001/Train/CBCol05,Train,CBCol,calibration,session 1 complete fixed-length run
+F_23,2,bigp3bci/F_23/SE002/Test/Dyn01,Test,Dyn,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_23,2,bigp3bci/F_23/SE002/Test/Dyn02,Test,Dyn,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_23,2,bigp3bci/F_23/SE002/Test/DynBigram01,Test,DynBigram,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_23,2,bigp3bci/F_23/SE002/Test/DynBigram02,Test,DynBigram,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_23,2,bigp3bci/F_23/SE002/Test/Static01,Test,Static,calibration,session 2 complete fixed-length run
+F_23,2,bigp3bci/F_23/SE002/Test/Static02,Test,Static,calibration,session 2 complete fixed-length run
+F_23,2,bigp3bci/F_23/SE002/Train/CBCol02,Train,CBCol,calibration,session 2 complete fixed-length run
+F_23,2,bigp3bci/F_23/SE002/Train/CBCol03,Train,CBCol,calibration,session 2 complete fixed-length run
+F_23,2,bigp3bci/F_23/SE002/Train/CBCol04,Train,CBCol,calibration,session 2 complete fixed-length run
+F_23,3,bigp3bci/F_23/SE003/Test/Dyn03,Test,Dyn,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_23,3,bigp3bci/F_23/SE003/Test/Dyn04,Test,Dyn,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_23,3,bigp3bci/F_23/SE003/Test/DynBigram01,Test,DynBigram,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_23,3,bigp3bci/F_23/SE003/Test/DynBigram02,Test,DynBigram,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_23,3,bigp3bci/F_23/SE003/Test/Static01,Test,Static,evaluation,session 3 complete fixed-length Test run (primary)
+F_23,3,bigp3bci/F_23/SE003/Test/Static02,Test,Static,evaluation,session 3 complete fixed-length Test run (primary)
+F_23,3,bigp3bci/F_23/SE003/Train/CBCol01,Train,CBCol,evaluation_secondary,session 3 complete calibration-style run; never used for training
+F_23,3,bigp3bci/F_23/SE003/Train/CBCol02,Train,CBCol,evaluation_secondary,session 3 complete calibration-style run; never used for training
+F_23,3,bigp3bci/F_23/SE003/Train/CBCol03,Train,CBCol,evaluation_secondary,session 3 complete calibration-style run; never used for training
+F_24,1,bigp3bci/F_24/SE001/Test/Dyn01,Test,Dyn,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_24,1,bigp3bci/F_24/SE001/Test/Dyn02,Test,Dyn,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_24,1,bigp3bci/F_24/SE001/Test/DynBigram01,Test,DynBigram,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_24,1,bigp3bci/F_24/SE001/Test/DynBigram02,Test,DynBigram,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_24,1,bigp3bci/F_24/SE001/Test/Static01,Test,Static,calibration,session 1 complete fixed-length run
+F_24,1,bigp3bci/F_24/SE001/Test/Static02,Test,Static,calibration,session 1 complete fixed-length run
+F_24,1,bigp3bci/F_24/SE001/Train/CBCol01,Train,CBCol,calibration,session 1 complete fixed-length run
+F_24,1,bigp3bci/F_24/SE001/Train/CBCol02,Train,CBCol,calibration,session 1 complete fixed-length run
+F_24,1,bigp3bci/F_24/SE001/Train/CBCol03,Train,CBCol,calibration,session 1 complete fixed-length run
+F_24,2,bigp3bci/F_24/SE002/Test/Dyn01,Test,Dyn,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_24,2,bigp3bci/F_24/SE002/Test/Dyn02,Test,Dyn,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_24,2,bigp3bci/F_24/SE002/Test/DynBigram01,Test,DynBigram,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_24,2,bigp3bci/F_24/SE002/Test/DynBigram02,Test,DynBigram,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_24,2,bigp3bci/F_24/SE002/Test/Static01,Test,Static,calibration,session 2 complete fixed-length run
+F_24,2,bigp3bci/F_24/SE002/Test/Static02,Test,Static,calibration,session 2 complete fixed-length run
+F_24,2,bigp3bci/F_24/SE002/Train/CBCol01,Train,CBCol,calibration,session 2 complete fixed-length run
+F_24,2,bigp3bci/F_24/SE002/Train/CBCol02,Train,CBCol,calibration,session 2 complete fixed-length run
+F_24,2,bigp3bci/F_24/SE002/Train/CBCol03,Train,CBCol,calibration,session 2 complete fixed-length run
+F_24,3,bigp3bci/F_24/SE003/Test/Dyn01,Test,Dyn,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_24,3,bigp3bci/F_24/SE003/Test/Dyn02,Test,Dyn,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_24,3,bigp3bci/F_24/SE003/Test/DynBigram01,Test,DynBigram,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_24,3,bigp3bci/F_24/SE003/Test/DynBigram02,Test,DynBigram,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_24,3,bigp3bci/F_24/SE003/Test/Static01,Test,Static,evaluation,session 3 complete fixed-length Test run (primary)
+F_24,3,bigp3bci/F_24/SE003/Test/Static02,Test,Static,evaluation,session 3 complete fixed-length Test run (primary)
+F_24,3,bigp3bci/F_24/SE003/Train/CBCol01,Train,CBCol,evaluation_secondary,session 3 complete calibration-style run; never used for training
+F_24,3,bigp3bci/F_24/SE003/Train/CBCol02,Train,CBCol,evaluation_secondary,session 3 complete calibration-style run; never used for training
+F_24,3,bigp3bci/F_24/SE003/Train/CBCol03,Train,CBCol,evaluation_secondary,session 3 complete calibration-style run; never used for training
+F_25,1,bigp3bci/F_25/SE001/Test/Dyn01,Test,Dyn,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_25,1,bigp3bci/F_25/SE001/Test/Dyn02,Test,Dyn,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_25,1,bigp3bci/F_25/SE001/Test/DynBigram01,Test,DynBigram,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_25,1,bigp3bci/F_25/SE001/Test/DynBigram02,Test,DynBigram,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_25,1,bigp3bci/F_25/SE001/Test/Static01,Test,Static,calibration,session 1 complete fixed-length run
+F_25,1,bigp3bci/F_25/SE001/Test/Static02,Test,Static,calibration,session 1 complete fixed-length run
+F_25,1,bigp3bci/F_25/SE001/Train/CBCol01,Train,CBCol,calibration,session 1 complete fixed-length run
+F_25,1,bigp3bci/F_25/SE001/Train/CBCol02,Train,CBCol,calibration,session 1 complete fixed-length run
+F_25,1,bigp3bci/F_25/SE001/Train/CBCol03,Train,CBCol,calibration,session 1 complete fixed-length run
+F_25,2,bigp3bci/F_25/SE002/Test/Dyn01,Test,Dyn,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_25,2,bigp3bci/F_25/SE002/Test/Dyn02,Test,Dyn,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_25,2,bigp3bci/F_25/SE002/Test/DynBigram01,Test,DynBigram,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_25,2,bigp3bci/F_25/SE002/Test/DynBigram02,Test,DynBigram,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_25,2,bigp3bci/F_25/SE002/Test/Static01,Test,Static,calibration,session 2 complete fixed-length run
+F_25,2,bigp3bci/F_25/SE002/Test/Static02,Test,Static,calibration,session 2 complete fixed-length run
+F_25,2,bigp3bci/F_25/SE002/Train/CBCol01,Train,CBCol,calibration,session 2 complete fixed-length run
+F_25,2,bigp3bci/F_25/SE002/Train/CBCol02,Train,CBCol,calibration,session 2 complete fixed-length run
+F_25,2,bigp3bci/F_25/SE002/Train/CBCol03,Train,CBCol,calibration,session 2 complete fixed-length run
+F_25,3,bigp3bci/F_25/SE003/Test/Dyn01,Test,Dyn,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_25,3,bigp3bci/F_25/SE003/Test/Dyn02,Test,Dyn,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_25,3,bigp3bci/F_25/SE003/Test/DynBigram01,Test,DynBigram,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_25,3,bigp3bci/F_25/SE003/Test/DynBigram02,Test,DynBigram,dynamic_replay_only,online dynamic stopping truncated the evidence; usable only to compare with the recorded stop point
+F_25,3,bigp3bci/F_25/SE003/Test/Static01,Test,Static,evaluation,session 3 complete fixed-length Test run (primary)
+F_25,3,bigp3bci/F_25/SE003/Test/Static02,Test,Static,evaluation,session 3 complete fixed-length Test run (primary)
+F_25,3,bigp3bci/F_25/SE003/Train/CBCol01,Train,CBCol,evaluation_secondary,session 3 complete calibration-style run; never used for training
+F_25,3,bigp3bci/F_25/SE003/Train/CBCol02,Train,CBCol,evaluation_secondary,session 3 complete calibration-style run; never used for training
+F_25,3,bigp3bci/F_25/SE003/Train/CBCol03,Train,CBCol,evaluation_secondary,session 3 complete calibration-style run; never used for training

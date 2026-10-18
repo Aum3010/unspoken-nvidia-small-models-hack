@@ -68,13 +68,21 @@ export function GlassApp() {
   const remoteHost = host && host !== 'this device' ? host : null
   // vision preview: only when the gateway runs with UNSPOKEN_CHECKIN=1
   const checkinOn = !!health?.gateway?.checkin
+  // the name at the top, in the same clay tube as the written sentence
+  const brandRef = useRef<HTMLCanvasElement>(null)
+  useEffect(() => { if (brandRef.current) E.drawStatic(brandRef.current, 'Unspoken', 46) }, [])
+  // the profile's preferred name, so the check-in addresses the person (synthetic profile in the preview)
+  const [patientName, setPatientName] = useState<string | null>(null)
+  useEffect(() => {
+    if (!checkinOn) return
+    Promise.resolve().then(() => api.visionData()).then((d) => setPatientName(d?.profile?.preferred_name ?? null)).catch(() => {})
+  }, [checkinOn])
   // a saved calibration (same window size) is used straight away: no recalibrating after a reload
   const [calibrating, setCalibrating] = useState(() => !gazeState.calibrated)
   const [focusMode, setFocusMode] = useState(false)
   const [eyes, setEyes] = useState(() => gazeState.calibrated)
   const [cam, setCam] = useState<'starting' | 'on' | 'off'>('starting')
   const [mic, setMic] = useState<'starting' | 'on' | 'off'>('starting')
-  const [hearing, setHearing] = useState(false)
   const [alarm, setAlarm] = useState(0)
   const camRef = useRef<HTMLVideoElement>(null)
   const histRef = useRef<HTMLDivElement>(null)
@@ -98,7 +106,7 @@ export function GlassApp() {
     offSince.current ||= performance.now()
     if (performance.now() - offSince.current > 2500) {
       offSince.current = performance.now() + 8000   // repeat the hint at most every ~10 s
-      E.caption('Your eyes are off the calibration', 'sit as you did when calibrating, or calibrate again (Eyes chip, or the E key)')
+      E.caption('Your eyes are off the calibration', 'sit as you did when calibrating, or press E to calibrate again')
     }
   }), [])
   useEffect(() => {
@@ -224,7 +232,7 @@ export function GlassApp() {
     let early: Promise<string | null> | null = null
     startVoice({
       canCapture: () => canCapture('audio'),
-      onSpeech: (on) => { setHearing(on); if (on) E.fire('voice', .7, 'HEARING') },
+      onSpeech: (on) => { if (on) E.fire('voice', .7, 'HEARING') },
       onEarly: (b) => { early = api.captureAudioEarly(b).then((r) => r.early_id).catch(() => null) },
       onEarlyCancel: () => { const p = early; early = null; p?.then((id) => { if (id) api.discardAudio(id).catch(() => undefined) }) },
       onClip: (b, _ms, wasEarly) => {
@@ -310,11 +318,24 @@ export function GlassApp() {
 
   /* ---------- session state -> ink, bubbles, caption ---------- */
   const lastSpoken = useRef<string | null>(null)
+  // finished text (spoken, nurse notified) stays 5 s, then dissolves; readings waiting for Yes/No stay put
+  const inkDone = useRef<{ key: string; timer: number } | null>(null)
+  const writeDone = (key: string, ws: string[]) => {
+    if (inkDone.current?.key === key) return
+    if (inkDone.current) window.clearTimeout(inkDone.current.timer)
+    E.setTranscript(ws, [])
+    inkDone.current = { key, timer: window.setTimeout(() => { E.setTranscript([], []); E.caption('') }, 5000) }
+  }
+  const holdInk = () => { if (inkDone.current) { window.clearTimeout(inkDone.current.timer); inkDone.current = null } }
+  useEffect(() => () => holdInk(), [])
   useEffect(() => {
     if (!state || calibrating) return
     if (state.checkin?.status === 'open') { E.caption(state.checkin.question, 'Yes, blink or nod · No or shake'); return }
     if (state.checkin?.status === 'answered' && state.checkin.answered_ts && Date.now() - state.checkin.answered_ts < 8000) {
-      E.caption(`Nurse notified: patient answered ${(state.checkin.answer ?? '').toUpperCase()}`, 'vision preview · nothing was spoken')
+      // written in ink like a reading, addressed by name; a note to the person, not a message: nothing is spoken
+      if (inkDone.current?.key === `checkin:${state.checkin.answered_ts}`) return
+      writeDone(`checkin:${state.checkin.answered_ts}`, words(`${patientName ? `${patientName}, your` : 'Your'} nurse has been notified`))
+      E.caption(`You answered ${(state.checkin.answer ?? '').toUpperCase()}`, 'sent to your nurse · nothing was spoken')
       return
     }
     const m = state.message
@@ -323,11 +344,13 @@ export function GlassApp() {
     if (m.status === 'selected') {
       const c = m.candidates.find((x) => x.id === m.selected_candidate_id)
       if (c) {
+        holdInk()
         E.setTranscript([], words(c.text))
         E.caption(`Will say exactly “${c.text}”`, 'look at Yes, blink, or nod to say it · No or shake to change it')
       }
     } else if (PENDING.includes(m.status) && shown.length) {
       // only the best reading, written in ink; Yes/blink/nod chooses it, No/shake rejects it
+      holdInk()
       E.setTranscript(words(shown[0].text), [])
       const read = shown[0].origin === 'correction' ? shown[1]?.text : null
       const from = read ? `corrected from “${read}” · ` : ''
@@ -340,7 +363,7 @@ export function GlassApp() {
         lastSpoken.current = sp.message_id
         // auto-spoken by the gateway: this page did not start it, so it plays it now
         if (sp.method === 'demo_auto_spoken' && Date.now() - sp.ts < 15000) play(`/api/${SESSION_ID}/audio/${sp.message_id}`, sp.text, sp.phrase_audio_id)
-        E.setTranscript(words(sp.text), [])
+        writeDone(`spoken:${sp.message_id}`, words(sp.text))
         E.caption(`Spoken · confirmed by ${METHOD_TEXT[sp.method] ?? sp.method}`)
       }
     } else if (m.status === 'rejected') {
@@ -354,7 +377,7 @@ export function GlassApp() {
     } else if (state.plan?.name === 'switch_input_method') {
       E.caption(state.plan.rationale, `try ${state.plan.arguments.method ?? 'another way'}`)
     }
-  }, [state, calibrating])
+  }, [state, calibrating, patientName])
 
   // the countdown caption, on top of the one above, while a delayed auto-speak is pending
   useEffect(() => {
@@ -469,12 +492,7 @@ export function GlassApp() {
       <canvas className="layer" id="ink" />
       {alarm > 0 && <div key={alarm} className="alarm" />}
 
-      <div className="brand">
-        <div className="name"><span className="logo" /><span>unspoken<i>.</i></span></div>
-        <button className={`chip glass mono ${cam === 'on' ? 'live' : ''}`} data-a="camera"><b /><span>{cam === 'on' ? (remoteHost ? `Camera · clips to ${remoteHost}` : 'Camera · on device') : cam === 'off' ? 'Camera off · allow & reload' : 'Camera · starting'}</span></button>
-        <span className={`chip glass mono ${mic === 'on' ? (hearing ? 'live' : 'ok') : ''}`}><b /><span>{mic === 'on' ? (health?.audio?.state !== 'ready' ? 'Mic · voice agent offline' : hearing ? 'Mic · hearing you' : 'Mic · listening') : mic === 'off' ? 'Mic off' : 'Mic · starting'}</span></span>
-        <button className={`chip glass mono ${eyes ? 'ok' : 'warn'}`} data-a="calibrate"><b /><span>{eyes ? `Eyes · ≈${Math.round(gazeState.accuracyPx ?? 0)} px` : 'Eyes · pointer · calibrate'}</span></button>
-      </div>
+      <canvas className="brand" ref={brandRef} aria-label="unspoken" role="img" />
       {!connected && <div className="offline mono">Gateway offline · reconnecting</div>}
 
       <div className="side">
@@ -517,7 +535,6 @@ export function GlassApp() {
       </nav>
 
       <div className="caption mono" id="caption" aria-live="polite" />
-      <div className="hint mono">Look or point to aim · blink or Space selects<br />Nod = yes · shake = no · P = phrases</div>
       <div className="gaze" id="gaze" />
 
       {calibrating && <Calibration bind={bindCalib} onFocusMode={setFocusMode} onDone={doneCalib} remoteHost={remoteHost} />}
@@ -545,14 +562,14 @@ function ServingCard() {
     <section className="vision serving glass" aria-label="Serving">
       <header><div>Serving · vLLM</div><span className="mono">{m.state === 'ready' ? 'Nemotron 3.5 Lightning' : 'unavailable'}</span></header>
       {m.state === 'ready' ? (
-        <div className="vrows mono">
+        <div className="vrows">
           <div><span>Running · waiting</span><b>{m.running} · {m.waiting}</b></div>
           <div><span>TTFT p50{m.ttft_window ? ` · ${m.ttft_window}` : ''}</span><b>{m.ttft_p50_ms == null ? '–' : `${Math.round(m.ttft_p50_ms)} ms`}</b></div>
           <div><span>KV cache in use</span><b>{pct(m.kv_cache_usage_pct)}</b></div>
           <div><span>Prefix-cache hits</span><b>{pct(m.prefix_cache_hit_rate, 100)}</b></div>
           {m.spec_decode_acceptance != null && <div><span>MTP drafts accepted</span><b>{pct(m.spec_decode_acceptance, 100)}</b></div>}
         </div>
-      ) : <div className="vrows mono">vLLM is not answering · the coordinator uses its rules</div>}
+      ) : <div className="vrows">vLLM is not answering · the coordinator uses its rules</div>}
     </section>
   )
 }

@@ -1,0 +1,8 @@
+{
+ "source": "E6 value labeller on Study F calibration sessions 1-2 (in-sample for the labeller)",
+ "n": 600,
+ "p_right": 0.6183333333333333,
+ "p_wrong": 0.035,
+ "p_abstain": 0.3466666666666667,
+ "sec": 10.278333333333334
+}

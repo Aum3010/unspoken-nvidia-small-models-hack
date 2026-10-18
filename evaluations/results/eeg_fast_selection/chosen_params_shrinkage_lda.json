@@ -1,0 +1,844 @@
+{
+ "decoder": "shrinkage_lda",
+ "alpha_global": 0.9312752054539775,
+ "alpha_participant": {
+  "F_03": 0.8566220304208312,
+  "F_05": 0.5640858870147051,
+  "F_06": 0.8566220304208312,
+  "F_07": 0.3416743901970999,
+  "F_08": 0.666688304052344,
+  "F_20": 1.1006662311938409,
+  "F_21": 0.9312752054539775,
+  "F_23": 0.9312752054539775,
+  "F_24": 0.9312752054539775,
+  "F_25": 1.1006662311938409
+ },
+ "risks": {
+  "0.0": {
+   "flash_global": {
+    "tau": 0.9995,
+    "deadline": 25.0,
+    "cal_wrong": 0,
+    "cal_correct": 328,
+    "cal_n": 600,
+    "cal_ccpm": 1.7124434950206007,
+    "allowed_wrong": 0
+   },
+   "flash_hybrid": {
+    "tau": 0.999,
+    "deadline": 25.0,
+    "cal_wrong": 0,
+    "cal_correct": 327,
+    "cal_n": 600,
+    "cal_ccpm": 1.7040273061256395,
+    "allowed_wrong": 0
+   },
+   "flash_participant": {
+    "F_03": {
+     "tau": 0.95,
+     "deadline": 25.0,
+     "cal_wrong": 0,
+     "cal_correct": 55,
+     "cal_n": 60,
+     "cal_ccpm": 3.829416884247171,
+     "allowed_wrong": 0
+    },
+    "F_05": {
+     "tau": 0.99,
+     "deadline": Infinity,
+     "cal_wrong": 0,
+     "cal_correct": 56,
+     "cal_n": 60,
+     "cal_ccpm": 3.2941176470588234,
+     "allowed_wrong": 0
+    },
+    "F_06": {
+     "tau": 1.01,
+     "deadline": 0.0,
+     "cal_wrong": 0,
+     "cal_correct": 0,
+     "cal_n": 60,
+     "cal_ccpm": 0.0,
+     "allowed_wrong": 0,
+     "never_commit": true
+    },
+    "F_07": {
+     "tau": 1.01,
+     "deadline": 0.0,
+     "cal_wrong": 0,
+     "cal_correct": 0,
+     "cal_n": 60,
+     "cal_ccpm": 0.0,
+     "allowed_wrong": 0,
+     "never_commit": true
+    },
+    "F_08": {
+     "tau": 0.8,
+     "deadline": 10.0,
+     "cal_wrong": 0,
+     "cal_correct": 60,
+     "cal_n": 60,
+     "cal_ccpm": 13.779904306220095,
+     "allowed_wrong": 0
+    },
+    "F_20": {
+     "tau": 0.97,
+     "deadline": 25.0,
+     "cal_wrong": 0,
+     "cal_correct": 60,
+     "cal_n": 60,
+     "cal_ccpm": 6.083650190114068,
+     "allowed_wrong": 0
+    },
+    "F_21": {
+     "tau": 0.9,
+     "deadline": 10.0,
+     "cal_wrong": 0,
+     "cal_correct": 31,
+     "cal_n": 60,
+     "cal_ccpm": 3.572114461302093,
+     "allowed_wrong": 0
+    },
+    "F_23": {
+     "tau": 0.98,
+     "deadline": Infinity,
+     "cal_wrong": 0,
+     "cal_correct": 23,
+     "cal_n": 60,
+     "cal_ccpm": 0.7703042143455205,
+     "allowed_wrong": 0
+    },
+    "F_24": {
+     "tau": 0.98,
+     "deadline": Infinity,
+     "cal_wrong": 0,
+     "cal_correct": 60,
+     "cal_n": 60,
+     "cal_ccpm": 4.941660947151681,
+     "allowed_wrong": 0
+    },
+    "F_25": {
+     "tau": 0.98,
+     "deadline": 20.0,
+     "cal_wrong": 0,
+     "cal_correct": 16,
+     "cal_n": 60,
+     "cal_ccpm": 0.8486562942008485,
+     "allowed_wrong": 0
+    }
+   },
+   "rep_participant": {
+    "F_03": {
+     "tau": 0.9,
+     "deadline": 25.0,
+     "cal_wrong": 0,
+     "cal_correct": 55,
+     "cal_n": 60,
+     "cal_ccpm": 3.8316400580551524,
+     "allowed_wrong": 0
+    },
+    "F_05": {
+     "tau": 0.98,
+     "deadline": Infinity,
+     "cal_wrong": 0,
+     "cal_correct": 57,
+     "cal_n": 60,
+     "cal_ccpm": 3.4182908545727133,
+     "allowed_wrong": 0
+    },
+    "F_06": {
+     "tau": 1.01,
+     "deadline": 0.0,
+     "cal_wrong": 0,
+     "cal_correct": 0,
+     "cal_n": 60,
+     "cal_ccpm": 0.0,
+     "allowed_wrong": 0,
+     "never_commit": true
+    },
+    "F_07": {
+     "tau": 1.01,
+     "deadline": 0.0,
+     "cal_wrong": 0,
+     "cal_correct": 0,
+     "cal_n": 60,
+     "cal_ccpm": 0.0,
+     "allowed_wrong": 0,
+     "never_commit": true
+    },
+    "F_08": {
+     "tau": 0.7,
+     "deadline": 10.0,
+     "cal_wrong": 0,
+     "cal_correct": 60,
+     "cal_n": 60,
+     "cal_ccpm": 11.57556270096463,
+     "allowed_wrong": 0
+    },
+    "F_20": {
+     "tau": 0.97,
+     "deadline": Infinity,
+     "cal_wrong": 0,
+     "cal_correct": 60,
+     "cal_n": 60,
+     "cal_ccpm": 5.47112462006079,
+     "allowed_wrong": 0
+    },
+    "F_21": {
+     "tau": 0.995,
+     "deadline": Infinity,
+     "cal_wrong": 0,
+     "cal_correct": 60,
+     "cal_n": 60,
+     "cal_ccpm": 3.645569620253165,
+     "allowed_wrong": 0
+    },
+    "F_23": {
+     "tau": 0.95,
+     "deadline": Infinity,
+     "cal_wrong": 0,
+     "cal_correct": 27,
+     "cal_n": 60,
+     "cal_ccpm": 0.9246575342465754,
+     "allowed_wrong": 0
+    },
+    "F_24": {
+     "tau": 0.98,
+     "deadline": Infinity,
+     "cal_wrong": 0,
+     "cal_correct": 60,
+     "cal_n": 60,
+     "cal_ccpm": 4.483188044831881,
+     "allowed_wrong": 0
+    },
+    "F_25": {
+     "tau": 0.97,
+     "deadline": 20.0,
+     "cal_wrong": 0,
+     "cal_correct": 15,
+     "cal_n": 60,
+     "cal_ccpm": 0.7868852459016393,
+     "allowed_wrong": 0
+    }
+   }
+  },
+  "0.02": {
+   "flash_global": {
+    "tau": 0.85,
+    "deadline": 10.0,
+    "cal_wrong": 11,
+    "cal_correct": 248,
+    "cal_n": 600,
+    "cal_ccpm": 2.944319126202066,
+    "allowed_wrong": 12
+   },
+   "flash_hybrid": {
+    "tau": 0.85,
+    "deadline": 10.0,
+    "cal_wrong": 11,
+    "cal_correct": 248,
+    "cal_n": 600,
+    "cal_ccpm": 2.9102003696423857,
+    "allowed_wrong": 12
+   },
+   "flash_participant": {
+    "F_03": {
+     "tau": 0.8,
+     "deadline": 20.0,
+     "cal_wrong": 1,
+     "cal_correct": 54,
+     "cal_n": 60,
+     "cal_ccpm": 4.762954796030871,
+     "allowed_wrong": 1
+    },
+    "F_05": {
+     "tau": 0.9,
+     "deadline": 20.0,
+     "cal_wrong": 1,
+     "cal_correct": 55,
+     "cal_n": 60,
+     "cal_ccpm": 4.707896426278622,
+     "allowed_wrong": 1
+    },
+    "F_06": {
+     "tau": 0.4,
+     "deadline": 25.0,
+     "cal_wrong": 1,
+     "cal_correct": 1,
+     "cal_n": 60,
+     "cal_ccpm": 0.04042718054105043,
+     "allowed_wrong": 1
+    },
+    "F_07": {
+     "tau": 1.01,
+     "deadline": 0.0,
+     "cal_wrong": 0,
+     "cal_correct": 0,
+     "cal_n": 60,
+     "cal_ccpm": 0.0,
+     "allowed_wrong": 1,
+     "never_commit": true
+    },
+    "F_08": {
+     "tau": 0.8,
+     "deadline": 10.0,
+     "cal_wrong": 0,
+     "cal_correct": 60,
+     "cal_n": 60,
+     "cal_ccpm": 13.779904306220095,
+     "allowed_wrong": 1
+    },
+    "F_20": {
+     "tau": 0.93,
+     "deadline": 25.0,
+     "cal_wrong": 1,
+     "cal_correct": 59,
+     "cal_n": 60,
+     "cal_ccpm": 6.682397357243983,
+     "allowed_wrong": 1
+    },
+    "F_21": {
+     "tau": 0.97,
+     "deadline": 25.0,
+     "cal_wrong": 1,
+     "cal_correct": 59,
+     "cal_n": 60,
+     "cal_ccpm": 4.756466241182398,
+     "allowed_wrong": 1
+    },
+    "F_23": {
+     "tau": 0.9,
+     "deadline": 25.0,
+     "cal_wrong": 1,
+     "cal_correct": 24,
+     "cal_n": 60,
+     "cal_ccpm": 1.0532089961601754,
+     "allowed_wrong": 1
+    },
+    "F_24": {
+     "tau": 0.93,
+     "deadline": Infinity,
+     "cal_wrong": 1,
+     "cal_correct": 59,
+     "cal_n": 60,
+     "cal_ccpm": 5.550764406115249,
+     "allowed_wrong": 1
+    },
+    "F_25": {
+     "tau": 0.98,
+     "deadline": 25.0,
+     "cal_wrong": 1,
+     "cal_correct": 24,
+     "cal_n": 60,
+     "cal_ccpm": 1.0921501706484642,
+     "allowed_wrong": 1
+    }
+   },
+   "rep_participant": {
+    "F_03": {
+     "tau": 0.8,
+     "deadline": 25.0,
+     "cal_wrong": 1,
+     "cal_correct": 55,
+     "cal_n": 60,
+     "cal_ccpm": 4.276273163146301,
+     "allowed_wrong": 1
+    },
+    "F_05": {
+     "tau": 0.9,
+     "deadline": 25.0,
+     "cal_wrong": 1,
+     "cal_correct": 55,
+     "cal_n": 60,
+     "cal_ccpm": 4.218869854257224,
+     "allowed_wrong": 1
+    },
+    "F_06": {
+     "tau": 0.4,
+     "deadline": Infinity,
+     "cal_wrong": 1,
+     "cal_correct": 2,
+     "cal_n": 60,
+     "cal_ccpm": 0.06347527109230362,
+     "allowed_wrong": 1
+    },
+    "F_07": {
+     "tau": 1.01,
+     "deadline": 0.0,
+     "cal_wrong": 0,
+     "cal_correct": 0,
+     "cal_n": 60,
+     "cal_ccpm": 0.0,
+     "allowed_wrong": 1,
+     "never_commit": true
+    },
+    "F_08": {
+     "tau": 0.7,
+     "deadline": 10.0,
+     "cal_wrong": 0,
+     "cal_correct": 60,
+     "cal_n": 60,
+     "cal_ccpm": 11.57556270096463,
+     "allowed_wrong": 1
+    },
+    "F_20": {
+     "tau": 0.9,
+     "deadline": 25.0,
+     "cal_wrong": 1,
+     "cal_correct": 59,
+     "cal_n": 60,
+     "cal_ccpm": 6.430517711171662,
+     "allowed_wrong": 1
+    },
+    "F_21": {
+     "tau": 0.95,
+     "deadline": Infinity,
+     "cal_wrong": 1,
+     "cal_correct": 59,
+     "cal_n": 60,
+     "cal_ccpm": 4.538461538461538,
+     "allowed_wrong": 1
+    },
+    "F_23": {
+     "tau": 0.95,
+     "deadline": Infinity,
+     "cal_wrong": 0,
+     "cal_correct": 27,
+     "cal_n": 60,
+     "cal_ccpm": 0.9246575342465754,
+     "allowed_wrong": 1
+    },
+    "F_24": {
+     "tau": 0.9,
+     "deadline": Infinity,
+     "cal_wrong": 1,
+     "cal_correct": 59,
+     "cal_n": 60,
+     "cal_ccpm": 5.2444444444444445,
+     "allowed_wrong": 1
+    },
+    "F_25": {
+     "tau": 0.995,
+     "deadline": Infinity,
+     "cal_wrong": 1,
+     "cal_correct": 33,
+     "cal_n": 60,
+     "cal_ccpm": 1.180679785330948,
+     "allowed_wrong": 1
+    }
+   }
+  },
+  "0.05": {
+   "flash_global": {
+    "tau": 0.8,
+    "deadline": 10.0,
+    "cal_wrong": 26,
+    "cal_correct": 259,
+    "cal_n": 600,
+    "cal_ccpm": 3.1586970882666803,
+    "allowed_wrong": 30
+   },
+   "flash_hybrid": {
+    "tau": 0.8,
+    "deadline": 15.0,
+    "cal_wrong": 26,
+    "cal_correct": 336,
+    "cal_n": 600,
+    "cal_ccpm": 3.1498031373039184,
+    "allowed_wrong": 30
+   },
+   "flash_participant": {
+    "F_03": {
+     "tau": 0.8,
+     "deadline": 20.0,
+     "cal_wrong": 1,
+     "cal_correct": 54,
+     "cal_n": 60,
+     "cal_ccpm": 4.762954796030871,
+     "allowed_wrong": 3
+    },
+    "F_05": {
+     "tau": 0.8,
+     "deadline": 20.0,
+     "cal_wrong": 2,
+     "cal_correct": 54,
+     "cal_n": 60,
+     "cal_ccpm": 5.192723775943586,
+     "allowed_wrong": 3
+    },
+    "F_06": {
+     "tau": 0.3,
+     "deadline": 25.0,
+     "cal_wrong": 3,
+     "cal_correct": 2,
+     "cal_n": 60,
+     "cal_ccpm": 0.08164653852696037,
+     "allowed_wrong": 3
+    },
+    "F_07": {
+     "tau": 1.01,
+     "deadline": 0.0,
+     "cal_wrong": 0,
+     "cal_correct": 0,
+     "cal_n": 60,
+     "cal_ccpm": 0.0,
+     "allowed_wrong": 3,
+     "never_commit": true
+    },
+    "F_08": {
+     "tau": 0.8,
+     "deadline": 10.0,
+     "cal_wrong": 0,
+     "cal_correct": 60,
+     "cal_n": 60,
+     "cal_ccpm": 13.779904306220095,
+     "allowed_wrong": 3
+    },
+    "F_20": {
+     "tau": 0.9,
+     "deadline": 20.0,
+     "cal_wrong": 2,
+     "cal_correct": 58,
+     "cal_n": 60,
+     "cal_ccpm": 7.102040816326531,
+     "allowed_wrong": 3
+    },
+    "F_21": {
+     "tau": 0.9,
+     "deadline": 20.0,
+     "cal_wrong": 2,
+     "cal_correct": 58,
+     "cal_n": 60,
+     "cal_ccpm": 5.499802449624655,
+     "allowed_wrong": 3
+    },
+    "F_23": {
+     "tau": 0.93,
+     "deadline": Infinity,
+     "cal_wrong": 2,
+     "cal_correct": 31,
+     "cal_n": 60,
+     "cal_ccpm": 1.1395313217950682,
+     "allowed_wrong": 3
+    },
+    "F_24": {
+     "tau": 0.8,
+     "deadline": 15.0,
+     "cal_wrong": 3,
+     "cal_correct": 54,
+     "cal_n": 60,
+     "cal_ccpm": 6.556713548517656,
+     "allowed_wrong": 3
+    },
+    "F_25": {
+     "tau": 0.9,
+     "deadline": 25.0,
+     "cal_wrong": 3,
+     "cal_correct": 36,
+     "cal_n": 60,
+     "cal_ccpm": 1.870048915631358,
+     "allowed_wrong": 3
+    }
+   },
+   "rep_participant": {
+    "F_03": {
+     "tau": 0.7,
+     "deadline": 20.0,
+     "cal_wrong": 3,
+     "cal_correct": 52,
+     "cal_n": 60,
+     "cal_ccpm": 4.623934790663209,
+     "allowed_wrong": 3
+    },
+    "F_05": {
+     "tau": 0.7,
+     "deadline": 20.0,
+     "cal_wrong": 3,
+     "cal_correct": 53,
+     "cal_n": 60,
+     "cal_ccpm": 5.026078710289237,
+     "allowed_wrong": 3
+    },
+    "F_06": {
+     "tau": 0.4,
+     "deadline": Infinity,
+     "cal_wrong": 1,
+     "cal_correct": 2,
+     "cal_n": 60,
+     "cal_ccpm": 0.06347527109230362,
+     "allowed_wrong": 3
+    },
+    "F_07": {
+     "tau": 1.01,
+     "deadline": 0.0,
+     "cal_wrong": 0,
+     "cal_correct": 0,
+     "cal_n": 60,
+     "cal_ccpm": 0.0,
+     "allowed_wrong": 3,
+     "never_commit": true
+    },
+    "F_08": {
+     "tau": 0.7,
+     "deadline": 10.0,
+     "cal_wrong": 0,
+     "cal_correct": 60,
+     "cal_n": 60,
+     "cal_ccpm": 11.57556270096463,
+     "allowed_wrong": 3
+    },
+    "F_20": {
+     "tau": 0.85,
+     "deadline": 20.0,
+     "cal_wrong": 2,
+     "cal_correct": 58,
+     "cal_n": 60,
+     "cal_ccpm": 6.653919694072657,
+     "allowed_wrong": 3
+    },
+    "F_21": {
+     "tau": 0.85,
+     "deadline": 25.0,
+     "cal_wrong": 3,
+     "cal_correct": 57,
+     "cal_n": 60,
+     "cal_ccpm": 5.294117647058823,
+     "allowed_wrong": 3
+    },
+    "F_23": {
+     "tau": 0.7,
+     "deadline": 20.0,
+     "cal_wrong": 3,
+     "cal_correct": 22,
+     "cal_n": 60,
+     "cal_ccpm": 1.242060691601976,
+     "allowed_wrong": 3
+    },
+    "F_24": {
+     "tau": 0.8,
+     "deadline": 20.0,
+     "cal_wrong": 3,
+     "cal_correct": 55,
+     "cal_n": 60,
+     "cal_ccpm": 5.728172192327721,
+     "allowed_wrong": 3
+    },
+    "F_25": {
+     "tau": 0.85,
+     "deadline": 25.0,
+     "cal_wrong": 3,
+     "cal_correct": 37,
+     "cal_n": 60,
+     "cal_ccpm": 1.915444348576359,
+     "allowed_wrong": 3
+    }
+   }
+  },
+  "0.1": {
+   "flash_global": {
+    "tau": 0.7,
+    "deadline": 10.0,
+    "cal_wrong": 41,
+    "cal_correct": 279,
+    "cal_n": 600,
+    "cal_ccpm": 3.5462345090562444,
+    "allowed_wrong": 60
+   },
+   "flash_hybrid": {
+    "tau": 0.7,
+    "deadline": 10.0,
+    "cal_wrong": 32,
+    "cal_correct": 275,
+    "cal_n": 600,
+    "cal_ccpm": 3.4343518441428693,
+    "allowed_wrong": 60
+   },
+   "flash_participant": {
+    "F_03": {
+     "tau": 0.8,
+     "deadline": 20.0,
+     "cal_wrong": 1,
+     "cal_correct": 54,
+     "cal_n": 60,
+     "cal_ccpm": 4.762954796030871,
+     "allowed_wrong": 6
+    },
+    "F_05": {
+     "tau": 0.7,
+     "deadline": 15.0,
+     "cal_wrong": 5,
+     "cal_correct": 51,
+     "cal_n": 60,
+     "cal_ccpm": 5.688260990798402,
+     "allowed_wrong": 6
+    },
+    "F_06": {
+     "tau": 0.3,
+     "deadline": Infinity,
+     "cal_wrong": 5,
+     "cal_correct": 4,
+     "cal_n": 60,
+     "cal_ccpm": 0.13063001768948157,
+     "allowed_wrong": 6
+    },
+    "F_07": {
+     "tau": 1.01,
+     "deadline": 0.0,
+     "cal_wrong": 0,
+     "cal_correct": 0,
+     "cal_n": 60,
+     "cal_ccpm": 0.0,
+     "allowed_wrong": 6,
+     "never_commit": true
+    },
+    "F_08": {
+     "tau": 0.8,
+     "deadline": 10.0,
+     "cal_wrong": 0,
+     "cal_correct": 60,
+     "cal_n": 60,
+     "cal_ccpm": 13.779904306220095,
+     "allowed_wrong": 6
+    },
+    "F_20": {
+     "tau": 0.85,
+     "deadline": 20.0,
+     "cal_wrong": 5,
+     "cal_correct": 55,
+     "cal_n": 60,
+     "cal_ccpm": 7.560137457044673,
+     "allowed_wrong": 6
+    },
+    "F_21": {
+     "tau": 0.8,
+     "deadline": 20.0,
+     "cal_wrong": 6,
+     "cal_correct": 54,
+     "cal_n": 60,
+     "cal_ccpm": 5.955882352941177,
+     "allowed_wrong": 6
+    },
+    "F_23": {
+     "tau": 0.7,
+     "deadline": 20.0,
+     "cal_wrong": 5,
+     "cal_correct": 27,
+     "cal_n": 60,
+     "cal_ccpm": 1.6025323968740726,
+     "allowed_wrong": 6
+    },
+    "F_24": {
+     "tau": 0.7,
+     "deadline": 10.0,
+     "cal_wrong": 4,
+     "cal_correct": 49,
+     "cal_n": 60,
+     "cal_ccpm": 7.048669383840805,
+     "allowed_wrong": 6
+    },
+    "F_25": {
+     "tau": 0.9,
+     "deadline": Infinity,
+     "cal_wrong": 4,
+     "cal_correct": 50,
+     "cal_n": 60,
+     "cal_ccpm": 2.4144869215291753,
+     "allowed_wrong": 6
+    }
+   },
+   "rep_participant": {
+    "F_03": {
+     "tau": 0.7,
+     "deadline": 25.0,
+     "cal_wrong": 5,
+     "cal_correct": 54,
+     "cal_n": 60,
+     "cal_ccpm": 4.7123845538506295,
+     "allowed_wrong": 6
+    },
+    "F_05": {
+     "tau": 0.6,
+     "deadline": 25.0,
+     "cal_wrong": 6,
+     "cal_correct": 52,
+     "cal_n": 60,
+     "cal_ccpm": 5.296214564590053,
+     "allowed_wrong": 6
+    },
+    "F_06": {
+     "tau": 0.3,
+     "deadline": Infinity,
+     "cal_wrong": 6,
+     "cal_correct": 3,
+     "cal_n": 60,
+     "cal_ccpm": 0.09706120248045294,
+     "allowed_wrong": 6
+    },
+    "F_07": {
+     "tau": 1.01,
+     "deadline": 0.0,
+     "cal_wrong": 0,
+     "cal_correct": 0,
+     "cal_n": 60,
+     "cal_ccpm": 0.0,
+     "allowed_wrong": 6,
+     "never_commit": true
+    },
+    "F_08": {
+     "tau": 0.7,
+     "deadline": 10.0,
+     "cal_wrong": 0,
+     "cal_correct": 60,
+     "cal_n": 60,
+     "cal_ccpm": 11.57556270096463,
+     "allowed_wrong": 6
+    },
+    "F_20": {
+     "tau": 0.7,
+     "deadline": 20.0,
+     "cal_wrong": 5,
+     "cal_correct": 55,
+     "cal_n": 60,
+     "cal_ccpm": 7.3991031390134525,
+     "allowed_wrong": 6
+    },
+    "F_21": {
+     "tau": 0.7,
+     "deadline": 25.0,
+     "cal_wrong": 5,
+     "cal_correct": 55,
+     "cal_n": 60,
+     "cal_ccpm": 5.59322033898305,
+     "allowed_wrong": 6
+    },
+    "F_23": {
+     "tau": 0.7,
+     "deadline": 25.0,
+     "cal_wrong": 5,
+     "cal_correct": 27,
+     "cal_n": 60,
+     "cal_ccpm": 1.3328945203225275,
+     "allowed_wrong": 6
+    },
+    "F_24": {
+     "tau": 0.7,
+     "deadline": 20.0,
+     "cal_wrong": 6,
+     "cal_correct": 54,
+     "cal_n": 60,
+     "cal_ccpm": 6.206896551724139,
+     "allowed_wrong": 6
+    },
+    "F_25": {
+     "tau": 0.85,
+     "deadline": Infinity,
+     "cal_wrong": 4,
+     "cal_correct": 52,
+     "cal_n": 60,
+     "cal_ccpm": 2.543823889115369,
+     "allowed_wrong": 6
+    }
+   }
+  }
+ }
+}

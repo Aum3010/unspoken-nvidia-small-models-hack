@@ -1,0 +1,8 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/291 [00:00<?, ?it/s]Loading weights: 100%|██████████| 291/291 [00:00<00:00, 8186.12it/s]
+epoch 0 step 50 loss 0.574 26s
+epoch 0 step 100 loss 0.819 48s
+epoch 1 step 150 loss 0.460 70s
+epoch 1 step 200 loss 0.593 92s
+saved /home/shadeform/unspoken/data/student/adapter after 212 steps, 98s

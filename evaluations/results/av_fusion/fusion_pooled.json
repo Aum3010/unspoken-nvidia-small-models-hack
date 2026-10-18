@@ -1,0 +1,209 @@
+{
+ "n_clips": 200,
+ "lip_no_face": 0,
+ "risk_target": 0.02,
+ "n_candidates": 10,
+ "calibration": "pooled over all noise conditions",
+ "conditions": {
+  "clean": {
+   "voice": {
+    "correct": 187,
+    "wrong": 0,
+    "abstain": 13,
+    "top1": 199,
+    "correct_rate": 0.935,
+    "top1_rate": 0.995
+   },
+   "lips": {
+    "correct": 107,
+    "wrong": 6,
+    "abstain": 87,
+    "top1": 177,
+    "correct_rate": 0.535,
+    "top1_rate": 0.885
+   },
+   "fused": {
+    "correct": 194,
+    "wrong": 1,
+    "abstain": 5,
+    "top1": 196,
+    "correct_rate": 0.97,
+    "top1_rate": 0.98
+   }
+  },
+  "white_10": {
+   "voice": {
+    "correct": 166,
+    "wrong": 2,
+    "abstain": 32,
+    "top1": 194,
+    "correct_rate": 0.83,
+    "top1_rate": 0.97
+   },
+   "lips": {
+    "correct": 107,
+    "wrong": 6,
+    "abstain": 87,
+    "top1": 177,
+    "correct_rate": 0.535,
+    "top1_rate": 0.885
+   },
+   "fused": {
+    "correct": 186,
+    "wrong": 3,
+    "abstain": 11,
+    "top1": 195,
+    "correct_rate": 0.93,
+    "top1_rate": 0.975
+   }
+  },
+  "white_0": {
+   "voice": {
+    "correct": 86,
+    "wrong": 0,
+    "abstain": 114,
+    "top1": 181,
+    "correct_rate": 0.43,
+    "top1_rate": 0.905
+   },
+   "lips": {
+    "correct": 107,
+    "wrong": 6,
+    "abstain": 87,
+    "top1": 177,
+    "correct_rate": 0.535,
+    "top1_rate": 0.885
+   },
+   "fused": {
+    "correct": 177,
+    "wrong": 6,
+    "abstain": 17,
+    "top1": 188,
+    "correct_rate": 0.885,
+    "top1_rate": 0.94
+   }
+  },
+  "white_-5": {
+   "voice": {
+    "correct": 39,
+    "wrong": 2,
+    "abstain": 159,
+    "top1": 156,
+    "correct_rate": 0.195,
+    "top1_rate": 0.78
+   },
+   "lips": {
+    "correct": 107,
+    "wrong": 6,
+    "abstain": 87,
+    "top1": 177,
+    "correct_rate": 0.535,
+    "top1_rate": 0.885
+   },
+   "fused": {
+    "correct": 169,
+    "wrong": 8,
+    "abstain": 23,
+    "top1": 186,
+    "correct_rate": 0.845,
+    "top1_rate": 0.93
+   }
+  },
+  "babble_10": {
+   "voice": {
+    "correct": 147,
+    "wrong": 2,
+    "abstain": 51,
+    "top1": 187,
+    "correct_rate": 0.735,
+    "top1_rate": 0.935
+   },
+   "lips": {
+    "correct": 107,
+    "wrong": 6,
+    "abstain": 87,
+    "top1": 177,
+    "correct_rate": 0.535,
+    "top1_rate": 0.885
+   },
+   "fused": {
+    "correct": 186,
+    "wrong": 2,
+    "abstain": 12,
+    "top1": 194,
+    "correct_rate": 0.93,
+    "top1_rate": 0.97
+   }
+  },
+  "babble_0": {
+   "voice": {
+    "correct": 16,
+    "wrong": 12,
+    "abstain": 172,
+    "top1": 92,
+    "correct_rate": 0.08,
+    "top1_rate": 0.46
+   },
+   "lips": {
+    "correct": 107,
+    "wrong": 6,
+    "abstain": 87,
+    "top1": 177,
+    "correct_rate": 0.535,
+    "top1_rate": 0.885
+   },
+   "fused": {
+    "correct": 152,
+    "wrong": 9,
+    "abstain": 39,
+    "top1": 179,
+    "correct_rate": 0.76,
+    "top1_rate": 0.895
+   }
+  },
+  "babble_-5": {
+   "voice": {
+    "correct": 0,
+    "wrong": 21,
+    "abstain": 179,
+    "top1": 30,
+    "correct_rate": 0.0,
+    "top1_rate": 0.15
+   },
+   "lips": {
+    "correct": 107,
+    "wrong": 6,
+    "abstain": 87,
+    "top1": 177,
+    "correct_rate": 0.535,
+    "top1_rate": 0.885
+   },
+   "fused": {
+    "correct": 130,
+    "wrong": 12,
+    "abstain": 58,
+    "top1": 170,
+    "correct_rate": 0.65,
+    "top1_rate": 0.85
+   }
+  }
+ },
+ "latency_ms": {
+  "voice": {
+   "p50": 57.2,
+   "p95": 62.7
+  },
+  "lips": {
+   "p50": 347.8,
+   "p95": 366.3
+  },
+  "fused_parallel": {
+   "p50": 347.8,
+   "p95": 366.3
+  },
+  "devices": {
+   "voice": "cuda",
+   "lips": "mps"
+  }
+ }
+}

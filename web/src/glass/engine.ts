@@ -233,6 +233,25 @@ function strokeInk(ctx: CanvasRenderingContext2D, outer: Map<number, Path2D>) {
     ctx.save(); ctx.translate(-w * .16, -w * .2); ctx.strokeStyle = 'rgba(255,255,255,.95)'; ctx.lineWidth = w * .2; ctx.stroke(p); ctx.restore()
   }
 }
+/** A word in the same clay tube as the sentence, drawn once onto its own canvas (the name at the top). */
+export function drawStatic(c: HTMLCanvasElement, text: string, capPx: number) {
+  const keepS = S
+  S = capPx / 21
+  const geo = buildWord(text, 'static')   // case kept: the name starts with a capital
+  const pad = S * 2.5
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity
+  for (const s of geo.strokes) for (let i = 0; i < s.n; i++) {
+    const x = s.xy[i * 2], y = s.xy[i * 2 + 1]
+    x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y)
+  }
+  S = keepS
+  const dpr = Math.min(2, devicePixelRatio || 1), w = x1 - x0 + pad * 2, h = y1 - y0 + pad * 2
+  c.width = Math.ceil(w * dpr); c.height = Math.ceil(h * dpr)
+  c.style.width = `${w}px`; c.style.height = `${h}px`
+  const ctx = c.getContext('2d'); if (!ctx) return
+  ctx.setTransform(dpr, 0, 0, dpr, (pad - x0) * dpr, (pad - y0) * dpr)
+  strokeInk(ctx, bucketPaths({ geo } as Word, geo.total))
+}
 function drawGhost(wd: Word, ox: number, oy: number, now: number, alpha: number) {
   // tentative: a faint, trembling sketch that has not been committed yet
   const amp = wd.final ? 0.2 : 0.6 + (wd.revised ? 0.4 : 0)

@@ -31,7 +31,9 @@ mlx-lm==0.32.2
 # EEG replay
 mne==1.12.1             # 1.13+ needs numpy>=2
 pyriemann==0.7           # 0.8+ needs numpy>=2
+pyedflib==0.1.42         # bigP3BCI EDF+ reader (scripts/data)
 pypdf
 # evaluation
 jiwer==4.0.0
 pytest==9.1.1
+pandas==3.0.6

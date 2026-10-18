@@ -20,15 +20,16 @@ export function VisionPreview() {
   const last = (ps: { value: number }[]) => (ps.length ? ps[ps.length - 1].value : null)
   return (
     <section className="vision glass" aria-label="Vision preview">
-      <header><div>Vision preview</div><span className="mono">{data?.label ?? 'Recorded ICU data (MIMIC-IV demo) · synthetic profile · vision preview'}</span></header>
+      {/* the dataset stays named (MIMIC-IV demo, ODbL); the footer says the profile is synthetic */}
+      <header><span className="mono">Recorded ICU data (MIMIC-IV)</span></header>
       <div className="vgreet">Good morning, {data?.profile?.preferred_name ?? 'Raj'}</div>
       {ev ? (
-        <div className="vrows mono">
+        <div className="vrows">
           <div><span>Glucose (charted)</span><b className="vlow">{ev.glucose.value} {ev.glucose.unit}</b></div>
           <div><span>Heart rate · {ev.window_hours} h</span><Spark points={hr} color="255,128,112" lo={40} hi={120} /><b>{last(hr) ?? '–'} bpm</b></div>
           <div><span>SpO2 · {ev.window_hours} h</span><Spark points={spo2} color="94,200,255" lo={85} hi={100} /><b>{last(spo2) ?? '–'} %</b></div>
         </div>
-      ) : <div className="vrows mono">no recorded event on the server (scripts/vision/fetch_mimic_event.py)</div>}
+      ) : <div className="vrows">no recorded event on the server (scripts/vision/fetch_mimic_event.py)</div>}
       <div className="vfoot">
         <button className="cbtn" data-a="vision:checkin">Start check-in · V</button>
         <span className="mono">{data?.profile?.synthetic ? 'profile: SYNTHETIC' : ''}</span>
