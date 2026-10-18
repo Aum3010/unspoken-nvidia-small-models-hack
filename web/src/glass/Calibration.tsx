@@ -179,7 +179,10 @@ export function Calibration({ bind, onFocusMode, onDone }: Props) {
           measure its error, and only use it when it is good enough.
         </p>
         <div className="calib-status" aria-live="polite">
-          <L s={lights.camera} label={lights.camera === 'ok' ? 'Camera on' : lights.camera === 'wait' ? 'Camera starting' : 'Camera stopped'} />
+          {/* loading the eye model briefly blocks the page, so frames pause: not a camera fault */}
+          {phase === 'starting' && lights.camera !== 'ok'
+            ? <L s="wait" label="Loading eye model…" />
+            : <L s={lights.camera} label={lights.camera === 'ok' ? 'Camera on' : lights.camera === 'wait' ? 'Camera starting' : 'Camera stopped'} />}
           <L s={lights.face} label={lights.face === 'ok' ? 'Face in view' : lights.face === 'wait' ? 'Looking for your face' : 'Face not found'} />
           <L s={appearanceState.ready ? 'ok' : appearanceState.error ? 'bad' : 'wait'}
             label={appearanceState.ready ? `Eye model on ${appearanceState.provider}` : appearanceState.error ? 'Eye model unavailable (iris only)' : 'Eye model loads at start'} />
