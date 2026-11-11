@@ -576,7 +576,6 @@ export function GlassApp() {
 
       <nav className="rail glass" aria-label="Always available">
         <button data-a="phrases" style={{ ['--c' as string]: '250,160,70' }}><span className="ic"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h7" /></svg></span><span className="lb">Phrases</span></button>
-        <button data-a="clear" style={{ ['--c' as string]: '126,132,148' }}><span className="ic"><svg viewBox="0 0 24 24"><path d="M5 19 19 5M8 5h11v11" /></svg></span><span className="lb">Clear</span></button>
         <button data-a="help" className="alert" style={{ ['--c' as string]: '236,72,64' }}><span className="ic"><svg viewBox="0 0 24 24"><path d="M12 3 2 21h20zM12 10v4M12 18h.01" /></svg></span><span className="lb">Help</span></button>
       </nav>
 

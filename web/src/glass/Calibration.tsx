@@ -8,7 +8,7 @@ import { bubbleCentres } from './engine'
 import { calibrationSampleCount, clearCalibration, eyesVisible, gazeState, hasGazeModel, measureAccuracy, onGaze, recordCalibrationPoint, saveCalibration, setCalibrating, startGaze } from '../lib/gaze'
 
 const PHRASE_CARDS = 6   // the Phrases menu: its cards open in a 3 x 2 grid in the room
-// accuracy is tested on points that were not trained on, including the gaps between dock tiles
+// accuracy is tested on points that were not trained on: open space between Yes/No, the cards and the dock
 const DOT_SAMPLES = 12   // each dot stays until it has this many samples (slow eye model = fewer per second)...
 const MAX_DOT_MS = 4500  // ...or this long, so a dot the eyes never reach cannot hold calibration up
 const READY_MS = 600    // eyes tracked this long before the first dot (the camera and eye model warm up first)
@@ -25,9 +25,21 @@ function layoutPoints() {
   const tiles = [...document.querySelectorAll<HTMLElement>('.rail button .ic')].map(centre)
   const answers = [...document.querySelectorAll<HTMLElement>('.answers button .ic')].map(centre)
   const cards = bubbleCentres(PHRASE_CARDS).map(([x, y]) => [x / W, y / H])
-  const gaps = tiles.slice(1).map((t, i) => [t[0], (t[1] + tiles[i][1]) / 2])
-  const between = [(cards[0][0] + cards[1][0]) / 2, (cards[0][1] + cards[3][1]) / 2]   // where four cards meet
-  return { sequence: [...answers, ...tiles, ...cards], test: [...gaps, between] }
+  // test dots sit in open space between targets, never on the dock column (a dot there reads as a missing tile);
+  // the accuracy needs at least 3 of them
+  // On first load this runs before the dock and Yes/No are in the page (start re-plans once they are), so a
+  // missing element falls back to where it normally sits instead of throwing.
+  const rowMid = (cards[0][1] + cards[3][1]) / 2
+  const yesNo = answers.length >= 2 ? (answers[0][1] + answers[1][1]) / 2 : 0.08
+  const yesNoX = answers.length >= 2 ? (answers[0][0] + answers[1][0]) / 2 : cards[1][0]
+  const dockX = tiles.length ? tiles[0][0] : 0.06
+  const test = [
+    [yesNoX, yesNo],                                              // between Yes and No
+    [(cards[0][0] + cards[1][0]) / 2, rowMid],                    // where the left four cards meet
+    [(cards[1][0] + cards[2][0]) / 2, rowMid],                    // where the right four cards meet
+    [(dockX + cards[0][0]) / 2, rowMid],                          // between the dock and the first card column
+  ]
+  return { sequence: [...answers, ...tiles, ...cards], test }
 }
 const SETTLE_MS = 600   // eyes travel to a new dot (~200-400 ms) before samples count
 const RECORD_MS = 1000
@@ -48,7 +60,8 @@ interface Props {
 
 export function Calibration({ bind, onFocusMode, onDone, remoteHost }: Props) {
   const [phase, setPhase] = useState<Phase>('intro')
-  const plan = useRef(layoutPoints())
+  const [initialPlan] = useState(layoutPoints)   // once, not on every render; start re-plans on the live layout
+  const plan = useRef(initialPlan)
   const [idx, setIdx] = useState(0)
   const [acc, setAcc] = useState<number | null>(gazeState.accuracyPx)
   const [gaze, setGaze] = useState<{ x: number; y: number } | null>(null)

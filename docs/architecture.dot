@@ -1,0 +1,44 @@
+// Unspoken architecture. Render: npx -y @hpcc-js/wasm-graphviz-cli -K dot -T svg docs/architecture.dot > docs/architecture.svg
+digraph unspoken {
+  rankdir=LR;
+  graph [fontname="Helvetica", fontsize=12, nodesep=0.35, ranksep=0.6, bgcolor="white"];
+  node  [fontname="Helvetica", fontsize=11, shape=box, style="rounded,filled", fillcolor="#f4f4f4", color="#888888"];
+  edge  [fontname="Helvetica", fontsize=9, color="#555555"];
+
+  subgraph cluster_laptop {
+    label="Laptop browser (React + Vite, web/)"; style="rounded"; color="#4a7bd0";
+    sensors [label="Camera + mic\nMediaPipe gaze, blink, nod\nenergy VAD, mouth clips"];
+    ui      [label="Glass UI\nYes / No targets, phrase cards\nagent activity"];
+  }
+
+  tunnel [label="SSH tunnel\nlocalhost:8000", shape=cds, fillcolor="#ffffff"];
+
+  subgraph cluster_brev {
+    label="NVIDIA Brev, one RTX PRO 6000"; style="rounded"; color="#76b900";
+    gateway [label="Gateway :8000\nstate machine, fusion\npolicy gate", fillcolor="#e6f2d0"];
+    lips    [label="Lips :8101\nAuto-AVSR + enrolled phrases"];
+    voice   [label="Voice :8102\nNemotron Speech 0.6B"];
+    eeg     [label="EEG replay :8103\nP300 decoder (recorded data)"];
+    coord   [label="Coordinator :8105\ntyped tool call + validator"];
+    vllm    [label="vLLM :8001\nNemotron 3.5 Lightning\n30B-A3B NVFP4", fillcolor="#e6f2d0"];
+    tts     [label="Speech out :8104\nKokoro-82M\nneeds confirmation token"];
+  }
+
+  subgraph cluster_offline {
+    label="Offline (training + evaluation)"; style="rounded,dashed"; color="#999999";
+    gym [label="NeMo Gym envs\nunspoken_communication, neuro_comm\nLoRA training, held-out evals"];
+  }
+
+  sensors -> tunnel [label="clips, gaze,\nanswers (WebSocket)"];
+  tunnel  -> gateway;
+  gateway -> ui [label="questions, readings,\naudio", style=dashed];
+
+  gateway -> lips;
+  gateway -> voice;
+  gateway -> eeg;
+  gateway -> coord [label="structured summary\n(no media)"];
+  coord   -> vllm;
+  gateway -> tts   [label="confirmed text only"];
+
+  gym -> coord [style=dotted, xlabel="evaluates"];
+}

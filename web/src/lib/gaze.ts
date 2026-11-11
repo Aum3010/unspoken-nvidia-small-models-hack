@@ -102,7 +102,9 @@ const fx = new OneEuro(), fy = new OneEuro()
 // The calibration is kept on this device (eye features and dot positions, no images) so it can be
 // reused after a reload. It is only valid for the same window size and camera position. Its samples are
 // kept too: learning from a gaze selection refits on all of them, never on that one selection alone.
-const STORE = 'unspoken.gaze.v6'
+// v7: rail lost its Clear tile and phrase-card rows moved apart, so a v6 fit was trained on old dot positions
+const STORE = 'unspoken.gaze.v7'
+try { localStorage.removeItem('unspoken.gaze.v6') } catch { /* ignore */ }
 type Sample = { f: number[]; x: number; y: number }
 interface Saved { model: RidgeModel; appearance: boolean; accuracyPx: number; w: number; h: number; savedAt: number; samples?: Sample[]; implicit?: Sample[] }
 const pack = (a: Sample[]) => a.map((s) => ({ f: s.f.map((v) => +v.toFixed(5)), x: Math.round(s.x), y: Math.round(s.y) }))

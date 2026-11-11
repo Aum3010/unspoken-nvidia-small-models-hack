@@ -593,7 +593,7 @@ function bubbleSlot(i: number, n: number, w: number) {
   const cx = BLOCK_CX, cy = H * 0.5, rx = Math.min(W * 0.3, 420), ry = Math.min(H * 0.26, 220)
   const wide = W > 860, minX = wide ? 130 : 76, maxX = W - (wide ? 440 : 0) - 12
   const row = Math.floor(i / cols), inRow = Math.min(cols, n - row * cols), col = i % cols
-  const x = cx + (col - (inRow - 1) / 2) * Math.min(rx * 0.95, (W - 160) / 3.2), y = cy + (row - (rows - 1) / 2) * Math.min(ry, 120)
+  const x = cx + (col - (inRow - 1) / 2) * Math.min(rx * 0.95, (W - 160) / 3.2), y = cy + (row - (rows - 1) / 2) * Math.min(ry, 170)
   return { left: Math.max(minX, Math.min(maxX - w, x - w / 2)), y }
 }
 /** Screen centres the bubbles of an n-item menu will have (calibration puts dots there). */
